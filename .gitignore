@@ -1,0 +1,21 @@
+/build/
+/out/
+/.cache/
+/.idea/
+/.vs/
+/.vscode/
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.lib
+*.dll
+*.exp
+__pycache__/
+*.py[cod]
+
+# Resultados generados de validaciones y capturas: los informes Markdown
+# permanecen versionados, mientras que los binarios y medios se regeneran.
+/reports/**
+!/reports/**/
+!/reports/**/*.md

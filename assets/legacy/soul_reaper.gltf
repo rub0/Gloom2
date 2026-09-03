@@ -1,0 +1,203 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Gloom legacy importer 1"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "soul_reaper",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ],
+      "rotation": [
+        0,
+        0.0,
+        0,
+        1.0
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "soulReaper",
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0,
+        "roughnessFactor": 0.408248290463863,
+        "baseColorTexture": {
+          "index": 0
+        }
+      },
+      "extras": {
+        "gloom": {
+          "sourceMaterial": "soulReaper"
+        }
+      },
+      "extensions": {
+        "KHR_materials_specular": {
+          "specularFactor": 1,
+          "specularColorTexture": {
+            "index": 2
+          }
+        },
+        "KHR_materials_emissive_strength": {
+          "emissiveStrength": 1.0
+        }
+      },
+      "normalTexture": {
+        "index": 1
+      },
+      "emissiveTexture": {
+        "index": 4
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "source": 1,
+      "sampler": 0
+    },
+    {
+      "source": 2,
+      "sampler": 0
+    },
+    {
+      "source": 3,
+      "sampler": 0
+    },
+    {
+      "source": 4,
+      "sampler": 0
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/56859e10188129b8.png"
+    },
+    {
+      "uri": "textures/2f9a53babb04f035.png"
+    },
+    {
+      "uri": "textures/7c106bc82a01154f.png"
+    },
+    {
+      "uri": "textures/2eeb0244db0405b7.png"
+    },
+    {
+      "uri": "textures/e3f2f2490c154bb8.png"
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 57600
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 57600,
+      "byteLength": 57600
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 115200,
+      "byteLength": 38400
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 153600,
+      "byteLength": 19200
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 4800,
+      "type": "VEC3",
+      "min": [
+        -0.1488957405090332,
+        0.060874734073877335,
+        -6.2906670570373535
+      ],
+      "max": [
+        1.845561146736145,
+        4.627928256988525,
+        6.20060920715332
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 4800,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 4800,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 4800,
+      "type": "SCALAR"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_materials_specular",
+    "KHR_materials_emissive_strength"
+  ],
+  "buffers": [
+    {
+      "uri": "soul_reaper.bin",
+      "byteLength": 172800
+    }
+  ]
+}

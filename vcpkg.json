@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "gloom",
+  "version-semver": "0.1.0",
+  "builtin-baseline": "ddd0023b0eee70986e42ed49d9d4afb8098f212e",
+  "dependencies": [
+    "fastgltf",
+    {
+      "name": "gamenetworkingsockets",
+      "default-features": false
+    },
+    "joltphysics",
+    "ktx",
+    "meshoptimizer",
+    "mikktspace",
+    "openssl",
+    "simdjson",
+    {
+      "name": "sdl3",
+      "features": [
+        "vulkan"
+      ]
+    },
+    "stb"
+  ]
+}

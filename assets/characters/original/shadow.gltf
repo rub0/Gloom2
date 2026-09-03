@@ -1,0 +1,670 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Gloom legacy importer 1"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "shadow presentation root",
+      "children": [
+        1,
+        2
+      ],
+      "scale": [
+        0.1139368819849043,
+        0.1139368819849043,
+        0.1139368819849043
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0.033649283592207604,
+        -1.034095402922979,
+        -11.599289541270227
+      ]
+    },
+    {
+      "name": "shadow",
+      "mesh": 0,
+      "skin": 0
+    },
+    {
+      "name": "Bip001",
+      "translation": [
+        -0.29533267,
+        -17.0,
+        -101.80451965
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        -0.5,
+        0.5
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        3
+      ]
+    },
+    {
+      "name": "Bip001 Pelvis",
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        -0.49999937415122986,
+        -0.5000007152557373,
+        -0.49999937415122986,
+        0.5000007152557373
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        4
+      ]
+    },
+    {
+      "name": "Bip001 Spine",
+      "translation": [
+        0.9046173095703125,
+        -0.0019167501013725996,
+        2.6532001040635578e-09
+      ],
+      "rotation": [
+        -2.080199692500173e-06,
+        -1.6543578724472082e-24,
+        -4.963080519874545e-24,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        5,
+        6,
+        17
+      ]
+    },
+    {
+      "name": "Bip001 L Thigh",
+      "translation": [
+        -0.9046173095703125,
+        0.001918138819746673,
+        0.7866209745407104
+      ],
+      "rotation": [
+        0.04997916519641876,
+        0.9987502694129944,
+        1.3872511317458702e-06,
+        -2.5654363966509663e-08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": []
+    },
+    {
+      "name": "Bip001 Spine1",
+      "translation": [
+        2.41168212890625,
+        0.0002457039663568139,
+        6.813398734095699e-10
+      ],
+      "rotation": [
+        -1.8367099231598242e-40,
+        -1.6543612251060553e-24,
+        -1.6543612251060553e-24,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        7
+      ]
+    },
+    {
+      "name": "Bip001 Neck",
+      "translation": [
+        2.1032562255859375,
+        0.0008571126963943243,
+        2.3771611346035115e-09
+      ],
+      "rotation": [
+        -1.8367099231598242e-40,
+        -1.6543612251060553e-24,
+        -1.6543612251060553e-24,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        8,
+        9,
+        13
+      ]
+    },
+    {
+      "name": "Bip001 Head",
+      "translation": [
+        1.0269546508789062,
+        0.0008177856798283756,
+        2.2681481137709625e-09
+      ],
+      "rotation": [
+        -4.547473508864641e-13,
+        -1.6543612251060553e-24,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": []
+    },
+    {
+      "name": "Bip001 L Clavicle",
+      "translation": [
+        -7.62939453125e-06,
+        0.0008166498737409711,
+        0.39331045746803284
+      ],
+      "rotation": [
+        0.6329812407493591,
+        -1.076700414159859e-06,
+        0.7741671204566956,
+        -8.80903996858251e-07
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        10
+      ]
+    },
+    {
+      "name": "Bip001 L UpperArm",
+      "translation": [
+        1.260056972503662,
+        4.547473508864641e-13,
+        -1.9073486328125e-06
+      ],
+      "rotation": [
+        0.004589698277413845,
+        0.35809049010276794,
+        -0.0016040712362155318,
+        0.9336743354797363
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        11
+      ]
+    },
+    {
+      "name": "Bip001 L Forearm",
+      "translation": [
+        3.2498321533203125,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        1.6947773739950378e-10,
+        -3.725302022417054e-08,
+        -0.0006905790069140494,
+        0.9999997615814209
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        12
+      ]
+    },
+    {
+      "name": "Bip001 L Hand",
+      "translation": [
+        2.7212390899658203,
+        -7.450580596923828e-09,
+        0.0
+      ],
+      "rotation": [
+        0.9999999403953552,
+        8.89904989975765e-12,
+        -2.2351834161327133e-08,
+        -0.00039813684998080134
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": []
+    },
+    {
+      "name": "Bip001 R Clavicle",
+      "translation": [
+        -7.62939453125e-06,
+        0.0008188316714949906,
+        -0.39331045746803284
+      ],
+      "rotation": [
+        -0.6329812407493591,
+        -1.0705289241741411e-06,
+        0.7741671204566956,
+        8.74732563715952e-07
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        14
+      ]
+    },
+    {
+      "name": "Bip001 R UpperArm",
+      "translation": [
+        1.260056972503662,
+        -2.2737367544323206e-13,
+        1.9073486328125e-06
+      ],
+      "rotation": [
+        -0.004578034859150648,
+        -0.3761211335659027,
+        -0.0016635889187455177,
+        0.926557719707489
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        15
+      ]
+    },
+    {
+      "name": "Bip001 R Forearm",
+      "translation": [
+        3.2498350143432617,
+        -1.4901161193847656e-08,
+        9.5367431640625e-07
+      ],
+      "rotation": [
+        -2.3283056038714278e-10,
+        2.980221047721443e-08,
+        -0.0008457894437015057,
+        0.9999996423721313
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        16
+      ]
+    },
+    {
+      "name": "Bip001 R Hand",
+      "translation": [
+        2.7212343215942383,
+        2.2351741790771484e-08,
+        -3.814697265625e-06
+      ],
+      "rotation": [
+        0.7068251967430115,
+        2.6257392704565063e-08,
+        -2.642622476400902e-08,
+        0.7073882818222046
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": []
+    },
+    {
+      "name": "Bip001 Tail",
+      "translation": [
+        -1.4945831298828125,
+        0.046384990215301514,
+        -7.364747602878197e-07
+      ],
+      "rotation": [
+        3.0420127815388234e-14,
+        -2.7735979983845027e-06,
+        0.999999463558197,
+        -0.0010335473343729973
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": [
+        18
+      ]
+    },
+    {
+      "name": "Bip001 Tail1",
+      "translation": [
+        4.229678153991699,
+        -0.002489490434527397,
+        -6.9047700890223496e-09
+      ],
+      "rotation": [
+        -2.2750765572669696e-13,
+        1.1911186703628118e-08,
+        -0.0042944857850670815,
+        0.9999908804893494
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "children": []
+    }
+  ],
+  "meshes": [
+    {
+      "name": "shadow",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TEXCOORD_0": 3,
+            "WEIGHTS_0": 4,
+            "WEIGHTS_1": 5,
+            "JOINTS_0": 6,
+            "JOINTS_1": 7
+          },
+          "indices": 8,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "shadow concept metal",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "baseColorFactor": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallicFactor": 1,
+        "roughnessFactor": 1,
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      },
+      "normalTexture": {
+        "index": 2
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ],
+      "emissiveTexture": {
+        "index": 3
+      },
+      "extensions": {
+        "KHR_materials_emissive_strength": {
+          "emissiveStrength": 4
+        }
+      },
+      "extras": {
+        "gloom": {
+          "sourceMaterial": "shadow"
+        }
+      }
+    }
+  ],
+  "textures": [
+    {
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "source": 1,
+      "sampler": 0
+    },
+    {
+      "source": 2,
+      "sampler": 0
+    },
+    {
+      "source": 3,
+      "sampler": 0
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/beea70d77249f0bd.png"
+    },
+    {
+      "uri": "textures/shadow-metal-rough.png"
+    },
+    {
+      "uri": "textures/de25dc1c8da9c5d7.png"
+    },
+    {
+      "uri": "textures/shadow-emission.png"
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 1088
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1088,
+      "byteLength": 100368
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 101456,
+      "byteLength": 100368
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 201824,
+      "byteLength": 66912
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 268736,
+      "byteLength": 133824
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 402560,
+      "byteLength": 133824
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 536384,
+      "byteLength": 66912
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 603296,
+      "byteLength": 66912
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 670208,
+      "byteLength": 33456
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 17,
+      "type": "MAT4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 8364,
+      "type": "VEC3",
+      "min": [
+        -6.596424579620361,
+        -24.874258041381836,
+        -103.07337188720703
+      ],
+      "max": [
+        6.005759239196777,
+        -9.076037406921387,
+        -100.5356674194336
+      ]
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 8364,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 8364,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 8364,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5126,
+      "count": 8364,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5123,
+      "count": 8364,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5123,
+      "count": 8364,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5125,
+      "count": 8364,
+      "type": "SCALAR"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_materials_specular",
+    "KHR_materials_emissive_strength"
+  ],
+  "skins": [
+    {
+      "name": "shadow original rig",
+      "joints": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "inverseBindMatrices": 0
+    }
+  ],
+  "extras": {
+    "gloom": {
+      "animationInventory": [],
+      "animationStatus": "original keys exported; Shadow movement authored procedurally",
+      "anchors": {
+        "rightHand": "Bip001 R Hand",
+        "leftHand": "Bip001 L Hand"
+      }
+    }
+  },
+  "buffers": [
+    {
+      "uri": "shadow.bin",
+      "byteLength": 703664
+    }
+  ]
+}

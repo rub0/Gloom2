@@ -1,0 +1,3528 @@
+{
+  "version": 1,
+  "sources": {
+    "Exes/media/materials/programs/shadersFran/heatHaze.hlsl": "55f641752b6df0eca857cd74c81cc786c65faa528711fcced0d7eed6ace86ceb",
+    "Exes/media/materials/scripts/shadersFran/heatHaze.material": "5dc0eea8a197766d3e13098c07f7ff57a99ff9c6b1ae9a3cbb95cffaae91f189",
+    "Exes/media/materials/textures/magma_NRM.tga": "1e940ac4c51518d6eb60aaabf63a5eb53e3c82a286a024139ab07f3b6d230db2",
+    "Exes/media/particles/Blood/bloodStrike.pu": "aa7e222724b57d991dbee277fe3b1fee116d2f35d07b360739ae1df929edc3b3",
+    "Exes/media/particles/Blood/large/mp_bloodsplat_large.pu": "c3da34f01e35e2522b9d7fa8ac7359394c053e03b51fff8acb205b4996c6fb59",
+    "Exes/media/particles/Blood/large/mp_bloodspray_large.pu": "662f9492ac31b302ff627759642ba4e7270c7b1700782658bc74979b45436d03",
+    "Exes/media/particles/Blood/large/mp_bloodstrike_01_large.pu": "46f5d4ff0d5b52f9caf0a3a097398bc30b194244fccbee4d00211b801ff5f940",
+    "Exes/media/particles/Blood/large/mp_bloodstrike_02_large.pu": "803f92496fab4df0409a56a9d198ffb6accbe2de9530e7f8edc541c05cec63cf",
+    "Exes/media/particles/Blood/mp_bloodsplat.material": "52a4ce7548dbb20e80e2bb9d2d273d05c24079e3b28939e80b83066fcd933061",
+    "Exes/media/particles/Blood/png/mp_bloodsplat_01.png": "e27c5d02a54f5ba9b46913fec2ef912754f34ad6abe2475fdd07d57e0d5cce51",
+    "Exes/media/particles/Blood/small/mp_bloodsplat_small.pu": "6ef013a58df7ab54d552a4f1d007a3faae2df8b73d5c6d88c7756591b1a80124",
+    "Exes/media/particles/Blood/small/mp_bloodspray_small.pu": "8f75e3b3aa41cb6421964970c08c20999cd56e0aa2786ab4615bfa790ab859a4",
+    "Exes/media/particles/Blood/small/mp_bloodstrike_01_small.pu": "9e7ce069b7f74fdcf8dc334e7d92d885ed3911bf23621fc968f18a1399a3a6ae",
+    "Exes/media/particles/Blood/small/mp_bloodstrike_02_small.pu": "11884461b6781ca8d52b8c6138b6fc2bfa2eebfda0a4ba72af92fa5976cb9149",
+    "Exes/media/particles/Blood/small/mp_bloodstrike_03_small.pu": "66449482a93feb5649b2a8ad8c4e9b8a1d60f5f7e9bc9114a4b0f5d566318a7b",
+    "Exes/media/particles/Explosion/fireballExplotion.pu": "0b19123782daa80d795b7584e927c544e97b87c4ccfac7cfb2a11021e44f9b45",
+    "Exes/media/particles/Explosion/large/mp_explosion_01_large.pu": "7110d9769f250080c03ba7ea7fea287ede7868ec7c4746c57d24a07a5d1d03da",
+    "Exes/media/particles/Explosion/large/mp_explosion_02_aftermath_large.pu": "6b8086c407e515a5b30e3a6f5b4660b0c1234b5bcf66cb16a858f3813d954464",
+    "Exes/media/particles/Explosion/large/mp_explosion_02_large.pu": "cfab8086ca0a16ec4746a2cb0e1bf7e6bebe5f21840dbdc198866d7307e0b7d3",
+    "Exes/media/particles/Explosion/large/mp_explosion_dirt_01_large.pu": "de2b0aab060191a03ff4399f0066d7af6756951f285780cb0d2744bf2a54278f",
+    "Exes/media/particles/Explosion/large/mp_explosion_dirt_02_large.pu": "e6eb37f41c543295be571ebc501ab9b29afc0287310bcab10240b9f3ebc0ec9d",
+    "Exes/media/particles/Explosion/large/mp_explosion_dirt_and_fire_large.pu": "3196a873e2cb8404b6599057e8bef38ed0d5fdae7b9103389278a3c98e63b3e7",
+    "Exes/media/particles/Explosion/large/mp_explosion_flare_large.pu": "91b4e1c46c57c63fe7a78ce5a29fedec480d726731b0376a3997f522b86512ad",
+    "Exes/media/particles/Explosion/large/mp_explosion_trail_large.pu": "497c5247cfcf0aa2944ab1894b2e9d0d7503259bf31393a57d538f1e14ee37dc",
+    "Exes/media/particles/Explosion/large/mp_explosion_water_large.pu": "5c1fa8176d305a3e1ea1dd76f7a280c563fd4bd355ec5d1424d334afb97fd197",
+    "Exes/media/particles/Explosion/lavaBurn.pu": "91f7a84c89f46268020b63c51a62432f49adc1df10c497142a5e157ea056850b",
+    "Exes/media/particles/Explosion/mp_explosion.material": "c5c71b457fbf87dd977b4ac8bb52f2f6e783076aa3a99b640ab42e79c3b046b6",
+    "Exes/media/particles/Explosion/png/mp_explosion_burst.png": "c1a1d0d0ae0f4a0daf4eb1f5394db64c47b53ed31bb831b9b97567155468bd2e",
+    "Exes/media/particles/Explosion/screamerExplotion.pu": "c7c6eda2e85065288d0167cc642593738e43fe80112379281ee0c7e51b317f3e",
+    "Exes/media/particles/Explosion/screamerShieldHit.pu": "d2aabbed018e1bb11f5f466b1389d4f0b985f4e31e8294fbdb03288cdabb7d8b",
+    "Exes/media/particles/Explosion/small/mp_explosion_01_small.pu": "26fb7c448547e09aebeae06fdfe7e0126d4626989a3ca2abef7060984731f900",
+    "Exes/media/particles/Explosion/small/mp_explosion_02_aftermath_small.pu": "13edd215b2fadf688c484f4d656ef8e69a6b951519b89ab12a2a1654dc2432f2",
+    "Exes/media/particles/Explosion/small/mp_explosion_02_small.pu": "f3e89cbe90a0e8a8ba7d17d7fc0175bb6557cc7583a6b76a83dbf561bc02079e",
+    "Exes/media/particles/Explosion/small/mp_explosion_03_small.pu": "d3478666a38c775ba97d2736a6c01ae40e554d7fd1db69fc0bee563ea03b2eb0",
+    "Exes/media/particles/Explosion/small/mp_explosion_04_blue_small.pu": "cb27ee9441e3241bd08272e598f36342b6e6244378292d8b93b527e726f0d048",
+    "Exes/media/particles/Explosion/small/mp_explosion_04_small.pu": "f56f595191c6f79cb652626e22703ce9e7858e7e9b1f0916ce324102a70cafc9",
+    "Exes/media/particles/Explosion/small/mp_explosion_dirt_01_small.pu": "7af68f7b3ed1ed5d6ff9993c1e97ce9064bf9106f064b7ece15bd4d76d3cf952",
+    "Exes/media/particles/Explosion/small/mp_explosion_dirt_02_small.pu": "a8d6a995c152ad59fd7168bc906d2000792b9408266f1fd070a473cd678f71b5",
+    "Exes/media/particles/Explosion/small/mp_explosion_dirt_and_fire_small.pu": "7a3f9dc82f268cb220d6419b82b67f06b187acde18358f6161732dc3c317a704",
+    "Exes/media/particles/Explosion/small/mp_explosion_flare_small.pu": "9385a3498efc846300ed44fa06c4d5712865d642a1ac718924d18fccd87d71f4",
+    "Exes/media/particles/Explosion/small/mp_explosion_trail_small.pu": "5527afe3728d2ef5a1a252ace177134d929ea82e9821ff5bc538fac6f902fd6e",
+    "Exes/media/particles/Explosion/small/mp_explosion_water_small.pu": "fadd07ce216ba378ec253ff278dd5bd725d3d9740566dd237139941a6a5c6537",
+    "Exes/media/particles/Explosion/sniperHit.pu": "f1a115f3c9f7aade0361ea402db1323b99c194351331c6fb023126881f20d45b",
+    "Exes/media/particles/Fire/large/mp_campfire_large.pu": "ac2be1202d95e99e11b96e6fc7caffc678f0cf1e2d6db1ca700a7575665b9a98",
+    "Exes/media/particles/Fire/large/mp_fire_and_smoke_large.pu": "700e5cb79c75fa8b2daef6ade28dd2593b232191ec90eaa0486a55f230796215",
+    "Exes/media/particles/Fire/large/mp_fireplace_large.pu": "61b04216159a01061db9e523fbd61924fc40149191eb54cda0aef395b1ff2b85",
+    "Exes/media/particles/Fire/large/mp_torch_large.pu": "66a44766c219e68ea08cc5469912369fa44ac0f7e2487a9ec5851b4ff32b5753",
+    "Exes/media/particles/Fire/mp_fire.material": "e621db0992f9104572c21e54be2aac349af4c231e911fdfcad131b3feb2ba3db",
+    "Exes/media/particles/Fire/small/mp_campfire_small.pu": "6aa98b209bed557d35060b497c6e445b186e60a55e5e915ca8a1c4fe3a1686c4",
+    "Exes/media/particles/Fire/small/mp_fire_and_smoke_small.pu": "94fb760ddb7af29e1cb3d77de40fb69c0bcdde67be8b24747911131ba8fc3ea2",
+    "Exes/media/particles/Fire/small/mp_fireplace_small.pu": "72126463c2f5195c9424bca6a72e1773663ac49d1e664e77607305ff2a03d75e",
+    "Exes/media/particles/Fire/small/mp_torch_small.pu": "2c84063ebe0a0e984c386d8672ab2e93221de146cc7f9d15e97ee34eb083378c",
+    "Exes/media/particles/Flare/large/mp_flare_01_large.pu": "c2c5fc640a07613b80b27368d717b12e9d12c242dd737612e042fba5afd55cdc",
+    "Exes/media/particles/Flare/large/mp_flare_02_large.pu": "374d5b160de5c722c81b2872fb826df0368fe886aa8e91a9e1eb0175693866e0",
+    "Exes/media/particles/Flare/large/mp_flare_03_large.pu": "d3628cbc3085c11028089a58c33c576f04787dc5e4f782c1d90ba0100276547f",
+    "Exes/media/particles/Flare/large/mp_flare_04_large.pu": "85e6a3044089e208506c8667b5bc747385a46acf1f6f2a0ef479c7bef665590f",
+    "Exes/media/particles/Flare/large/mp_flare_05_large.pu": "7100ccb038493a266a17eeb58bbfca2e0206761389a69f957a9f321339a3c42a",
+    "Exes/media/particles/Flare/large/mp_flare_06_large.pu": "a757754dd3a04862e12ae7277d076f262da1d674600219c004288d9d2fab4691",
+    "Exes/media/particles/Flare/large/mp_flare_07_large.pu": "421837fb41a0a92f27a88459757951041ddb1c98c5d11e181956d563592b70e0",
+    "Exes/media/particles/Flare/large/mp_flare_aurora_borealis_large.pu": "ade2a56a93af6a005b0053b503f178358bbbe2281ec929495c8b382b8c71dcff",
+    "Exes/media/particles/Flare/large/mp_flare_diabolique_large.pu": "e6e18fc0491361e8cb168b10eefd60d8933faaa9d2c0397b1508d951ac7b24de",
+    "Exes/media/particles/Flare/large/mp_flare_fireball_01_large.pu": "0be6bc2cc002ce92564cdb1b20d5856b645dab86804d6b9eb166aaad508444d4",
+    "Exes/media/particles/Flare/large/mp_flare_fireball_02_large.pu": "53d9df13eefa49d54601a3020b8f33d19fa499e5df19f238c82be9ca59d789e1",
+    "Exes/media/particles/Flare/large/mp_flare_lensflare_large.pu": "fbfd0fe734fcf60514bb166ec9633492311f69cda19522cf5abc012eca799eb3",
+    "Exes/media/particles/Flare/large/mp_flare_lightning_large.pu": "5a2e6a5b38990b6c5f419c1e5bec8a0b40866b469c4fe3c851e9a87a19f46f15",
+    "Exes/media/particles/Flare/large/mp_flare_mr_blue_flare_large.pu": "ada88ac9e44abac868ffc2cb5e44c435c74725c1fb30c37c44e0833b18b8d923",
+    "Exes/media/particles/Flare/large/mp_flare_nebula_large.pu": "0aa33a44596c319ec4f9dd38dc95efe4e6ec0e9df411fa35e2b043a7340197d8",
+    "Exes/media/particles/Flare/large/mp_flare_redflare_large.pu": "3c1934ab01fcc62ce37e259235a145ed6e1954992f3ea43d00915c5f666727ba",
+    "Exes/media/particles/Flare/large/mp_flare_rotator_large.pu": "fb432bd46861e60656a133e4f61fb0360374b1e91e9a3bb51d6d24f644196bfa",
+    "Exes/media/particles/Flare/large/mp_flare_sparkle_large.pu": "45df07b142ddb080859b87e5623223ca2f66daacec9300d5cd83994756235cc0",
+    "Exes/media/particles/Flare/large/mp_flare_starfield_large.pu": "d4de020ed9f3b3e93e2773c60001eac879d8dce4b55375edeebdb3983b76ce46",
+    "Exes/media/particles/Flare/large/mp_flare_streak_01_large.pu": "1631a537ea4e3de1f38794c6d23448204210c3c8972247b39fac19b91fc68685",
+    "Exes/media/particles/Flare/large/mp_flare_streak_02_large.pu": "e4cacbcc8d5dfb237cad0285f388bd5fdcbf3bfccbe3411903304d5b4293804a",
+    "Exes/media/particles/Flare/large/mp_flare_sun_large.pu": "578a794ff3fcf67e2e0c060bb501bbf196f706e2146bf4a201eaa4b1a487af7a",
+    "Exes/media/particles/Flare/mp_flare.material": "9fde736d13ad051186dad8411a1bf44b536a1daaeb6dadbbf3d486dc33337698",
+    "Exes/media/particles/Flare/small/mp_flare_01_small.pu": "c719aa2a76f9d4e1faf42c0bfee4c4c5feaf82fa296d1c40004252e33250135b",
+    "Exes/media/particles/Flare/small/mp_flare_02_small.pu": "bb40aeb2cede245212d62a62d3291eab87b51ed341a2d21625c111f75b756b83",
+    "Exes/media/particles/Flare/small/mp_flare_03_small.pu": "7fd81ca61702ed652b25ec38cb1dd186f8f1f54625086ba2beeb4cd20c77a44d",
+    "Exes/media/particles/Flare/small/mp_flare_04_small.pu": "66c760c5c3fe5eac35f83f38a3602abc2ae1c8ae15ad458e0f8f6f2297a8484a",
+    "Exes/media/particles/Flare/small/mp_flare_05_small.pu": "071c13889ad8b3e741c3e7137f19cb4b477bd3003aaed908b64f6c89f12717a0",
+    "Exes/media/particles/Flare/small/mp_flare_06_small.pu": "3a60de33d353f56e6a40f339965fa63f4e84e0fe0586c83038f3c9c72017c2d6",
+    "Exes/media/particles/Flare/small/mp_flare_07_small.pu": "8c5971da74fa8909ea42dcaffc28ba03e07b80ee5bf789998a470258e10edbb8",
+    "Exes/media/particles/Flare/small/mp_flare_aurora_borealis_small.pu": "fa337a02db211aa3caf9375bf7df8c126861d18d339aafa819249c4b6ae73a35",
+    "Exes/media/particles/Flare/small/mp_flare_diabolique_small.pu": "34c360101b3e28ec891022450de9aca415e08d3a106ba8d49f19d6874be2482e",
+    "Exes/media/particles/Flare/small/mp_flare_fireball_01_small.pu": "d26af403d1e9619ba113959dc6a08daeaf2fa22fbbc8a86b871a28ac8ab65341",
+    "Exes/media/particles/Flare/small/mp_flare_fireball_02_small.pu": "f910ed1eaad1ab3aeb80ac0049716874fc7689ba6b372c40c204a37e04496cf3",
+    "Exes/media/particles/Flare/small/mp_flare_lensflare_small.pu": "34d0d2afb6ce2651be61c41a8b16af4612081e05e6566e8ebe4b63b73bae63a7",
+    "Exes/media/particles/Flare/small/mp_flare_lightning_small.pu": "2088a282ec10232f0bee90ea3994190bf60224ded3668bc973c616d4805cea1f",
+    "Exes/media/particles/Flare/small/mp_flare_mr_blue_flare_small.pu": "67651a94fa3fd640150b912807e64c1dad50fcd01da225056464d84a2296b5b0",
+    "Exes/media/particles/Flare/small/mp_flare_nebula_small.pu": "0de8da3c9ca150c7dae9282cf4c5a62b7578f8adb107ea5d451de5a272b1cc2b",
+    "Exes/media/particles/Flare/small/mp_flare_redflare_small.pu": "b84d464087719c316769cf47c9e23f8b8921832ac7cd820482ea1230656748ca",
+    "Exes/media/particles/Flare/small/mp_flare_rotator_small.pu": "13d7fdb2ae6dba748df9f3c1cfe9025a1caf17f1da030d83cfa5b89f5c268d6b",
+    "Exes/media/particles/Flare/small/mp_flare_sparkle_small.pu": "97fd29e7b0e4b246b6219d6b5572b13ff941834c49af0616a057b3632e6e3578",
+    "Exes/media/particles/Flare/small/mp_flare_starfield_small.pu": "6c67917e64bbb34b546b735a02f186b422a6d8045a40fd362a2242288b13ab68",
+    "Exes/media/particles/Flare/small/mp_flare_streak_01_small.pu": "411c2c699d090f22e20f68a738b7b381797b52501f2ec2432212fa70809f327f",
+    "Exes/media/particles/Flare/small/mp_flare_streak_02_small.pu": "4d336d15f1e70f3a47398b90c3b098a34e64b7343c2f7be9f141b5987395c284",
+    "Exes/media/particles/Flare/small/mp_flare_sun_small.pu": "bdea205c933502d91e87b1e25c7e74ecf1e440d8f772621ba84e733c8d016e40",
+    "Exes/media/particles/Hit/bulletSpark.pu": "64dd2b2a2b5eb521f66f6ac634bbf3e6b93922b4c32ca5e689d05b6a65e1e58b",
+    "Exes/media/particles/Hit/large/mp_hit_01_large.pu": "5dccb66c320121612f506ba43a96ec3726905c89db21ba92f5f4636a7a73d2f9",
+    "Exes/media/particles/Hit/large/mp_hit_02_large.pu": "672bb98c56fa32ce70d5eb81b65473e79d4afacd5155adb75dd5e1656554cc1d",
+    "Exes/media/particles/Hit/large/mp_hit_03_large.pu": "1c457ce20c526eef4f6306aecf9ab8c8e4327921b7bac737a3488769f4e46288",
+    "Exes/media/particles/Hit/large/mp_hit_04_large.pu": "30cf17f399875605197de7cb3057edeff0963c6b4db6ccda674a4701a2a70301",
+    "Exes/media/particles/Hit/large/mp_hit_05_large.pu": "c54ca642436ee6776fc0e82b733b24dfbd1be9cbdeeb7f8181e0ed819c415b8b",
+    "Exes/media/particles/Hit/large/mp_hit_06_large.pu": "82f5806e87722ce47a38f07a35840dd6bb557c03cd278a4163c771255984d707",
+    "Exes/media/particles/Hit/large/mp_hit_07_large.pu": "17fd68692a5fc001dccb39ac819da192b896d4a344925e786b22945f3f690215",
+    "Exes/media/particles/Hit/large/mp_hit_08_large.pu": "5e0f9f0e34ca835d4edf108bb1a1f2e15b8ceddb6f32ac30715db12f17db2fb0",
+    "Exes/media/particles/Hit/large/mp_hit_09_large.pu": "b01c7af8ed3354936a1a03c349f07fe923b47294a29808fef0c122b1c362693e",
+    "Exes/media/particles/Hit/large/mp_hit_10_large.pu": "6eaec8d4564b6863ae9762a0d08336a52f4d13ee30de9ac6f3bc46f4ff65a832",
+    "Exes/media/particles/Hit/large/mp_hit_11_large.pu": "2221f90e1de6d0c3fbcd5c7f353714e3e19f714478024a746f7458a82c94849e",
+    "Exes/media/particles/Hit/large/mp_hit_12_large.pu": "a15dfc0188f0ac98908025834e8949466ef3c758e41480c9c22553a3fa593200",
+    "Exes/media/particles/Hit/large/mp_hit_13_large.pu": "225b7f2965c2646ca18aa2bcdad33081abaf511a2288a71b0c5cac2d113b7a29",
+    "Exes/media/particles/Hit/large/mp_hit_14_large.pu": "2f3c7763efd97d211d6777719dd05aba39ff5b7189aa0fd194d0459b422a6001",
+    "Exes/media/particles/Hit/large/mp_metal_hit_large.pu": "e95dd9a148167a868abf740fd4657f9810eddcfa65a9c8a4561e6303164b2432",
+    "Exes/media/particles/Hit/large/sniper_trail.pu": "5c081edc4dfb90db41a9291727b74bf81bed01cadca11f7ea2e9c082dba70e6d",
+    "Exes/media/particles/Hit/mp_hit.material": "c19536fec3a58f8fd20d663494092f5e34b9e48da43e71032c06431a4c736523",
+    "Exes/media/particles/Hit/png/mp_hit_metal_sparkle.png": "f9b3dfcd085c4f49813cf203a554557913de54c0e9baba2928cd17d1bbfc499a",
+    "Exes/media/particles/Hit/small/mp_hit_01_small.pu": "b14d6115cc1a1338b481a1b9db4a336041bf7bef0a283a208d0ce4cc33274426",
+    "Exes/media/particles/Hit/small/mp_hit_02_small.pu": "7eb9dc9fb04a56632f6cd734aa44c3d0a79c781cfb6a97328b4ba5c74d932551",
+    "Exes/media/particles/Hit/small/mp_hit_03_small.pu": "6832094eac64df5f3323369e7528e0de4592c260117461d2b7fb6da9b2d6f202",
+    "Exes/media/particles/Hit/small/mp_hit_04_small.pu": "f56a9370b4987f3c33e00d1d12d6e30d3958007ba379d9aaa0c55c0c96511a11",
+    "Exes/media/particles/Hit/small/mp_hit_05_small.pu": "680ac23dca826a0cf1ca8e337d1e5eef712ba6f79df8d90d100185ed171bc693",
+    "Exes/media/particles/Hit/small/mp_hit_06_small.pu": "cfa820c03671c01788433c5dc33db6b2580829490ead68f9e9d028456f3f812d",
+    "Exes/media/particles/Hit/small/mp_hit_07_small.pu": "a3e4d192aaa0e7559c64d4d3fe4beb6be2e80f605d78db02732dff0687a44b4c",
+    "Exes/media/particles/Hit/small/mp_hit_08_small.pu": "6a320dc7d47fae0903807569b44cf146f19f18d5a9247f03d1be5aa7d0dbbc47",
+    "Exes/media/particles/Hit/small/mp_hit_09_small.pu": "feea1bbd60f697b2fe9074007ba7041fd9e5f42d7134e11e2c50f16c8899df48",
+    "Exes/media/particles/Hit/small/mp_hit_10_small.pu": "f95a46187be88f1c6aca405659bbe276a21b9893510952c49a547b41bc1d70a9",
+    "Exes/media/particles/Hit/small/mp_hit_11_small.pu": "d063fb9d197e76a2116d5632b98b9dd70b526d19119534ddcf1345b45373c6b2",
+    "Exes/media/particles/Hit/small/mp_hit_12_small.pu": "bf553202d59d8336cd114c0f1d743b67caf7b5b9a18a9d741cf354e9808c90c6",
+    "Exes/media/particles/Hit/small/mp_hit_13_small.pu": "d84a87cf33c24e0c793df4267a25b58fd45c0aeb343498af79db9b00fb314bb9",
+    "Exes/media/particles/Hit/small/mp_hit_14_small.pu": "61ccf42b982d1decd84756d0b851986d8d6c9594b241445284e915b630e9b062",
+    "Exes/media/particles/Hit/small/mp_metal_hit_small.pu": "f8805d88024f069e119c3aff5ded9fd8460957b73cb10efeb36037cb812260c7",
+    "Exes/media/particles/MuzzleFlash/ShotGunSecondaryShoot.pu": "5ca5abbd65ff9c65bd5ac75f008ebd77ffeaa75b88f475cbbc0d3714258da09e",
+    "Exes/media/particles/MuzzleFlash/laserSniper.pu": "5ee3cb14a4ef19dee5d0f1144a92acc3163339a83945c75304283de581cfa7aa",
+    "Exes/media/particles/MuzzleFlash/miniGunPrimaryShot.pu": "e42ddfd5924d1cabaac4062feeecff9e30231b63eb73cfd67fc470ea27e4f0d2",
+    "Exes/media/particles/MuzzleFlash/miniGunSecondaryShot.pu": "d600f9bbc44d8d16470eb90fd230b92dcb4aa2c408412254ce183e9b82c91c6c",
+    "Exes/media/particles/MuzzleFlash/shotGunPrimaryShot.pu": "642029621c69dc4aef25606a84bf3b02eae94e3875d70ee6a1972bdb4f8b7826",
+    "Exes/media/particles/MuzzleFlash/sniperPrimaryShot.pu": "7daa2061ecdb6a56ba83653e141c69d3e29444b679ad0260fea2a535b1c575e6",
+    "Exes/media/particles/MuzzleFlash/sniperSecondaryShot.pu": "fbc73dd5e07d30e4c660094371b3e9ee99bf3531316389da9cfef4fa1ea7ad73",
+    "Exes/media/particles/Nature/large/mp_rain_large.pu": "2958cf6a1655bb723b44b54001e1d161e0af52f83e816917cdf5d5d1c6200dc4",
+    "Exes/media/particles/Nature/large/mp_sakura_large.pu": "c340d249393f3a2f26b8dfabd26ef86e4d783886b199d22d1506d10eefa43e81",
+    "Exes/media/particles/Nature/large/mp_snow_large.pu": "55c863e7a2ad1b551476282ed5f29fd5d921b2756946917059ed5ff7a5bff981",
+    "Exes/media/particles/Nature/large/mp_waterfall_large.pu": "4bc3795c42f984a7e76598a1e2345da722074699ea63a89e187463d9b71ba211",
+    "Exes/media/particles/Nature/mp_nature.material": "9e0e0f55ebc6d1873bc9a80c34060f107c343478034506bea9350d934fee9108",
+    "Exes/media/particles/Nature/small/mp_rain_small.pu": "a8cb883b11174475e4aa4af37c632ef1eda025d9c5127f538cd4ec81b68f361a",
+    "Exes/media/particles/Nature/small/mp_sakura_small.pu": "12de2556f7d6d1962e4d160c1be36375476d766aaa98804053a4f5f775262d7d",
+    "Exes/media/particles/Nature/small/mp_snow_small.pu": "31fcdc9cd41c6e677090cb5f339e011322bdedabd47b117b9721cad9f5b53330",
+    "Exes/media/particles/Nature/small/mp_waterfall_small.pu": "940b3864932d63bbd608442efa150d30e4be877c2965f29ca02f58d63289df88",
+    "Exes/media/particles/Seal/large/mp_seal_01_large.pu": "47331df605aaf9c50788ece3dc656e5f665165c77e42b3c18b0efd3b6673a143",
+    "Exes/media/particles/Seal/large/mp_seal_02_large.pu": "3e135eaaba8d6746e056f7653a94334b3a96c6cbe9ef1b6f61a7a7394a481c23",
+    "Exes/media/particles/Seal/large/mp_seal_03_large.pu": "2fe72c8fc49fb2a1512a7c769ae0093491f3e3cae93534f173a0ecbdc6a2db05",
+    "Exes/media/particles/Seal/large/mp_seal_04_large.pu": "129bd7bfec6dd01ee69ae256cd378fd7ae83918fff85035c788a730a56bbe1c0",
+    "Exes/media/particles/Seal/large/mp_seal_05_large.pu": "4e63accf96a211b9ec0d46c7b57dbdc519b7c21ccf99653aa2c1649692a56ddd",
+    "Exes/media/particles/Seal/large/mp_seal_06_large.pu": "97f0e801e6cea2afad35ed0511310d2adb45bb30c312dc368f6fa319ec859ae5",
+    "Exes/media/particles/Seal/large/mp_seal_07_large.pu": "e4c98329479b22b5c4856fdcea69de358cfba61a5bb71e580d73746ca620195e",
+    "Exes/media/particles/Seal/large/mp_seal_08_large.pu": "fba8c8108d82f643ff2bc889c42f669572585db7d4211063457d04e7584dae85",
+    "Exes/media/particles/Seal/large/mp_seal_09_large.pu": "f8c6c5a9eca1d72b223b75d4f5f5e44d78191db5e18dfec9649c64f7ad3e8fb1",
+    "Exes/media/particles/Seal/mp_seal.material": "3bd63ebc9fcbbe75648859661675b5c0673f7a251c60e4c460ab958ae687e1be",
+    "Exes/media/particles/Seal/small/mp_seal_01_small.pu": "4b63cafc31b3ef6955c7620de1f4332128359b1337ee9f1f09ba47fae6717984",
+    "Exes/media/particles/Seal/small/mp_seal_02_small.pu": "9a3291b90e07def7451a49ba40363aae93e457ebb69237f1c1c83d6ed5723788",
+    "Exes/media/particles/Seal/small/mp_seal_03_small.pu": "6a88d5accb0cb9ccfd47ad95455d36e46881ccd1168c8c431529c14937e6db03",
+    "Exes/media/particles/Seal/small/mp_seal_04_small.pu": "d77ec197163530fd11fe2e8cfbe29e49a4eed67cddbe11b7763fad3aa3d27d03",
+    "Exes/media/particles/Seal/small/mp_seal_05_small.pu": "a24034b1e4d16a0b91d130537f0ebc90e83807f8533377e47d6b1cc211740744",
+    "Exes/media/particles/Seal/small/mp_seal_06_small.pu": "e4c4bf4b0eaede276baa3575204a4b91983321f3f4efb0e1d5408d26452f72ab",
+    "Exes/media/particles/Seal/small/mp_seal_07_small.pu": "d7ea069aa6ee11cce278eb93288dfd65173526097f9ac0780ae98159e46a6845",
+    "Exes/media/particles/Seal/small/mp_seal_08_small.pu": "e11609dfe92eca99190d79fd98dc1a42b1ce3cc23c034757af59cb09a08558cf",
+    "Exes/media/particles/Seal/small/mp_seal_09_small.pu": "3a487f9e132f8995ca9170272d3a90d3a05693c6b35bc6e466dc83354a48e367",
+    "Exes/media/particles/ShotGunSecondaryShoot.pu": "61cf98c6b24f611ae327f69b9cfbd0a173e48c46b0ecf4f6fb077b4dad44f4e7",
+    "Exes/media/particles/Smoke/large/mp_glowing_smoke_large.pu": "9ffa7b4852bf457a503805f136c18a5bda73775decb2e15ae9516231b5ee39f8",
+    "Exes/media/particles/Smoke/large/mp_smoke_chimney_large.pu": "66566ea86e36250ec03be58198487f20f2bf50f125ab38cf9ae0114ea243f902",
+    "Exes/media/particles/Smoke/large/mp_smoke_dangerzone_large.pu": "55c7e578c5bc34d731f72aa5b4789573f55cdbc4f68a859fa636099e6121340e",
+    "Exes/media/particles/Smoke/large/mp_smoke_droppingzone_large.pu": "20b23151333d80683be922a8c56b3455d4878fd75435484780e940bd5e317bec",
+    "Exes/media/particles/Smoke/large/mp_smoke_flare_large.pu": "cdd0e5948365e1e3eddf3c5f395f33ce9651044a98e3ae837173bf16707637a8",
+    "Exes/media/particles/Smoke/large/mp_smoke_flare_sparkle_large.pu": "35cb08fd88af613a3085fa0a9a894d4d1a1506a37d6d1ce097d422aad5b828ad",
+    "Exes/media/particles/Smoke/large/mp_smoke_fog_of_war_large.pu": "d1fa33d7190cdda075029ed39b9a78c0f066104b2564e53c12b14d3252a473e1",
+    "Exes/media/particles/Smoke/large/mp_smoke_smolder_large.pu": "10b15535524df130bebec29a50c44534d028a61ef335252235b1b8f8f31c2c09",
+    "Exes/media/particles/Smoke/large/mp_smoke_thick_large.pu": "254c7e6d53760bbce3dec707cbc46d15f1a14e224ce51217b0917ac3ff77512a",
+    "Exes/media/particles/Smoke/mp_smoke.material": "ebf2b6510af1d5159f7bec2272fdaadf44251221edc1c1b7cf721b093e830093",
+    "Exes/media/particles/Smoke/small/mp_glowing_smoke_small.pu": "f9d3ef133415607548bcfb59a4239a48b45344974518db658e360ee19c649e2a",
+    "Exes/media/particles/Smoke/small/mp_smoke_bash_small.pu": "2df56b4abab6f4520b9f39fd3bc6b4c05c1ab88d51fb4717f843d67d2a1d95f6",
+    "Exes/media/particles/Smoke/small/mp_smoke_chimney_small.pu": "3fe7d6f5890f6a92d016400d2252c805319a7ec82fc7f4d9111c91b6020f269f",
+    "Exes/media/particles/Smoke/small/mp_smoke_dangerzone_small.pu": "d89c8c190cbdf64471629c26c89d16e2af916bd330fbdac00e0f0036c2b4da71",
+    "Exes/media/particles/Smoke/small/mp_smoke_droppingzone_small.pu": "59f8dc98426484972217eeb9894557995c2a976d5e07c6f2f363ad9bdc24a444",
+    "Exes/media/particles/Smoke/small/mp_smoke_flare_small.pu": "c3dd5c2ed9d02cb5dc62f9c08425e10bb9ddf97bb15b90322d490a47f58b8fb1",
+    "Exes/media/particles/Smoke/small/mp_smoke_flare_sparkle_small.pu": "e903cadae9f54e8235f795d30a24e2dfa764ec2cc0fb4708dd0adcd62c3fb562",
+    "Exes/media/particles/Smoke/small/mp_smoke_fog_of_war_small.pu": "f94add0f12ad3582b24e6dc4b3cb7b1c6f93424d103bb0489b6c27f901392a18",
+    "Exes/media/particles/Smoke/small/mp_smoke_smolder_small.pu": "17c31099c477bd6b071e195be8e784503fb5d6801bddd8b1714a0641c9cddde1",
+    "Exes/media/particles/Smoke/small/mp_smoke_thick_small.pu": "f83becdd5fec07f628080ab9cc0d6385ad91c22c6ae1b02e5df8ec11b8dcca7a",
+    "Exes/media/particles/Smoke/smokeBash.pu": "c034d66e9843a8c7627a411c994df8b704d34899e3c011a5ea175ff3f945b147",
+    "Exes/media/particles/Spell/large/mp_spell_effect_01_large.pu": "56ee9cbfa893c4d0cefa20eb3a7e581ee671de07e5499696dac039fb98c1fd0d",
+    "Exes/media/particles/Spell/large/mp_spell_effect_02_large.pu": "61185f9c3964e5d5655f40cfef6e0766aa4db4b029314886e7ea035ff4248e62",
+    "Exes/media/particles/Spell/large/mp_spell_effect_03_large.pu": "7ddb97a2645fca305e0d3a6c6b1efcaa6ee50fc2fe2d75562c4f1f09af4d9604",
+    "Exes/media/particles/Spell/large/mp_spell_effect_04_large.pu": "be842b51eb0d1f6295862af5a63c2d8ae70353b9983a722b3a230e2feb7e5ea3",
+    "Exes/media/particles/Spell/large/mp_spell_effect_05_large.pu": "41216dc7e05357570456919aa24912c9f803dd5f706c1ff8c4ef849ae95771c1",
+    "Exes/media/particles/Spell/large/mp_spell_effect_06_large.pu": "7d7d9a3083134a0efa96a33ae244ad9f6dfef753b23c2187ca8902935a001808",
+    "Exes/media/particles/Spell/large/mp_spell_effect_07_large.pu": "1d5b9e2a42f28e93f953e11cbb2ad21199d66ae94d5dd37709544c0511cba3f5",
+    "Exes/media/particles/Spell/large/mp_spell_lightning_lamp_large.pu": "b0676f272e315e1c1f711adcdfe700be07c594d7b75d03d46c8a2705da8087c4",
+    "Exes/media/particles/Spell/large/mp_spell_spiderweb_large.pu": "5708b7dc3d5f49ecd99b0d3d3ab7e99f86770c3630c1a4971bf119c3acb7c267",
+    "Exes/media/particles/Spell/large/mp_spell_tornado_spell_large.pu": "9666d397e2fdd105c667af1714e0929cf970604b0f7a537c4476f62180568b57",
+    "Exes/media/particles/Spell/mp_spell.material": "e421c6c2b946c71ac0ca76f00971bf009b3e7120d550455aeb8da490a65b35df",
+    "Exes/media/particles/Spell/small/mp_spell_effect_01_small.pu": "a0b8ef5e0ef8dc83b1f15f32745c4ef167befcc61b76cc8af0a03121c50295ce",
+    "Exes/media/particles/Spell/small/mp_spell_effect_02_small.pu": "ee6d10a8eb221f1ea90c7e723d77c6b7cd33b868c72ce8b704f38a4e0883687a",
+    "Exes/media/particles/Spell/small/mp_spell_effect_03_small.pu": "e74cd5111e36f78efe6906eceea14ab5a4ca8dbdb64c10cac51c533a8c34dd9c",
+    "Exes/media/particles/Spell/small/mp_spell_effect_04_small.pu": "e39741f05d23a1270c70d3302a269526d01542b2079622450e4eb0cb9d6b6e98",
+    "Exes/media/particles/Spell/small/mp_spell_effect_05_small.pu": "65c1f862d1919e01f5f35f26a6afef27acef8d6e42dc6e240b4cc8d1fe9ef025",
+    "Exes/media/particles/Spell/small/mp_spell_effect_06_small.pu": "7bb7f8cd2e06e77ed89619839c77ce2ad12d8116248e8e3d0c3be553dafdda53",
+    "Exes/media/particles/Spell/small/mp_spell_effect_07_small.pu": "bc006944cf385a715a9ab89c0859b09c6a39f2dc222c1ebfc40078614c3f5d95",
+    "Exes/media/particles/Spell/small/mp_spell_lightning_lamp_small.pu": "671c05c8b3664a22468ee2bdda03a8a01314cb638b5f64b0229f70272998ac37",
+    "Exes/media/particles/Spell/small/mp_spell_spiderweb_small.pu": "26b323d671bad00bfdc77906cf1f7f65c0e19f210727032c7d680d1b59b794a9",
+    "Exes/media/particles/Spell/small/mp_spell_tornado_spell_small.pu": "00d11a903da4d0cb5d3b4d786502e97e44b761cb0f4942cb530d9d82defc4331",
+    "Exes/media/particles/Weapon/large/mp_bullettrail_01_large.pu": "92f67eee27fe1ccc148d970edf21db846a4901feb6d0df3071c7295a560e5cb2",
+    "Exes/media/particles/Weapon/large/mp_bullettrail_02_large.pu": "274e8053fcb0fcb0047363bd0a6580c8460af26d826f5763bcd0cd7f94b1c051",
+    "Exes/media/particles/Weapon/large/mp_bullettrail_03_large.pu": "6375f780a7cbcc97cb90d5bfcda5241619338c63bdc16715f16838c09e761d32",
+    "Exes/media/particles/Weapon/large/mp_bullettrail_04_large.pu": "49ddaebeec044dd3dca118cff291eb36e74ee27eeb6cebca54a519596ec04c51",
+    "Exes/media/particles/Weapon/large/mp_bullettrail_05_large.pu": "ac749d5810c867d63f3fe4d35ccbd85a5d24b4e54ff060e7e7528925f586a284",
+    "Exes/media/particles/Weapon/large/mp_flamethrower_01_large.pu": "b74e919129f6c5bf12f4c16ed01b461de00dc2b37213b5d2b51ac25c4b0eeb92",
+    "Exes/media/particles/Weapon/large/mp_flamethrower_02_large.pu": "92731553a683689c63c1ef1f8ecf2f2ad9a0c1a104f0cb3e9721a55781af93d1",
+    "Exes/media/particles/Weapon/large/mp_laser_large.pu": "79cfbd1169b2210169cc7049038f4059766092d31ac93340605be7e59b4d1126",
+    "Exes/media/particles/Weapon/large/mp_muzzle_01_large.pu": "99335499a58110af212071239235d4b4ea546f619d75eee057555a92ecaab94d",
+    "Exes/media/particles/Weapon/large/mp_muzzle_02_large.pu": "a80e7b1bf1fa16b09ebc6ed5831bfc1ec84d09a131408c6071a017c3af9dc321",
+    "Exes/media/particles/Weapon/large/mp_muzzle_03_large.pu": "b85918a4be66b042ddeb2058391ea3ef7824040618cfcedb7cf28c19e7d14f16",
+    "Exes/media/particles/Weapon/large/mp_muzzle_04_large.pu": "c31463fecc9a83ac4bed748ac5192fb476446ce81db4722d7a3db3d5a6f2e5aa",
+    "Exes/media/particles/Weapon/large/mp_rocket_large.pu": "9ad7f8fd83c6f30e7bf483cf31eed95cc165becc0fbfb4f43a8952d77fb3d755",
+    "Exes/media/particles/Weapon/large/mp_spheretrail_large.pu": "50cf2a320ab5c4358fdcb7b32a2d60ffc3e816b67e4142061b13e6ec5355094d",
+    "Exes/media/particles/Weapon/mp_weapon.material": "b12b2fd4daa667ce7a9d0a635d989997ec45cbfffeb8fb60364487c4bf45384e",
+    "Exes/media/particles/Weapon/shotgunMuzzle.pu": "7c4a9d0925f278bedce2654db2d0faaf43437bf2f17c32e3b99920f3f4eca7ce",
+    "Exes/media/particles/Weapon/small/mp_bullettrail_01_small.pu": "1ae9df2ebabb513923394478b4a68cefd204fdbc009b92372653747daaf895c9",
+    "Exes/media/particles/Weapon/small/mp_bullettrail_02_small.pu": "4b544ecb51a63ac71a08a73215825e9b1e43152cc8a2c1df03c604b02cf3139d",
+    "Exes/media/particles/Weapon/small/mp_bullettrail_03_small.pu": "0f8ab5ee2aa1233c8c13b62b96fb5a62deffc9d75727fa3f6d0011bcde624838",
+    "Exes/media/particles/Weapon/small/mp_bullettrail_04_small.pu": "2c8baa20f42a4d086c1dede43e7376a3fb7c2013a1764356cd1a2a9a77c851d4",
+    "Exes/media/particles/Weapon/small/mp_bullettrail_05_small.pu": "84cd1db238ff0ce6f3f4c35040822f5fd44221fc52fda385cea1223428e36815",
+    "Exes/media/particles/Weapon/small/mp_flamethrower_01_small.pu": "aa0657685c6f60adb81a120567e718c1b414c8404ea9c628bd8637692b15d9e9",
+    "Exes/media/particles/Weapon/small/mp_flamethrower_02_small.pu": "cc272c3c02122cb1374f1515b18f8b0943b85ee0a6d2751f0ab3b0f0b68bd66f",
+    "Exes/media/particles/Weapon/small/mp_laser_small.pu": "413882bb3ade5493f0b83f8023b495b7f87f48a77c8bd89ecb269dd2287e075b",
+    "Exes/media/particles/Weapon/small/mp_muzzle_01_small.pu": "ea4ec372ad329432c9d1ecf5eee9ed82bda35d434431e36e4840c9a0cc51034a",
+    "Exes/media/particles/Weapon/small/mp_muzzle_02_small.pu": "f9710cc01670532f7e3d491c1fb71904d4450ae6e915689e2f23a095fed38c0b",
+    "Exes/media/particles/Weapon/small/mp_muzzle_03_small.pu": "d8f9e4164abec5d38accb162a7fc392e2d508718d1998594141d539e2c090f57",
+    "Exes/media/particles/Weapon/small/mp_muzzle_04_small.pu": "138f229a832c741c73edf85f67b7acf9749acf5de06626479496718a196ff7fa",
+    "Exes/media/particles/Weapon/small/mp_rocket_small.pu": "3f6290442b964384af32a622d26291b41094418d8a2ce83085527772cf45da3f",
+    "Exes/media/particles/Weapon/small/mp_spheretrail_small.pu": "8fb0f107a83242640b3125895b42385dd59ca667d5136631b0297d8ec4b1e3b6",
+    "Exes/media/particles/Woosh/jumperImpulse.pu": "1e56185355dd703c48ae975ead2284c1cf846fb32e0929837efc90117ccdf713",
+    "Exes/media/particles/Woosh/large/mp_woosh_01_large.pu": "7ee374887eb03e9394c0f77c56896799fc20fd321c635374b14e938d6288552c",
+    "Exes/media/particles/Woosh/large/mp_woosh_02_large.pu": "7967983abc1ccf95ab5d201a4d93cb7ded08f2cabf819023f82da958eea01708",
+    "Exes/media/particles/Woosh/large/mp_woosh_03_large.pu": "b6f71683e9f65c1535f776dbe7fce1a06df71a62753fd730d168d4ad53e9e430",
+    "Exes/media/particles/Woosh/large/mp_woosh_04_large.pu": "344ac9dc7b1fa764c846b090d0997bdfe6f902370d59fc6ead7742c5750ecfa2",
+    "Exes/media/particles/Woosh/large/mp_woosh_05_large.pu": "13852de359c775eaa93d93c53990a7fa8088b39d0ab58d3377ea1d0c148ac41f",
+    "Exes/media/particles/Woosh/large/mp_woosh_06_large.pu": "ce87a5bef05083e3a35bd10ade63920562f613702d964c20310486e05df3d0fd",
+    "Exes/media/particles/Woosh/large/mp_woosh_07_large.pu": "f72d8832cb8dfe1a3e53bb3ab013d5dee6484f99528e19aeef166f712636a39b",
+    "Exes/media/particles/Woosh/large/mp_woosh_08_large.pu": "0feec7dee08677a8f7a2df305f1cb8e66e6ada6185ca789f182d21269a81aebb",
+    "Exes/media/particles/Woosh/large/mp_woosh_09_large.pu": "73348f5a88b34f6c51be36d45d3f44c24cfb0f1479645a2d303177b0bcc531f5",
+    "Exes/media/particles/Woosh/large/mp_woosh_10_large.pu": "e07189a14789df1d3a6ad7c61f7c4e5895d68848cdbcb4353831368292860673",
+    "Exes/media/particles/Woosh/large/mp_woosh_11_large.pu": "5c77bcd84dd0cf52acb32b3732cca852fde2192ac3cd00297cef1363b7a76f19",
+    "Exes/media/particles/Woosh/large/mp_woosh_13_large.pu": "5956cf7dcf80d6c8aec511b1367a0ec8d8d99a44142450755842d594b6433d16",
+    "Exes/media/particles/Woosh/large/mp_woosh_14_large.pu": "046b4fe1e6def5ea104e3190c1a556841e4a784683bf7be6d9513d0dd45773ef",
+    "Exes/media/particles/Woosh/large/mp_woosh_bolt_large.pu": "88c6be0e78b141daa49299bcfb18d206c4473e4e3fcf7ad0b446eecbd89a64b3",
+    "Exes/media/particles/Woosh/lifeDome.pu": "efa6eccdb11fe680377a1bb6a4ef4ef4356f910bc3a95dc170de046e67fdff24",
+    "Exes/media/particles/Woosh/mp_woosh.material": "c95f5a1026a9db0a4a6b4c25a19dcc93df653144da73b44351cf2e0c9c55ce27",
+    "Exes/media/particles/Woosh/small/mp_woosh_01_small.pu": "13666fe5fa9c8f429d33c1bdd73c3f4ac14f78eac73a5fb9a5521c6fe5c4f3ef",
+    "Exes/media/particles/Woosh/small/mp_woosh_02_small.pu": "0eb10e9635ec808682f7f04a93717a3f5aa0fd7488b15cb1520c9ae55c882400",
+    "Exes/media/particles/Woosh/small/mp_woosh_03_small.pu": "e8f85ed022efa9d742721718ae6024ea0fc10d9a555d69969e4db812736ebe38",
+    "Exes/media/particles/Woosh/small/mp_woosh_04_small.pu": "822f745fb623ebc9dc265a86c31b45d8dab78ee938b10037714b69744e5c3765",
+    "Exes/media/particles/Woosh/small/mp_woosh_05_small.pu": "c9eabbdfa3a17342932fc6162f79cc8bfc7574d0df404b18814faae7295088e2",
+    "Exes/media/particles/Woosh/small/mp_woosh_06_small.pu": "1938a5fbb10c22b95d5557cb495d5531674bcac43a29771ccd5ae230dea3c091",
+    "Exes/media/particles/Woosh/small/mp_woosh_07_small.pu": "a320095f32a36906f339a8f3415798cf69f63b7702a2e1eb65d288410a2e57d5",
+    "Exes/media/particles/Woosh/small/mp_woosh_08_small.pu": "9ae7208bd0c8f4d18e412ee0f20c789db6493e133b3f324a38380c9722022107",
+    "Exes/media/particles/Woosh/small/mp_woosh_09_small.pu": "fa49bce32673eb542264e39e377e62a73349ac815c25b97b2902588e6cf09966",
+    "Exes/media/particles/Woosh/small/mp_woosh_10_small.pu": "ceb249b8c90a654f43c0485c27b78220090e13502b463c03172655974fd1db6d",
+    "Exes/media/particles/Woosh/small/mp_woosh_11_small.pu": "546a63bef06bc00584196a038c7cb5f604137d52cd409985d734167c32fdda9e",
+    "Exes/media/particles/Woosh/small/mp_woosh_12_small.pu": "38c2a13d4cecbc471de28573d7df78bd05be9a5080f8676b0fddf04f31974de1",
+    "Exes/media/particles/Woosh/small/mp_woosh_13_small.pu": "352be905dd46c51c5080c76a133334615ff7451fc1b9cbf7a64b16c6b3c997a6",
+    "Exes/media/particles/Woosh/small/mp_woosh_14_small.pu": "38e19fc38af3e7f3a2094aaea24d45915661c84ec496ce82377913508d7fbcc7",
+    "Exes/media/particles/Woosh/small/mp_woosh_bolt_small.pu": "bbfc01c4721efcddde273a2ce6051e2c7607a4474ac327467cb9483a831b1af4",
+    "Exes/media/particles/cooldownReducer.pu": "2078747a3a01810939b8b29826b47655842df44ad321287014b60065c2c4c57f",
+    "Exes/media/particles/damageAmplifier.pu": "6cfaeea1e4127cd89e25e8ed69bc8aeddcab738f7161eca8aa92902307f83084",
+    "Exes/media/particles/examples/materials/pu_example.material": "bb8f2d619b3b450c2394d97485f9dbb658bd785c20668721641fbb529638cc5a",
+    "Exes/media/particles/examples/materials/pu_example_32.material": "6f34077cb00eaf33f49a975056352797e8a12400f129fa85f66d29457d0eafae",
+    "Exes/media/particles/examples/materials/pu_mediapack_01.material": "b0dd52ccf4df61079f8a3816a9670961286fbb4b6a7386cd8e95137b6617b11a",
+    "Exes/media/particles/examples/scripts/advancedLodSystem.pu": "a59bda3ecd548204160caf98b1b97716a693f6dc164f39c699b1f6de28a15aa8",
+    "Exes/media/particles/examples/scripts/atomicity.pu": "5a5a1d792ec06804a21efc3340a7a51c4795b29a08bc26727fdd21f78f85e9ab",
+    "Exes/media/particles/examples/scripts/blackHole.pu": "03fa2224796bddc1d8785c969697341437f655fed8928da6616fdf74045cff30",
+    "Exes/media/particles/examples/scripts/bubbles.pu": "ba2641735d6a8cefc308fc44dbdd1c8ae9c98de7b3910f1dd1490d85237781ab",
+    "Exes/media/particles/examples/scripts/canOfWorms.pu": "c04902cd743ef5feb673a7b98232d355af8e5d7a67df1ee07699aaeef9c4077b",
+    "Exes/media/particles/examples/scripts/colouredStreaks.pu": "40540b0bd75e1f0744f9111ec591264873798b85adc08e98448a4d4b8a22b903",
+    "Exes/media/particles/examples/scripts/dirtExplosion.pu": "d793eaa41c511d6261a18a5af05a66829e64ce9f7633e984b36eefd279cfaa17",
+    "Exes/media/particles/examples/scripts/electricBeamSystem.pu": "9edd72ac975be6266eee98bb8a6a1fd65306d1a39401e7221bc40c1d0da8de21",
+    "Exes/media/particles/examples/scripts/electroShield.pu": "f37d1e038d9075b7f5ba59b20280b046c7ac242318abb0cf90f00de2883a681f",
+    "Exes/media/particles/examples/scripts/example_001.pu": "842f8520aad4801fc3d19b05c854d674981a2c267e013889f13665976ef5d5bf",
+    "Exes/media/particles/examples/scripts/example_002.pu": "6450ec1a6c06c2b8ef4f8622e68088d9402e3846558fe30703de4ea59bf5a63d",
+    "Exes/media/particles/examples/scripts/example_003.pu": "54b29fb4c706a1226aa8ed324c212fdfa24dc47a15ded5ec0d3ccd86f3d93fe1",
+    "Exes/media/particles/examples/scripts/example_004.pu": "2b6517ef999db6388e307ab2c025a88592520ebba0ba7568f2efd4a0124cc6b6",
+    "Exes/media/particles/examples/scripts/example_005.pu": "c256106796aaef8052e95007bba2af8ea9b94ed960f02f875069ae9cd574fd05",
+    "Exes/media/particles/examples/scripts/example_006.pu": "66be1e421fbdbb30802ab2d0a121e0a658debf79b67d8ecdee2686af88a5acc1",
+    "Exes/media/particles/examples/scripts/example_007.pu": "a5f3477a41e26271cce44ae8ed5ccf28cf9d5e423ffa1167720e0836b2dee09a",
+    "Exes/media/particles/examples/scripts/example_008.pu": "564d7ad057399ea01cae97e4703792d265c3358315d65b9c54243220497cfc19",
+    "Exes/media/particles/examples/scripts/example_009.pu": "aa213110c2d96f326cc4b057fa5fe3f9f7b6ddc1d65c4623d905920bb217036f",
+    "Exes/media/particles/examples/scripts/example_010.pu": "526ac7ae511234d52d0c2a3eb694a71386bc5193e70cf7f2051f7d035595f65e",
+    "Exes/media/particles/examples/scripts/example_011.pu": "bb7a8fba7a7bd1fe2951f022e759ec7bc2831f7a98d20b47ae62d42cb42e3e6c",
+    "Exes/media/particles/examples/scripts/example_012.pu": "423e05a741f96907675ec70de9cc2012f85bea85b66126c02a8f9dca5ce702a8",
+    "Exes/media/particles/examples/scripts/example_013.pu": "16dfeb71fc964afd96ad78b0d1b2b42e7dcc6ec0210c938e4b8585c74b4b5e64",
+    "Exes/media/particles/examples/scripts/example_014.pu": "6cddd1ac74273bb6be76fc974f905a34f772878380309a0f3057ee31f603340f",
+    "Exes/media/particles/examples/scripts/example_015.pu": "29826df2fc88c1cf109f6857efd5d40cb808b0764c885e4510cf79eee429e3ac",
+    "Exes/media/particles/examples/scripts/example_016.pu": "14ef4872c15ba00fbb205f3946b3d0de56c23ea1b86e4ad9768b37f40fadf766",
+    "Exes/media/particles/examples/scripts/example_017.pu": "0781cfaabfb67af3db6d1dafbf9c3a18cc8c05191bb347dbedba62449e6e6549",
+    "Exes/media/particles/examples/scripts/example_018.pu": "0c967a8c9dae1af09fc03d6f19287e42675264b7476886e599aa48f07c957bef",
+    "Exes/media/particles/examples/scripts/example_019.pu": "390d74ac03b7c16ccd876d151564fb0b3d40e7cf31f4ddc4132ba90b5b617e7f",
+    "Exes/media/particles/examples/scripts/example_020.pu": "7d953a4c418ff16b19565bd91096000f9a7c83c48177895be367db0bbddaf8f0",
+    "Exes/media/particles/examples/scripts/example_021.pu": "492d7d4a26d474016423aa3d09260d028d8d33400acd60df49f267bbf550fbbf",
+    "Exes/media/particles/examples/scripts/example_022.pu": "4c6b5ef45e02fbd8bc6b349d22009d13869e9657a561c7aa5327aeec34ffd2ec",
+    "Exes/media/particles/examples/scripts/example_023.pu": "7a5f7ce31370269e9479b7eccef1added4fbe72042a5d92f5743dad21a0f97ee",
+    "Exes/media/particles/examples/scripts/example_024.pu": "1e122a130ddaedc37acee0ab66b9c5901172a5631e66b3f881a4df53f2eb51e8",
+    "Exes/media/particles/examples/scripts/example_025.pu": "233903aa4015ffdbcde8aabd1723a8ad6d308456cb47c9482f1aeab4dc93fc38",
+    "Exes/media/particles/examples/scripts/example_026.pu": "e1b7b213eb6ef74620000622eab269ca7f2872c2f9f86afbb7bbedf0c5327fa3",
+    "Exes/media/particles/examples/scripts/example_027.pu": "6d9481a25980a818dd444c5d0fb4b2d66e2476f3654fe016ff48082e3462dd8b",
+    "Exes/media/particles/examples/scripts/example_028.pu": "60496f29c5a9632662b6e2a728ed1c3815bd450d952977bedfe99e479c392d84",
+    "Exes/media/particles/examples/scripts/example_029.pu": "06a69a434f132957677cef7ad18bc1964fb5c683514d9c5ae859c079a47e361d",
+    "Exes/media/particles/examples/scripts/example_030.pu": "2b43566f7ee02c729573078371586971625ddf4dcf412dbd7d1b904732aa37c4",
+    "Exes/media/particles/examples/scripts/example_031.pu": "fdc8574e7e3bfa4d2d159706bb3495b89a47d89429b0e81afed35a53ea40d4ff",
+    "Exes/media/particles/examples/scripts/example_032.pu": "bbcb505d10d3caf4ec784ddb891a8b7971d664bb65675872d66eb5a5a19c3a00",
+    "Exes/media/particles/examples/scripts/explosion.pu": "49c13f6797b5b50ae68b82e3e26a52ce79b434c0e1eb90e4249d68ee1c5348c5",
+    "Exes/media/particles/examples/scripts/explosionSystem.pu": "48b6f7cc32c3da3d7cf28db744885721e9f155f2501d3ba2510f5de1dd7a6a90",
+    "Exes/media/particles/examples/scripts/fireSystem.pu": "7997d4cfee9b75d22e25476665827ca021799bd775d7bcceaa0942d99a9d16fc",
+    "Exes/media/particles/examples/scripts/fireplace_01.pu": "ce5722fdca1effbda32aa3c50e8b72a12b833ae99f6a1de4caf2d3ebe33af58f",
+    "Exes/media/particles/examples/scripts/fireplace_02.pu": "a5a38286ef2d2deb50c8b9cb7affeb3f91712955a58277622e4de8c018850c7f",
+    "Exes/media/particles/examples/scripts/flameSystem.pu": "62051caefa1eb6b68a3bf0b2ea2cd1d209f2a7776393c76fecfba1365e5e10c1",
+    "Exes/media/particles/examples/scripts/flareShield.pu": "230abe0a4482a021a374be2b61b543b4addaf690f67db9d6f9c8116b96f386ea",
+    "Exes/media/particles/examples/scripts/fxPression.pu": "4ccbf5e13e2246cd5bc402bda2a77e1a9b6a87b1ae7b275db0c6b75271880fae",
+    "Exes/media/particles/examples/scripts/hypno.pu": "762a20c42e6df224e91d4722d21bc56932f10b87f2c0dfdf094e2197a685f403",
+    "Exes/media/particles/examples/scripts/leaves.pu": "5bf55ce4628854b79ff21e033d9357c72b2562943a93b427ba3cf7736039f505",
+    "Exes/media/particles/examples/scripts/lightningBolt.pu": "5018f8209b884cfa448b901036228a97bb8e5861b8da6fb8af80d339b515ae02",
+    "Exes/media/particles/examples/scripts/lineStreak.pu": "9b0e07952de530f4d999e723ba6c818bfe183b0420f2b92b13b93e4d3364e409",
+    "Exes/media/particles/examples/scripts/mp_torch.pu": "cdee2a308e66de5c3a3d836b9876fcdb678aae4c47796e774fe9dff2536d3210",
+    "Exes/media/particles/examples/scripts/physXFluid.pu": "d62fcb6edbeb6d0babda9018fc8966ca37af4a18de1673e8cf4fab3403f30d63",
+    "Exes/media/particles/examples/scripts/physXParticles.pu": "a8a3f03c0565bdb18169a46541c9d1ec637d2aec058947ed41663b2ef0498e14",
+    "Exes/media/particles/examples/scripts/propulsion.pu": "db12c15d5af72f1a107dc7b2f8aaa0f5daa1524d4d6f547d5c334356ca4d6df7",
+    "Exes/media/particles/examples/scripts/psychoBurn.pu": "e14ecf1ca6fb2b3bf730a7bb97d80a34dab2d498c5b43486133ce7befa2dfcf5",
+    "Exes/media/particles/examples/scripts/rainSystem_1.pu": "c7614500e2622df0b8d7c32eb42d965bd8d13f515e6480255635d219017da756",
+    "Exes/media/particles/examples/scripts/rainSystem_2.pu": "19a3fa36c7fe66aada9fd0cbd9d2ec35b12a8a3fcbcdc04246f6763c8c5d8125",
+    "Exes/media/particles/examples/scripts/smoke.pu": "2a03e2aee4f6d88570d3826d14058c2c7589cf9d9653979db67dab189c7ef312",
+    "Exes/media/particles/examples/scripts/snow.pu": "dcc5da12847b20e51b8b23ec90ac8927df56944a388a186f5767480605c2b6f3",
+    "Exes/media/particles/examples/scripts/spiralStars.pu": "ae849e0f4e39310abaaea76ec4b464d32d269292c383d5ac93bc14bccb7a503d",
+    "Exes/media/particles/examples/scripts/teleport.pu": "fc33a7ea3a97f66c675f9654f5530548097cd1d5e6a18c0f43c8fb878b096280",
+    "Exes/media/particles/examples/scripts/timeShift.pu": "8329b0e36bde335e61f47d3cc6792a70181dd883c87c9eae0f13b9908981d17f",
+    "Exes/media/particles/examples/scripts/tornadoSystem.pu": "5b19f6e1eae562e43f9990e5c59a74bb110436b7b41560a7426c4f7de05c015c",
+    "Exes/media/particles/examples/scripts/windyFireSystem.pu": "75497fef5a137989e10e202a43880739fe4780fa1a63173573f22cab62faf68e",
+    "Exes/media/particles/examples/scripts/woosh.pu": "c463dfb2ce6af9160205eb5b0a936b65e9e69334b45cf73ed38cc562b502a414",
+    "Exes/media/particles/examples/teleport.pu": "fc33a7ea3a97f66c675f9654f5530548097cd1d5e6a18c0f43c8fb878b096280",
+    "Exes/media/particles/examples/textures/pump_flare_05.png": "44b848b4fda07442c03f0ab23c9685a714b6ca868427d0f3d2681922fa415db1",
+    "Exes/media/particles/examples/textures/pump_ring_04.png": "a87ae17bb2b4191f9bc07b5c1d6ad4accd32cb3e3d1437906cacb6467dbd9c0a",
+    "Exes/media/particles/examples/textures/pump_smoke_01.png": "e782854ddcdeb6aa24104726f8a626f3b6d638c8f0e18be14fba976e1aa9cff2",
+    "Exes/media/particles/fireBall_No_estoy_contento.pu": "281c0593c595c74cfd234b8c109bc25af33b23e34fbadfb44dda893341a638b7",
+    "Exes/media/particles/fogonazo3.pu": "b87ee65836b56311c957461a68d0060bc6ddf07f497ad96c4e8995401f753341",
+    "Exes/media/particles/groundTouch.pu": "95984f022543e4e99a72163de7b0887146819a4649448d963e92bca07e096350",
+    "Exes/media/particles/heatHaze.pu": "4469182fb416d06cd9ca8d9029734d128ebd9bcc4c5ff5a0cd64a4d9cf0a77af",
+    "Exes/media/particles/houndOdor.pu": "3c1bdcd07f7408e49c7fe6560787ae6aa6730553246c7ad104d0b9facd762f13",
+    "Exes/media/particles/houndSecondaryKill.pu": "8b8cd4fc0e766f65ecb0b0a87241ef8c99d97c0572aeb9b232ff2034dc6fb51c",
+    "Exes/media/particles/minigunHit.pu": "ff7458d2b937676f9b1adc89b85997f8b447f11869b6bea67c7b026cb396dec9",
+    "Exes/media/particles/shadow.pu": "7c7ff98021279a670be83a06b75eadcd9c644044b89f844c2758272dc30520f9",
+    "Exes/media/particles/sniperPrimaryShot_50.pu": "58893849703b29db1f693ece9593fcb235010df2859027d191e79f66725b44b4",
+    "Exes/media/particles/spawn.pu": "ff5748750ecd93116eec3e8c3b4c744b9ddfe91fb45975a670a4cefa298bb597"
+  },
+  "inventory": [
+    {
+      "path": "Exes/media/particles/Blood/bloodStrike.pu",
+      "materials": [
+        "mp_bloodsplat_10"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/large/mp_bloodsplat_large.pu",
+      "materials": [
+        "mp_bloodsplat_2x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/large/mp_bloodspray_large.pu",
+      "materials": [
+        "mp_bloodsplat_09"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/large/mp_bloodstrike_01_large.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_bloodsplat_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/large/mp_bloodstrike_02_large.pu",
+      "materials": [
+        "mp_bloodsplat_2x2",
+        "mp_bloodsplat_2x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/mp_bloodsplat.material",
+      "materials": [
+        "mp_bloodsplat_01",
+        "mp_bloodsplat_02",
+        "mp_bloodsplat_03",
+        "mp_bloodsplat_04",
+        "mp_bloodsplat_05",
+        "mp_bloodsplat_06",
+        "mp_bloodsplat_07",
+        "mp_bloodsplat_08",
+        "mp_bloodsplat_09",
+        "mp_bloodsplat_10",
+        "mp_bloodsplat_2x2"
+      ],
+      "textures": [
+        "mp_bloodsplat_01.dds",
+        "mp_bloodsplat_02.dds",
+        "mp_bloodsplat_03.dds",
+        "mp_bloodsplat_04.dds",
+        "mp_bloodsplat_05.dds",
+        "mp_bloodsplat_06.dds",
+        "mp_bloodsplat_07.dds",
+        "mp_bloodsplat_08.dds",
+        "mp_bloodsplat_09.dds",
+        "mp_bloodsplat_10.dds",
+        "mp_bloodsplat_2x2.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Blood/small/mp_bloodsplat_small.pu",
+      "materials": [
+        "mp_bloodsplat_2x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/small/mp_bloodspray_small.pu",
+      "materials": [
+        "mp_bloodsplat_09"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/small/mp_bloodstrike_01_small.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_bloodsplat_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/small/mp_bloodstrike_02_small.pu",
+      "materials": [
+        "mp_bloodsplat_2x2",
+        "mp_bloodsplat_2x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Blood/small/mp_bloodstrike_03_small.pu",
+      "materials": [
+        "mp_bloodsplat_10"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/cooldownReducer.pu",
+      "materials": [
+        "mp_flare_elipses",
+        "mp_spell_flare_02",
+        "mp_flare_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/damageAmplifier.pu",
+      "materials": [
+        "mp_flare_elipses",
+        "mp_spell_flare_02",
+        "mp_flare_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/materials/pu_example.material",
+      "materials": [
+        "mp_fire_02",
+        "ParticleUniverse/Tornado",
+        "ParticleUniverse/Stone",
+        "ParticleUniverse/Circle",
+        "ParticleUniverse/Rain_01",
+        "ParticleUniverse/Barrel_01",
+        "ParticleUniverse/Barrel_02",
+        "ParticleUniverse/Lightning",
+        "fxpression/ac3dmat1",
+        "ParticleUniverse/Flame",
+        "ParticleUniverse/Fire",
+        "ParticleUniverse/Smoke",
+        "ParticleUniverse/Smoke_02",
+        "ParticleUniverse/ExplosionFire",
+        "ParticleUniverse/Nucleus",
+        "ParticleUniverse/Debris",
+        "ParticleUniverse/Dirt",
+        "PUMediaPack/Smoke",
+        "ParticleUniverse/BurstFlare",
+        "ParticleUniverse/GreenBall",
+        "ParticleUniverse/Crate",
+        "ParticleUniverse/Star",
+        "ParticleUniverse/Hart",
+        "ParticleUniverse/Interpolate",
+        "ParticleUniverse/Fish",
+        "ParticleUniverse/Flare",
+        "ParticleUniverse/RibbonTrail",
+        "ParticleUniverse/Rain",
+        "ParticleUniverse/Beam_1",
+        "ParticleUniverse/Beam_2"
+      ],
+      "textures": [
+        "mp_fire_02_2x2.dds",
+        "pu_sand_336x330.png",
+        "pu_stone.jpeg",
+        "pu_circle.png",
+        "pu_rain_01.png",
+        "pu_barrel_01.png",
+        "pu_barrel_02.png",
+        "pu_lightning_blue_20x64.png",
+        "pu_plate.jpg",
+        "pu_flame.png",
+        "pu_flame.png",
+        "pu_smoke_brown_336x330.png",
+        "pu_smoke_brown_336x330.png",
+        "pu_smoke_02_128x128.png",
+        "pu_nucleus.png",
+        "pu_fire_01_64x64.png",
+        "pu_dirt_256x512.png",
+        "pu_smoke_02_128x128.png",
+        "pu_dot_03_64x64.png",
+        "pu_green_ball.png",
+        "crate6.png",
+        "pu_flare_12_256x256.png",
+        "pu_hart.png",
+        "interpolate.png",
+        "steelhead.png",
+        "pu_flare.png",
+        "pu_ribbontrail.png",
+        "pu_rain.png",
+        "pu_beam_01.png",
+        "pu_beam_02.png"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/examples/materials/pu_example_32.material",
+      "materials": [
+        "ParticleUniverse/SmallSmokeTexture"
+      ],
+      "textures": [
+        "pu_smoke_brown_336x330.png"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/examples/materials/pu_mediapack_01.material",
+      "materials": [
+        "PUMediaPack/Bubble",
+        "PUMediaPack/BlurredBubble",
+        "PUMediaPack/Streak_01",
+        "PUMediaPack/Streak_02",
+        "PUMediaPack/Streak_03",
+        "PUMediaPack/Streak_04",
+        "PUMediaPack/Flare_01",
+        "PUMediaPack/Flare_02",
+        "PUMediaPack/Flare_03",
+        "PUMediaPack/Flare_04",
+        "PUMediaPack/Flare_05",
+        "PUMediaPack/Flare_06",
+        "PUMediaPack/Watch",
+        "PUMediaPack/Hourglass",
+        "PUMediaPack/Leave",
+        "PUMediaPack/Smoke_01",
+        "PUMediaPack/Smoke_11",
+        "PUMediaPack/Dirt_11",
+        "PUMediaPack/Dirt_12",
+        "PUMediaPack/Lightning_01",
+        "PUMediaPack/Lightning_02",
+        "PUMediaPack/Lightning_03",
+        "PUMediaPack/Lightning_04",
+        "PUMediaPack/Spark_01",
+        "PUMediaPack/Star_01",
+        "PUMediaPack/Star_02",
+        "PUMediaPack/Star_03",
+        "PUMediaPack/Star_04",
+        "PUMediaPack/Star_05",
+        "PUMediaPack/Genesis_11",
+        "PUMediaPack/Genesis_12",
+        "ParticleUniverse/Swirl_01",
+        "ParticleUniverse/Swirl_02",
+        "ParticleUniverse/Swirl_03",
+        "PUMediaPack/Ring_01",
+        "PUMediaPack/Ring_02",
+        "PUMediaPack/Ring_03",
+        "PUMediaPack/Ring_14",
+        "PUMediaPack/Ring_05",
+        "PUMediaPack/Metal_01",
+        "PUMediaPack/Metal_02",
+        "PUMediaPack/Fire_01",
+        "PUMediaPack/Fire_02",
+        "PUMediaPack/Fire_03",
+        "PUMediaPack/Fire_04",
+        "PUMediaPack/AtlasSmoke",
+        "PUMediaPack/Snow_01",
+        "PUMediaPack/BBal",
+        "PUMediaPack/BioHazzard",
+        "PUMediaPack/CelticKnot",
+        "PUMediaPack/Pentagram_01",
+        "PUMediaPack/Pentagram_02"
+      ],
+      "textures": [
+        "pump_bubble.png",
+        "pump_bubble_blurred.png",
+        "pump_streak_01.png",
+        "pump_streak_02.png",
+        "pump_streak_03.png",
+        "pump_streak_04.png",
+        "pump_flare_01.png",
+        "pump_flare_02.png",
+        "pump_flare_03.png",
+        "pump_flare_04.png",
+        "pump_flare_05.png",
+        "pump_flare_06.png",
+        "pump_watch.png",
+        "pump_hourglass.png",
+        "pump_leave.png",
+        "pump_smoke_01.png",
+        "pump_smoke_01.png",
+        "pump_dirt_01.png",
+        "pump_dirt_02.png",
+        "pump_lightning_01.png",
+        "pump_lightning_02.png",
+        "pump_lightning_03.png",
+        "pump_lightning_04.png",
+        "pump_spark_01.png",
+        "pump_star_01.png",
+        "pump_star_02.png",
+        "pump_star_03.png",
+        "pump_star_04.png",
+        "pump_star_05.png",
+        "pump_genesis_01.png",
+        "pump_genesis_02.png",
+        "pump_swirl_01.png",
+        "pump_swirl_02.png",
+        "pump_swirl_03.png",
+        "pump_ring_01.png",
+        "pump_ring_02.png",
+        "pump_ring_03.png",
+        "pump_ring_04.png",
+        "pump_ring_05.png",
+        "pump_metal_01.png",
+        "pump_metal_02.png",
+        "pump_flame_01.png",
+        "pump_flame_02.png",
+        "pump_flame_03.png",
+        "pump_flame_04.png",
+        "pump_atlas_smoke.png",
+        "pump_snow_01.png",
+        "pu_bbal.png",
+        "pump_biohazzard.png",
+        "pump_celticknot.png",
+        "pump_pentagram_01.png",
+        "pump_pentagram_02.png"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/advancedLodSystem.pu",
+      "materials": [
+        "ParticleUniverse/Barrel_02",
+        "ParticleUniverse/Barrel_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/atomicity.pu",
+      "materials": [
+        "PUMediaPack/Streak_02",
+        "PUMediaPack/Flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/blackHole.pu",
+      "materials": [
+        "PUMediaPack/Flare_04",
+        "PUMediaPack/Streak_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/bubbles.pu",
+      "materials": [
+        "PUMediaPack/Bubble",
+        "PUMediaPack/BlurredBubble"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/canOfWorms.pu",
+      "materials": [
+        "PUMediaPack/Flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/colouredStreaks.pu",
+      "materials": [
+        "PUMediaPack/Streak_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/dirtExplosion.pu",
+      "materials": [
+        "PUMediaPack/Dirt_11",
+        "PUMediaPack/Smoke_11"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/electricBeamSystem.pu",
+      "materials": [
+        "ParticleUniverse/Lightning",
+        "ParticleUniverse/Lightning"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/electroShield.pu",
+      "materials": [
+        "PUMediaPack/Spark_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_001.pu",
+      "materials": [
+        "ParticleUniverse/GreenBall"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_002.pu",
+      "materials": [
+        "ParticleUniverse/Hart"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_003.pu",
+      "materials": [
+        "ParticleUniverse/Beam_2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_004.pu",
+      "materials": [
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_005.pu",
+      "materials": [
+        "ParticleUniverse/Star",
+        "ParticleUniverse/Stone"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_006.pu",
+      "materials": [
+        "ParticleUniverse/Crate"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_007.pu",
+      "materials": [
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_008.pu",
+      "materials": [
+        "ParticleUniverse/Hart"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_009.pu",
+      "materials": [
+        "ParticleUniverse/GreenBall"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_010.pu",
+      "materials": [
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_011.pu",
+      "materials": [
+        "ParticleUniverse/GreenBall"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_012.pu",
+      "materials": [
+        "ParticleUniverse/BurstFlare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_013.pu",
+      "materials": [
+        "ParticleUniverse/GreenBall"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_014.pu",
+      "materials": [
+        "PUMediaPack/Flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_015.pu",
+      "materials": [
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_016.pu",
+      "materials": [
+        "ParticleUniverse/Dirt"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_017.pu",
+      "materials": [
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_018.pu",
+      "materials": [
+        "ParticleUniverse/Hart"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_019.pu",
+      "materials": [
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_020.pu",
+      "materials": [
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_021.pu",
+      "materials": [
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_022.pu",
+      "materials": [
+        "ParticleUniverse/RibbonTrail"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_023.pu",
+      "materials": [
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_024.pu",
+      "materials": [
+        "ParticleUniverse/RibbonTrail",
+        "ParticleUniverse/Star",
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_025.pu",
+      "materials": [
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_026.pu",
+      "materials": [
+        "ParticleUniverse/GreenBall"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_027.pu",
+      "materials": [
+        "ParticleUniverse/Fish"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_028.pu",
+      "materials": [
+        "ParticleUniverse/Nucleus",
+        "PUMediaPack/Smoke"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_029.pu",
+      "materials": [
+        "ParticleUniverse/Interpolate"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_030.pu",
+      "materials": [
+        "ParticleUniverse/Beam_1",
+        "ParticleUniverse/Beam_2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_031.pu",
+      "materials": [
+        "ParticleUniverse/Tornado"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/example_032.pu",
+      "materials": [
+        "ParticleUniverse/SmallSmokeTexture",
+        "BaseWhite"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/explosion.pu",
+      "materials": [
+        "ParticleUniverse/Nucleus",
+        "ParticleUniverse/Debris",
+        "PUMediaPack/AtlasSmoke"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/explosionSystem.pu",
+      "materials": [
+        "ParticleUniverse/ExplosionFire",
+        "BaseWhite",
+        "ParticleUniverse/Nucleus",
+        "ParticleUniverse/Debris"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/fireplace_01.pu",
+      "materials": [
+        "PUMediaPack/Fire_01",
+        "PUMediaPack/Fire_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/fireplace_02.pu",
+      "materials": [
+        "PUMediaPack/Fire_03",
+        "PUMediaPack/Fire_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/fireSystem.pu",
+      "materials": [
+        "ParticleUniverse/Fire",
+        "ParticleUniverse/Smoke"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/flameSystem.pu",
+      "materials": [
+        "ParticleUniverse/Flame"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/flareShield.pu",
+      "materials": [
+        "PUMediaPack/Flare_05",
+        "PUMediaPack/Flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/fxPression.pu",
+      "materials": [
+        "ParticleUniverse/Star",
+        "fxpression/ac3dmat1",
+        "fxpression/ac3dmat1"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/hypno.pu",
+      "materials": [
+        "ParticleUniverse/Swirl_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/leaves.pu",
+      "materials": [
+        "PUMediaPack/Leave"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/lightningBolt.pu",
+      "materials": [
+        "PUMediaPack/Smoke_01",
+        "PUMediaPack/Lightning_01",
+        "PUMediaPack/Lightning_02",
+        "PUMediaPack/Lightning_03",
+        "PUMediaPack/Lightning_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/lineStreak.pu",
+      "materials": [
+        "PUMediaPack/Streak_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/mp_torch.pu",
+      "materials": [
+        "mp_fire_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/physXFluid.pu",
+      "materials": [
+        "ParticleUniverse/GreenBall",
+        "PUMediaPack/BBal"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/physXParticles.pu",
+      "materials": [
+        "ParticleUniverse/Crate",
+        "ParticleUniverse/Star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/propulsion.pu",
+      "materials": [
+        "PUMediaPack/Streak_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/psychoBurn.pu",
+      "materials": [
+        "PUMediaPack/Streak_01",
+        "PUMediaPack/Star_03",
+        "PUMediaPack/Genesis_11",
+        "PUMediaPack/Genesis_12"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/rainSystem_1.pu",
+      "materials": [
+        "ParticleUniverse/Rain_01",
+        "ParticleUniverse/Circle",
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/rainSystem_2.pu",
+      "materials": [
+        "ParticleUniverse/Rain_01",
+        "ParticleUniverse/Circle",
+        "ParticleUniverse/Flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/smoke.pu",
+      "materials": [
+        "PUMediaPack/Smoke_11"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/snow.pu",
+      "materials": [
+        "PUMediaPack/Snow_01",
+        "PUMediaPack/Snow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/spiralStars.pu",
+      "materials": [
+        "PUMediaPack/Flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/teleport.pu",
+      "materials": [
+        "PUMediaPack/Streak_01",
+        "PUMediaPack/Flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/timeShift.pu",
+      "materials": [
+        "PUMediaPack/Watch",
+        "PUMediaPack/Hourglass"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/tornadoSystem.pu",
+      "materials": [
+        "ParticleUniverse/Tornado",
+        "ParticleUniverse/Stone"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/windyFireSystem.pu",
+      "materials": [
+        "ParticleUniverse/Fire"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/scripts/woosh.pu",
+      "materials": [
+        "PUMediaPack/Ring_14"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/examples/teleport.pu",
+      "materials": [
+        "PUMediaPack/Streak_01",
+        "PUMediaPack/Flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/fireballExplotion.pu",
+      "materials": [
+        "mp_explosion_debris",
+        "mp_explosion_smoke_01_add",
+        "mp_explosion_smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_01_large.pu",
+      "materials": [
+        "mp_explosion_flare_01",
+        "mp_explosion_flame_01",
+        "mp_explosion_flare_01",
+        "mp_explosion_smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_02_aftermath_large.pu",
+      "materials": [
+        "mp_explosion_flame_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_02_large.pu",
+      "materials": [
+        "mp_explosion_flame_02",
+        "mp_explosion_04",
+        "mp_explosion_flame_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_dirt_01_large.pu",
+      "materials": [
+        "mp_explosion_dirt"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_dirt_02_large.pu",
+      "materials": [
+        "mp_explosion_smoke_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_dirt_and_fire_large.pu",
+      "materials": [
+        "mp_explosion_flame_01",
+        "mp_explosion_flare_01",
+        "mp_explosion_flare_01",
+        "mp_explosion_smoke_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_flare_large.pu",
+      "materials": [
+        "mp_explosion_flare_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_trail_large.pu",
+      "materials": [
+        "mp_explosion_trail",
+        "mp_explosion_smoke_01",
+        "mp_explosion_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/large/mp_explosion_water_large.pu",
+      "materials": [
+        "mp_explosion_water"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/lavaBurn.pu",
+      "materials": [
+        "mp_explosion_flame_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/mp_explosion.material",
+      "materials": [
+        "mp_explosion_smoke_01",
+        "mp_explosion_smoke_01_add",
+        "mp_explosion_flare_01",
+        "mp_explosion_flare_02",
+        "mp_explosion_dirt",
+        "mp_explosion_flame_01",
+        "mp_explosion_flame_02",
+        "mp_explosion_smoke_02",
+        "mp_explosion_smoke_03",
+        "mp_explosion_debris",
+        "mp_explosion_debris_large",
+        "mp_explosion_04",
+        "mp_explosion_trail",
+        "mp_explosion_water"
+      ],
+      "textures": [
+        "mp_explosion_smoke_01.dds",
+        "mp_explosion_smoke_01_add.dds",
+        "mp_explosion_flare_01.dds",
+        "mp_explosion_flare_02.dds",
+        "mp_explosion_dirt.dds",
+        "mp_explosion_flame_01.dds",
+        "mp_explosion_flame_02.dds",
+        "mp_explosion_smoke_02.dds",
+        "mp_explosion_smoke_03.dds",
+        "mp_explosion_debris.dds",
+        "mp_explosion_debris_large_4x4.dds",
+        "mp_explosion_04.dds",
+        "mp_explosion_trail_01.dds",
+        "mp_explosion_water.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Explosion/screamerExplotion.pu",
+      "materials": [
+        "mp_explosion_04",
+        "mp_explosion_smoke_01",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_debris",
+        "mp_explosion_debris_large"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/screamerShieldHit.pu",
+      "materials": [
+        "mp_explosion_flare_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_01_small.pu",
+      "materials": [
+        "mp_explosion_flare_01",
+        "mp_explosion_flame_01",
+        "mp_explosion_flare_01",
+        "mp_explosion_smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_02_aftermath_small.pu",
+      "materials": [
+        "mp_explosion_flame_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_02_small.pu",
+      "materials": [
+        "mp_explosion_flame_02",
+        "mp_explosion_04",
+        "mp_explosion_flame_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_03_small.pu",
+      "materials": [
+        "mp_explosion_debris",
+        "mp_explosion_smoke_01_add",
+        "mp_explosion_smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_04_blue_small.pu",
+      "materials": [
+        "mp_explosion_04",
+        "mp_explosion_smoke_01",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_debris"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_04_small.pu",
+      "materials": [
+        "mp_explosion_04",
+        "mp_explosion_smoke_01",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_debris",
+        "mp_explosion_debris_large"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_dirt_01_small.pu",
+      "materials": [
+        "mp_explosion_dirt"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_dirt_02_small.pu",
+      "materials": [
+        "mp_explosion_smoke_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_dirt_and_fire_small.pu",
+      "materials": [
+        "mp_explosion_flame_01",
+        "mp_explosion_flare_01",
+        "mp_explosion_flare_01",
+        "mp_explosion_smoke_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_flare_small.pu",
+      "materials": [
+        "mp_explosion_flare_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_trail_small.pu",
+      "materials": [
+        "mp_explosion_trail",
+        "mp_explosion_smoke_01",
+        "mp_explosion_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/small/mp_explosion_water_small.pu",
+      "materials": [
+        "mp_explosion_water"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Explosion/sniperHit.pu",
+      "materials": [
+        "mp_explosion_04",
+        "mp_explosion_smoke_01",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_04",
+        "mp_explosion_debris"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/large/mp_campfire_large.pu",
+      "materials": [
+        "mp_fire_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/large/mp_fire_and_smoke_large.pu",
+      "materials": [
+        "mp_fire_02",
+        "mp_fire_smoke_01",
+        "mp_fire_smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/large/mp_fireplace_large.pu",
+      "materials": [
+        "mp_fire_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/large/mp_torch_large.pu",
+      "materials": [
+        "mp_fire_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/mp_fire.material",
+      "materials": [
+        "mp_fire_01",
+        "mp_fire_02",
+        "mp_fire_03",
+        "mp_fire_04",
+        "mp_fire_05",
+        "mp_fire_spark_01",
+        "mp_fire_spark_02",
+        "mp_fire_smoke_01"
+      ],
+      "textures": [
+        "mp_fire_01_2x2.dds",
+        "mp_fire_02_2x2.dds",
+        "mp_fire_03_2x2.dds",
+        "mp_fire_04_2x2.dds",
+        "mp_fire_05_1x2.dds",
+        "mp_fire_spark_01.dds",
+        "mp_fire_spark_02.dds",
+        "mp_fire_smoke_01.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Fire/small/mp_campfire_small.pu",
+      "materials": [
+        "mp_fire_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/small/mp_fire_and_smoke_small.pu",
+      "materials": [
+        "mp_fire_02",
+        "mp_fire_smoke_01",
+        "mp_fire_smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/small/mp_fireplace_small.pu",
+      "materials": [
+        "mp_fire_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Fire/small/mp_torch_small.pu",
+      "materials": [
+        "mp_fire_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/fireBall_No_estoy_contento.pu",
+      "materials": [
+        "PUMediaPack/Smoke_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_01_large.pu",
+      "materials": [
+        "mp_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_02_large.pu",
+      "materials": [
+        "mp_flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_03_large.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_04_large.pu",
+      "materials": [
+        "mp_flare_elipses",
+        "mp_spell_flare_02",
+        "mp_flare_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_05_large.pu",
+      "materials": [
+        "mp_flare_07",
+        "mp_flare_elipse_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_06_large.pu",
+      "materials": [
+        "mp_flare_02",
+        "mp_flare_ring"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_07_large.pu",
+      "materials": [
+        "mp_flare_streak_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_aurora_borealis_large.pu",
+      "materials": [
+        "mp_flare_01",
+        "mp_flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_diabolique_large.pu",
+      "materials": [
+        "mp_flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_fireball_01_large.pu",
+      "materials": [
+        "mp_flare_05",
+        "mp_flare_smoke_add"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_fireball_02_large.pu",
+      "materials": [
+        "mp_flare_05",
+        "mp_flare_elipses"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_lensflare_large.pu",
+      "materials": [
+        "mp_flare_lensflare_centre",
+        "mp_flare_lensflare_left",
+        "mp_flare_lensflare_right"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_lightning_large.pu",
+      "materials": [
+        "mp_flare_lightning_bolt_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_mr_blue_flare_large.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_nebula_large.pu",
+      "materials": [
+        "mp_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_redflare_large.pu",
+      "materials": [
+        "mp_flare_redflare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_rotator_large.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_sparkle_large.pu",
+      "materials": [
+        "mp_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_starfield_large.pu",
+      "materials": [
+        "mp_flare_star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_streak_01_large.pu",
+      "materials": [
+        "mp_flare_streak_01",
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_streak_02_large.pu",
+      "materials": [
+        "mp_flare_streak_02",
+        "mp_flare_streak_02",
+        "mp_flare_zero_star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/large/mp_flare_sun_large.pu",
+      "materials": [
+        "mp_flare_sun"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/mp_flare.material",
+      "materials": [
+        "mp_flare_01",
+        "mp_flare_02",
+        "mp_flare_03",
+        "mp_flare_04",
+        "mp_flare_05",
+        "mp_flare_06",
+        "mp_flare_07",
+        "mp_flare_redflare",
+        "mp_flare_lensflare_left",
+        "mp_flare_lensflare_centre",
+        "mp_flare_lensflare_right",
+        "mp_flare_electric",
+        "mp_flare_lightning_bolt_1x2",
+        "mp_flare_sun",
+        "mp_flare_star",
+        "mp_flare_streak_01",
+        "mp_flare_streak_02",
+        "mp_flare_zero_star",
+        "mp_flare_elipses",
+        "mp_flare_elipse_02",
+        "mp_flare_smoke_add",
+        "mp_flare_ring",
+        "mp_flare_halo"
+      ],
+      "textures": [
+        "mp_flare_01.dds",
+        "mp_flare_02.dds",
+        "mp_flare_03.dds",
+        "mp_flare_04.png",
+        "mp_flare_05.png",
+        "mp_flare_06.dds",
+        "mp_flare_07.dds",
+        "mp_flare_redflare.png",
+        "mp_flare_lensflare_left.dds",
+        "mp_flare_lensflare_centre.dds",
+        "mp_flare_lensflare_right.dds",
+        "mp_flare_electric.dds",
+        "mp_flare_lightning_bolt_1x2.dds",
+        "mp_flare_sun.png",
+        "mp_flare_star.dds",
+        "mp_flare_streak_01.dds",
+        "mp_flare_streak_02.png",
+        "mp_flare_zero_star.dds",
+        "mp_flare_elipses.dds",
+        "mp_flare_elipse_02.dds",
+        "mp_flare_smoke_add.dds",
+        "mp_flare_ring.dds",
+        "mp_flare_halo.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_01_small.pu",
+      "materials": [
+        "mp_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_02_small.pu",
+      "materials": [
+        "mp_flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_03_small.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_04_small.pu",
+      "materials": [
+        "mp_flare_elipses",
+        "mp_spell_flare_02",
+        "mp_flare_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_05_small.pu",
+      "materials": [
+        "mp_flare_07",
+        "mp_flare_elipse_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_06_small.pu",
+      "materials": [
+        "mp_flare_02",
+        "mp_flare_ring"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_07_small.pu",
+      "materials": [
+        "mp_flare_streak_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_aurora_borealis_small.pu",
+      "materials": [
+        "mp_flare_01",
+        "mp_flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_diabolique_small.pu",
+      "materials": [
+        "mp_flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_fireball_01_small.pu",
+      "materials": [
+        "mp_flare_05",
+        "mp_flare_smoke_add"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_fireball_02_small.pu",
+      "materials": [
+        "mp_flare_05",
+        "mp_flare_elipses"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_lensflare_small.pu",
+      "materials": [
+        "mp_flare_lensflare_centre",
+        "mp_flare_lensflare_left",
+        "mp_flare_lensflare_right"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_lightning_small.pu",
+      "materials": [
+        "mp_flare_lightning_bolt_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_mr_blue_flare_small.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_nebula_small.pu",
+      "materials": [
+        "mp_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_redflare_small.pu",
+      "materials": [
+        "mp_flare_redflare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_rotator_small.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_sparkle_small.pu",
+      "materials": [
+        "mp_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_starfield_small.pu",
+      "materials": [
+        "mp_flare_star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_streak_01_small.pu",
+      "materials": [
+        "mp_flare_streak_01",
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_streak_02_small.pu",
+      "materials": [
+        "mp_flare_streak_02",
+        "mp_flare_streak_02",
+        "mp_flare_zero_star"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Flare/small/mp_flare_sun_small.pu",
+      "materials": [
+        "mp_flare_sun"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/fogonazo3.pu",
+      "materials": [
+        "PUMediaPack/Ring_14"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/groundTouch.pu",
+      "materials": [
+        "PUMediaPack/Ring_14"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/heatHaze.pu",
+      "materials": [
+        "heatHazeMaterial"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/bulletSpark.pu",
+      "materials": [
+        "mp_hit_metal_sparkle"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_01_large.pu",
+      "materials": [
+        "mp_hit_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_02_large.pu",
+      "materials": [
+        "mp_hit_arrow",
+        "mp_hit_circle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_03_large.pu",
+      "materials": [
+        "mp_hit_metal_sparkle"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_04_large.pu",
+      "materials": [
+        "mp_hit_glow_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_05_large.pu",
+      "materials": [
+        "mp_hit_glow_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_06_large.pu",
+      "materials": [
+        "mp_hit_glow_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_07_large.pu",
+      "materials": [
+        "mp_hit_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_08_large.pu",
+      "materials": [
+        "mp_hit_glow_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_09_large.pu",
+      "materials": [
+        "mp_hit_glow_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_10_large.pu",
+      "materials": [
+        "mp_hit_glow_07"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_11_large.pu",
+      "materials": [
+        "mp_hit_circle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_12_large.pu",
+      "materials": [
+        "mp_hit_glow_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_13_large.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_hit_glow_07"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_hit_14_large.pu",
+      "materials": [
+        "mp_hit_circle_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/mp_metal_hit_large.pu",
+      "materials": [
+        "mp_hit_metal_sparkle"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/large/sniper_trail.pu",
+      "materials": [
+        "mp_flare_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/mp_hit.material",
+      "materials": [
+        "mp_hit_metal_sparkle",
+        "mp_hit_flare",
+        "mp_hit_arrow",
+        "mp_hit_glow_01",
+        "mp_hit_glow_02",
+        "mp_hit_glow_03",
+        "mp_hit_glow_04",
+        "mp_hit_glow_05",
+        "mp_hit_glow_06",
+        "mp_hit_glow_07",
+        "mp_hit_circle_01",
+        "mp_hit_circle_02",
+        "mp_hit_circle_03",
+        "mp_hit_streak"
+      ],
+      "textures": [
+        "mp_hit_metal_sparkle.dds",
+        "mp_hit_flare.dds",
+        "mp_hit_arrow.dds",
+        "mp_hit_glow_01.dds",
+        "mp_hit_glow_02.dds",
+        "mp_hit_glow_03.dds",
+        "mp_hit_glow_04.dds",
+        "mp_hit_glow_05.dds",
+        "mp_hit_glow_06.dds",
+        "mp_hit_glow_07.dds",
+        "mp_hit_circle_01.dds",
+        "mp_hit_circle_02.dds",
+        "mp_hit_circle_03.dds",
+        "mp_hit_streak.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_01_small.pu",
+      "materials": [
+        "mp_hit_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_02_small.pu",
+      "materials": [
+        "mp_hit_arrow",
+        "mp_hit_circle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_03_small.pu",
+      "materials": [
+        "mp_hit_metal_sparkle"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_04_small.pu",
+      "materials": [
+        "mp_hit_glow_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_05_small.pu",
+      "materials": [
+        "mp_hit_glow_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_06_small.pu",
+      "materials": [
+        "mp_hit_glow_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_07_small.pu",
+      "materials": [
+        "mp_hit_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_08_small.pu",
+      "materials": [
+        "mp_hit_glow_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_09_small.pu",
+      "materials": [
+        "mp_hit_glow_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_10_small.pu",
+      "materials": [
+        "mp_hit_glow_07"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_11_small.pu",
+      "materials": [
+        "mp_hit_circle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_12_small.pu",
+      "materials": [
+        "mp_hit_glow_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_13_small.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_hit_glow_07"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_hit_14_small.pu",
+      "materials": [
+        "mp_hit_circle_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Hit/small/mp_metal_hit_small.pu",
+      "materials": [
+        "mp_hit_metal_sparkle"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/houndOdor.pu",
+      "materials": [
+        "mp_smoke_zone_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/houndSecondaryKill.pu",
+      "materials": [
+        "PUMediaPack/Smoke_11"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/minigunHit.pu",
+      "materials": [
+        "mp_hit_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/laserSniper.pu",
+      "materials": [
+        "ParticleUniverse/Lightning"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/miniGunPrimaryShot.pu",
+      "materials": [
+        "mp_weapon_muzzle_04",
+        "mp_weapon_muzzle_straight_01",
+        "mp_weapon_muzzle_glow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/miniGunSecondaryShot.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/shotGunPrimaryShot.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/ShotGunSecondaryShoot.pu",
+      "materials": [
+        "PUMediaPack/Ring_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/sniperPrimaryShot.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/MuzzleFlash/sniperSecondaryShot.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/large/mp_rain_large.pu",
+      "materials": [
+        "mp_nature_rain"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/large/mp_sakura_large.pu",
+      "materials": [
+        "mp_nature_sakura"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/large/mp_snow_large.pu",
+      "materials": [
+        "mp_nature_snow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/large/mp_waterfall_large.pu",
+      "materials": [
+        "mp_nature_water_01",
+        "mp_nature_water_02",
+        "mp_nature_water_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/mp_nature.material",
+      "materials": [
+        "mp_nature_sakura",
+        "mp_nature_snow",
+        "mp_nature_rain",
+        "mp_nature_water_01",
+        "mp_nature_water_02",
+        "mp_nature_water_03"
+      ],
+      "textures": [
+        "mp_nature_sakura_02.dds",
+        "mp_nature_snow.dds",
+        "mp_nature_rain.dds",
+        "mp_nature_water_01.dds",
+        "mp_nature_water_02.dds",
+        "mp_nature_water_03.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Nature/small/mp_rain_small.pu",
+      "materials": [
+        "mp_nature_rain"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/small/mp_sakura_small.pu",
+      "materials": [
+        "mp_nature_sakura"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/small/mp_snow_small.pu",
+      "materials": [
+        "mp_nature_snow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Nature/small/mp_waterfall_small.pu",
+      "materials": [
+        "mp_nature_water_01",
+        "mp_nature_water_02",
+        "mp_nature_water_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_01_large.pu",
+      "materials": [
+        "mp_seal_01",
+        "mp_seal_arrow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_02_large.pu",
+      "materials": [
+        "mp_seal_02",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_03_large.pu",
+      "materials": [
+        "mp_seal_03_1x2",
+        "mp_seal_03_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_04_large.pu",
+      "materials": [
+        "mp_seal_04",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_05_large.pu",
+      "materials": [
+        "mp_seal_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_06_large.pu",
+      "materials": [
+        "mp_seal_06",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_07_large.pu",
+      "materials": [
+        "mp_seal_07",
+        "mp_seal_flare",
+        "mp_seal_ribbon"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_08_large.pu",
+      "materials": [
+        "mp_seal_08",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/large/mp_seal_09_large.pu",
+      "materials": [
+        "mp_seal_09"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/mp_seal.material",
+      "materials": [
+        "mp_seal_01",
+        "mp_seal_02",
+        "mp_seal_03_1x2",
+        "mp_seal_04",
+        "mp_seal_05",
+        "mp_seal_06",
+        "mp_seal_07",
+        "mp_seal_08",
+        "mp_seal_09",
+        "mp_seal_flare",
+        "mp_seal_ribbon",
+        "mp_seal_arrow"
+      ],
+      "textures": [
+        "mp_seal_01.dds",
+        "mp_seal_02.dds",
+        "mp_seal_03_1x2.dds",
+        "mp_seal_04.dds",
+        "mp_seal_05.dds",
+        "mp_seal_06.dds",
+        "mp_seal_07.dds",
+        "mp_seal_08.dds",
+        "mp_seal_09.dds",
+        "mp_seal_flare.dds",
+        "mp_seal_ribbon.png",
+        "mp_seal_arrow.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_01_small.pu",
+      "materials": [
+        "mp_seal_01",
+        "mp_seal_arrow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_02_small.pu",
+      "materials": [
+        "mp_seal_02",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_03_small.pu",
+      "materials": [
+        "mp_seal_03_1x2",
+        "mp_seal_03_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_04_small.pu",
+      "materials": [
+        "mp_seal_04",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_05_small.pu",
+      "materials": [
+        "mp_seal_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_06_small.pu",
+      "materials": [
+        "mp_seal_06",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_07_small.pu",
+      "materials": [
+        "mp_seal_07",
+        "mp_seal_flare",
+        "mp_seal_ribbon"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_08_small.pu",
+      "materials": [
+        "mp_seal_08",
+        "mp_seal_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Seal/small/mp_seal_09_small.pu",
+      "materials": [
+        "mp_seal_09"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/shadow.pu",
+      "materials": [
+        "PUMediaPack/Smoke_11"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/ShotGunSecondaryShoot.pu",
+      "materials": [
+        "PUMediaPack/Ring_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_glowing_smoke_large.pu",
+      "materials": [
+        "mp_smoke_04",
+        "mp_smoke_04_mod"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_chimney_large.pu",
+      "materials": [
+        "mp_smoke_chimney"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_dangerzone_large.pu",
+      "materials": [
+        "mp_smoke_zone_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_droppingzone_large.pu",
+      "materials": [
+        "mp_smoke_zone_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_flare_large.pu",
+      "materials": [
+        "mp_smoke_flare",
+        "mp_smoke_04_add"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_flare_sparkle_large.pu",
+      "materials": [
+        "mp_smoke_flare_sparkle",
+        "mp_smoke_flare",
+        "mp_smoke_04_add"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_fog_of_war_large.pu",
+      "materials": [
+        "mp_smoke_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_smolder_large.pu",
+      "materials": [
+        "mp_smoke_smolder"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/large/mp_smoke_thick_large.pu",
+      "materials": [
+        "mp_smoke_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/mp_smoke.material",
+      "materials": [
+        "mp_smoke_smolder",
+        "mp_smoke_02",
+        "mp_smoke_04",
+        "mp_smoke_04_mod",
+        "mp_smoke_04_add",
+        "mp_smoke_zone_1x2",
+        "mp_smoke_flare",
+        "mp_smoke_flare_sparkle",
+        "mp_smoke_chimney",
+        "mp_smoke_from_hell",
+        "mp_smoke_puff"
+      ],
+      "textures": [
+        "mp_smoke_smolder.dds",
+        "mp_smoke_02.dds",
+        "mp_smoke_04.dds",
+        "mp_smoke_04_add.dds",
+        "mp_smoke_04_add.dds",
+        "mp_smoke_zone_1x2.dds",
+        "mp_smoke_flare.dds",
+        "mp_smoke_flare_sparkle.dds",
+        "mp_smoke_chimney.dds",
+        "mp_smoke_from_hell.dds",
+        "mp_smoke_puff.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_glowing_smoke_small.pu",
+      "materials": [
+        "mp_smoke_04",
+        "mp_smoke_04_mod"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_bash_small.pu",
+      "materials": [
+        "mp_smoke_chimney"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_chimney_small.pu",
+      "materials": [
+        "mp_smoke_chimney"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_dangerzone_small.pu",
+      "materials": [
+        "mp_smoke_zone_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_droppingzone_small.pu",
+      "materials": [
+        "mp_smoke_zone_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_flare_small.pu",
+      "materials": [
+        "mp_smoke_flare",
+        "mp_smoke_04_add"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_flare_sparkle_small.pu",
+      "materials": [
+        "mp_smoke_flare_sparkle",
+        "mp_smoke_flare",
+        "mp_smoke_04_add"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_fog_of_war_small.pu",
+      "materials": [
+        "mp_smoke_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_smolder_small.pu",
+      "materials": [
+        "mp_smoke_smolder"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/small/mp_smoke_thick_small.pu",
+      "materials": [
+        "mp_smoke_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Smoke/smokeBash.pu",
+      "materials": [
+        "mp_smoke_chimney"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/sniperPrimaryShot_50.pu",
+      "materials": [
+        "ParticleUniverse/Lightning"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/spawn.pu",
+      "materials": [
+        "PUMediaPack/Flare_05"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_01_large.pu",
+      "materials": [
+        "mp_spell_ring",
+        "mp_spell_sweep",
+        "mp_spell_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_02_large.pu",
+      "materials": [
+        "mp_spell_stripe",
+        "mp_spell_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_03_large.pu",
+      "materials": [
+        "mp_spell_swirl"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_04_large.pu",
+      "materials": [
+        "mp_spell_flare_02",
+        "mp_spell_small_ray",
+        "mp_spell_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_05_large.pu",
+      "materials": [
+        "mp_spell_flare_03",
+        "mp_spell_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_06_large.pu",
+      "materials": [
+        "mp_spell_outer",
+        "mp_spell_inner"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_effect_07_large.pu",
+      "materials": [
+        "mp_spell_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_lightning_lamp_large.pu",
+      "materials": [
+        "mp_spell_lightning_1x2",
+        "mp_spell_sphere",
+        "mp_spell_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_spiderweb_large.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_spell_lightning_2x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/large/mp_spell_tornado_spell_large.pu",
+      "materials": [
+        "mp_spell_tornado_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/mp_spell.material",
+      "materials": [
+        "mp_spell_tornado_flare",
+        "mp_spell_lightning_2x2",
+        "mp_spell_lightning_1x2",
+        "mp_spell_stripe",
+        "mp_spell_swirl",
+        "mp_spell_small_ray",
+        "mp_spell_flare_01",
+        "mp_spell_flare_02",
+        "mp_spell_flare_03",
+        "mp_spell_flare_06",
+        "mp_spell_woosh_01",
+        "mp_spell_woosh_02",
+        "mp_spell_outer",
+        "mp_spell_inner",
+        "mp_spell_ring",
+        "mp_spell_sweep",
+        "mp_spell_sphere"
+      ],
+      "textures": [
+        "mp_spell_tornado_flare.dds",
+        "mp_spell_lightning_2x2.dds",
+        "mp_spell_lightning_1x2.dds",
+        "mp_spell_stripe.dds",
+        "mp_spell_swirl.dds",
+        "mp_spell_small_ray.dds",
+        "mp_spell_flare_01.png",
+        "mp_spell_flare_02.dds",
+        "mp_spell_flare_03.png",
+        "mp_spell_flare_06.dds",
+        "mp_spell_woosh_01.dds",
+        "mp_spell_woosh_02.dds",
+        "mp_spell_outer.dds",
+        "mp_spell_inner.dds",
+        "mp_spell_ring.dds",
+        "mp_spell_sweep_01.dds",
+        "mp_spell_outer.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_01_small.pu",
+      "materials": [
+        "mp_spell_ring",
+        "mp_spell_sweep",
+        "mp_spell_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_02_small.pu",
+      "materials": [
+        "mp_spell_stripe",
+        "mp_spell_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_03_small.pu",
+      "materials": [
+        "mp_spell_swirl"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_04_small.pu",
+      "materials": [
+        "mp_spell_flare_02",
+        "mp_spell_small_ray",
+        "mp_spell_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_05_small.pu",
+      "materials": [
+        "mp_spell_flare_03",
+        "mp_spell_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_06_small.pu",
+      "materials": [
+        "mp_spell_outer",
+        "mp_spell_inner"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_effect_07_small.pu",
+      "materials": [
+        "mp_spell_flare_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_lightning_lamp_small.pu",
+      "materials": [
+        "mp_spell_lightning_1x2",
+        "mp_spell_sphere",
+        "mp_spell_flare_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_spiderweb_small.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_spell_lightning_2x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Spell/small/mp_spell_tornado_spell_small.pu",
+      "materials": [
+        "mp_spell_tornado_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_bullettrail_01_large.pu",
+      "materials": [
+        "BaseWhite"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_bullettrail_02_large.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_weapon_trail_lightred",
+        "mp_weapon_trail_red"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_bullettrail_03_large.pu",
+      "materials": [
+        "mp_weapon_flare_red"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_bullettrail_04_large.pu",
+      "materials": [
+        "mp_weapon_flare_blue"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_bullettrail_05_large.pu",
+      "materials": [
+        "mp_weapon_flare_green"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_flamethrower_01_large.pu",
+      "materials": [
+        "mp_weapon_flamethrower_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_flamethrower_02_large.pu",
+      "materials": [
+        "mp_weapon_flamethrower_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_laser_large.pu",
+      "materials": [
+        "mp_weapon_trail_red",
+        "mp_weapon_laser_jitter"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_muzzle_01_large.pu",
+      "materials": [
+        "mp_weapon_muzzle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_muzzle_02_large.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_muzzle_03_large.pu",
+      "materials": [
+        "mp_weapon_muzzle_03",
+        "mp_weapon_muzzle_straight_01",
+        "mp_weapon_muzzle_glow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_muzzle_04_large.pu",
+      "materials": [
+        "mp_weapon_muzzle_04",
+        "mp_weapon_muzzle_straight_01",
+        "mp_weapon_muzzle_glow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_rocket_large.pu",
+      "materials": [
+        "mp_weapon_rocket_01_1x4",
+        "mp_weapon_rocket_02_1x4",
+        "mp_weapon_rocketboost",
+        "mp_weapon_rocketflare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/large/mp_spheretrail_large.pu",
+      "materials": [
+        "mp_weapon_spheretrail_lightning",
+        "mp_weapon_spheretrail_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/mp_weapon.material",
+      "materials": [
+        "mp_weapon_muzzle_01",
+        "mp_weapon_muzzle_02",
+        "mp_weapon_muzzle_03",
+        "mp_weapon_muzzle_04",
+        "mp_weapon_muzzle_glow",
+        "mp_weapon_spheretrail_lightning",
+        "mp_weapon_spheretrail_flare",
+        "mp_weapon_trail_lightred",
+        "mp_weapon_trail_red",
+        "mp_weapon_flare_red",
+        "mp_weapon_flare_blue",
+        "mp_weapon_flare_green",
+        "mp_weapon_laser_jitter",
+        "mp_weapon_flamethrower_01",
+        "mp_weapon_flamethrower_02",
+        "mp_weapon_rocket_01_1x4",
+        "mp_weapon_rocket_02_1x4",
+        "mp_weapon_rocketboost",
+        "mp_weapon_rocketflare",
+        "mp_weapon_muzzle_straight_01"
+      ],
+      "textures": [
+        "mp_weapon_muzzle_01_2x2.dds",
+        "mp_weapon_muzzle_02_2x2.dds",
+        "mp_weapon_muzzle_14.dds",
+        "mp_weapon_muzzle_15.dds",
+        "mp_weapon_muzzle_glow.png",
+        "mp_weapon_spheretrail_lightning.dds",
+        "mp_weapon_spheretrail_flare.dds",
+        "mp_weapon_trail_lightred.dds",
+        "mp_weapon_trail_red.dds",
+        "mp_weapon_flare_red.dds",
+        "mp_weapon_flare_blue.dds",
+        "mp_weapon_flare_green.dds",
+        "mp_weapon_laser_jitter.dds",
+        "mp_weapon_flamethrower_01.dds",
+        "mp_weapon_flamethrower_02.dds",
+        "mp_weapon_rocket_01_1x4.dds",
+        "mp_weapon_rocket_02_1x4.dds",
+        "mp_weapon_rocketboost.dds",
+        "mp_weapon_rocketflare.png",
+        "mp_weapon_muzzle_straight_01.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Weapon/shotgunMuzzle.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_bullettrail_01_small.pu",
+      "materials": [
+        "BaseWhite"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_bullettrail_02_small.pu",
+      "materials": [
+        "BaseWhite",
+        "mp_weapon_trail_lightred",
+        "mp_weapon_trail_red"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_bullettrail_03_small.pu",
+      "materials": [
+        "mp_weapon_flare_red"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_bullettrail_04_small.pu",
+      "materials": [
+        "mp_weapon_flare_blue"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_bullettrail_05_small.pu",
+      "materials": [
+        "mp_weapon_flare_green"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_flamethrower_01_small.pu",
+      "materials": [
+        "mp_weapon_flamethrower_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_flamethrower_02_small.pu",
+      "materials": [
+        "mp_weapon_flamethrower_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_laser_small.pu",
+      "materials": [
+        "mp_weapon_trail_red",
+        "mp_weapon_laser_jitter"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_muzzle_01_small.pu",
+      "materials": [
+        "mp_weapon_muzzle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_muzzle_02_small.pu",
+      "materials": [
+        "mp_weapon_muzzle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_muzzle_03_small.pu",
+      "materials": [
+        "mp_weapon_muzzle_03",
+        "mp_weapon_muzzle_straight_01",
+        "mp_weapon_muzzle_glow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_muzzle_04_small.pu",
+      "materials": [
+        "mp_weapon_muzzle_04",
+        "mp_weapon_muzzle_straight_01",
+        "mp_weapon_muzzle_glow"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_rocket_small.pu",
+      "materials": [
+        "mp_weapon_rocket_01_1x4",
+        "mp_weapon_rocket_02_1x4",
+        "mp_weapon_rocketboost",
+        "mp_weapon_rocketflare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Weapon/small/mp_spheretrail_small.pu",
+      "materials": [
+        "mp_weapon_spheretrail_lightning",
+        "mp_weapon_spheretrail_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/jumperImpulse.pu",
+      "materials": [
+        "mp_woosh_smoke",
+        "mp_woosh_circle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_01_large.pu",
+      "materials": [
+        "mp_woosh_blurred"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_02_large.pu",
+      "materials": [
+        "mp_woosh_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_03_large.pu",
+      "materials": [
+        "mp_woosh_bolt_1x2",
+        "mp_woosh_flare_01",
+        "mp_woosh_star",
+        "mp_woosh_circle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_04_large.pu",
+      "materials": [
+        "mp_woosh_circle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_05_large.pu",
+      "materials": [
+        "mp_woosh_circle_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_06_large.pu",
+      "materials": [
+        "mp_woosh_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_07_large.pu",
+      "materials": [
+        "mp_woosh_streak_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_08_large.pu",
+      "materials": [
+        "mp_woosh_star",
+        "mp_woosh_circle_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_09_large.pu",
+      "materials": [
+        "mp_woosh_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_10_large.pu",
+      "materials": [
+        "mp_woosh_circle_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_11_large.pu",
+      "materials": [
+        "mp_woosh_circle_07",
+        "mp_woosh_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_13_large.pu",
+      "materials": [
+        "mp_woosh_glow_01",
+        "mp_woosh_circle_08"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_14_large.pu",
+      "materials": [
+        "mp_woosh_glow_01",
+        "mp_woosh_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/large/mp_woosh_bolt_large.pu",
+      "materials": [
+        "mp_woosh_bolt_1x2"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/lifeDome.pu",
+      "materials": [
+        "mp_woosh_blurred"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/mp_woosh.material",
+      "materials": [
+        "mp_woosh_01",
+        "mp_woosh_02",
+        "mp_woosh_circle_01",
+        "mp_woosh_circle_02",
+        "mp_woosh_circle_03",
+        "mp_woosh_circle_04",
+        "mp_woosh_circle_05",
+        "mp_woosh_circle_06",
+        "mp_woosh_circle_07",
+        "mp_woosh_circle_08",
+        "mp_woosh_bolt_1x2",
+        "mp_woosh_flare",
+        "mp_woosh_streak_01",
+        "mp_woosh_star",
+        "mp_woosh_glow_01",
+        "mp_woosh_smoke",
+        "mp_woosh_blurred",
+        "mp_woosh_flare_01"
+      ],
+      "textures": [
+        "mp_woosh_01.png",
+        "mp_woosh_02.dds",
+        "mp_woosh_circle_01.dds",
+        "mp_woosh_circle_02.png",
+        "mp_woosh_circle_03.dds",
+        "mp_woosh_circle_04.dds",
+        "mp_woosh_circle_05.dds",
+        "mp_woosh_circle_06.dds",
+        "mp_woosh_circle_07.dds",
+        "mp_woosh_circle_08.dds",
+        "mp_woosh_bolt_1x2.dds",
+        "mp_woosh_flare.dds",
+        "mp_woosh_streak_01.dds",
+        "mp_woosh_star.dds",
+        "mp_woosh_glow_01.dds",
+        "mp_woosh_smoke.dds",
+        "mp_woosh_blurred.png",
+        "mp_woosh_flare_01.dds"
+      ]
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_01_small.pu",
+      "materials": [
+        "mp_woosh_blurred"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_02_small.pu",
+      "materials": [
+        "mp_woosh_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_03_small.pu",
+      "materials": [
+        "mp_woosh_bolt_1x2",
+        "mp_woosh_flare_01",
+        "mp_woosh_star",
+        "mp_woosh_circle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_04_small.pu",
+      "materials": [
+        "mp_woosh_circle_02"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_05_small.pu",
+      "materials": [
+        "mp_woosh_circle_03"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_06_small.pu",
+      "materials": [
+        "mp_woosh_flare"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_07_small.pu",
+      "materials": [
+        "mp_woosh_streak_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_08_small.pu",
+      "materials": [
+        "mp_woosh_star",
+        "mp_woosh_circle_04"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_09_small.pu",
+      "materials": [
+        "mp_woosh_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_10_small.pu",
+      "materials": [
+        "mp_woosh_circle_06"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_11_small.pu",
+      "materials": [
+        "mp_woosh_circle_07",
+        "mp_woosh_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_12_small.pu",
+      "materials": [
+        "mp_woosh_smoke",
+        "mp_woosh_circle_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_13_small.pu",
+      "materials": [
+        "mp_woosh_glow_01",
+        "mp_woosh_circle_08"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_14_small.pu",
+      "materials": [
+        "mp_woosh_glow_01",
+        "mp_woosh_glow_01"
+      ],
+      "textures": []
+    },
+    {
+      "path": "Exes/media/particles/Woosh/small/mp_woosh_bolt_small.pu",
+      "materials": [
+        "mp_woosh_bolt_1x2"
+      ],
+      "textures": []
+    }
+  ],
+  "textures": [
+    {
+      "uri": "textures/pump_flare_05.png",
+      "source": "Exes/media/particles/examples/textures/pump_flare_05.png"
+    },
+    {
+      "uri": "textures/pump_smoke_01.png",
+      "source": "Exes/media/particles/examples/textures/pump_smoke_01.png"
+    },
+    {
+      "uri": "textures/pump_ring_04.png",
+      "source": "Exes/media/particles/examples/textures/pump_ring_04.png"
+    },
+    {
+      "uri": "textures/mp_hit_metal_sparkle.png",
+      "source": "Exes/media/particles/Hit/png/mp_hit_metal_sparkle.png"
+    },
+    {
+      "uri": "textures/mp_bloodsplat_01.png",
+      "source": "Exes/media/particles/Blood/png/mp_bloodsplat_01.png"
+    },
+    {
+      "uri": "textures/magma_NRM.png",
+      "source": "Exes/media/materials/textures/magma_NRM.tga"
+    },
+    {
+      "uri": "textures/mp_explosion_burst.png",
+      "source": "Exes/media/particles/Explosion/png/mp_explosion_burst.png"
+    }
+  ],
+  "adaptation": "Original textures, bounded authored recipes; no Ogre runtime. Blood/explosion review only."
+}

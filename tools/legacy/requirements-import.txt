@@ -1,0 +1,4 @@
+assimp-py==1.1.0
+ogre-python==14.5.2
+Pillow==12.3.0
+numpy==2.3.5

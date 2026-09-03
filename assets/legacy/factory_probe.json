@@ -1,0 +1,15 @@
+{
+  "position": [
+    -10.0,
+    6.0,
+    -15.0
+  ],
+  "size": 32,
+  "mips": 6,
+  "filter": "GGX 128 deterministic Hammersley samples",
+  "static_geometry": [
+    "World",
+    "lavaFondo"
+  ],
+  "scene_sha256": "bf315d35a33e305d3e17b0b88ad78cb53b725e790cf3745105234f489230ef26"
+}

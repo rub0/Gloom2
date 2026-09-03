@@ -1,0 +1,41 @@
+{
+  "asset": {"version": "2.0", "generator": "Gloom Factory modular surface pass"},
+  "buffers": [
+    {
+      "byteLength": 228,
+      "uri": "data:application/octet-stream;base64,AACAvwAAgL4AAIC/AACAPwAAgL4AAIC/AACAPwAAgL4AAIA/AACAvwAAgL4AAIA/AABAvwAAgD4AAEC/AABAPwAAgD4AAEC/AABAPwAAgD4AAEA/AABAvwAAgD4AAEA/AAAFAAEAAAAEAAUAAQAGAAIAAQAFAAYAAgAHAAMAAgAGAAcAAwAEAAAAAwAHAAQABAAGAAUABAAHAAYAAwABAAIAAwAAAAEAAACAvwAAAAAAAIC/AACAPwAAAAAAAIC/AACAPwAAAAAAAIA/AACAvwAAAAAAAIA/AAACAAEAAAADAAIA"
+    }
+  ],
+  "bufferViews": [
+    {"buffer": 0, "byteOffset": 0, "byteLength": 96, "byteStride": 12, "target": 34962},
+    {"buffer": 0, "byteOffset": 96, "byteLength": 72, "target": 34963},
+    {"buffer": 0, "byteOffset": 168, "byteLength": 48, "byteStride": 12, "target": 34962},
+    {"buffer": 0, "byteOffset": 216, "byteLength": 12, "target": 34963}
+  ],
+  "accessors": [
+    {"bufferView": 0, "componentType": 5126, "count": 8, "type": "VEC3", "min": [-1, -0.25, -1], "max": [1, 0.25, 1]},
+    {"bufferView": 1, "componentType": 5123, "count": 36, "type": "SCALAR"},
+    {"bufferView": 2, "componentType": 5126, "count": 4, "type": "VEC3", "min": [-1, 0, -1], "max": [1, 0, 1]},
+    {"bufferView": 3, "componentType": 5123, "count": 6, "type": "SCALAR"}
+  ],
+  "materials": [
+    {"name": "Factory floor plate", "pbrMetallicRoughness": {"baseColorFactor": [0.11, 0.13, 0.17, 1], "metallicFactor": 0.72, "roughnessFactor": 0.48}},
+    {"name": "Factory industrial steel", "pbrMetallicRoughness": {"baseColorFactor": [0.24, 0.27, 0.31, 1], "metallicFactor": 0.82, "roughnessFactor": 0.36}},
+    {"name": "Factory oxidized trim", "pbrMetallicRoughness": {"baseColorFactor": [0.48, 0.16, 0.035, 1], "metallicFactor": 0.68, "roughnessFactor": 0.52}},
+    {"name": "Factory lava", "emissiveFactor": [1.0, 0.12, 0.01], "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.055, 0.004, 1], "metallicFactor": 0.0, "roughnessFactor": 0.24}}
+  ],
+  "meshes": [
+    {"name": "FloorPanel", "primitives": [{"attributes": {"POSITION": 0}, "indices": 1, "material": 0}]},
+    {"name": "IndustrialModule", "primitives": [{"attributes": {"POSITION": 0}, "indices": 1, "material": 1}]},
+    {"name": "TrimModule", "primitives": [{"attributes": {"POSITION": 0}, "indices": 1, "material": 2}]},
+    {"name": "LavaSurface", "primitives": [{"attributes": {"POSITION": 2}, "indices": 3, "material": 3}]}
+  ],
+  "nodes": [
+    {"name": "Factory Floor Panel", "mesh": 0},
+    {"name": "Factory Industrial Module", "mesh": 1},
+    {"name": "Factory Trim Module", "mesh": 2},
+    {"name": "Factory Lava Surface", "mesh": 3}
+  ],
+  "scenes": [{"nodes": [0, 1, 2, 3]}],
+  "scene": 0
+}

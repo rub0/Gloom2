@@ -1,0 +1,1515 @@
+{
+  "version": 1,
+  "characters": [
+    {
+      "name": "archangel",
+      "bones": 43,
+      "triangles": 4936,
+      "bounds": [
+        [
+          -5.0350260734558105,
+          -3.6893584728240967,
+          -4.249338626861572
+        ],
+        [
+          5.0350213050842285,
+          11.257899284362793,
+          1.7984460592269897
+        ]
+      ],
+      "visual_height": 1.8,
+      "scale": 0.12042342485352193,
+      "max_influences": 4,
+      "clips": [
+        {
+          "name": "forward",
+          "seconds": 0.6666666865348816,
+          "tracks": [
+            {
+              "bone": "Bip001",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 0.047842211974956986,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Pelvis",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 Spine",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 4.915124923727108e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Thigh",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 5.331201499700045e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Calf",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.430511474609375e-06,
+              "rotation_loop_error": 3.3306690738754696e-16
+            },
+            {
+              "bone": "Bip001 L Foot",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 3.4240261593687705e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Toe0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Thigh",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 3.941291737419306e-14
+            },
+            {
+              "bone": "Bip001 R Calf",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.384185791015625e-07,
+              "rotation_loop_error": 8.43769498715119e-15
+            },
+            {
+              "bone": "Bip001 R Foot",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.4502435994859265e-06,
+              "rotation_loop_error": 1.6431300764452317e-14
+            },
+            {
+              "bone": "Bip001 R Toe0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.384185791015625e-07,
+              "rotation_loop_error": 1.6209256159527285e-14
+            },
+            {
+              "bone": "Bip001 Spine1",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.4901161193847656e-08,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Spine2",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 6.758296770124774e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Neck",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.83137917709749e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Head",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.8667603522940767e-06,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Clavicle",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.3328003749250113e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L UpperArm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Forearm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.0925711858167266e-06,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Hand",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.5367431640625e-07,
+              "rotation_loop_error": 7.66053886991358e-15
+            },
+            {
+              "bone": "Bip001 L Finger0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger01",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 6.743495761743046e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger1",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.9804534585280597e-06,
+              "rotation_loop_error": 6.661338147750939e-16
+            },
+            {
+              "bone": "Bip001 L Finger11",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 1.9984014443252818e-15
+            },
+            {
+              "bone": "Bip001 L Finger2",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.1680077279964342e-06,
+              "rotation_loop_error": 5.551115123125783e-16
+            },
+            {
+              "bone": "Bip001 L Finger21",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.0230487285229133e-06,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger3",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 3.3306690738754696e-16
+            },
+            {
+              "bone": "Bip001 L Finger31",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 6.743495761743046e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger4",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.5367431640625e-07,
+              "rotation_loop_error": 3.885780586188048e-15
+            },
+            {
+              "bone": "Bip001 L Finger41",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.3696104637475082e-06,
+              "rotation_loop_error": 1.2212453270876722e-15
+            },
+            {
+              "bone": "Bip001 R Clavicle",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.573923590307838e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R UpperArm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.384185791015625e-07,
+              "rotation_loop_error": 5.10702591327572e-15
+            },
+            {
+              "bone": "Bip001 R Forearm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 9.555351461101412e-07,
+              "rotation_loop_error": 3.3306690738754696e-16
+            },
+            {
+              "bone": "Bip001 R Hand",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 2.4424906541753444e-15
+            },
+            {
+              "bone": "Bip001 R Finger0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 2.1094237467877974e-15
+            },
+            {
+              "bone": "Bip001 R Finger01",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 6.419616707723741e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger1",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.9802322387695312e-08,
+              "rotation_loop_error": 1.2212453270876722e-15
+            },
+            {
+              "bone": "Bip001 R Finger11",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 2.1457672119140625e-06,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger2",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.0699822348961973e-06,
+              "rotation_loop_error": 9.992007221626409e-16
+            },
+            {
+              "bone": "Bip001 R Finger21",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.922192036699903e-06,
+              "rotation_loop_error": 2.4424906541753444e-15
+            },
+            {
+              "bone": "Bip001 R Finger3",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.018524616398517e-06,
+              "rotation_loop_error": 1.5543122344752192e-15
+            },
+            {
+              "bone": "Bip001 R Finger31",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.1246181883879427e-06,
+              "rotation_loop_error": 1.7763568394002505e-15
+            },
+            {
+              "bone": "Bip001 R Finger4",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 1.6326124578478739e-06,
+              "rotation_loop_error": 6.661338147750939e-16
+            },
+            {
+              "bone": "Bip001 R Finger41",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666666865348816,
+              "translation_loop_error": 5.960464477539062e-07,
+              "rotation_loop_error": 4.440892098500626e-16
+            }
+          ],
+          "translation": "bind + Ogre parent-space delta",
+          "rotation": "bind * Ogre local delta",
+          "scale": "bind * Ogre scale",
+          "root_motion": "source preserved; suppressed by runtime locomotion"
+        },
+        {
+          "name": "idle",
+          "seconds": 0.5,
+          "tracks": [
+            {
+              "bone": "Bip001",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Pelvis",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Spine",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Thigh",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Calf",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Foot",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Toe0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Thigh",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.098321516541546e-14
+            },
+            {
+              "bone": "Bip001 R Calf",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.9110702922202824e-06,
+              "rotation_loop_error": 5.129230373768223e-14
+            },
+            {
+              "bone": "Bip001 R Foot",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 2.6656007498500226e-07,
+              "rotation_loop_error": 5.395683899678261e-14
+            },
+            {
+              "bone": "Bip001 R Toe0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 4.6552715753952587e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 Spine1",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Spine2",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 Neck",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Head",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L Clavicle",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L UpperArm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.0658141036401503e-14
+            },
+            {
+              "bone": "Bip001 L Forearm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 5.773159728050814e-15
+            },
+            {
+              "bone": "Bip001 L Hand",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 3.3306690738754696e-16
+            },
+            {
+              "bone": "Bip001 L Finger0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.581489939859104e-06,
+              "rotation_loop_error": 5.773159728050814e-15
+            },
+            {
+              "bone": "Bip001 L Finger01",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.0925711858167266e-06,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L Finger1",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 8.259061849445711e-07,
+              "rotation_loop_error": 7.771561172376096e-16
+            },
+            {
+              "bone": "Bip001 L Finger11",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 7.327471962526033e-15
+            },
+            {
+              "bone": "Bip001 L Finger2",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger21",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 8.881784197001252e-16
+            },
+            {
+              "bone": "Bip001 L Finger3",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 5.331201499700045e-07,
+              "rotation_loop_error": 6.661338147750939e-16
+            },
+            {
+              "bone": "Bip001 L Finger31",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 9.992007221626409e-16
+            },
+            {
+              "bone": "Bip001 L Finger4",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 7.152557373046875e-07,
+              "rotation_loop_error": 4.440892098500626e-16
+            },
+            {
+              "bone": "Bip001 L Finger41",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 R Clavicle",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R UpperArm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.0103029524088925e-14
+            },
+            {
+              "bone": "Bip001 R Forearm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.7202937233044877e-06,
+              "rotation_loop_error": 1.099120794378905e-14
+            },
+            {
+              "bone": "Bip001 R Hand",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 6.743495761743046e-07,
+              "rotation_loop_error": 4.551914400963142e-15
+            },
+            {
+              "bone": "Bip001 R Finger0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 9.555351461101412e-07,
+              "rotation_loop_error": 1.4432899320127035e-15
+            },
+            {
+              "bone": "Bip001 R Finger01",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger1",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.9082797281243946e-06,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger11",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 8.881784197001252e-15
+            },
+            {
+              "bone": "Bip001 R Finger2",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.4317526995497124e-06,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger21",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 2.132480599880018e-06,
+              "rotation_loop_error": 1.3322676295501878e-15
+            },
+            {
+              "bone": "Bip001 R Finger3",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 2.4379684133789014e-06,
+              "rotation_loop_error": 1.1102230246251565e-15
+            },
+            {
+              "bone": "Bip001 R Finger31",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 2.384185791015625e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger4",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 1.0925711858167266e-06,
+              "rotation_loop_error": 2.220446049250313e-15
+            },
+            {
+              "bone": "Bip001 R Finger41",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.5,
+              "translation_loop_error": 6.743495761743046e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            }
+          ],
+          "translation": "bind + Ogre parent-space delta",
+          "rotation": "bind * Ogre local delta",
+          "scale": "bind * Ogre scale",
+          "root_motion": "source preserved; suppressed by runtime locomotion"
+        },
+        {
+          "name": "jump",
+          "seconds": 0.33333325386047363,
+          "tracks": [
+            {
+              "bone": "Bip001",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Pelvis",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Spine",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Thigh",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L Calf",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Foot",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 4.440892098500626e-16
+            },
+            {
+              "bone": "Bip001 L Toe0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 1.1920928955078125e-07,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Thigh",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Calf",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Foot",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Toe0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 Spine1",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Spine2",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 Neck",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Head",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L Clavicle",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L UpperArm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 4.440892098500626e-16
+            },
+            {
+              "bone": "Bip001 L Forearm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Hand",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 L Finger0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger01",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger1",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger11",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger2",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger21",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger3",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger31",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Finger4",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Finger41",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Clavicle",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R UpperArm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 R Forearm",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Hand",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger0",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger01",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 R Finger1",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger11",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger2",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": -2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger21",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger3",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger31",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger4",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger41",
+              "keys": 3,
+              "start": 0.0,
+              "end": 0.33333325386047363,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            }
+          ],
+          "translation": "bind + Ogre parent-space delta",
+          "rotation": "bind * Ogre local delta",
+          "scale": "bind * Ogre scale",
+          "root_motion": "source preserved; suppressed by runtime locomotion"
+        },
+        {
+          "name": "strafe_right",
+          "seconds": 0.6666667461395264,
+          "tracks": [
+            {
+              "bone": "Bip001",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Pelvis",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 Spine",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 0.0,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 L Thigh",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.228781230931777e-07,
+              "rotation_loop_error": 3.3306690738754696e-16
+            },
+            {
+              "bone": "Bip001 L Calf",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 2.384185791015625e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Foot",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 5.840038639982171e-07,
+              "rotation_loop_error": 6.661338147750939e-16
+            },
+            {
+              "bone": "Bip001 L Toe0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 2.9200193199910854e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Thigh",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 2.457562461863554e-07,
+              "rotation_loop_error": 1.4210854715202004e-14
+            },
+            {
+              "bone": "Bip001 R Calf",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 1.8762769116165146e-14
+            },
+            {
+              "bone": "Bip001 R Foot",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 2.2110029448260555e-06,
+              "rotation_loop_error": 4.107825191113079e-15
+            },
+            {
+              "bone": "Bip001 R Toe0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 3.5762786865234375e-07,
+              "rotation_loop_error": 2.5091040356528538e-14
+            },
+            {
+              "bone": "Bip001 Spine1",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.4901161193847656e-08,
+              "rotation_loop_error": 4.440892098500626e-16
+            },
+            {
+              "bone": "Bip001 Spine2",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.4306860869352752e-06,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Neck",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.83137917709749e-07,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 Head",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.53703419792631e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 L Clavicle",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 5.960464477539063e-08,
+              "rotation_loop_error": 5.551115123125783e-16
+            },
+            {
+              "bone": "Bip001 L UpperArm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.1920928955078125e-07,
+              "rotation_loop_error": 5.995204332975845e-15
+            },
+            {
+              "bone": "Bip001 L Forearm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 4.76837158203125e-07,
+              "rotation_loop_error": 2.220446049250313e-15
+            },
+            {
+              "bone": "Bip001 L Hand",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 6.743495761743046e-07,
+              "rotation_loop_error": 2.1094237467877974e-15
+            },
+            {
+              "bone": "Bip001 L Finger0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 1.865174681370263e-14
+            },
+            {
+              "bone": "Bip001 L Finger01",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.1680077279964342e-06,
+              "rotation_loop_error": 5.551115123125783e-16
+            },
+            {
+              "bone": "Bip001 L Finger1",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 7.152557373046875e-07,
+              "rotation_loop_error": 7.771561172376096e-16
+            },
+            {
+              "bone": "Bip001 L Finger11",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.922192036699903e-06,
+              "rotation_loop_error": 4.218847493575595e-15
+            },
+            {
+              "bone": "Bip001 L Finger2",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 5.331201499700045e-07,
+              "rotation_loop_error": 2.7755575615628914e-15
+            },
+            {
+              "bone": "Bip001 L Finger21",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 5.331201499700045e-07,
+              "rotation_loop_error": 1.1102230246251565e-15
+            },
+            {
+              "bone": "Bip001 L Finger3",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 2.132480599880018e-06,
+              "rotation_loop_error": 9.992007221626409e-16
+            },
+            {
+              "bone": "Bip001 L Finger31",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.966049969490843e-06,
+              "rotation_loop_error": 1.9984014443252818e-15
+            },
+            {
+              "bone": "Bip001 L Finger4",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.0925711858167266e-06,
+              "rotation_loop_error": 4.440892098500626e-16
+            },
+            {
+              "bone": "Bip001 L Finger41",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 2.900487198971853e-06,
+              "rotation_loop_error": 8.881784197001252e-16
+            },
+            {
+              "bone": "Bip001 R Clavicle",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.555351461101412e-07,
+              "rotation_loop_error": 8.881784197001252e-16
+            },
+            {
+              "bone": "Bip001 R UpperArm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.610960183499514e-07,
+              "rotation_loop_error": 1.6653345369377348e-14
+            },
+            {
+              "bone": "Bip001 R Forearm",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 8.107108180961277e-07,
+              "rotation_loop_error": 1.9984014443252818e-15
+            },
+            {
+              "bone": "Bip001 R Hand",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.066240299940009e-06,
+              "rotation_loop_error": 1.1102230246251565e-15
+            },
+            {
+              "bone": "Bip001 R Finger0",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.541398640621973e-07,
+              "rotation_loop_error": 6.661338147750939e-16
+            },
+            {
+              "bone": "Bip001 R Finger01",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 5.331201499700045e-07,
+              "rotation_loop_error": 9.992007221626409e-16
+            },
+            {
+              "bone": "Bip001 R Finger1",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.9075814492470335e-06,
+              "rotation_loop_error": 1.1102230246251565e-16
+            },
+            {
+              "bone": "Bip001 R Finger11",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.1680077279964342e-06,
+              "rotation_loop_error": 8.659739592076221e-15
+            },
+            {
+              "bone": "Bip001 R Finger2",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.4901161193847656e-07,
+              "rotation_loop_error": 2.220446049250313e-16
+            },
+            {
+              "bone": "Bip001 R Finger21",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 9.830249847454215e-07,
+              "rotation_loop_error": 1.1102230246251565e-15
+            },
+            {
+              "bone": "Bip001 R Finger3",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 3.3718795872007803e-06,
+              "rotation_loop_error": 8.881784197001252e-16
+            },
+            {
+              "bone": "Bip001 R Finger31",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.1246181883879427e-06,
+              "rotation_loop_error": 0.0
+            },
+            {
+              "bone": "Bip001 R Finger4",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.0084464738183398e-06,
+              "rotation_loop_error": 1.3322676295501878e-15
+            },
+            {
+              "bone": "Bip001 R Finger41",
+              "keys": 4,
+              "start": 0.0,
+              "end": 0.6666667461395264,
+              "translation_loop_error": 1.430511474609375e-06,
+              "rotation_loop_error": 3.9968028886505635e-15
+            }
+          ],
+          "translation": "bind + Ogre parent-space delta",
+          "rotation": "bind * Ogre local delta",
+          "scale": "bind * Ogre scale",
+          "root_motion": "source preserved; suppressed by runtime locomotion"
+        }
+      ],
+      "materials": {
+        "emissive_pixels": 3645,
+        "metal_pixels": 395247,
+        "emission_color": "cyan",
+        "roughness_range": [
+          0.26,
+          0.58
+        ]
+      },
+      "root_rebase": null,
+      "bind_error": 1.7763568394002505e-15
+    },
+    {
+      "name": "shadow",
+      "bones": 17,
+      "triangles": 2788,
+      "bounds": [
+        [
+          -6.596424579620361,
+          -24.874258041381836,
+          -103.07337188720703
+        ],
+        [
+          6.005759239196777,
+          -9.076037406921387,
+          -100.5356674194336
+        ]
+      ],
+      "visual_height": 1.8,
+      "scale": 0.1139368819849043,
+      "max_influences": 5,
+      "clips": [],
+      "materials": {
+        "emissive_pixels": 149,
+        "metal_pixels": 193741,
+        "emission_color": "red",
+        "roughness_range": [
+          0.26,
+          0.58
+        ]
+      },
+      "root_rebase": [
+        3.9245927335949706,
+        1014.94580078125,
+        -173.21072387363282
+      ],
+      "bind_error": 2.842170943040401e-14
+    }
+  ],
+  "tool_versions": {
+    "ogre-python": "14.5.2",
+    "assimp-py": "1.1.0",
+    "Pillow": "12.3.0",
+    "numpy": "2.3.5"
+  },
+  "sources": {
+    "Exes/media/materials/programs/glowMapping.hlsl": "fc1a4d81ebc7640bcffb18d03772812f58256b87d9a832ab2cd58005d638d702",
+    "Exes/media/materials/scripts/weapons/soulReaper.material": "6919b14500f60a8957ec5719f2d83310edb40911ac1adf73720419aec62358e3",
+    "Exes/media/materials/textures/personajes/map_arcangel_DIF.jpg": "2b3182b10a4555edc6d283b1a114e9886139803e9027a32aeb5563e51ef44e2d",
+    "Exes/media/materials/textures/personajes/map_arcangel_NRM_SPEC.tga": "6ae3e81a623dce975572f23a678bea86e81a43f34e5a8753affd71782c59fef7",
+    "Exes/media/materials/textures/personajes/shadow_DIF.jpg": "beea70d77249f0bda90e00aa131390ddbf07680c53655290551c97e9fc4d19b2",
+    "Exes/media/materials/textures/personajes/shadow_GLOW.tga": "cca2b332c98009c7a2fcf33d81562d60d207e7d4d7886782ace2dabad40fe792",
+    "Exes/media/materials/textures/personajes/shadow_NRM_SPEC.tga": "de25dc1c8da9c5d754d1f59e64aa7450eb6c5018258895b2a7c7471d19989768",
+    "Exes/media/materials/textures/weapons/SoulReaper_COLOR.jpg": "56859e10188129b8fac6f3d9f2d5d55e231d4a3a56194c50aee1222c4fdd3e5a",
+    "Exes/media/materials/textures/weapons/SoulReaper_GLOW.tga": "2eeb0244db0405b76082cea337764c3b2cfc23ac979ae301bc47751dd30dd29f",
+    "Exes/media/materials/textures/weapons/SoulReaper_NRM.tga": "2f9a53babb04f035ff39b8b0301ba55de28ecfd7b5f948bb71223f081406682d",
+    "Exes/media/materials/textures/weapons/SoulReaper_SPEC.tga": "7c106bc82a01154ff1ff4f59d77af860a546905f397c47438145402c7e41eb08",
+    "Exes/media/models/personajes/archangel.mesh": "6e85351d676956a53abe2f99e79ea1074950a164894a0943a424d4cc0fb55285",
+    "Exes/media/models/personajes/archangel.skeleton": "222f629fc6d536ab0fe4b0d3b8de8b8fc82cce97d3a6acc5e865c80c246e8da2",
+    "Exes/media/models/personajes/shadow.mesh": "d31ffdaa290541eab30c605b857e89d744d786a9167654210c6cd0cfa1ade489",
+    "Exes/media/models/personajes/shadow.skeleton": "1ab4e25a380e8aaa06f029a6034cd84cb692e4befc57f53a20f69501ef50d8f1",
+    "Exes/media/models/weapons/soulReaper.mesh": "a488eba995d79e53e31a7db0b3854b1447c64b34a8b69b72b1c4cd9f98cc18b6",
+    "Exes/resources.cfg": "03df67cc1971aec47dc4aaa7c92fc6815a44f269d69e4982d9a0d7e8bbb4a44a"
+  }
+}

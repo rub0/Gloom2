@@ -1,0 +1,2 @@
+assimp-py==1.1.0
+Pillow==12.3.0
