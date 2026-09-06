@@ -2,6 +2,7 @@
 #include <gloom/render/render_graph.hpp>
 #include <gloom/render/lighting.hpp>
 #include <gloom/render/temporal.hpp>
+#include <gloom/render/ui.hpp>
 
 #include <BasicMath.hpp>
 #include <BasicPlatformDebug.hpp>
@@ -315,7 +316,8 @@ PSOutput main(in PSInput input, bool front_face : SV_IsFrontFace)
     float ao=lerp(1.0,OcclusionTexture.Sample(BaseColorTexture_sampler,mapped_uv(input,4)).r,SurfaceParameters.y);
     float3 lightmap=LightmapTexture.Sample(BaseColorTexture_sampler,mapped_uv(input,9)).rgb;
     float3 emission=Emissive.rgb*EmissiveTexture.Sample(BaseColorTexture_sampler,mapped_uv(input,3)).rgb;
-    output.color = float4(ambient*ao*lightmap + direct + emission, surface_color.a);
+    const float3 fill = environment_tint * DirectionalColor.w * surface_color.rgb;
+    output.color = float4(ambient*ao*lightmap + fill*ao + direct + emission, surface_color.a);
     const float2 current_ndc = input.current_clip.xy / max(input.current_clip.w, 0.0001);
     const float2 previous_ndc = input.previous_clip.xy / max(input.previous_clip.w, 0.0001);
     output.motion = (current_ndc - previous_ndc) * float2(0.5, -0.5);
@@ -663,6 +665,11 @@ struct ShadowFrame {
 } // namespace
 
 struct DiligentRenderer::Impl {
+    render::UiDrawData ui;
+    Diligent::RefCntAutoPtr<Diligent::IPipelineState> ui_pipeline;
+    Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> ui_resources;
+    Diligent::RefCntAutoPtr<Diligent::IBuffer> ui_vertices;
+    Diligent::ITextureView* ui_bound_view{nullptr};
     std::filesystem::path capture_path;
     static constexpr std::size_t timing_frame_count = 4;
     struct TimingFrame {
@@ -1866,6 +1873,7 @@ void DiligentRenderer::stop() noexcept {
         resources.Release();
     }
     impl_->tone_map_pipeline.Release();
+    impl_->ui_resources.Release();impl_->ui_pipeline.Release();impl_->ui_vertices.Release();impl_->ui_bound_view=nullptr;impl_->ui.vertices.clear();
     impl_->tone_constants.Release();
     for (auto& resources : impl_->temporal_resources) {
         resources.Release();
@@ -1939,12 +1947,18 @@ void DiligentRenderer::stop() noexcept {
 
 void DiligentRenderer::resize(const std::uint32_t width, const std::uint32_t height) {
     if (impl_->swap_chain) {
+        if (impl_->output_extent.width == width && impl_->output_extent.height == height) return;
+        // Frame targets also back mutable tone-map/TAA descriptors. Drain their
+        // users before replacing them, including SDL's initial resize events.
+        impl_->immediate_context->Flush();
+        impl_->immediate_context->WaitForIdle();
         impl_->swap_chain->Resize(width, height);
         create_frame_resources(width, height);
     }
 }
 
 void DiligentRenderer::begin_frame() {
+    impl_->ui.vertices.clear();
     if (state_ != core::SubsystemState::running) {
         throw std::logic_error{"Diligent renderer must be running before begin_frame"};
     }
@@ -2157,6 +2171,10 @@ void DiligentRenderer::begin_frame() {
 }
 
 void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
+    if(snapshot.ui){
+        if(snapshot.ui->vertices.size()>65536)throw std::invalid_argument{"UI draw list exceeds capacity"};
+        impl_->ui=*snapshot.ui;
+    }
     if (state_ != core::SubsystemState::running) {
         throw std::logic_error{"Diligent renderer must be running before drawing a snapshot"};
     }
@@ -2555,7 +2573,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 directional.direction.z,
                 directional.intensity};
             constants->directional_color = {
-                directional.color.x, directional.color.y, directional.color.z, 0.0F};
+                directional.color.x, directional.color.y, directional.color.z, environment.ambient_fill};
             constants->environment_sky = {environment.sky_radiance.x,
                                           environment.sky_radiance.y,
                                           environment.sky_radiance.z,
@@ -2712,6 +2730,72 @@ void DiligentRenderer::end_frame() {
         if (measure_tone_map) {
             impl_->immediate_context->EndQuery(timing->tone_map);
             timing->tone_map_pending = true;
+        }
+    }
+    if(!impl_->ui.vertices.empty() && swap_chain_description.Width && swap_chain_description.Height){
+        const auto atlas=impl_->textures.find(impl_->ui.atlas);
+        if(atlas!=impl_->textures.end()){
+            if(!impl_->ui_pipeline){
+                constexpr char ui_vs[]=R"(
+struct Input {float2 position:ATTRIB0;float2 uv:ATTRIB1;float4 color:ATTRIB2;};
+struct Output {float4 position:SV_POSITION;float2 uv:TEX_COORD;float4 color:COLOR;};
+Output main(Input v){Output o;o.position=float4(v.position,0,1);o.uv=v.uv;o.color=v.color;return o;}
+)";
+                constexpr char ui_ps[]=R"(
+Texture2D UiAtlas;SamplerState UiAtlas_sampler;
+float4 main(float4 position:SV_POSITION,float2 uv:TEX_COORD,float4 color:COLOR):SV_TARGET{
+ return UiAtlas.Sample(UiAtlas_sampler,uv)*color;}
+)";
+                Diligent::ShaderCreateInfo shader;shader.SourceLanguage=Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
+                shader.EntryPoint="main";
+                shader.Desc.ShaderType=Diligent::SHADER_TYPE_VERTEX;shader.Desc.Name="Gloom UI vertices";shader.Source=ui_vs;
+                Diligent::RefCntAutoPtr<Diligent::IShader> vs,ps;impl_->device->CreateShader(shader,&vs);
+                shader.Desc.ShaderType=Diligent::SHADER_TYPE_PIXEL;shader.Desc.Name="Gloom UI atlas";shader.Source=ui_ps;
+                impl_->device->CreateShader(shader,&ps);
+                Diligent::GraphicsPipelineStateCreateInfo pso;pso.PSODesc.Name="Gloom UI after tone mapping";
+                pso.PSODesc.PipelineType=Diligent::PIPELINE_TYPE_GRAPHICS;
+                pso.PSODesc.ResourceLayout.DefaultVariableType=Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
+                const Diligent::ImmutableSamplerDesc sampler{Diligent::SHADER_TYPE_PIXEL,"UiAtlas_sampler",Diligent::SamplerDesc{}};
+                pso.PSODesc.ResourceLayout.ImmutableSamplers=&sampler;pso.PSODesc.ResourceLayout.NumImmutableSamplers=1;
+                auto& gp=pso.GraphicsPipeline;gp.NumRenderTargets=1;gp.RTVFormats[0]=swap_chain_description.ColorBufferFormat;
+                gp.PrimitiveTopology=Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;gp.RasterizerDesc.CullMode=Diligent::CULL_MODE_NONE;
+                gp.DepthStencilDesc.DepthEnable=false;
+                auto& blend=gp.BlendDesc.RenderTargets[0];blend.BlendEnable=true;
+                blend.SrcBlend=Diligent::BLEND_FACTOR_SRC_ALPHA;blend.DestBlend=Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+                blend.SrcBlendAlpha=Diligent::BLEND_FACTOR_ONE;blend.DestBlendAlpha=Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+                const Diligent::LayoutElement layout[]{
+                    {0,0,2,Diligent::VT_FLOAT32,false},{1,0,2,Diligent::VT_FLOAT32,false},{2,0,4,Diligent::VT_FLOAT32,false}};
+                gp.InputLayout.LayoutElements=layout;gp.InputLayout.NumElements=3;pso.pVS=vs;pso.pPS=ps;
+                impl_->device->CreateGraphicsPipelineState(pso,&impl_->ui_pipeline);
+                if(!impl_->ui_pipeline)throw std::runtime_error{"UI pipeline creation failed"};
+                impl_->ui_pipeline->CreateShaderResourceBinding(&impl_->ui_resources,true);
+                Diligent::BufferDesc buffer;buffer.Name="Gloom UI quads";buffer.Size=65536*sizeof(render::UiVertex);
+                buffer.Usage=Diligent::USAGE_DEFAULT;buffer.BindFlags=Diligent::BIND_VERTEX_BUFFER;
+                impl_->device->CreateBuffer(buffer,nullptr,&impl_->ui_vertices);
+                if(!impl_->ui_vertices || !impl_->ui_resources)throw std::runtime_error{"UI resources unavailable"};
+            }
+            atlas->second.last_used_frame=impl_->frame_index;
+            // Mutable descriptors must not be rewritten while earlier frames use
+            // them. This immutable atlas binds once; a rare replacement drains
+            // outstanding work before creating a fresh binding.
+            if(impl_->ui_bound_view!=atlas->second.view){
+                if(impl_->ui_bound_view)impl_->immediate_context->WaitForIdle();
+                impl_->ui_resources.Release();impl_->ui_pipeline->CreateShaderResourceBinding(&impl_->ui_resources,true);
+                impl_->ui_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL,"UiAtlas")->Set(atlas->second.view);
+                impl_->ui_bound_view=atlas->second.view;
+            }
+            // Keep large UI uploads out of the shared dynamic constant-buffer heap.
+            impl_->immediate_context->UpdateBuffer(impl_->ui_vertices,0,
+                impl_->ui.vertices.size()*sizeof(render::UiVertex),impl_->ui.vertices.data(),
+                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            auto* target=impl_->swap_chain->GetCurrentBackBufferRTV();
+            impl_->immediate_context->SetRenderTargets(1,&target,nullptr,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            impl_->immediate_context->SetPipelineState(impl_->ui_pipeline);
+            Diligent::IBuffer* vertex_buffer=impl_->ui_vertices;Diligent::Uint64 offset=0;
+            impl_->immediate_context->SetVertexBuffers(0,1,&vertex_buffer,&offset,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
+            impl_->immediate_context->CommitShaderResources(impl_->ui_resources,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            Diligent::DrawAttribs draw;draw.NumVertices=static_cast<Diligent::Uint32>(impl_->ui.vertices.size());draw.Flags=Diligent::DRAW_FLAG_VERIFY_ALL;
+            impl_->immediate_context->Draw(draw);
         }
     }
     if (!impl_->capture_path.empty() && swap_chain_description.Width && swap_chain_description.Height) {

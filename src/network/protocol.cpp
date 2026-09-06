@@ -49,6 +49,7 @@ template <typename Integer>
         case MessageKind::lobby_command:
         case MessageKind::lobby_state:
         case MessageKind::ability_command:
+        case MessageKind::weapon_command:
             return true;
     }
     return false;

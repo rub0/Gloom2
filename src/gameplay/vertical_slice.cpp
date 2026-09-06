@@ -21,6 +21,7 @@ namespace gloom::gameplay {
 namespace {
 
 constexpr std::uint32_t cooldown_ticks = 30;
+constexpr float maximum_weapon_range = 600.0F * legacy_gameplay_scale;
 constexpr std::uint32_t respawn_ticks = 240;
 constexpr std::uint32_t bite_duration_ticks = 30;
 constexpr std::uint32_t bite_cooldown_ticks = 1'500;
@@ -170,6 +171,7 @@ constexpr network::ConnectionId opponent_connection = 102;
 } // namespace
 
 struct VerticalSliceSimulation::Impl {
+    struct Projectile {std::uint32_t id{};network::NetworkEntityId owner{};SliceWeapon weapon{};float x{},y{},z{},dx{},dy{},dz{},speed{},radius{},damage{},explosion{};std::uint16_t life{600};bool returning{};};
     struct Combatant {
         core::EntityId logical_entity;
         TransformComponent* transform{nullptr};
@@ -232,7 +234,7 @@ struct VerticalSliceSimulation::Impl {
                   .hit_radius = 0.55F,
                   .character_center_height = 0.9F,
                   .hit_half_height = 0.45F,
-                  .maximum_range = soul_reaper_range,
+                  .maximum_range = maximum_weapon_range,
                   .static_obstacles = movement_settings.static_obstacles,
                   .static_mesh = settings.original_factory ? original_factory().collision : nullptr}),
           opponent_ai_enabled{settings.opponent_ai_enabled},
@@ -251,6 +253,10 @@ struct VerticalSliceSimulation::Impl {
                                      opponent_connection, 5.0F);
 
         if (use_original_factory) {
+            pickups.reset(original_factory().pickups);
+            movement_settings=factory_movement_settings([this](network::NetworkEntityId entity){
+                return entity==player.entity()?player.loadout->selection.character:opponent.loadout->selection.character;
+            });
             const auto set_spawn = [](Combatant& character, const FactorySpawn& spawn) {
                 character.movement->spawn_x = spawn.position.x;
                 character.movement->spawn_y = spawn.position.y;
@@ -408,12 +414,10 @@ struct VerticalSliceSimulation::Impl {
         const auto* damage = logical_entities.get<DamageVolumeComponent>(lava_entity);
         if (damage != nullptr) {
             if (player_in_lava) {
-                apply_environment_damage(player, damage->damage_per_second /
-                                                     static_cast<float>(tick_rate));
+                apply_environment_damage(player, player.health->life+player.shield->value+1.F);
             }
             if (opponent_in_lava) {
-                apply_environment_damage(opponent, damage->damage_per_second /
-                                                       static_cast<float>(tick_rate));
+                apply_environment_damage(opponent, opponent.health->life+opponent.shield->value+1.F);
             }
         }
     }
@@ -496,8 +500,8 @@ struct VerticalSliceSimulation::Impl {
                      network::PredictedMovementClient& prediction,
                      const float axis_x,
                      const float axis_z,
-                     const bool jump) {
-        const auto message = wire_round_trip(prediction.create_input(axis_x, axis_z, jump));
+                     const bool jump, const bool dodge) {
+        const auto message = wire_round_trip(prediction.create_input(axis_x, axis_z, jump, dodge));
         const auto owner = sessions.authorize_input(connection, message);
         if (!owner || *owner != session.controlled_entity()) {
             ++rejected_commands;
@@ -518,6 +522,7 @@ struct VerticalSliceSimulation::Impl {
         combatant.health->life = legacy_default_life;
         combatant.shield->value = 0.0F;
         combatant.weapon->cooldown_remaining = 0;
+        combatant.weapon->arsenal.clear_modifiers();
         combatant.ability->cooldown_remaining = 0;
         combatant.ability->active_remaining = 0;
         combatant.ability->hit_consumed = false;
@@ -575,13 +580,13 @@ struct VerticalSliceSimulation::Impl {
                     Combatant& target,
                     float aim_x,
                     float aim_y,
-                    float aim_z) {
+                    float aim_z,
+                    const float damage,
+                    const float maximum_distance) {
         if (shooter.health->respawn_remaining != 0 ||
-            shooter.weapon->cooldown_remaining != 0 ||
             target.health->respawn_remaining != 0) {
             return false;
         }
-        shooter.weapon->cooldown_remaining = cooldown_ticks;
         const float length = std::sqrt(aim_x * aim_x + aim_y * aim_y + aim_z * aim_z);
         if (length < 1.0e-5F) {
             return false;
@@ -596,7 +601,7 @@ struct VerticalSliceSimulation::Impl {
             .aim_x = aim_x,
             .aim_y = aim_y,
             .aim_z = aim_z,
-            .maximum_distance = soul_reaper_range,
+            .maximum_distance = maximum_distance,
         };
         const auto decoded = network::decode_fire_command(
             wire_round_trip(network::encode_fire_command(command)));
@@ -614,15 +619,54 @@ struct VerticalSliceSimulation::Impl {
             shooter.weapon->shot_impact={position.position_x+aim_x*result->distance,
                 position.position_y+0.9F+aim_y*result->distance,position.position_z+aim_z*result->distance};
             shooter.weapon->shot_hit=result->status==network::FireValidationStatus::hit;
-            shooter.weapon->shot_contact=shooter.weapon->shot_hit || result->distance<soul_reaper_range;
+            shooter.weapon->shot_contact=shooter.weapon->shot_hit || result->distance<maximum_distance;
         }
         if (!result || result->status != network::FireValidationStatus::hit ||
             result->target != target.entity()) {
             return false;
         }
-        static_cast<void>(apply_damage(shooter, target, soul_reaper_damage));
+        static_cast<void>(apply_damage(shooter, target, damage));
         return true;
     }
+
+    PickupActor pickup_actor(Combatant& c, bool hold_pull) {
+        const auto p=component_movement(c);
+        return {static_cast<std::uint8_t>(c.entity()),{p.position_x,p.position_y,p.position_z},
+            c.health->respawn_remaining==0,hold_pull,&c.weapon->arsenal,&c.health->life,&c.shield->value};
+    }
+
+    bool route_weapon_actions(const network::ConnectionId connection, Combatant& shooter,
+                              Combatant& target, const SliceInput& input) {
+        bool hit=false;
+        if(shooter.health->respawn_remaining) {shooter.weapon->arsenal.clear_modifiers();return false;}
+        for(const auto& action:shooter.weapon->arsenal.tick({input.fire_primary,input.fire_secondary})) {
+            shooter.weapon->cooldown_remaining=shooter.weapon->arsenal.cooldown_remaining();
+            switch(action.kind){
+            case LegacyWeaponActionKind::hitscan:
+            case LegacyWeaponActionKind::expansive_hitscan:
+            case LegacyWeaponActionKind::charged_hitscan:
+                hit=route_fire(connection,shooter,target,input.aim_x,input.aim_y,input.aim_z,
+                               action.damage,action.range)||hit;break;
+            case LegacyWeaponActionKind::magnetic_projectiles:
+                {const auto position=component_movement(shooter);for(std::uint16_t pellet=0;pellet<action.projectile_count&&projectiles.size()<32;++pellet){const float side=(static_cast<int>(pellet%4)-1.5F)*.012F;const float up=(static_cast<int>(pellet/4)-1.F)*.012F;float dx=input.aim_x+side*input.aim_z,dy=input.aim_y+up,dz=input.aim_z-side*input.aim_x;const float l=std::sqrt(dx*dx+dy*dy+dz*dz);if(l<1e-5F)continue;projectiles.push_back({next_projectile_id++,shooter.entity(),action.weapon,position.position_x,position.position_y+.9F,position.position_z,dx/l,dy/l,dz/l,action.projectile_speed,action.projectile_radius,action.damage,0});}}break;
+            case LegacyWeaponActionKind::charged_fireball:
+                {const auto position=component_movement(shooter);const float l=std::sqrt(input.aim_x*input.aim_x+input.aim_y*input.aim_y+input.aim_z*input.aim_z);if(l>=1e-5F&&projectiles.size()<32)projectiles.push_back({next_projectile_id++,shooter.entity(),action.weapon,position.position_x,position.position_y+.9F,position.position_z,input.aim_x/l,input.aim_y/l,input.aim_z/l,action.projectile_speed,action.projectile_radius,action.damage,action.explosion_radius});}break;
+            case LegacyWeaponActionKind::recall_projectiles:
+                for(auto& p:projectiles)if(p.owner==shooter.entity()&&p.weapon==SliceWeapon::shotgun)p.returning=true;
+                break;
+            case LegacyWeaponActionKind::pull_item:
+                static_cast<void>(pickups.pull(pickup_actor(shooter,input.fire_secondary),
+                    {input.aim_x,input.aim_y,input.aim_z},action.range));
+                break;
+            case LegacyWeaponActionKind::steer_fireballs:
+                {const float l=std::sqrt(input.aim_x*input.aim_x+input.aim_y*input.aim_y+input.aim_z*input.aim_z);if(l>=1e-5F)for(auto& p:projectiles)if(p.owner==shooter.entity()&&p.weapon==SliceWeapon::iron_hell_goat){p.dx=input.aim_x/l;p.dy=input.aim_y/l;p.dz=input.aim_z/l;}}break;
+            }
+        }
+        shooter.weapon->cooldown_remaining=shooter.weapon->arsenal.cooldown_remaining();
+        return hit;
+    }
+
+    bool advance_projectiles(Combatant& owner,Combatant& target){bool hit=false;const auto owner_pos=component_movement(owner);const auto target_pos=component_movement(target);for(auto& p:projectiles){if(p.owner!=owner.entity()||!p.life)continue;if(p.returning){const float x=owner_pos.position_x-p.x,y=owner_pos.position_y+.9F-p.y,z=owner_pos.position_z-p.z;const float l=std::sqrt(x*x+y*y+z*z);if(l<.35F){p.life=0;continue;}p.dx=x/l;p.dy=y/l;p.dz=z/l;}p.x+=p.dx*p.speed/60.F;p.y+=p.dy*p.speed/60.F;p.z+=p.dz*p.speed/60.F;--p.life;const float x=target_pos.position_x-p.x,y=target_pos.position_y+.9F-p.y,z=target_pos.position_z-p.z;const float range=p.radius+.55F;if(x*x+y*y+z*z<=range*range&&target.health->respawn_remaining==0){static_cast<void>(apply_damage(owner,target,p.damage));owner.weapon->shot_sequence=owner.weapon->next_fire_sequence++;owner.weapon->shot_tick=movement_server->simulation_tick();owner.weapon->shot_impact={p.x,p.y,p.z};owner.weapon->shot_hit=owner.weapon->shot_contact=true;p.life=0;hit=true;}}std::erase_if(projectiles,[](const Projectile& p){return !p.life;});return hit;}
 
     bool activate_ability(const network::ConnectionId connection,
                           Combatant& combatant,
@@ -713,6 +757,8 @@ struct VerticalSliceSimulation::Impl {
     }
 
     void tick(const SliceInput& player_input, const SliceInput& opponent_input) {
+        if(player_input.weapon_selection<slice_weapon_count)static_cast<void>(player.weapon->arsenal.select(static_cast<SliceWeapon>(player_input.weapon_selection)));
+        if(opponent_input.weapon_selection<slice_weapon_count)static_cast<void>(opponent.weapon->arsenal.select(static_cast<SliceWeapon>(opponent_input.weapon_selection)));
         const bool player_respawned = respawn_if_ready(player);
         const bool opponent_respawned = respawn_if_ready(opponent);
         if (player_respawned) {
@@ -736,12 +782,6 @@ struct VerticalSliceSimulation::Impl {
             opponent_prediction->set_collision_entities(collision);
         } else {
             opponent_prediction->set_collision_entities({});
-        }
-        if (player.weapon->cooldown_remaining != 0) {
-            --player.weapon->cooldown_remaining;
-        }
-        if (opponent.weapon->cooldown_remaining != 0) {
-            --opponent.weapon->cooldown_remaining;
         }
         if (player.ability->cooldown_remaining != 0) {
             --player.ability->cooldown_remaining;
@@ -786,7 +826,8 @@ struct VerticalSliceSimulation::Impl {
                         ? movement_axis_x(player, player_input) : 0.0F,
                     player.health->respawn_remaining == 0
                         ? movement_axis_z(player, player_input) : 0.0F,
-                    player.health->respawn_remaining == 0 && player_input.jump);
+                    player.health->respawn_remaining == 0 && player_input.jump,
+                    player.health->respawn_remaining == 0 && player_input.dodge);
         route_input(opponent.authority->connection,
                     opponent_session,
                     *opponent_prediction,
@@ -794,7 +835,8 @@ struct VerticalSliceSimulation::Impl {
                         ? movement_axis_x(opponent, opponent_input) : 0.0F,
                     opponent.health->respawn_remaining == 0
                         ? movement_axis_z(opponent, opponent_input) : 0.0F,
-                    opponent.health->respawn_remaining == 0 && opponent_input.jump);
+                    opponent.health->respawn_remaining == 0 && opponent_input.jump,
+                    opponent.health->respawn_remaining == 0 && opponent_input.dodge);
 
         if (const auto primary_snapshot = movement_server->tick()) {
             player_prediction->receive(wire_round_trip(*primary_snapshot));
@@ -814,22 +856,17 @@ struct VerticalSliceSimulation::Impl {
             opponent.presentation->hit_marker_ticks = hit_marker_ticks;
         }
 
-        if (player_input.fire_primary && route_fire(player.authority->connection,
-                                                    player,
-                                                    opponent,
-                                                    player_input.aim_x,
-                                                    player_input.aim_y,
-                                                    player_input.aim_z)) {
+        if (route_weapon_actions(player.authority->connection,player,opponent,player_input)) {
             player.presentation->hit_marker_ticks = hit_marker_ticks;
         }
-        if (opponent_input.fire_primary && route_fire(opponent.authority->connection,
-                                                      opponent,
-                                                      player,
-                                                      opponent_input.aim_x,
-                                                      opponent_input.aim_y,
-                                                      opponent_input.aim_z)) {
+        if (route_weapon_actions(opponent.authority->connection,opponent,player,opponent_input)) {
             opponent.presentation->hit_marker_ticks = hit_marker_ticks;
         }
+        if(advance_projectiles(player,opponent))player.presentation->hit_marker_ticks=hit_marker_ticks;
+        if(advance_projectiles(opponent,player))opponent.presentation->hit_marker_ticks=hit_marker_ticks;
+        auto pickup_actors=std::array{pickup_actor(player,player_input.fire_secondary),
+                                     pickup_actor(opponent,opponent_input.fire_secondary)};
+        pickups.tick(pickup_actors);
         if (player.presentation->hit_marker_ticks != 0) {
             --player.presentation->hit_marker_ticks;
         }
@@ -864,17 +901,23 @@ struct VerticalSliceSimulation::Impl {
                  .kills = combatant.score->kills,
                  .deaths = combatant.health->deaths,
                  .character = combatant.loadout->selection.character,
-                 .weapon = combatant.loadout->selection.weapon,
+                 .weapon = combatant.weapon->arsenal.active_weapon(),
                  .ability = combatant.loadout->selection.ability,
                  .primary_ability_active = combatant.ability->active_remaining != 0,
                 .alive = combatant.health->respawn_remaining == 0,
                 .grounded = movement.grounded,
+                .air_dodge_available = movement.air_dodge_available,
                 .aim_pitch = combatant.weapon->aim_pitch,
                 .shot_sequence = combatant.weapon->shot_sequence,
                 .shot_tick = combatant.weapon->shot_tick,
                 .shot_impact = combatant.weapon->shot_impact,
                 .shot_hit = combatant.weapon->shot_hit,
-                .shot_contact = combatant.weapon->shot_contact};
+                .shot_contact = combatant.weapon->shot_contact,
+                .ammunition = [&]{std::array<std::uint16_t,slice_weapon_count> value{};for(std::size_t i=0;i<value.size();++i)value[i]=combatant.weapon->arsenal.ammo(static_cast<SliceWeapon>(i));return value;}(),
+                .owned_weapons = [&]{std::uint8_t value=0;for(std::size_t i=0;i<slice_weapon_count;++i)if(combatant.weapon->arsenal.owns(static_cast<SliceWeapon>(i)))value|=static_cast<std::uint8_t>(1U<<i);return value;}(),
+                .weapon_charge_fraction = combatant.weapon->arsenal.charge_fraction(),
+                .damage_modifier_ticks = combatant.weapon->arsenal.damage_modifier_ticks(),
+                .cooldown_modifier_ticks = combatant.weapon->arsenal.cooldown_modifier_ticks()};
     }
 
     void refresh_snapshot() {
@@ -888,9 +931,7 @@ struct VerticalSliceSimulation::Impl {
             .factory_lift = factory_lift_view(),
             .hud = {.life_fraction = player.health->life / legacy_maximum_life,
                     .shield_fraction = player.shield->value / legacy_maximum_shield,
-                     .weapon_ready_fraction =
-                         1.0F - static_cast<float>(player.weapon->cooldown_remaining) /
-                                    static_cast<float>(cooldown_ticks),
+                     .weapon_ready_fraction = player.weapon->arsenal.cooldown_remaining()==0?1.F:1.F-static_cast<float>(player.weapon->arsenal.cooldown_remaining())/std::max(1U,static_cast<unsigned>(legacy_weapon_rule(player.weapon->arsenal.active_weapon()).primary_cooldown_ticks)),
                      .primary_ability_ready_fraction =
                          player.loadout->selection.ability == SliceAbility::none
                              ? 0.0F
@@ -904,7 +945,10 @@ struct VerticalSliceSimulation::Impl {
                     .hit_marker = player.presentation->hit_marker_ticks != 0,
                     .dead = player.health->respawn_remaining != 0,
                     .kills = player.score->kills,
-                    .deaths = player.health->deaths},
+                    .deaths = player.health->deaths,
+                    .ammunition = player.weapon->arsenal.active_ammo(),
+                    .maximum_ammunition = legacy_weapon_rule(player.weapon->arsenal.active_weapon()).maximum_ammo,
+                    .weapon_charge_fraction = player.weapon->arsenal.charge_fraction()},
             .network = {.active_sessions = sessions.active_sessions(),
                         .authorized_input_batches = authorized_input_batches,
                         .authorized_fire_commands = authorized_fire_commands,
@@ -913,6 +957,10 @@ struct VerticalSliceSimulation::Impl {
                         .reconciliation_count = player_prediction->reconciliation_count()},
             .scene_id = use_original_factory ? original_factory().scene_id : 0U,
         };
+        snapshot.projectile_count=static_cast<std::uint8_t>(std::min<std::size_t>(projectiles.size(),snapshot.projectiles.size()));
+        snapshot.pickup_count=static_cast<std::uint8_t>(pickups.views().size());
+        std::ranges::copy(pickups.views(),snapshot.pickups.begin());
+        for(std::size_t i=0;i<snapshot.projectile_count;++i){const auto& p=projectiles[i];snapshot.projectiles[i]={p.id,p.owner,p.weapon,p.x,p.y,p.z,p.radius};}
     }
 
     network::ReplicationSettings movement_settings;
@@ -941,6 +989,9 @@ struct VerticalSliceSimulation::Impl {
     bool use_original_factory{false};
     bool player_in_lava{false};
     bool opponent_in_lava{false};
+    std::vector<Projectile> projectiles;
+    LegacyPickups pickups;
+    std::uint32_t next_projectile_id{1};
 };
 
 VerticalSliceSimulation::VerticalSliceSimulation(const bool opponent_ai_enabled)
@@ -995,6 +1046,7 @@ bool VerticalSliceSimulation::set_selection(const network::NetworkEntityId entit
         return false;
     }
     combatant->loadout->selection = selection;
+    combatant->weapon->arsenal.reset(selection.weapon);
     if (selection.ability == SliceAbility::none) {
         combatant->ability->cooldown_remaining = 0;
         combatant->ability->active_remaining = 0;
@@ -1002,6 +1054,19 @@ bool VerticalSliceSimulation::set_selection(const network::NetworkEntityId entit
     }
     impl_->refresh_snapshot();
     return true;
+}
+
+bool VerticalSliceSimulation::acquire_weapon(const network::NetworkEntityId entity,const SliceWeapon weapon,const std::uint16_t ammunition){
+    Impl::Combatant* c=impl_->player.entity()==entity?&impl_->player:impl_->opponent.entity()==entity?&impl_->opponent:nullptr;
+    if(!c||c->health->respawn_remaining)return false;const bool changed=c->weapon->arsenal.acquire(weapon,ammunition);impl_->refresh_snapshot();return changed;
+}
+bool VerticalSliceSimulation::add_ammunition(const network::NetworkEntityId entity,const SliceWeapon weapon,const std::uint16_t ammunition){
+    Impl::Combatant* c=impl_->player.entity()==entity?&impl_->player:impl_->opponent.entity()==entity?&impl_->opponent:nullptr;
+    if(!c||c->health->respawn_remaining)return false;const bool changed=c->weapon->arsenal.add_ammo(weapon,ammunition);impl_->refresh_snapshot();return changed;
+}
+bool VerticalSliceSimulation::select_weapon(const network::NetworkEntityId entity,const SliceWeapon weapon){
+    Impl::Combatant* c=impl_->player.entity()==entity?&impl_->player:impl_->opponent.entity()==entity?&impl_->opponent:nullptr;
+    if(!c||c->health->respawn_remaining)return false;const bool changed=c->weapon->arsenal.select(weapon);if(changed)c->loadout->selection.weapon=weapon;impl_->refresh_snapshot();return changed;
 }
 
 const SliceSnapshot& VerticalSliceSimulation::snapshot() const noexcept {
@@ -1024,9 +1089,7 @@ SliceSnapshot VerticalSliceSimulation::snapshot_for(
         .factory_lift = impl_->factory_lift_view(),
         .hud = {.life_fraction = local.health->life / legacy_maximum_life,
                 .shield_fraction = local.shield->value / legacy_maximum_shield,
-                .weapon_ready_fraction =
-                    1.0F - static_cast<float>(local.weapon->cooldown_remaining) /
-                               static_cast<float>(cooldown_ticks),
+                .weapon_ready_fraction = local.weapon->arsenal.cooldown_remaining()==0?1.F:1.F-static_cast<float>(local.weapon->arsenal.cooldown_remaining())/std::max(1U,static_cast<unsigned>(legacy_weapon_rule(local.weapon->arsenal.active_weapon()).primary_cooldown_ticks)),
                 .primary_ability_ready_fraction =
                     local.loadout->selection.ability == SliceAbility::none
                         ? 0.0F
@@ -1040,10 +1103,17 @@ SliceSnapshot VerticalSliceSimulation::snapshot_for(
                 .hit_marker = local.presentation->hit_marker_ticks != 0,
                 .dead = local.health->respawn_remaining != 0,
                 .kills = local.score->kills,
-                .deaths = local.health->deaths},
+                .deaths = local.health->deaths,
+                .ammunition = local.weapon->arsenal.active_ammo(),
+                .maximum_ammunition = legacy_weapon_rule(local.weapon->arsenal.active_weapon()).maximum_ammo,
+                .weapon_charge_fraction = local.weapon->arsenal.charge_fraction()},
         .network = impl_->snapshot.network,
+        .projectiles = impl_->snapshot.projectiles,
+        .projectile_count = impl_->snapshot.projectile_count,
     };
     result.scene_id=impl_->use_original_factory ? original_factory().scene_id : 0U;
+    result.pickups=impl_->snapshot.pickups;
+    result.pickup_count=impl_->snapshot.pickup_count;
     return result;
 }
 

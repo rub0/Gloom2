@@ -24,6 +24,7 @@ struct MovementInput {
     float axis_x{0.0F};
     float axis_z{0.0F};
     bool jump{false};
+    bool dodge{false};
 };
 
 struct MovementState {
@@ -36,6 +37,7 @@ struct MovementState {
     float velocity_y{0.0F};
     float velocity_z{0.0F};
     bool grounded{true};
+    bool air_dodge_available{false};
 };
 
 struct StaticMovementObstacle {
@@ -189,7 +191,7 @@ public:
                             NetworkEntityId local_entity,
                             MovementState initial_state);
 
-    [[nodiscard]] ProtocolMessage create_input(float axis_x, float axis_z, bool jump = false);
+    [[nodiscard]] ProtocolMessage create_input(float axis_x, float axis_z, bool jump = false, bool dodge = false);
     void receive(const ProtocolMessage& message);
     void set_collision_entities(std::span<const MovementState> entities);
     void reset_local_state(MovementState state);

@@ -8,12 +8,15 @@ en reposo y materiales dirigidos por los bocetos: véase [CHARACTERS.md](CHARACT
 El hito **63** añade clips, skinning, brazos FPS y partículas; véanse
 [ANIMATION_VFX.md](ANIMATION_VFX.md) y el
 [informe con 38/38 pruebas y secuencias](../reports/animation-vfx-2026-09-03/README.md).
-El hito **64 sigue pendiente**. Audio, ampliación del juego, balance,
+El hito **64 está completado**: HUD, menú, navegador, sala, selección y flujo
+de reconexión gráfico, con 41 pruebas validadas. Véanse [UI.md](UI.md), ADR 0065
+y el [informe de aceptación](../reports/ui-2026-09-04/README.md).
+Audio, ampliación del juego, balance,
 despliegue público y distribución quedan para después.
 
 El resto del documento conserva la auditoría inicial y los criterios acordados
 cuando el motor estaba en el hito 58. Las carencias descritas en presente en
-esa auditoría son el punto de partida; el estado actual de 59–63 está en la
+esa auditoría son el punto de partida; el estado actual de 59–64 está en la
 documentación de las entregas enlazada arriba.
 
 ## Referencias comprobadas

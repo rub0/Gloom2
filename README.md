@@ -2,6 +2,8 @@
 
 Modern revival of the original Gloom project, built as a modular C++23 engine.
 
+Para continuar el desarrollo en una tarea nueva: [estado y traspaso actual](docs/ESTADO_ACTUAL.md).
+
 Milestones 59–61 restore the original Factory mesh, placed static objects,
 materials and collision in local, host/join and dedicated play. The offline
 Ogre conversion is reproducible; specular/anisotropic shading, textured glow,
@@ -13,7 +15,17 @@ metallic/emissive materials, preserved bind rigs and first-/third-person weapon
 anchors. See [CHARACTERS.md](docs/CHARACTERS.md). Milestone 63 adds recovered
 clips, procedural Shadow motion, GPU skinning, posed FPS arms and bounded combat
 particles. See [ANIMATION_VFX.md](docs/ANIMATION_VFX.md) for reproducible temporal
-reviews and limits. Graphical UI remains milestone 64.
+reviews and limits. Milestone 64 restores the graphical HUD, menu, match browser,
+lobby and selection using recovered original artwork and fonts. See
+[UI.md](docs/UI.md) and its [acceptance report](reports/ui-2026-09-04/README.md).
+
+Original gameplay migration now starts with milestone 65: class-specific
+momentum, ground/air movement, jump and double-tap WASD dodge in Factory.
+Authority and prediction share the recovered motion rules; arsenal replication
+advances current peers to protocol 16.
+[GAMEPLAY_MIGRATION.md](docs/GAMEPLAY_MIGRATION.md) documents the conversion;
+[ARSENAL.md](docs/ARSENAL.md) covers the completed five-weapon milestone. Factory
+pickups remain scheduled for milestone 67.
 
 Factory visual corrections and reproducible screenshot checks are documented
 in [VISUAL_REVIEW.md](docs/VISUAL_REVIEW.md). Run
@@ -26,9 +38,10 @@ The repository is intentionally starting with a small executable foundation.
 Its subsystem contracts keep platform, rendering, physics and networking code
 independent from their chosen third-party backends.
 
-The current executable opens a resizable, high-DPI SDL3 window and renders an
-interpolated stack of Jolt rigid bodies through Diligent's Vulkan backend. Close
-the window to shut the engine down cleanly.
+The executable without arguments opens the graphical menu in a resizable,
+high-DPI SDL3 window. Choose local play, browse matches, connect directly or
+create a development room. Mouse and keyboard navigation share the same scaled
+layout; Esc opens pause during play. Existing CLI tools remain available.
 
 The interactive network laboratory can be launched with:
 
@@ -387,5 +400,9 @@ Keycloak account sign-in, renewal and host introspection are documented in
 [docs/architecture/0058-keycloak-account-provider.md](docs/architecture/0058-keycloak-account-provider.md).
 The ordered implementation milestones are tracked in
 [docs/ROADMAP.md](docs/ROADMAP.md).
+Original movement and the five-weapon authoritative arsenal are documented in
+[docs/GAMEPLAY_MIGRATION.md](docs/GAMEPLAY_MIGRATION.md) and
+[docs/ARSENAL.md](docs/ARSENAL.md). Gameplay uses `1`–`5`, left/right mouse and
+`Q` for the selected class ability.
 Verified game tickets, authoritative identity and reconnect ownership are
 documented in [ADR 0059](docs/architecture/0059-verified-game-admission.md).

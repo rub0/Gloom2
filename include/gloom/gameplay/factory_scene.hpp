@@ -1,5 +1,7 @@
 #pragma once
 #include <gloom/network/movement_replication.hpp>
+#include <gloom/gameplay/slice_selection.hpp>
+#include <gloom/gameplay/legacy_pickups.hpp>
 #include <gloom/physics/world.hpp>
 #include <gloom/render/lighting.hpp>
 #include <memory>
@@ -13,11 +15,13 @@ struct FactoryScene {
     std::shared_ptr<const render::EnvironmentProbe> environment_probe;
     std::shared_ptr<const physics::TriangleMesh> collision;
     std::vector<FactorySpawn> spawns;
+    std::vector<PickupDefinition> pickups;
     std::vector<render::PointLight> lights;
     physics::Vec3 lava_center;
     float lava_half_width{112.5F};
     std::size_t entity_count{0};
 };
 [[nodiscard]] const FactoryScene& original_factory();
-[[nodiscard]] network::ReplicationSettings factory_movement_settings();
+[[nodiscard]] network::ReplicationSettings factory_movement_settings(
+    std::function<SliceCharacter(network::NetworkEntityId)> character = {});
 }

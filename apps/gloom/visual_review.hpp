@@ -28,6 +28,12 @@ inline constexpr std::array factory_views{
     View{"factory-lava", -30.0F, 6.0F, -15.0F, 1.3F, -0.65F},
     View{"factory-central-walkway", -3.0F, 7.0F, -10.0F, -1.5F, -0.3F},
 };
+inline constexpr std::array pickup_views{
+    View{"pickup-available", -55.7487F, .1F, -7.5236F, 3.14159265F, -.30F},
+    View{"pickup-pulling", -55.7487F, .1F, -7.5236F, 3.14159265F, -.30F},
+    View{"pickup-collected", -55.7487F, .1F, -7.5236F, 3.14159265F, -.30F},
+    View{"pickup-respawned", -55.7487F, .1F, -7.5236F, 3.14159265F, -.30F},
+};
 inline constexpr std::array character_views{
     View{"archangel-front", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F},
     View{"archangel-back", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F},

@@ -2,6 +2,7 @@
 
 #include <gloom/core/entity.hpp>
 #include <gloom/gameplay/slice_selection.hpp>
+#include <gloom/gameplay/legacy_arsenal.hpp>
 #include <gloom/network/movement_replication.hpp>
 #include <gloom/network/transport.hpp>
 #include <gloom/physics/world.hpp>
@@ -115,6 +116,7 @@ struct CharacterMovementComponent {
 };
 
 struct WeaponComponent {
+    LegacyArsenal arsenal;
     std::uint32_t cooldown_remaining{0};
     std::uint32_t next_fire_sequence{1};
     std::uint32_t shot_sequence{0};

@@ -13,6 +13,20 @@ The CMake preset selects the Visual Studio installation on `D:` explicitly.
 
 ## Configure, build and test
 
+Milestone 65 adds `gloom.legacy_movement`: native 16 ms motion-oracle comparison,
+30/60/144 Hz response, original class profiles, dodge redundancy/reconciliation
+and Factory collision. Current protocol is **15** (dodge input flags); the
+Factory scene fingerprint also identifies the new movement contract. See
+[GAMEPLAY_MIGRATION.md](docs/GAMEPLAY_MIGRATION.md) and ADR 0066. The literal
+source audit uses Python's standard library only; `--verify` checks all 28 sources.
+
+Milestone 64 adds `gloom.ui`, `gloom.ui_visual_review` and `gloom.ui_flow`.
+The executable without arguments opens the graphical menu. The visual test checks
+48 captures at 1280×720, 1920×1080 and 2560×1080 against separate UI references.
+The flow test starts two graphical processes and a dedicated server. See
+[UI.md](docs/UI.md) and ADR 0065 for original SWF/font extraction, controls,
+authentication, DPI and reproducible acceptance. Protocol 14 is unchanged.
+
 Milestone 63 adds `gloom.animation_vfx`, `gloom.animation_network` and
 `gloom.animation_dedicated`. Scene payload **5** supports validated TRS clips,
 bind rigs and eight influences per vertex. Protocol **14** carries cosmetic
@@ -730,3 +744,8 @@ Basis-compressed into KTX2 payloads. Color uses ETC1S+sRGB; normal/data textures
 use linear UASTC. Runtime KTX validation/transcoding produces the owned mip
 packets consumed by the renderer. The graphical smoke test additionally forces
 upload deferral, fence-safe release and LRU eviction with small test budgets.
+
+`gloom.legacy_arsenal` validates the source-derived five-weapon state machine.
+Protocol 16 peers replicate inventory, ammunition, charge and up to 32 active
+projectiles. Optional slice loadouts include `hound-sniper`, `hound-shotgun`,
+`hound-minigun` and `hound-iron-hell-goat`; keys 1–5 select only owned weapons.

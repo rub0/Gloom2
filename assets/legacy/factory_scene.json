@@ -39536,6 +39536,10 @@
     {
       "material": "IronHellGoat",
       "reason": "Missing optional emission: ironhellgoat_glow.png"
+    },
+    {
+      "material": "IronHellGoat",
+      "reason": "Missing optional emission: ironhellgoat_glow.png"
     }
   ],
   "meshes": [
@@ -39820,6 +39824,86 @@
       "tangent_policy": "preserve when present; otherwise MikkTSpace in cooker"
     },
     {
+      "source": "Exes/media/models/weapons/sniper.mesh",
+      "serializer": "[MeshSerializer_v1.8]",
+      "normalized_serializer": "[MeshSerializer_v1.8]",
+      "submeshes": 1,
+      "triangles": 1894,
+      "bounds": [
+        [
+          -0.2781127691268921,
+          -0.9072027802467346,
+          -3.4900853633880615
+        ],
+        [
+          0.27811259031295776,
+          1.3677020072937012,
+          3.4900851249694824
+        ]
+      ],
+      "tangent_policy": "preserve when present; otherwise MikkTSpace in cooker"
+    },
+    {
+      "source": "Exes/media/models/weapons/shotGun.mesh",
+      "serializer": "[MeshSerializer_v1.41]",
+      "normalized_serializer": "[MeshSerializer_v1.8]",
+      "submeshes": 1,
+      "triangles": 1351,
+      "bounds": [
+        [
+          -0.6665788292884827,
+          0.11326546967029572,
+          -2.5476675033569336
+        ],
+        [
+          0.6665785908699036,
+          2.70326566696167,
+          2.5476672649383545
+        ]
+      ],
+      "tangent_policy": "preserve when present; otherwise MikkTSpace in cooker"
+    },
+    {
+      "source": "Exes/media/models/weapons/miniGun.mesh",
+      "serializer": "[MeshSerializer_v1.8]",
+      "normalized_serializer": "[MeshSerializer_v1.8]",
+      "submeshes": 1,
+      "triangles": 4734,
+      "bounds": [
+        [
+          -1.2404661178588867,
+          0.17766229808330536,
+          -4.00867223739624
+        ],
+        [
+          1.2218505144119263,
+          3.5716347694396973,
+          5.0597639083862305
+        ]
+      ],
+      "tangent_policy": "preserve when present; otherwise MikkTSpace in cooker"
+    },
+    {
+      "source": "Exes/media/models/weapons/ironHellGoat.mesh",
+      "serializer": "[MeshSerializer_v1.8]",
+      "normalized_serializer": "[MeshSerializer_v1.8]",
+      "submeshes": 1,
+      "triangles": 2008,
+      "bounds": [
+        [
+          -1.5567673444747925,
+          -2.3350841999053955,
+          -7.508195877075195
+        ],
+        [
+          1.6767550706863403,
+          4.209122180938721,
+          3.27767014503479
+        ]
+      ],
+      "tangent_policy": "preserve when present; otherwise MikkTSpace in cooker"
+    },
+    {
       "source": "Exes/media/models/armourSmall.mesh",
       "serializer": "[MeshSerializer_v1.41]",
       "normalized_serializer": "[MeshSerializer_v1.8]",
@@ -39862,6 +39946,7 @@
     "Exes/media/materials/scripts/mapaAlberto/mapaAlberto.material": "4ebe6f20b57c985e13447de23114af4686d9e5f13dafc00f6b822f292b682f14",
     "Exes/media/materials/scripts/weapons/ironHellGoat.material": "27b61dd1edcf5ac0e4d6c5e2bb6d55b5b2ac4ad7b2d55278ebcc7dd02371fbba",
     "Exes/media/materials/scripts/weapons/ironHellGoatAmmo.material": "d4224a446f763ea10d95612114563a042f3e0ffb30c971d622b83d4ab1ee7bfd",
+    "Exes/media/materials/scripts/weapons/miniGun.material": "90a2f518fcae0758a658c7a4c1583b14fa2647328d90473df14546736439a0ad",
     "Exes/media/materials/scripts/weapons/shotGun.material": "018ecb798bc48a21aea62d72d88fc5175b261ed31375dcb46a8be480c1d4499d",
     "Exes/media/materials/scripts/weapons/shotGunAmmo.material": "93f7575451e9e4d7d211a8e2ab02ffccec17bd7c48982ad8d5c795a6114d9d06",
     "Exes/media/materials/scripts/weapons/sniper.material": "8553e989e1d093646471782e9426c5073a90a2d7c0b475b82c93f6644a0ae8ea",
@@ -39931,6 +40016,10 @@
     "Exes/media/materials/textures/weapons/SoulReaper_GLOW.tga": "2eeb0244db0405b76082cea337764c3b2cfc23ac979ae301bc47751dd30dd29f",
     "Exes/media/materials/textures/weapons/SoulReaper_NRM.tga": "2f9a53babb04f035ff39b8b0301ba55de28ecfd7b5f948bb71223f081406682d",
     "Exes/media/materials/textures/weapons/SoulReaper_SPEC.tga": "7c106bc82a01154ff1ff4f59d77af860a546905f397c47438145402c7e41eb08",
+    "Exes/media/materials/textures/weapons/miniGun.jpg": "e3d9b8a4ea27cfc09714af8c3a13ab40a39fcf9eae9d66c470c7d6ddafca10b0",
+    "Exes/media/materials/textures/weapons/miniGun_GLOW.tga": "1e4ddfe336cdd069f8f3062984b8f5a5367b77a98ccb47a6fc0db2f82d7923fc",
+    "Exes/media/materials/textures/weapons/miniGun_NRM.tga": "f86fbce139cb71137e984b80b1977858ab36f4c3f2477f0609dd8a14c369ecf6",
+    "Exes/media/materials/textures/weapons/miniGun_SPEC.tga": "e1478687d5fb91bef3686b4fd52a6b560a3eb99c4053b1b2c2ddf11cd6015e1b",
     "Exes/media/materials/textures/weapons/shotGunAmmo_Diffuse.tga": "19614f03b832a8a6b1f8475da384a44df76bfdf09b88b2358c7d2a16bb5fb297",
     "Exes/media/materials/textures/weapons/shotGunAmmo_emmisive.tga": "18a707541ce82d7ff798ad28c9ff1b2a11a01331cded607f47af4fa0d0d5b0e6",
     "Exes/media/materials/textures/weapons/shotgun.png": "aa83963930c890035024151850bd465bda2818304d08fd9a33c6e6f4d585c2ae",

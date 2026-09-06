@@ -1,0 +1,178 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Gloom legacy importer 1"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "sniper",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ],
+      "rotation": [
+        0,
+        0.0,
+        0,
+        1.0
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "sniper",
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0,
+        "roughnessFactor": 0.408248290463863,
+        "baseColorTexture": {
+          "index": 0
+        }
+      },
+      "extras": {
+        "gloom": {
+          "sourceMaterial": "sniper"
+        }
+      },
+      "extensions": {
+        "KHR_materials_specular": {
+          "specularFactor": 1,
+          "specularColorTexture": {
+            "index": 2
+          }
+        }
+      },
+      "normalTexture": {
+        "index": 1
+      }
+    }
+  ],
+  "textures": [
+    {
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "source": 1,
+      "sampler": 0
+    },
+    {
+      "source": 2,
+      "sampler": 0
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/9dafa9b2c8411902.png"
+    },
+    {
+      "uri": "textures/0d0fe18de6260af9.png"
+    },
+    {
+      "uri": "textures/a4aa206f9bd33ac2.png"
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 68184
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 68184,
+      "byteLength": 68184
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 136368,
+      "byteLength": 45456
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 181824,
+      "byteLength": 22728
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 5682,
+      "type": "VEC3",
+      "min": [
+        -0.2781127691268921,
+        -0.9072027802467346,
+        -3.4900853633880615
+      ],
+      "max": [
+        0.27811259031295776,
+        1.3677020072937012,
+        3.4900851249694824
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 5682,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 5682,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 5682,
+      "type": "SCALAR"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_materials_specular",
+    "KHR_materials_emissive_strength"
+  ],
+  "buffers": [
+    {
+      "uri": "sniper.bin",
+      "byteLength": 204552
+    }
+  ]
+}

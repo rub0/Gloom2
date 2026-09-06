@@ -9,7 +9,7 @@
 
 namespace gloom::network {
 
-inline constexpr std::uint16_t protocol_version = 14;
+inline constexpr std::uint16_t protocol_version = 18;
 inline constexpr std::size_t protocol_header_size = 28;
 inline constexpr std::size_t maximum_protocol_payload = 1024 * 1024;
 
@@ -27,6 +27,7 @@ enum class MessageKind : std::uint8_t {
     lobby_command = 11,
     lobby_state = 12,
     ability_command = 13,
+    weapon_command = 14,
 };
 
 enum class MessageFlags : std::uint8_t {

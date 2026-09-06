@@ -23,66 +23,7 @@ from probe_factory import material_blocks
 SCALE = 0.15  # Legacy capsule: cylinder 6 + two radii of 3 = 12; modern height 1.8.
 
 
-class DataParser:
-    """Restricted literal Lua tables. No functions, expressions or code execution."""
-    token = re.compile(r'\s+|--[^\n]*|//[^\n]*|"(?:[^"\\]|\\.)*"|[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?|[A-Za-z_]\w*|[{},;=]', re.S)
-
-    def __init__(self, text):
-        self.tokens = []
-        cursor = 0
-        while cursor < len(text):
-            match = self.token.match(text, cursor)
-            if not match:
-                raise ValueError(f"Unsupported map syntax: {text[cursor:cursor+60]!r}")
-            value = match[0]
-            if not value.isspace() and not value.startswith(("--", "//")):
-                self.tokens.append(value)
-            cursor = match.end()
-        self.i = 0
-
-    def pop(self):
-        value = self.tokens[self.i]
-        self.i += 1
-        return value
-
-    def value(self):
-        token = self.pop()
-        if token == "{":
-            mapping, sequence = {}, []
-            while self.tokens[self.i] != "}":
-                if self.i + 1 < len(self.tokens) and self.tokens[self.i + 1] == "=":
-                    key = self.pop()
-                    self.pop()
-                    if key in mapping:
-                        raise ValueError(f"Duplicate map field {key}")
-                    mapping[key] = self.value()
-                else:
-                    sequence.append(self.value())
-                if self.tokens[self.i] in (",", ";"):
-                    self.pop()
-            self.pop()
-            if mapping and sequence:
-                raise ValueError("Mixed map/list table")
-            return mapping if mapping else sequence
-        if token.startswith('"'):
-            return token[1:-1].replace('\\"', '"')
-        if token in ("true", "false"):
-            return token == "true"
-        try:
-            result = float(token)
-        except ValueError as error:
-            raise ValueError(f"Only literal map values supported: {token}") from error
-        if not math.isfinite(result):
-            raise ValueError("Nonfinite map number")
-        return result
-
-    def document(self):
-        if self.pop() != "Map" or self.pop() != "=":
-            raise ValueError("Expected Map literal")
-        result = self.value()
-        if self.i != len(self.tokens):
-            raise ValueError("Trailing executable map content")
-        return result
+from lua_data import DataParser
 
 
 class Importer:
@@ -133,7 +74,7 @@ class Importer:
         self.source(path)
         return DataParser(path.read_text(encoding="latin1")).document()
 
-    def mesh(self, source):
+    def mesh(self, source, allow_bind_pose=False):
         self.source(source)
         ogre = self.ogre
         number = self.mesh_number
@@ -149,9 +90,13 @@ class Importer:
         serializer = ogre.MeshSerializer()
         serializer.importMesh(resources.openResource(source.name, group), mesh.__deref__())
         if mesh.hasSkeleton() or mesh.getNumAnimations():
-            ogre.MeshManager.getSingleton().remove(mesh.getHandle())
-            del mesh
-            raise ValueError(f"Skinned/animated resource needs explicit rig import: {source.name}")
+            if source.name.lower() != "minigun.mesh" or not allow_bind_pose:
+                ogre.MeshManager.getSingleton().remove(mesh.getHandle())
+                del mesh
+                raise ValueError(f"Skinned/animated resource needs explicit rig import: {source.name}")
+            # The original MiniGun rig only spins presentation parts. Gameplay
+            # and both weapon anchors use its bind mesh, so export that pose.
+            mesh.setSkeletonName("")
         names = [mesh.getSubMesh(i).getMaterialName() for i in range(mesh.getNumSubMeshes())]
         normalized = self.work / f"mesh{number}.mesh"
         serializer.exportMesh(mesh.__deref__(), str(normalized), ogre.MESH_VERSION_1_8)
@@ -360,9 +305,14 @@ def run(args):
             status = "authoritative"
         records.append({"id":name,"type":data["type"],"status":status,"source":data,"resolved":resolved})
     factory.save()
-    for name, path in (("soul_reaper", "weapons/soulReaper.mesh"),("armour_small","armourSmall.mesh")):
+    for name, path in (("soul_reaper", "weapons/soulReaper.mesh"),
+                       ("sniper", "weapons/sniper.mesh"),
+                       ("shotgun", "weapons/shotGun.mesh"),
+                       ("minigun", "weapons/miniGun.mesh"),
+                       ("iron_hell_goat", "weapons/ironHellGoat.mesh"),
+                       ("armour_small","armourSmall.mesh")):
         scene = Scene(imp,name)
-        scene.instance(name,scene.mesh(imp.mesh(legacy/"Exes/media/models"/path)))
+        scene.instance(name,scene.mesh(imp.mesh(legacy/"Exes/media/models"/path, name == "minigun")))
         scene.save()
     repx_path = legacy / "Exes/media/models/mapaAlberto/mapaAlberto.RepX"
     imp.source(repx_path)

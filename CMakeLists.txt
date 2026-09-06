@@ -71,6 +71,9 @@ add_library(gloom_engine STATIC
     src/gameplay/vertical_slice.cpp
     src/gameplay/character_animation.cpp
     src/gameplay/combat_effects.cpp
+    src/gameplay/legacy_movement.cpp
+    src/gameplay/legacy_arsenal.cpp
+    src/gameplay/legacy_pickups.cpp
     src/gameplay/factory_scene.cpp
     src/gameplay/match_lobby.cpp
     src/gameplay/match_discovery.cpp
@@ -83,6 +86,7 @@ add_library(gloom_engine STATIC
     src/network/protocol.cpp
     src/network/session.cpp
     src/render/scene.cpp
+    src/render/ui.cpp
     src/render/particles.cpp
     src/render/temporal.cpp
     src/render/lighting.cpp
@@ -141,7 +145,7 @@ if(WIN32)
 endif()
 
 if(MSVC)
-    target_compile_options(gloom_engine PRIVATE /W4 /permissive- /EHsc /Zc:__cplusplus)
+    target_compile_options(gloom_engine PRIVATE /W4 /permissive- /EHsc /Zc:__cplusplus /utf-8)
     if(GLOOM_WARNINGS_AS_ERRORS)
         target_compile_options(gloom_engine PRIVATE /WX)
     endif()
@@ -198,7 +202,10 @@ else()
     endif()
 endif()
 
-add_executable(gloom apps/gloom/main.cpp)
+add_executable(gloom apps/gloom/main.cpp apps/gloom/desktop.cpp)
+if(MSVC)
+    target_compile_options(gloom PRIVATE /utf-8)
+endif()
 target_link_libraries(gloom PRIVATE gloom_engine)
 target_compile_definitions(gloom PRIVATE
     GLOOM_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}"
@@ -369,8 +376,20 @@ add_custom_command(OUTPUT "${GLOOM_FACTORY_CONTENT_DIR}/legacy/soul_reaper.gasse
             game:/legacy/soul_reaper.gltf cache:/legacy/soul_reaper.gasset
     DEPENDS gloom_asset_cooker "${CMAKE_CURRENT_SOURCE_DIR}/assets/legacy/soul_reaper.gltf"
             "${CMAKE_CURRENT_SOURCE_DIR}/assets/legacy/soul_reaper.bin" ${GLOOM_ORIGINAL_TEXTURES} VERBATIM)
+foreach(weapon sniper shotgun minigun iron_hell_goat)
+    add_custom_command(OUTPUT "${GLOOM_FACTORY_CONTENT_DIR}/legacy/${weapon}.gasset"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${GLOOM_FACTORY_CONTENT_DIR}/legacy"
+        COMMAND $<TARGET_FILE:gloom_asset_cooker> "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${GLOOM_FACTORY_CONTENT_DIR}"
+                "game:/legacy/${weapon}.gltf" "cache:/legacy/${weapon}.gasset"
+        DEPENDS gloom_asset_cooker "${CMAKE_CURRENT_SOURCE_DIR}/assets/legacy/${weapon}.gltf"
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets/legacy/${weapon}.bin" ${GLOOM_ORIGINAL_TEXTURES} VERBATIM)
+endforeach()
 add_custom_target(gloom_project_content ALL DEPENDS "${GLOOM_FACTORY_CONTENT_DIR}/legacy/factory.gasset"
     "${GLOOM_FACTORY_CONTENT_DIR}/legacy/soul_reaper.gasset"
+    "${GLOOM_FACTORY_CONTENT_DIR}/legacy/sniper.gasset"
+    "${GLOOM_FACTORY_CONTENT_DIR}/legacy/shotgun.gasset"
+    "${GLOOM_FACTORY_CONTENT_DIR}/legacy/minigun.gasset"
+    "${GLOOM_FACTORY_CONTENT_DIR}/legacy/iron_hell_goat.gasset"
     "${GLOOM_FACTORY_CONTENT_DIR}/characters/original/archangel.gasset"
     "${GLOOM_FACTORY_CONTENT_DIR}/characters/original/shadow.gasset"
     "${GLOOM_FACTORY_CONTENT_DIR}/characters/original/soul_reaper.gasset"
@@ -492,6 +511,24 @@ if(BUILD_TESTING)
     add_executable(gloom_factory_restoration_tests tests/factory_restoration_tests.cpp)
     add_executable(gloom_character_restoration_tests tests/character_restoration_tests.cpp)
     add_executable(gloom_animation_vfx_tests tests/animation_vfx_tests.cpp)
+    add_executable(gloom_legacy_movement_tests tests/legacy_movement_tests.cpp)
+    target_link_libraries(gloom_legacy_movement_tests PRIVATE gloom_engine)
+    add_test(NAME gloom.legacy_movement COMMAND gloom_legacy_movement_tests)
+
+    add_executable(gloom_legacy_arsenal_tests tests/legacy_arsenal_tests.cpp)
+    add_executable(gloom_legacy_pickups_tests tests/legacy_pickups_tests.cpp)
+    target_link_libraries(gloom_legacy_pickups_tests PRIVATE gloom_engine)
+    add_test(NAME gloom.legacy_pickups COMMAND gloom_legacy_pickups_tests)
+    target_link_libraries(gloom_legacy_arsenal_tests PRIVATE gloom_engine)
+    add_test(NAME gloom.legacy_arsenal COMMAND gloom_legacy_arsenal_tests)
+
+    add_executable(gloom_ui_tests tests/ui_tests.cpp)
+    target_link_libraries(gloom_ui_tests PRIVATE gloom_engine)
+    target_compile_definitions(gloom_ui_tests PRIVATE GLOOM_UI_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets/ui/original")
+    if(MSVC)
+        target_compile_options(gloom_ui_tests PRIVATE /utf-8)
+    endif()
+    add_test(NAME gloom.ui COMMAND gloom_ui_tests)
     target_link_libraries(gloom_animation_vfx_tests PRIVATE gloom_asset_pipeline)
     target_compile_definitions(gloom_animation_vfx_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
     add_test(NAME gloom.animation_vfx COMMAND gloom_animation_vfx_tests)
@@ -506,6 +543,16 @@ if(BUILD_TESTING)
         -Server "$<TARGET_FILE:gloom_slice_server>" -Clients "$<TARGET_FILE:gloom_animation_network_tests>"
         -Output "${CMAKE_CURRENT_BINARY_DIR}/animation-dedicated/$<CONFIG>")
     set_tests_properties(gloom.animation_dedicated PROPERTIES LABELS network TIMEOUT 95)
+    add_test(NAME gloom.ui_visual_review COMMAND "${CMAKE_COMMAND}"
+        "-DEXECUTABLE=$<TARGET_FILE:gloom>" "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/ui-review/$<CONFIG>"
+        "-DCOMPARATOR=$<TARGET_FILE:gloom_visual_capture_tests>" "-DREFERENCES=${CMAKE_CURRENT_SOURCE_DIR}/tests/ui-visual-references"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tools/review/ui_capture.cmake")
+    set_tests_properties(gloom.ui_visual_review PROPERTIES LABELS "graphics;visual" TIMEOUT 110)
+    add_test(NAME gloom.ui_flow COMMAND "${GLOOM_POWERSHELL}" -NoProfile -ExecutionPolicy Bypass
+        -File "${CMAKE_CURRENT_SOURCE_DIR}/tools/review/ui_flow.ps1"
+        -Server "$<TARGET_FILE:gloom_slice_server>" -Client "$<TARGET_FILE:gloom>"
+        -Output "${CMAKE_CURRENT_BINARY_DIR}/ui-flow/$<CONFIG>")
+    set_tests_properties(gloom.ui_flow PROPERTIES LABELS "graphics;network" TIMEOUT 155)
 
     target_link_libraries(gloom_character_restoration_tests PRIVATE gloom_asset_pipeline)
     target_compile_definitions(gloom_character_restoration_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")

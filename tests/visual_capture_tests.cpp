@@ -65,24 +65,27 @@ bool acceptable(const Difference& d) { return d.mean <= 4.0 && d.changed <= 0.01
 }
 int main(int argc, const char* const* argv) try {
     if (argc < 3 || argc > 5) throw std::invalid_argument{"Usage: visual_capture_tests CAPTURES REFERENCES [--factory] [--write-reference]"};
-    bool approve=false,factory=false,characters=false;
+    bool approve=false,factory=false,characters=false,ui=false;
     for(int i=3;i<argc;++i) {
         if(std::string_view{argv[i]}=="--write-reference") approve=true;
         else if(std::string_view{argv[i]}=="--factory") factory=true;
         else if(std::string_view{argv[i]}=="--characters") characters=true;
+        else if(std::string_view{argv[i]}=="--ui") ui=true;
         else throw std::invalid_argument{"Unknown visual comparison option"};
     }
     if (approve) std::filesystem::create_directories(argv[2]);
     bool failed = false;
     const auto views=characters ? std::span<const gloom::review::View>{gloom::review::character_views} : factory ? std::span<const gloom::review::View>{gloom::review::factory_views} : std::span<const gloom::review::View>{gloom::review::views};
-    for (const auto& view : views) {
-        const auto name = std::string{view.name} + ".ppm";
+    std::vector<std::string> names;
+    if(ui){for(const auto width:{1280,1920,2560})for(int page=0;page<16;++page)names.push_back(std::to_string(width)+"/page-"+std::to_string(page)+".ppm");}
+    else for(const auto& view:views)names.push_back(std::string{view.name}+".ppm");
+    for (const auto& name : names) {
         const auto actual = thumbnail(read(std::filesystem::path{argv[1]} / name));
         const auto path = std::filesystem::path{argv[2]} / name;
-        if (approve) { write(actual, path); continue; }
+        if (approve) { std::filesystem::create_directories(path.parent_path());write(actual, path); continue; }
         const auto reference = read(path);
         const auto diff = difference(actual, reference);
-        std::cout << view.name << ": mean=" << diff.mean << "/255 changed=" << diff.changed*100
+        std::cout << name << ": mean=" << diff.mean << "/255 changed=" << diff.changed*100
                   << "% worst_tile=" << diff.worst_tile << "/255\n";
         failed |= !acceptable(diff);
         // Ensure a blank image or a missing foreground quadrant cannot pass a

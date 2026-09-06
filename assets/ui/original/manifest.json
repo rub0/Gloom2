@@ -1,0 +1,1255 @@
+{
+  "sources": {
+    "Exes/media/gui/Component_Library.swf": "9a150c6fadfdc57e89bf05599fc0f9312a4d8f882d54715715c48f8a5e8adb50",
+    "Exes/media/gui/ESCMenu.swf": "f2e94ddd0b74c90840f2338e7a606a3947bbd20f3e55be83db298574a727d8aa",
+    "Exes/media/gui/Hud.swf": "7608efdcef8875dab44e5a64287b9a1be965b3f0cb3337c4bad040179b480851",
+    "Exes/media/gui/KilledBox.swf": "50e03e827785966151c0653b9555abd874b892c7cfdd783f580f28759b5306df",
+    "Exes/media/gui/LoadingMenu.swf": "48d549a5d03c08a9e606583110be824ee3b91121d3226bd35adea27529f15ed9",
+    "Exes/media/gui/MenuPrincipal.swf": "3dd55d252620dd2078ac5a422d2a1bd368ee896ca82d85efe2bf32406eaedf93",
+    "Exes/media/gui/MultiplayerClient.swf": "8eb5a11466a3f4c51be5e2daff2817b2c5c62b21bf81917d102974146384dce0",
+    "Exes/media/gui/MultiplayerServer.swf": "a9018186fc2306856b4dac3fac49c6bf2d4f01ac43e265748a315476b4bd1076",
+    "Exes/media/gui/NetworkGame.swf": "fc40043d4c6d3c9c9e0d2e9be26e934685ca3008261bef1a584c0faa9e630ed3",
+    "Exes/media/gui/Respawn.swf": "f10c1c26de45a5fdf45f4e01d7f267457a8b674f77b5bc7e4c4c4125dcffd11c",
+    "Exes/media/gui/ScoreDM.swf": "b697770e8e357baf3526e379f647612af98826f4ce29e422af9081f894a97e58",
+    "Exes/media/gui/ScoreTDM.swf": "4349b081d1296457e84e333efe80c44756e0ff687abf6c59809103bb242c79f4",
+    "Exes/media/gui/SeleccionPersonaje.swf": "0fa0baa20728842b9c74ff4389278a290674a32f9a0936ceea0e8803ae2ab326",
+    "Exes/media/gui/SinglePlayer.swf": "b3af865115138c641416c0e22ca595dbc9f72c044ca863d8ca4264e8b619f1ab",
+    "Exes/media/gui/SpecHud.swf": "846bf355e85a5aad7d07534cab666862175c0277b679df8439a35374c05515c0",
+    "Exes/media/gui/SpectatorHud.swf": "33938ea8e647f7a11b1314032c1df32cc1743c4d3198127a9f11f08ed43cf072",
+    "Exes/media/gui/spreeMsg.swf": "5e2d83f1a51cf58d4115d3484b15186d06be23965d81a13979cbdddd8c70ccc8",
+    "Src/Flash GUI/MenuPrincipal/bg.png": "8489e27aeb1953c2243877b9c266902374929102d622151607844a3c06a1eb04",
+    "Exes/media/gui/fonts/DejaVuSans.ttf": "947cb278dda7c38f62f8d2cc53309bdfdb3bb2aab36b4a32b06044f378c6ea7f",
+    "Exes/media/fonts/HammerheadThin.ttf": "c577f1b99fbaaa2d58318860e10e0a4d61692e148fd38053077ed78486e690e0"
+  },
+  "swf": {
+    "Component_Library.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "2": 30,
+        "39": 39,
+        "78": 21,
+        "37": 43,
+        "74": 43,
+        "22": 4,
+        "32": 26,
+        "46": 16,
+        "20": 12,
+        "26": 18,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "Component_Library-159.png",
+          "size": [
+            160,
+            184
+          ]
+        },
+        {
+          "name": "Component_Library-160.png",
+          "size": [
+            160,
+            80
+          ]
+        },
+        {
+          "name": "Component_Library-161.png",
+          "size": [
+            160,
+            104
+          ]
+        },
+        {
+          "name": "Component_Library-162.png",
+          "size": [
+            376,
+            344
+          ]
+        },
+        {
+          "name": "Component_Library-163.png",
+          "size": [
+            160,
+            80
+          ]
+        },
+        {
+          "name": "Component_Library-164.png",
+          "size": [
+            160,
+            184
+          ]
+        },
+        {
+          "name": "Component_Library-165.png",
+          "size": [
+            160,
+            176
+          ]
+        },
+        {
+          "name": "Component_Library-166.png",
+          "size": [
+            160,
+            208
+          ]
+        },
+        {
+          "name": "Component_Library-167.png",
+          "size": [
+            160,
+            176
+          ]
+        },
+        {
+          "name": "Component_Library-168.png",
+          "size": [
+            192,
+            176
+          ]
+        },
+        {
+          "name": "Component_Library-169.png",
+          "size": [
+            160,
+            176
+          ]
+        },
+        {
+          "name": "Component_Library-170.png",
+          "size": [
+            160,
+            176
+          ]
+        }
+      ]
+    },
+    "ESCMenu.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "35": 5,
+        "2": 6,
+        "39": 8,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 6,
+        "74": 6,
+        "26": 4,
+        "8": 1,
+        "6": 1,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "ESCMenu-1.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "ESCMenu-4.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "ESCMenu-9.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "ESCMenu-13.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "ESCMenu-22.png",
+          "size": [
+            458,
+            400
+          ]
+        }
+      ]
+    },
+    "Hud.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "46": 4,
+        "35": 43,
+        "2": 46,
+        "39": 69,
+        "37": 11,
+        "74": 13,
+        "26": 15,
+        "83": 3,
+        "11": 2,
+        "36": 1,
+        "32": 2,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "Hud-3.png",
+          "size": [
+            460,
+            460
+          ]
+        },
+        {
+          "name": "Hud-10.png",
+          "size": [
+            421,
+            434
+          ]
+        },
+        {
+          "name": "Hud-13.png",
+          "size": [
+            539,
+            539
+          ]
+        },
+        {
+          "name": "Hud-18.png",
+          "size": [
+            779,
+            576
+          ]
+        },
+        {
+          "name": "Hud-31.png",
+          "size": [
+            58,
+            58
+          ]
+        },
+        {
+          "name": "Hud-34.png",
+          "size": [
+            54,
+            30
+          ]
+        },
+        {
+          "name": "Hud-37.png",
+          "size": [
+            54,
+            53
+          ]
+        },
+        {
+          "name": "Hud-40.png",
+          "size": [
+            62,
+            62
+          ]
+        },
+        {
+          "name": "Hud-43.png",
+          "size": [
+            21,
+            53
+          ]
+        },
+        {
+          "name": "Hud-46.png",
+          "size": [
+            14,
+            47
+          ]
+        },
+        {
+          "name": "Hud-50.png",
+          "size": [
+            22,
+            53
+          ]
+        },
+        {
+          "name": "Hud-53.png",
+          "size": [
+            15,
+            47
+          ]
+        },
+        {
+          "name": "Hud-57.png",
+          "size": [
+            28,
+            27
+          ]
+        },
+        {
+          "name": "Hud-60.png",
+          "size": [
+            20,
+            20
+          ]
+        },
+        {
+          "name": "Hud-76.png",
+          "size": [
+            256,
+            256
+          ]
+        },
+        {
+          "name": "Hud-80.png",
+          "size": [
+            672,
+            126
+          ]
+        },
+        {
+          "name": "Hud-83.png",
+          "size": [
+            28,
+            62
+          ]
+        },
+        {
+          "name": "Hud-93.png",
+          "size": [
+            122,
+            89
+          ]
+        },
+        {
+          "name": "Hud-96.png",
+          "size": [
+            97,
+            62
+          ]
+        },
+        {
+          "name": "Hud-99.png",
+          "size": [
+            97,
+            62
+          ]
+        },
+        {
+          "name": "Hud-102.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-106.png",
+          "size": [
+            122,
+            89
+          ]
+        },
+        {
+          "name": "Hud-109.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-112.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-115.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-119.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-122.png",
+          "size": [
+            122,
+            89
+          ]
+        },
+        {
+          "name": "Hud-125.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-128.png",
+          "size": [
+            97,
+            56
+          ]
+        },
+        {
+          "name": "Hud-132.png",
+          "size": [
+            122,
+            89
+          ]
+        },
+        {
+          "name": "Hud-135.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-138.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-141.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-145.png",
+          "size": [
+            122,
+            89
+          ]
+        },
+        {
+          "name": "Hud-148.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-151.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-154.png",
+          "size": [
+            97,
+            59
+          ]
+        },
+        {
+          "name": "Hud-158.png",
+          "size": [
+            55,
+            53
+          ]
+        },
+        {
+          "name": "Hud-161.png",
+          "size": [
+            52,
+            51
+          ]
+        },
+        {
+          "name": "Hud-164.png",
+          "size": [
+            52,
+            51
+          ]
+        },
+        {
+          "name": "Hud-167.png",
+          "size": [
+            52,
+            51
+          ]
+        },
+        {
+          "name": "Hud-171.png",
+          "size": [
+            51,
+            51
+          ]
+        },
+        {
+          "name": "Hud-174.png",
+          "size": [
+            51,
+            51
+          ]
+        },
+        {
+          "name": "Hud-177.png",
+          "size": [
+            51,
+            51
+          ]
+        }
+      ]
+    },
+    "KilledBox.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 3,
+        "74": 3,
+        "39": 1,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": []
+    },
+    "LoadingMenu.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "21": 1,
+        "2": 1,
+        "26": 2,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 1,
+        "74": 1,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "LoadingMenu-1.png",
+          "size": [
+            1366,
+            768
+          ]
+        }
+      ]
+    },
+    "MenuPrincipal.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "35": 5,
+        "2": 5,
+        "39": 11,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 16,
+        "74": 16,
+        "8": 1,
+        "6": 2,
+        "22": 1,
+        "26": 2,
+        "70": 1,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "MenuPrincipal-1.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "MenuPrincipal-4.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MenuPrincipal-9.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MenuPrincipal-13.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MenuPrincipal-34.png",
+          "size": [
+            1024,
+            1024
+          ]
+        }
+      ]
+    },
+    "MultiplayerClient.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "35": 11,
+        "2": 13,
+        "39": 21,
+        "75": 4,
+        "73": 4,
+        "88": 3,
+        "37": 22,
+        "74": 22,
+        "32": 1,
+        "43": 1,
+        "8": 1,
+        "6": 3,
+        "26": 13,
+        "22": 1,
+        "70": 1,
+        "82": 1,
+        "76": 1,
+        "1": 2,
+        "28": 5,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "MultiplayerClient-1.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "MultiplayerClient-4.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MultiplayerClient-9.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MultiplayerClient-13.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MultiplayerClient-24.png",
+          "size": [
+            659,
+            83
+          ]
+        },
+        {
+          "name": "MultiplayerClient-47.png",
+          "size": [
+            659,
+            83
+          ]
+        },
+        {
+          "name": "MultiplayerClient-50.png",
+          "size": [
+            920,
+            135
+          ]
+        },
+        {
+          "name": "MultiplayerClient-53.png",
+          "size": [
+            81,
+            24
+          ]
+        },
+        {
+          "name": "MultiplayerClient-54.png",
+          "size": [
+            115,
+            25
+          ]
+        },
+        {
+          "name": "MultiplayerClient-59.png",
+          "size": [
+            659,
+            83
+          ]
+        },
+        {
+          "name": "MultiplayerClient-70.png",
+          "size": [
+            458,
+            400
+          ]
+        }
+      ]
+    },
+    "MultiplayerServer.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 4,
+        "73": 4,
+        "88": 2,
+        "37": 27,
+        "39": 45,
+        "32": 9,
+        "35": 13,
+        "2": 19,
+        "8": 1,
+        "6": 3,
+        "74": 24,
+        "78": 1,
+        "26": 11,
+        "70": 8,
+        "82": 1,
+        "76": 1,
+        "1": 2,
+        "28": 5,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "MultiplayerServer-9.png",
+          "size": [
+            400,
+            35
+          ]
+        },
+        {
+          "name": "MultiplayerServer-15.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "MultiplayerServer-20.png",
+          "size": [
+            458,
+            400
+          ]
+        },
+        {
+          "name": "MultiplayerServer-28.png",
+          "size": [
+            30,
+            350
+          ]
+        },
+        {
+          "name": "MultiplayerServer-33.png",
+          "size": [
+            29,
+            73
+          ]
+        },
+        {
+          "name": "MultiplayerServer-40.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MultiplayerServer-45.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MultiplayerServer-49.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "MultiplayerServer-99.png",
+          "size": [
+            659,
+            83
+          ]
+        },
+        {
+          "name": "MultiplayerServer-102.png",
+          "size": [
+            920,
+            135
+          ]
+        },
+        {
+          "name": "MultiplayerServer-105.png",
+          "size": [
+            158,
+            24
+          ]
+        },
+        {
+          "name": "MultiplayerServer-108.png",
+          "size": [
+            176,
+            24
+          ]
+        },
+        {
+          "name": "MultiplayerServer-114.png",
+          "size": [
+            659,
+            83
+          ]
+        }
+      ]
+    },
+    "NetworkGame.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "35": 4,
+        "2": 5,
+        "39": 7,
+        "75": 2,
+        "73": 2,
+        "88": 2,
+        "37": 10,
+        "74": 10,
+        "8": 1,
+        "6": 1,
+        "26": 5,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "NetworkGame-1.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "NetworkGame-4.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "NetworkGame-9.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "NetworkGame-13.png",
+          "size": [
+            230,
+            70
+          ]
+        }
+      ]
+    },
+    "Respawn.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 4,
+        "74": 4,
+        "26": 4,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": []
+    },
+    "ScoreDM.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "83": 1,
+        "37": 11,
+        "74": 11,
+        "36": 1,
+        "2": 1,
+        "39": 2,
+        "32": 3,
+        "26": 8,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": []
+    },
+    "ScoreTDM.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 9,
+        "74": 14,
+        "36": 1,
+        "2": 4,
+        "39": 7,
+        "32": 1,
+        "35": 3,
+        "11": 5,
+        "26": 3,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "ScoreTDM-12.png",
+          "size": [
+            358,
+            302
+          ]
+        },
+        {
+          "name": "ScoreTDM-21.png",
+          "size": [
+            358,
+            302
+          ]
+        },
+        {
+          "name": "ScoreTDM-26.png",
+          "size": [
+            358,
+            302
+          ]
+        }
+      ]
+    },
+    "SeleccionPersonaje.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "32": 20,
+        "75": 3,
+        "73": 3,
+        "88": 3,
+        "11": 17,
+        "74": 20,
+        "39": 53,
+        "35": 1,
+        "2": 12,
+        "78": 13,
+        "22": 7,
+        "21": 3,
+        "8": 1,
+        "6": 2,
+        "20": 1,
+        "26": 12,
+        "83": 1,
+        "37": 3,
+        "82": 1,
+        "76": 1,
+        "1": 4,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "SeleccionPersonaje-7.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "SeleccionPersonaje-85.png",
+          "size": [
+            595,
+            842
+          ]
+        },
+        {
+          "name": "SeleccionPersonaje-91.png",
+          "size": [
+            1389,
+            1211
+          ]
+        },
+        {
+          "name": "SeleccionPersonaje-94.png",
+          "size": [
+            1540,
+            1800
+          ]
+        },
+        {
+          "name": "SeleccionPersonaje-96.png",
+          "size": [
+            802,
+            953
+          ]
+        }
+      ]
+    },
+    "SinglePlayer.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 6,
+        "73": 6,
+        "37": 11,
+        "39": 21,
+        "32": 3,
+        "35": 8,
+        "2": 10,
+        "83": 1,
+        "74": 10,
+        "88": 3,
+        "8": 1,
+        "6": 2,
+        "11": 1,
+        "26": 7,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "SinglePlayer-8.png",
+          "size": [
+            400,
+            35
+          ]
+        },
+        {
+          "name": "SinglePlayer-12.png",
+          "size": [
+            64,
+            64
+          ]
+        },
+        {
+          "name": "SinglePlayer-19.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "SinglePlayer-24.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "SinglePlayer-28.png",
+          "size": [
+            230,
+            70
+          ]
+        },
+        {
+          "name": "SinglePlayer-37.png",
+          "size": [
+            30,
+            350
+          ]
+        },
+        {
+          "name": "SinglePlayer-42.png",
+          "size": [
+            29,
+            73
+          ]
+        },
+        {
+          "name": "SinglePlayer-47.png",
+          "size": [
+            458,
+            400
+          ]
+        }
+      ]
+    },
+    "SpecHud.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "32": 1,
+        "26": 2,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 1,
+        "74": 1,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": []
+    },
+    "SpectatorHud.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "32": 1,
+        "26": 4,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 5,
+        "74": 5,
+        "39": 5,
+        "35": 1,
+        "2": 1,
+        "70": 2,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": [
+        {
+          "name": "SpectatorHud-7.png",
+          "size": [
+            62,
+            62
+          ]
+        }
+      ]
+    },
+    "spreeMsg.swf": {
+      "tags": {
+        "69": 1,
+        "77": 1,
+        "9": 1,
+        "86": 1,
+        "75": 1,
+        "73": 1,
+        "88": 1,
+        "37": 2,
+        "74": 2,
+        "39": 3,
+        "26": 2,
+        "82": 1,
+        "76": 1,
+        "1": 1,
+        "0": 1
+      },
+      "images": []
+    }
+  },
+  "selected_bitmaps": {
+    "frame": "Hud-80.png",
+    "reaper": "Hud-96.png",
+    "bite": "Hud-171.png",
+    "heal": "Hud-161.png",
+    "health": "Hud-83.png",
+    "crosshair": "Hud-40.png",
+    "logo": "MenuPrincipal-34.png",
+    "archangel": "SeleccionPersonaje-94.png",
+    "shadow": "SeleccionPersonaje-85.png",
+    "art": "LoadingMenu-1.png",
+    "minigun": "Hud-135.png",
+    "shotgun": "Hud-148.png",
+    "sniper": "Hud-119.png",
+    "goat": "Hud-109.png",
+    "button": "MenuPrincipal-13.png",
+    "ring": "Hud-13.png"
+  },
+  "atlas_sha256": "cd1289a5b258552c05e70bc2ca1e43dede7fc842306b846ad6848b47ea30fbcb"
+}

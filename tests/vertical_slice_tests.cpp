@@ -259,6 +259,9 @@ int main() try {
     }
     for (std::uint32_t tick = 0; tick < 100; ++tick) {
         lava_simulation.tick({.axis_z = 1.0F}, {});
+        const auto lava_state=lava_simulation.snapshot();
+        expect(lava_state.player.life==legacy_default_life || lava_state.player.life==0,
+            "Lava must kill on first contact, not drain life over time");
     }
     expect(lava_simulation.snapshot().player.life < legacy_default_life,
            "Jolt lava trigger did not apply authoritative volume damage");

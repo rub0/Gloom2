@@ -1,0 +1,203 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Gloom legacy importer 1"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "minigun",
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.15,
+        0.15,
+        0.15
+      ],
+      "rotation": [
+        0,
+        0.0,
+        0,
+        1.0
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "miniGun",
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0,
+        "roughnessFactor": 0.408248290463863,
+        "baseColorTexture": {
+          "index": 0
+        }
+      },
+      "extras": {
+        "gloom": {
+          "sourceMaterial": "miniGun"
+        }
+      },
+      "extensions": {
+        "KHR_materials_specular": {
+          "specularFactor": 1,
+          "specularColorTexture": {
+            "index": 2
+          }
+        },
+        "KHR_materials_emissive_strength": {
+          "emissiveStrength": 1.0
+        }
+      },
+      "normalTexture": {
+        "index": 1
+      },
+      "emissiveTexture": {
+        "index": 4
+      },
+      "emissiveFactor": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "source": 1,
+      "sampler": 0
+    },
+    {
+      "source": 2,
+      "sampler": 0
+    },
+    {
+      "source": 3,
+      "sampler": 0
+    },
+    {
+      "source": 4,
+      "sampler": 0
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/e3d9b8a4ea27cfc0.png"
+    },
+    {
+      "uri": "textures/f86fbce139cb7113.png"
+    },
+    {
+      "uri": "textures/e1478687d5fb91be.png"
+    },
+    {
+      "uri": "textures/1e4ddfe336cdd069.png"
+    },
+    {
+      "uri": "textures/6460e124484081cb.png"
+    }
+  ],
+  "samplers": [
+    {
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 170424
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 170424,
+      "byteLength": 170424
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 340848,
+      "byteLength": 113616
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 454464,
+      "byteLength": 56808
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 14202,
+      "type": "VEC3",
+      "min": [
+        -1.2404661178588867,
+        0.17766229808330536,
+        -4.00867223739624
+      ],
+      "max": [
+        1.2218505144119263,
+        3.5716347694396973,
+        5.0597639083862305
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 14202,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 14202,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "count": 14202,
+      "type": "SCALAR"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_materials_specular",
+    "KHR_materials_emissive_strength"
+  ],
+  "buffers": [
+    {
+      "uri": "minigun.bin",
+      "byteLength": 511272
+    }
+  ]
+}

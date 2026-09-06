@@ -51,7 +51,7 @@ public:
     // A fresh virtual capsule query: no hidden contact history survives rollback.
     [[nodiscard]] physics::CharacterState query_character_motion(
         const physics::CharacterDesc& description, physics::Vec3 velocity,
-        float delta_seconds, physics::Vec3 gravity);
+        float delta_seconds, physics::Vec3 gravity, float contact_padding = .02F);
 
 private:
     struct Impl;

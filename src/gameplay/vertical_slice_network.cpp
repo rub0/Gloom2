@@ -1,6 +1,7 @@
 #include <gloom/gameplay/vertical_slice_network.hpp>
 #include <gloom/gameplay/factory_scene.hpp>
 #include <gloom/gameplay/component_replication.hpp>
+#include <gloom/gameplay/legacy_arsenal.hpp>
 
 #include <algorithm>
 #include <array>
@@ -18,13 +19,14 @@
 namespace gloom::gameplay {
 namespace {
 
-constexpr std::size_t combatant_payload_size = 96;
-constexpr std::size_t hud_payload_size = 28;
+constexpr std::size_t combatant_payload_size = 115;
+constexpr std::size_t hud_payload_size = 36;
 constexpr std::size_t network_payload_size = 48;
 constexpr std::size_t mechanism_payload_size = 32;
+constexpr std::size_t projectiles_payload_size = 32*29+1;
 constexpr std::size_t slice_payload_size = combatant_payload_size * 2 +
                                            mechanism_payload_size + hud_payload_size +
-                                           network_payload_size + 4;
+                                           network_payload_size + projectiles_payload_size + 4 + 1;
 constexpr std::size_t maximum_pending_remote_inputs = 256;
 
 template <typename Integer>
@@ -76,12 +78,16 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     append_integer(output, static_cast<std::uint8_t>(view.ability));
     append_integer(output, static_cast<std::uint8_t>(view.primary_ability_active));
     append_integer(output, static_cast<std::uint8_t>(view.alive));
-    append_integer(output, static_cast<std::uint8_t>(view.grounded));
+    append_integer(output, static_cast<std::uint8_t>((view.grounded ? 1 : 0) | (view.air_dodge_available << 1)));
     append_float(output,view.aim_pitch);
     append_integer(output,view.shot_sequence);append_integer(output,view.shot_tick);
     for (float x:view.shot_impact) append_float(output,x);
     append_integer(output,static_cast<std::uint8_t>(view.shot_hit));
     append_integer(output,static_cast<std::uint8_t>(view.shot_contact));
+    for(const auto value:view.ammunition)append_integer(output,value);
+    append_integer(output,view.owned_weapons);
+    append_float(output,view.weapon_charge_fraction);
+    append_integer(output,view.damage_modifier_ticks);append_integer(output,view.cooldown_modifier_ticks);
 }
 
 [[nodiscard]] CombatantView read_combatant(const std::span<const std::byte> input,
@@ -106,17 +112,29 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     view.ability = static_cast<SliceAbility>(read_integer<std::uint8_t>(input, offset));
     view.primary_ability_active = read_integer<std::uint8_t>(input, offset) != 0;
     view.alive = read_integer<std::uint8_t>(input, offset) != 0;
-    view.grounded = read_integer<std::uint8_t>(input, offset) != 0;
+    const auto movement_flags=read_integer<std::uint8_t>(input, offset);
+    if(movement_flags>3)throw std::runtime_error{"Invalid movement flags"};
+    view.grounded = (movement_flags & 1) != 0;
+    view.air_dodge_available = (movement_flags & 2) != 0;
     view.aim_pitch=read_float(input,offset);
     view.shot_sequence=read_integer<std::uint32_t>(input,offset);view.shot_tick=read_integer<std::uint64_t>(input,offset);
     for (auto& x:view.shot_impact) x=read_float(input,offset);
     view.shot_hit=read_integer<std::uint8_t>(input,offset)!=0;
     view.shot_contact=read_integer<std::uint8_t>(input,offset)!=0;
+    for(auto& value:view.ammunition)value=read_integer<std::uint16_t>(input,offset);
+    view.owned_weapons=read_integer<std::uint8_t>(input,offset);
+    view.weapon_charge_fraction=read_float(input,offset);
+    view.damage_modifier_ticks=read_integer<std::uint16_t>(input,offset);
+    view.cooldown_modifier_ticks=read_integer<std::uint16_t>(input,offset);
     return view;
 }
 
 [[nodiscard]] bool valid_combatant(const CombatantView& view) noexcept {
-    return view.entity != 0 && std::isfinite(view.aim_pitch) && std::abs(view.aim_pitch)<=1.571F &&
+    for(std::size_t i=0;i<slice_weapon_count;++i)
+        if(view.ammunition[i]>legacy_weapon_rule(static_cast<SliceWeapon>(i)).maximum_ammo)return false;
+    return view.entity != 0 && view.damage_modifier_ticks<=900 && view.cooldown_modifier_ticks<=900 && std::isfinite(view.aim_pitch) && std::abs(view.aim_pitch)<=1.571F &&
+           std::isfinite(view.weapon_charge_fraction) && view.weapon_charge_fraction>=0 && view.weapon_charge_fraction<=1 &&
+           view.owned_weapons>0 && (view.owned_weapons&~0x1fU)==0 &&
            std::ranges::all_of(view.shot_impact,[](float x){return std::isfinite(x);}) &&
            (!view.shot_hit || view.shot_contact) && std::isfinite(view.position_x) &&
            std::isfinite(view.position_y) && std::isfinite(view.position_z) &&
@@ -138,6 +156,19 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
            std::isfinite(view.position_y) && std::isfinite(view.position_z) &&
            std::isfinite(view.velocity_x) && std::isfinite(view.velocity_y) &&
            std::isfinite(view.velocity_z);
+}
+
+[[nodiscard]] bool valid_pickups(const SliceSnapshot& snapshot) {
+    if(snapshot.pickup_count!=(snapshot.scene_id?factory_pickup_count:0))return false;
+    for(std::size_t i=0;i<snapshot.pickup_count;++i) {
+        const auto& p=snapshot.pickups[i];
+        if(!std::isfinite(p.position.x)||!std::isfinite(p.position.y)||!std::isfinite(p.position.z)||
+           p.phase>PickupPhase::respawning || p.pulling_player>2 ||
+           (p.phase==PickupPhase::pulling)!=(p.pulling_player!=0) ||
+           (p.phase==PickupPhase::respawning)!=(p.respawn_remaining!=0) ||
+           p.respawn_remaining>original_factory().pickups[i].respawn_ticks)return false;
+    }
+    return true;
 }
 
 void append_mechanism(std::vector<std::byte>& output,
@@ -169,6 +200,10 @@ struct AbilityCommand {
     float aim_y{0.0F};
     float aim_z{0.0F};
 };
+
+struct WeaponCommand {std::uint32_t sequence{};network::NetworkEntityId entity{};float aim_x{},aim_y{},aim_z{};bool primary{},secondary{};std::uint8_t selection{255};};
+[[nodiscard]] network::ProtocolMessage encode_weapon_command(const WeaponCommand& c){network::ProtocolMessage m;m.kind=network::MessageKind::weapon_command;m.sequence=c.sequence;append_integer(m.payload,c.entity);append_float(m.payload,c.aim_x);append_float(m.payload,c.aim_y);append_float(m.payload,c.aim_z);append_integer(m.payload,static_cast<std::uint8_t>((c.primary?1:0)|(c.secondary?2:0)));append_integer(m.payload,c.selection);return m;}
+[[nodiscard]] std::optional<WeaponCommand> decode_weapon_command(const network::ProtocolMessage& m){if(m.kind!=network::MessageKind::weapon_command||!m.sequence||m.payload.size()!=22)return{};std::size_t o=0;WeaponCommand c{m.sequence,read_integer<std::uint64_t>(m.payload,o),read_float(m.payload,o),read_float(m.payload,o),read_float(m.payload,o)};const auto flags=read_integer<std::uint8_t>(m.payload,o);c.selection=read_integer<std::uint8_t>(m.payload,o);const float length=std::sqrt(c.aim_x*c.aim_x+c.aim_y*c.aim_y+c.aim_z*c.aim_z);if(!c.entity||flags>3||(c.selection>=slice_weapon_count&&c.selection!=255)||!std::isfinite(length)||length<1e-5F)return{};c.aim_x/=length;c.aim_y/=length;c.aim_z/=length;c.primary=(flags&1)!=0;c.secondary=(flags&2)!=0;return c;}
 
 [[nodiscard]] network::ProtocolMessage encode_ability_command(const AbilityCommand& command) {
     network::ProtocolMessage message;
@@ -237,7 +272,11 @@ network::ProtocolMessage encode_slice_snapshot(const SliceSnapshot& snapshot,
         !std::isfinite(snapshot.hud.life_fraction) ||
         !std::isfinite(snapshot.hud.shield_fraction) ||
         !std::isfinite(snapshot.hud.weapon_ready_fraction) ||
-        !std::isfinite(snapshot.hud.primary_ability_ready_fraction)) {
+        !std::isfinite(snapshot.hud.primary_ability_ready_fraction) ||
+        !std::isfinite(snapshot.hud.weapon_charge_fraction) ||
+        snapshot.hud.weapon_charge_fraction<0 || snapshot.hud.weapon_charge_fraction>1 ||
+        snapshot.hud.ammunition>snapshot.hud.maximum_ammunition || snapshot.projectile_count>snapshot.projectiles.size() ||
+        !std::ranges::all_of(std::span{snapshot.projectiles}.first(snapshot.projectile_count),[](const WeaponProjectileView& p){return p.id&&p.owner&&static_cast<std::size_t>(p.weapon)<slice_weapon_count&&std::isfinite(p.position_x)&&std::isfinite(p.position_y)&&std::isfinite(p.position_z)&&std::isfinite(p.radius)&&p.radius>0;})) {
         throw std::invalid_argument{"Slice snapshot contains invalid fields"};
     }
     network::ProtocolMessage message;
@@ -260,20 +299,33 @@ network::ProtocolMessage encode_slice_snapshot(const SliceSnapshot& snapshot,
     append_integer(message.payload, static_cast<std::uint8_t>(snapshot.player.alive));
     append_integer(message.payload, snapshot.hud.kills);
     append_integer(message.payload, snapshot.hud.deaths);
+    append_integer(message.payload,snapshot.hud.ammunition);
+    append_integer(message.payload,snapshot.hud.maximum_ammunition);
+    append_float(message.payload,snapshot.hud.weapon_charge_fraction);
     append_integer(message.payload, snapshot.network.active_sessions);
     append_integer(message.payload, snapshot.network.authorized_input_batches);
     append_integer(message.payload, snapshot.network.authorized_fire_commands);
     append_integer(message.payload, snapshot.network.authorized_ability_commands);
     append_integer(message.payload, snapshot.network.rejected_commands);
     append_integer(message.payload, snapshot.network.reconciliation_count);
+    append_integer(message.payload,snapshot.projectile_count);
+    for(const auto& p:snapshot.projectiles){append_integer(message.payload,p.id);append_integer(message.payload,p.owner);append_integer(message.payload,static_cast<std::uint8_t>(p.weapon));append_float(message.payload,p.position_x);append_float(message.payload,p.position_y);append_float(message.payload,p.position_z);append_float(message.payload,p.radius);}
     append_integer(message.payload, snapshot.scene_id);
+    if(!valid_pickups(snapshot))throw std::invalid_argument{"Invalid pickup snapshot"};
+    append_integer(message.payload,snapshot.pickup_count);
+    for(const auto& p:std::span{snapshot.pickups}.first(snapshot.pickup_count)) {
+        append_float(message.payload,p.position.x);append_float(message.payload,p.position.y);append_float(message.payload,p.position.z);
+        append_integer(message.payload,p.respawn_remaining);
+        append_integer(message.payload,static_cast<std::uint8_t>(p.phase));append_integer(message.payload,p.pulling_player);
+    }
     return message;
 }
 
 std::expected<SliceSnapshot, std::string>
 decode_slice_snapshot(const network::ProtocolMessage& message) {
     if (message.kind != network::MessageKind::gameplay_snapshot ||
-        message.payload.size() != slice_payload_size || message.sequence == 0) {
+        message.payload.size() < slice_payload_size ||
+        message.payload.size() > slice_payload_size+factory_pickup_count*16 || message.sequence == 0) {
         return std::unexpected{"Message is not a Gloom slice snapshot"};
     }
     std::size_t offset = 0;
@@ -293,6 +345,9 @@ decode_slice_snapshot(const network::ProtocolMessage& message) {
     static_cast<void>(read_integer<std::uint8_t>(message.payload, offset));
     snapshot.hud.kills = read_integer<std::uint32_t>(message.payload, offset);
     snapshot.hud.deaths = read_integer<std::uint32_t>(message.payload, offset);
+    snapshot.hud.ammunition=read_integer<std::uint16_t>(message.payload,offset);
+    snapshot.hud.maximum_ammunition=read_integer<std::uint16_t>(message.payload,offset);
+    snapshot.hud.weapon_charge_fraction=read_float(message.payload,offset);
     snapshot.network.active_sessions = read_integer<std::uint64_t>(message.payload, offset);
     snapshot.network.authorized_input_batches =
         read_integer<std::uint64_t>(message.payload, offset);
@@ -303,13 +358,29 @@ decode_slice_snapshot(const network::ProtocolMessage& message) {
     snapshot.network.rejected_commands = read_integer<std::uint64_t>(message.payload, offset);
     snapshot.network.reconciliation_count =
         read_integer<std::uint64_t>(message.payload, offset);
+    snapshot.projectile_count=read_integer<std::uint8_t>(message.payload,offset);
+    for(auto& p:snapshot.projectiles){p.id=read_integer<std::uint32_t>(message.payload,offset);p.owner=read_integer<std::uint64_t>(message.payload,offset);p.weapon=static_cast<SliceWeapon>(read_integer<std::uint8_t>(message.payload,offset));p.position_x=read_float(message.payload,offset);p.position_y=read_float(message.payload,offset);p.position_z=read_float(message.payload,offset);p.radius=read_float(message.payload,offset);}
     snapshot.scene_id = read_integer<std::uint32_t>(message.payload, offset);
+    snapshot.pickup_count=read_integer<std::uint8_t>(message.payload,offset);
+    if(snapshot.pickup_count>factory_pickup_count || message.payload.size()!=slice_payload_size+snapshot.pickup_count*16)
+        return std::unexpected{"Invalid pickup payload length"};
+    for(auto& p:std::span{snapshot.pickups}.first(snapshot.pickup_count)) {
+        p.position={read_float(message.payload,offset),read_float(message.payload,offset),read_float(message.payload,offset)};
+        p.respawn_remaining=read_integer<std::uint16_t>(message.payload,offset);
+        p.phase=static_cast<PickupPhase>(read_integer<std::uint8_t>(message.payload,offset));
+        p.pulling_player=read_integer<std::uint8_t>(message.payload,offset);
+    }
+    if(!valid_pickups(snapshot))return std::unexpected{"Invalid pickup snapshot"};
     if (!valid_combatant(snapshot.player) || !valid_combatant(snapshot.opponent) ||
         ((snapshot.scene_id != 0 and snapshot.scene_id != original_factory().scene_id) || (snapshot.scene_id == 0 && !valid_mechanism(snapshot.factory_lift)) || (snapshot.scene_id != 0 && snapshot.factory_lift.entity != 0)) ||
         !std::isfinite(snapshot.hud.life_fraction) ||
         !std::isfinite(snapshot.hud.shield_fraction) ||
         !std::isfinite(snapshot.hud.weapon_ready_fraction) ||
         !std::isfinite(snapshot.hud.primary_ability_ready_fraction) ||
+        !std::isfinite(snapshot.hud.weapon_charge_fraction) ||
+        snapshot.hud.weapon_charge_fraction<0 || snapshot.hud.weapon_charge_fraction>1 ||
+        snapshot.hud.ammunition>snapshot.hud.maximum_ammunition || snapshot.projectile_count>snapshot.projectiles.size() ||
+        !std::ranges::all_of(std::span{snapshot.projectiles}.first(snapshot.projectile_count),[](const WeaponProjectileView& p){return p.id&&p.owner&&static_cast<std::size_t>(p.weapon)<slice_weapon_count&&std::isfinite(p.position_x)&&std::isfinite(p.position_y)&&std::isfinite(p.position_z)&&std::isfinite(p.radius)&&p.radius>0;}) ||
         offset != message.payload.size()) {
         return std::unexpected{"Slice snapshot fields are invalid"};
     }
@@ -325,7 +396,10 @@ struct VerticalSliceRemoteHost::Impl {
         float aim_y{0.0F};
         float aim_z{0.0F};
         bool jump{false};
+        bool dodge{false};
         bool fire{false};
+        bool secondary_fire{false};
+        std::uint8_t weapon_selection{255};
         bool ability{false};
         std::deque<network::MovementInput> pending_inputs;
         std::uint32_t latest_received_input{0};
@@ -333,6 +407,8 @@ struct VerticalSliceRemoteHost::Impl {
         std::uint32_t acknowledged_input{0};
         std::uint32_t latest_fire_sequence{0};
         bool has_fire_sequence{false};
+        std::uint32_t latest_weapon_sequence{0};
+        bool has_weapon_sequence{false};
         std::uint32_t latest_ability_sequence{0};
         bool has_ability_sequence{false};
         std::uint32_t snapshot_sequence{0};
@@ -526,13 +602,13 @@ VerticalSliceRemoteHost::receive(const network::ConnectionId connection,
             control->second.aim_x = fire->aim_x;
             control->second.aim_y = fire->aim_y;
             control->second.aim_z = fire->aim_z;
-            control->second.fire = true;
             ++impl_->authorized_fire_commands;
         } else {
             ++impl_->rejected_commands;
         }
         return output;
     }
+    if(message.kind==network::MessageKind::weapon_command){const auto command=decode_weapon_command(message);const auto owner=impl_->sessions.controlled_entity(connection);auto control=impl_->controls.find(connection);if(command&&owner&&*owner==command->entity&&control!=impl_->controls.end()&&control->second.entity==*owner&&impl_->lobby.accepts_gameplay(*owner)&&(!control->second.has_weapon_sequence||network::sequence_more_recent(command->sequence,control->second.latest_weapon_sequence))){control->second.latest_weapon_sequence=command->sequence;control->second.has_weapon_sequence=true;control->second.aim_x=command->aim_x;control->second.aim_y=command->aim_y;control->second.aim_z=command->aim_z;control->second.fire=command->primary;control->second.secondary_fire=command->secondary;control->second.weapon_selection=command->selection;}else ++impl_->rejected_commands;return output;}
     if (message.kind == network::MessageKind::ability_command) {
         const auto ability = decode_ability_command(message);
         const auto owner = impl_->sessions.controlled_entity(connection);
@@ -581,12 +657,16 @@ std::vector<SliceHostMessage> VerticalSliceRemoteHost::tick_clients() {
     SliceInput opponent_input;
     for (auto& [connection, control] : impl_->controls) {
         static_cast<void>(connection);
+        const auto& authoritative=impl_->simulation.snapshot();
+        const auto& controlled=control.entity==VerticalSliceSimulation::player_entity?authoritative.player:authoritative.opponent;
+        if(!controlled.alive){control.fire=false;control.secondary_fire=false;}
         if (!control.pending_inputs.empty()) {
             const auto input = control.pending_inputs.front();
             control.pending_inputs.pop_front();
             control.axis_x = input.axis_x;
             control.axis_z = input.axis_z;
             control.jump = control.jump || input.jump;
+            control.dodge = control.dodge || input.dodge;
             control.acknowledged_input = input.sequence;
         }
         SliceInput input{.axis_x = control.axis_x,
@@ -595,8 +675,11 @@ std::vector<SliceHostMessage> VerticalSliceRemoteHost::tick_clients() {
                          .aim_y = control.aim_y,
                          .aim_z = control.aim_z,
                          .jump = std::exchange(control.jump, false),
-                         .fire_primary = std::exchange(control.fire, false),
-                         .use_primary_ability = std::exchange(control.ability, false)};
+                         .fire_primary = control.fire,
+                         .fire_secondary = control.secondary_fire,
+                         .use_primary_ability = std::exchange(control.ability, false),
+                         .dodge = std::exchange(control.dodge, false)};
+        input.weapon_selection=std::exchange(control.weapon_selection,static_cast<std::uint8_t>(255));
         if (control.entity == VerticalSliceSimulation::player_entity) {
             player_input = input;
         } else if (control.entity == VerticalSliceSimulation::opponent_entity) {
@@ -670,6 +753,7 @@ struct VerticalSliceRemoteClient::Impl {
     std::unique_ptr<network::PredictedMovementClient> prediction;
     SliceSnapshot snapshot;
     std::uint32_t next_fire_sequence{1};
+    std::uint32_t next_weapon_sequence{1};
     std::uint64_t next_fire_tick{0};
     std::uint32_t next_ability_sequence{1};
     std::uint64_t ability_request_tick{0};
@@ -774,7 +858,7 @@ VerticalSliceRemoteClient::receive(const network::ProtocolMessage& message,
             impl_->session.controlled_entity() != VerticalSliceSimulation::opponent_entity) {
             throw std::runtime_error{"Remote slice client received the wrong entity"};
         }
-        const auto settings = impl_->received_snapshot && impl_->snapshot.scene_id != 0 ? factory_movement_settings() : VerticalSliceSimulation::default_movement_settings();
+        const auto settings = impl_->received_snapshot && impl_->snapshot.scene_id != 0 ? factory_movement_settings([state=impl_.get()](network::NetworkEntityId){return state->received_snapshot?state->snapshot.player.character:state->desired_selection.character;}) : VerticalSliceSimulation::default_movement_settings();
         const auto entity = impl_->session.controlled_entity();
         impl_->compose_replication_entities(entity);
         const bool resumes_known_state = impl_->received_snapshot &&
@@ -794,6 +878,7 @@ VerticalSliceRemoteClient::receive(const network::ProtocolMessage& message,
                 .velocity_y = resumes_known_state ? impl_->snapshot.player.velocity_y : 0.0F,
                 .velocity_z = resumes_known_state ? impl_->snapshot.player.velocity_z : 0.0F,
                 .grounded = !resumes_known_state || impl_->snapshot.player.grounded,
+                .air_dodge_available = resumes_known_state && impl_->snapshot.player.air_dodge_available,
             });
         return SliceWireMessage{
             .message = impl_->session.create_clock_request(now_seconds),
@@ -857,7 +942,7 @@ VerticalSliceRemoteClient::receive(const network::ProtocolMessage& message,
                       .velocity_x = decoded->player.velocity_x,
                       .velocity_y = decoded->player.velocity_y,
                       .velocity_z = decoded->player.velocity_z,
-                      .grounded = decoded->player.grounded},
+                      .grounded = decoded->player.grounded, .air_dodge_available = decoded->player.air_dodge_available},
                      {.entity = decoded->opponent.entity,
                       .simulation_tick = decoded->simulation_tick,
                       .position_x = decoded->opponent.position_x,
@@ -866,11 +951,11 @@ VerticalSliceRemoteClient::receive(const network::ProtocolMessage& message,
                       .velocity_x = decoded->opponent.velocity_x,
                       .velocity_y = decoded->opponent.velocity_y,
                       .velocity_z = decoded->opponent.velocity_z,
-                      .grounded = decoded->opponent.grounded}},
+                      .grounded = decoded->opponent.grounded, .air_dodge_available = decoded->opponent.air_dodge_available}},
     };
     if (impl_->received_snapshot && decoded->scene_id != impl_->snapshot.scene_id) return std::nullopt;
     if (!impl_->received_snapshot && decoded->scene_id != 0) {
-        impl_->prediction = std::make_unique<network::PredictedMovementClient>(factory_movement_settings(),
+        impl_->prediction = std::make_unique<network::PredictedMovementClient>(factory_movement_settings([state=impl_.get()](network::NetworkEntityId){return state->received_snapshot?state->snapshot.player.character:state->desired_selection.character;}),
             decoded->player.entity, movement.entities.front());
     }
     const std::array component_entities{impl_->local_logical, impl_->remote_logical};
@@ -983,31 +1068,26 @@ VerticalSliceRemoteClient::create_input(const SliceInput& input) {
                                : predicting_ability ? impl_->predicted_ability_x : input.axis_x,
                           dead ? 0.0F
                                : predicting_ability ? impl_->predicted_ability_z : input.axis_z,
-                          !dead && input.jump),
+                          !dead && input.jump, !dead && input.dodge),
                       .delivery = network::Delivery::unreliable});
+    if(!dead&&std::isfinite(aim_length)&&aim_length>=1e-5F)output.push_back({.message=encode_weapon_command({impl_->next_weapon_sequence++,impl_->session.controlled_entity(),input.aim_x/aim_length,input.aim_y/aim_length,input.aim_z/aim_length,input.fire_primary,input.fire_secondary,input.weapon_selection}),.delivery=network::Delivery::unreliable});
     if (impl_->predicted_ability_remaining != 0) {
         --impl_->predicted_ability_remaining;
     }
-    if (dead || !input.fire_primary ||
-        impl_->snapshot.simulation_tick < impl_->next_fire_tick) {
-        // Ability traffic remains independent from weapon fire.
-    } else {
-        const float length = std::sqrt(input.aim_x * input.aim_x +
-                                       input.aim_y * input.aim_y +
-                                       input.aim_z * input.aim_z);
-        if (std::isfinite(length) && length >= 1.0e-5F) {
-            output.push_back({.message = network::encode_fire_command({
-                                  .sequence = impl_->next_fire_sequence++,
-                                  .shooter = impl_->session.controlled_entity(),
-                                  .estimated_server_tick = impl_->snapshot.simulation_tick,
-                                  .aim_x = input.aim_x / length,
-                                  .aim_y = input.aim_y / length,
-                                  .aim_z = input.aim_z / length,
-                                  .maximum_distance = soul_reaper_range,
-                              }),
-                              .delivery = network::Delivery::unreliable});
-            impl_->next_fire_tick = impl_->snapshot.simulation_tick + 30U;
-        }
+    if (!dead && input.fire_primary && impl_->snapshot.simulation_tick >= impl_->next_fire_tick &&
+        std::isfinite(aim_length) && aim_length >= 1.0e-5F) {
+        output.push_back({.message = network::encode_fire_command({
+                              .sequence = impl_->next_fire_sequence++,
+                              .shooter = impl_->session.controlled_entity(),
+                              .estimated_server_tick = impl_->snapshot.simulation_tick,
+                              .aim_x = input.aim_x / aim_length,
+                              .aim_y = input.aim_y / aim_length,
+                              .aim_z = input.aim_z / aim_length,
+                              .maximum_distance = legacy_weapon_rule(impl_->snapshot.player.weapon).range,
+                          }),
+                          .delivery = network::Delivery::unreliable});
+        impl_->next_fire_tick = impl_->snapshot.simulation_tick +
+            legacy_weapon_rule(impl_->snapshot.player.weapon).primary_cooldown_ticks;
     }
     if (!request_ability) {
         return output;

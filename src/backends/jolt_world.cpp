@@ -679,9 +679,10 @@ void JoltWorld::destroy_body(const physics::BodyId body) {
 
 physics::CharacterState JoltWorld::query_character_motion(
     const physics::CharacterDesc& description, const physics::Vec3 velocity,
-    const float delta_seconds, const physics::Vec3 gravity) {
+    const float delta_seconds, const physics::Vec3 gravity, const float contact_padding) {
     require_running();
     if (!(delta_seconds>0.0F) || !std::isfinite(delta_seconds) ||
+        !std::isfinite(contact_padding) || contact_padding<=0 || contact_padding>.5F ||
         !std::isfinite(description.radius) || !std::isfinite(description.cylinder_half_height) ||
         description.radius<=0 || description.cylinder_half_height<=0 ||
         !std::isfinite(description.position.x) || !std::isfinite(description.position.y) || !std::isfinite(description.position.z) ||
@@ -694,11 +695,17 @@ physics::CharacterState JoltWorld::query_character_motion(
         JPH::Vec3{0,description.cylinder_half_height+description.radius,0},JPH::Quat::sIdentity(),capsule};
     JPH::CharacterVirtualSettings settings;
     settings.mShape=standing;
+    settings.mCharacterPadding=contact_padding;
     settings.mMaxSlopeAngle=description.max_slope_angle_radians;
     settings.mSupportingVolume=JPH::Plane{JPH::Vec3::sAxisY(),-description.radius};
     JPH::CharacterVirtual character{&settings,JPH::RVec3{to_jolt(description.position)},
                                     JPH::Quat::sIdentity(),0,&impl_->system};
     character.SetLinearVelocity(to_jolt(velocity));
+    // Queries reconstruct the virtual character each tick. ExtendedUpdate needs
+    // the initial support state to follow descending stairs and slopes.
+    character.RefreshContacts(
+        impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
+        impl_->system.GetDefaultLayerFilter(object_layers::moving),{},{},impl_->temporary_allocator);
     JPH::CharacterVirtual::ExtendedUpdateSettings update;
     update.mWalkStairsStepUp={0,description.step_up_height,0};
     update.mStickToFloorStepDown=velocity.y>0 ? JPH::Vec3::sZero() : JPH::Vec3{0,-description.step_down_height,0};
@@ -706,8 +713,20 @@ physics::CharacterState JoltWorld::query_character_motion(
         impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
         impl_->system.GetDefaultLayerFilter(object_layers::moving),{},{},impl_->temporary_allocator);
     const auto position=character.GetPosition();
+    // CharacterVirtual resolves displacement, but preserves the requested
+    // velocity. Persist only momentum tangent to actual blocking contacts.
+    auto resolved=character.GetLinearVelocity();
+    for (unsigned pass=0; pass<4; ++pass)
+        for (const auto& contact:character.GetActiveContacts()) {
+            if (!contact.mHadCollision || contact.mIsSensorB || contact.mWasDiscarded) continue;
+            // Traversable ground redirects displacement, not stored horizontal
+            // momentum. Repeated projection against ramp normals brakes uphill.
+            if(contact.mSurfaceNormal.GetY()>=std::cos(description.max_slope_angle_radians))continue;
+            const float inward=(resolved-contact.mLinearVelocity).Dot(contact.mContactNormal);
+            if (inward<0) resolved-=inward*contact.mContactNormal;
+        }
     return {.position={static_cast<float>(position.GetX()),static_cast<float>(position.GetY()),static_cast<float>(position.GetZ())},
-            .velocity=from_jolt(character.GetLinearVelocity()),
+            .velocity=from_jolt(resolved),
             .ground_velocity=from_jolt(character.GetGroundVelocity()),
             .ground_normal=from_jolt(character.GetGroundNormal()),
             .grounded=character.GetGroundState()==JPH::CharacterBase::EGroundState::OnGround};

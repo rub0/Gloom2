@@ -1,4 +1,7 @@
+#include <gloom/platform/movement_actions.hpp>
 #include <gloom/assets/asset_loader.hpp>
+#include "desktop.hpp"
+#include "game_ui.hpp"
 #include <gloom/assets/residency_coordinator.hpp>
 #include <gloom/assets/scene_catalog.hpp>
 #include <gloom/assets/rig.hpp>
@@ -71,6 +74,10 @@ constexpr std::array slice_roster{
 
 [[nodiscard]] std::string_view selection_label(
     const gloom::gameplay::SlicePlayerSelection selection) noexcept {
+    if(selection.weapon==gloom::gameplay::SliceWeapon::sniper)return "Hound / Sniper";
+    if(selection.weapon==gloom::gameplay::SliceWeapon::shotgun)return "Hound / ShotGun";
+    if(selection.weapon==gloom::gameplay::SliceWeapon::minigun)return "Hound / MiniGun";
+    if(selection.weapon==gloom::gameplay::SliceWeapon::iron_hell_goat)return "Hound / IronHellGoat";
     if (selection.character == gloom::gameplay::SliceCharacter::berserker) {
         return "Hound (legacy Berserker slot) / Soul Reaper / No ability";
     }
@@ -145,8 +152,9 @@ void print_lobby(const gloom::gameplay::SliceLobbyState& lobby) {
 
 } // namespace
 
-int main(const int argument_count, const char* const* arguments) try {
+int run_game(const int argument_count, const char* const* arguments, gloom::desktop::Session* desktop_session=nullptr) try {
     const bool factory_review = argument_count > 1 && std::string_view{arguments[1]} == "--factory-review";
+    const bool pickup_review = argument_count > 1 && std::string_view{arguments[1]} == "--pickup-review";
     const bool lava_review=argument_count>1 && std::string_view{arguments[1]}=="--lava-review";
     const bool effects_review=argument_count>1 && std::string_view{arguments[1]}=="--effects-review";
     const bool short_review=lava_review || effects_review;
@@ -156,20 +164,20 @@ int main(const int argument_count, const char* const* arguments) try {
     if (animation_review && (argument_count!=(short_review?3:4) || (animation_fps!=30 && animation_fps!=60 && animation_fps!=144)))
         throw std::invalid_argument{"Usage: gloom --animation-review OUTPUT_DIRECTORY 30|60|144"};
     const bool character_review = animation_review || (argument_count > 1 && std::string_view{arguments[1]} == "--character-review");
-    const bool visual_review = character_review || factory_review || (argument_count > 1 && std::string_view{arguments[1]} == "--visual-review");
-    const bool original_factory = character_review || factory_review || (!visual_review && !(argument_count > 1 && std::string_view{arguments[1]} == "--vertical-slice-smoke"));
+    const bool visual_review = pickup_review || character_review || factory_review || (argument_count > 1 && std::string_view{arguments[1]} == "--visual-review");
+    const bool original_factory = pickup_review || character_review || factory_review || (!visual_review && !(argument_count > 1 && std::string_view{arguments[1]} == "--vertical-slice-smoke"));
     const bool original_characters = original_factory && !factory_review;
-    const auto review_views = character_review ? std::span<const gloom::review::View>{gloom::review::character_views} : factory_review ? std::span<const gloom::review::View>{gloom::review::factory_views} : std::span<const gloom::review::View>{gloom::review::views};
+    const auto review_views = pickup_review ? std::span<const gloom::review::View>{gloom::review::pickup_views} : character_review ? std::span<const gloom::review::View>{gloom::review::character_views} : factory_review ? std::span<const gloom::review::View>{gloom::review::factory_views} : std::span<const gloom::review::View>{gloom::review::views};
     if (visual_review && !animation_review && argument_count != 3) throw std::invalid_argument{"Usage: gloom --visual-review OUTPUT_DIRECTORY"};
     const std::filesystem::path review_output = visual_review ? arguments[2] : "";
     if (visual_review) std::filesystem::create_directories(review_output);
     const bool list_matches = argument_count > 1 &&
                               std::string_view{arguments[1]} == "--vertical-slice-list";
-    std::unique_ptr<gloom::gameplay::SliceMatchDirectory> match_directory;
+    std::shared_ptr<gloom::gameplay::SliceMatchDirectory> match_directory=desktop_session?desktop_session->directory:nullptr;
     const auto* game_auth = std::getenv("GLOOM_GAME_AUTH");
     const bool game_tickets = game_auth && std::string_view{game_auth} == "tickets";
     if (game_auth && *game_auth && !game_tickets) throw std::invalid_argument{"Unknown GLOOM_GAME_AUTH mode"};
-    std::function<std::expected<std::string, std::string>()> acquire_identity;
+    std::function<std::expected<std::string, std::string>()> acquire_identity=desktop_session?desktop_session->identity:std::function<std::expected<std::string,std::string>()>{};
     const auto configure_match_directory = [&]() -> gloom::gameplay::SliceMatchDirectory* {
         if (match_directory) return match_directory.get();
         const char* url = std::getenv("GLOOM_MATCH_SERVICE_URL");
@@ -289,17 +297,23 @@ int main(const int argument_count, const char* const* arguments) try {
         vertical_slice_browse && argument_count > 2 ? std::string_view{arguments[2]} :
         vertical_slice_join && argument_count > 3 ? std::string_view{arguments[3]} : std::string_view{};
     const std::string_view slice_loadout =
+        argument_count>2 && std::string_view{arguments[1]}=="--vertical-slice" ? std::string_view{arguments[2]} :
         vertical_slice_browse && argument_count > 3 ? std::string_view{arguments[3]} :
         vertical_slice_join && argument_count > 4 ? std::string_view{arguments[4]} : std::string_view{"hound-bite"};
     const bool interactive_slice_selection = vertical_slice_join &&
-        (vertical_slice_browse ? argument_count <= 3 : argument_count <= 4);
+        (desktop_session || (vertical_slice_browse ? argument_count <= 3 : argument_count <= 4));
     const gloom::gameplay::SlicePlayerSelection slice_selection{
         .character = slice_loadout == "berserker-reaper"
                          ? gloom::gameplay::SliceCharacter::berserker
                          : slice_loadout == "archangel-reaper" ? gloom::gameplay::SliceCharacter::archangel
                          : slice_loadout == "shadow-reaper" ? gloom::gameplay::SliceCharacter::shadow
                          : gloom::gameplay::SliceCharacter::hound,
-        .ability = (slice_loadout == "hound-reaper" || slice_loadout == "archangel-reaper" || slice_loadout == "shadow-reaper")
+        .weapon = slice_loadout=="hound-sniper"?gloom::gameplay::SliceWeapon::sniper:
+                  slice_loadout=="hound-shotgun"?gloom::gameplay::SliceWeapon::shotgun:
+                  slice_loadout=="hound-minigun"?gloom::gameplay::SliceWeapon::minigun:
+                  slice_loadout=="hound-iron-hell-goat"?gloom::gameplay::SliceWeapon::iron_hell_goat:gloom::gameplay::SliceWeapon::soul_reaper,
+        .ability = (slice_loadout == "hound-reaper" || slice_loadout == "archangel-reaper" || slice_loadout == "shadow-reaper" ||
+                    slice_loadout=="hound-sniper" || slice_loadout=="hound-shotgun" || slice_loadout=="hound-minigun" || slice_loadout=="hound-iron-hell-goat")
                        ? gloom::gameplay::SliceAbility::none
                        : slice_loadout == "berserker-reaper"
                              ? gloom::gameplay::SliceAbility::none
@@ -308,10 +322,12 @@ int main(const int argument_count, const char* const* arguments) try {
                              : gloom::gameplay::SliceAbility::bite};
     if (vertical_slice_join && slice_loadout != "hound-bite" &&
         slice_loadout != "hound-reaper" && slice_loadout != "hound-guard" &&
-        slice_loadout != "berserker-reaper" && slice_loadout != "archangel-reaper" && slice_loadout != "shadow-reaper") {
+        slice_loadout != "berserker-reaper" && slice_loadout != "archangel-reaper" && slice_loadout != "shadow-reaper" &&
+        slice_loadout!="hound-sniper" && slice_loadout!="hound-shotgun" && slice_loadout!="hound-minigun" && slice_loadout!="hound-iron-hell-goat") {
         throw std::invalid_argument{
             "Slice loadout must be hound-bite, hound-guard, hound-reaper or "
-            "berserker-reaper, archangel-reaper or shadow-reaper"};
+            "berserker-reaper, archangel-reaper, shadow-reaper, hound-sniper, "
+            "hound-shotgun, hound-minigun or hound-iron-hell-goat"};
     }
     const bool automated_graphics = smoke_test || network_scene_smoke ||
                                     vertical_slice_smoke || vulkan_sync_stress || visual_review;
@@ -400,6 +416,12 @@ int main(const int argument_count, const char* const* arguments) try {
         gloom::render::builtin_cube_mesh, gloom::render::builtin_cube_mesh};
     std::uint64_t weapon_generation = 0;
     bool weapon_failure_reported = false;
+    std::array<std::unique_ptr<gloom::assets::AssetCatalog>,4> arsenal_catalogs;
+    std::array<std::unique_ptr<gloom::assets::AsyncAssetLoader>,4> arsenal_loaders;
+    std::array<std::unique_ptr<gloom::assets::AssetResidencyCoordinator>,4> arsenal_residencies;
+    std::array<std::optional<gloom::assets::SceneTicket>,4> arsenal_tickets;
+    std::array<std::uint64_t,4> arsenal_generations{};
+    std::array<bool,4> arsenal_failure_reported{};
     std::unique_ptr<gloom::assets::AssetCatalog> ability_catalog;
     std::unique_ptr<gloom::assets::AsyncAssetLoader> ability_loader;
     std::unique_ptr<gloom::assets::AssetResidencyCoordinator> ability_residency;
@@ -531,11 +553,12 @@ int main(const int argument_count, const char* const* arguments) try {
                 *jobs_view, *loader, *catalog, *renderer_view);
             ticket = residency->request_scene(scene, gloom::assets::AssetPriority::high);
         };
-        const auto weapon_slot=original_characters ? gloom::gameplay::original_soul_reaper_presentation : gloom::gameplay::soul_reaper_presentation;
+        const auto weapon_slot=original_characters ? gloom::gameplay::original_weapon_presentation(slice_selection.weapon) : gloom::gameplay::soul_reaper_presentation;
         discover_presentation(weapon_slot.source_uri,
                               weapon_slot.cooked_uri,
                               weapon_catalog, weapon_loader, weapon_residency,
                               weapon_ticket);
+        if(original_characters)for(std::size_t i=1;i<gloom::gameplay::slice_weapon_count;++i){const auto slot=gloom::gameplay::original_weapon_presentation(static_cast<gloom::gameplay::SliceWeapon>(i));discover_presentation(slot.source_uri,slot.cooked_uri,arsenal_catalogs[i-1],arsenal_loaders[i-1],arsenal_residencies[i-1],arsenal_tickets[i-1]);}
         discover_presentation(gloom::gameplay::hound_ability_presentation.source_uri,
                               gloom::gameplay::hound_ability_presentation.cooked_uri,
                               ability_catalog, ability_loader, ability_residency,
@@ -585,6 +608,7 @@ int main(const int argument_count, const char* const* arguments) try {
         } else {
             prepare_game_ticket();
             if (!game_tickets) slice_remote_connection = transport_view->connect(slice_endpoint);
+            slice_admission_deadline=std::chrono::steady_clock::now()+std::chrono::seconds{10};
             std::cout << "Joining authoritative slice at " << slice_endpoint << " as "
                       << slice_remote_client->identity().display_name << ".\n";
         }
@@ -656,6 +680,8 @@ int main(const int argument_count, const char* const* arguments) try {
                 .authoritative_physics = vertical_slice_join
                                              ? nullptr
                                              : slice_authoritative_physics.get(), .original_factory = original_factory});
+            if(!vertical_slice_join && !visual_review && !vertical_slice_smoke)
+                static_cast<void>(slice_simulation->set_selection(gloom::gameplay::VerticalSliceSimulation::player_entity,slice_selection));
         }
         const auto arena = vertical_slice_host ? slice_remote_host->arena()
                                                : slice_simulation->arena();
@@ -849,7 +875,7 @@ int main(const int argument_count, const char* const* arguments) try {
     bool slice_saw_kill = false;
     bool slice_saw_respawn = false;
     bool slice_opponent_was_dead = false;
-    bool slice_previous_jump_pressed = false;
+    gloom::platform::MovementActions slice_actions;
     bool slice_previous_ability_pressed = false;
     bool slice_previous_menu_left = false;
     bool slice_previous_menu_right = false;
@@ -868,7 +894,62 @@ int main(const int argument_count, const char* const* arguments) try {
     gloom::render::ParticleSystem particles{gloom::render::load_particle_recipes(
         std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets/effects/recipes.json")};
     gloom::gameplay::CombatEffects combat_effects;
+    const bool graphical_ui=vertical_slice && !automated_graphics;
+    std::optional<gloom::desktop::GameUi> game_ui;
+    bool ui_return_to_menu=false,ui_mouse_captured=false,ui_suppress_game_input=true;
+    std::string ui_notice;
+    unsigned ui_flow_stage=0;std::array<bool,9> ui_flow_captured{};
+    const bool ui_flow=desktop_session && !desktop_session->flow_output.empty();
+    const auto ui_flow_start=std::chrono::steady_clock::now();auto ui_flow_next=ui_flow_start;
+    gloom::network::NetworkEntityId ui_flow_entity=0;
+    if(graphical_ui){
+        game_ui.emplace();renderer_view->enqueue(game_ui->canvas.atlas_upload());
+        for(std::size_t i=0;i<slice_roster.size();++i)if(slice_roster[i]==slice_selection)slice_roster_index=i;
+        window_view->set_relative_mouse_mode(false);
+    }
     while (window_view->poll_events()) {
+        if(game_ui){
+            const auto size=window_view->drawable_size();
+            const auto* lobby=vertical_slice_host?&slice_remote_host->lobby():vertical_slice_join?&slice_remote_client->lobby():nullptr;
+            const bool connected=!vertical_slice_join || (slice_remote_connection!=gloom::network::invalid_connection && slice_remote_client->active() && !slice_reconnect_pending);
+            auto ui_input=window_view->input_state();
+            if(ui_flow){
+                ui_input={};const auto now=std::chrono::steady_clock::now();
+                if(now-ui_flow_start>std::chrono::seconds{100})throw std::runtime_error{"Graphical two-client flow timed out at stage "+std::to_string(ui_flow_stage)};
+                if(frame_count%8==4){
+                    if(ui_flow_stage==0 && connected){ui_input.mouse_x=500;ui_input.mouse_y=617;ui_input.mouse_primary=true;ui_flow_stage=1;}
+                    else if(ui_flow_stage==1 && lobby && lobby->phase==gloom::gameplay::SliceMatchPhase::active && factory_surface_generation){ui_flow_entity=current_slice_snapshot().player.entity;ui_flow_stage=2;ui_flow_next=now+std::chrono::seconds{2};}
+                    else if(ui_flow_stage==2 && now>=ui_flow_next){ui_input.menu_back=true;ui_flow_stage=3;}
+                    else if(ui_flow_stage==3 && game_ui->paused){ui_input.mouse_x=640;ui_input.mouse_y=411;ui_input.mouse_primary=true;ui_flow_stage=4;}
+                    else if(ui_flow_stage==4 && connected && lobby && lobby->phase==gloom::gameplay::SliceMatchPhase::active){
+                        if(current_slice_snapshot().player.entity!=ui_flow_entity)throw std::runtime_error{"UI reconnect changed player identity"};
+                        ui_flow_stage=5;ui_flow_next=now+std::chrono::seconds{2};}
+                    else if(ui_flow_stage==5 && now>=ui_flow_next){ui_input.menu_back=true;ui_flow_stage=6;}
+                    else if(ui_flow_stage==6 && game_ui->paused){ui_input.mouse_x=600;ui_input.mouse_y=480;ui_input.mouse_primary=true;ui_flow_stage=7;}
+                    else if(ui_flow_stage==7 && game_ui->confirm_leave){ui_input.mouse_x=800;ui_input.mouse_y=422;ui_input.mouse_primary=true;ui_flow_stage=8;}
+                }
+            }
+            const auto action=game_ui->draw(size.first,size.second,ui_input,current_slice_snapshot(),lobby,vertical_slice_host,
+                factory_surface_generation!=0,connected,slice_reconnect_pending,slice_selection_confirmed,slice_roster_index,
+                vertical_slice_host?slice_bound_endpoint:slice_endpoint,ui_notice);
+            if(action.leave){ui_return_to_menu=true;break;}
+            if(action.selection && slice_remote_client){slice_roster_index=*action.selection;static_cast<void>(slice_remote_client->set_desired_selection(slice_roster[slice_roster_index]));}
+            if(action.ready && slice_remote_client){
+                if(auto outgoing=slice_remote_client->confirm_selection();outgoing && slice_remote_connection!=gloom::network::invalid_connection){
+                    const auto bytes=gloom::network::encode_message(outgoing->message);
+                    transport_view->send(slice_remote_connection,{.payload=bytes,.delivery=outgoing->delivery});
+                    slice_selection_confirmed=true;
+                }
+            }
+            if(action.reconnect && slice_remote_client){
+                if(slice_remote_connection!=gloom::network::invalid_connection)transport_view->disconnect(slice_remote_connection);
+                slice_remote_connection=gloom::network::invalid_connection;slice_reconnect_pending=true;
+                slice_reconnect_at=std::chrono::steady_clock::now()+std::chrono::milliseconds{300};ui_notice.clear();
+                local_animator.reset();opponent_animator.reset();combat_effects.reset(particles);previous_animated_instances.clear();
+            }
+            const bool capture=!game_ui->blocked;
+            if(capture!=ui_mouse_captured){window_view->set_relative_mouse_mode(capture);ui_mouse_captured=capture;ui_suppress_game_input=true;}
+        }
         if (effects_residency) {
             effects_residency->update();
             if (effects_ticket && effects_residency->state(*effects_ticket)==gloom::assets::SceneResidencyState::failed)
@@ -991,6 +1072,8 @@ int main(const int argument_count, const char* const* arguments) try {
         update_two_part_scene(weapon_residency, weapon_ticket, weapon_meshes,
                               weapon_generation, weapon_failure_reported,
                               "Authored Soul Reaper");
+        for(std::size_t i=0;i<arsenal_residencies.size();++i)if(arsenal_residencies[i]&&arsenal_tickets[i]){arsenal_residencies[i]->update();const auto state=arsenal_residencies[i]->state(*arsenal_tickets[i]);if(state==gloom::assets::SceneResidencyState::failed&&!arsenal_failure_reported[i]){std::cerr<<"Original weapon "<<i+1<<" failed to become resident: "<<arsenal_residencies[i]->error(*arsenal_tickets[i])<<'\n';arsenal_failure_reported[i]=true;}if(const auto* scene=arsenal_residencies[i]->scene(*arsenal_tickets[i]))arsenal_generations[i]=scene->generation;}
+        const auto resident_weapon=[&](gloom::gameplay::SliceWeapon weapon)->const gloom::assets::ResidentScene*{const auto i=static_cast<std::size_t>(weapon);if(i==0)return weapon_ticket&&weapon_residency?weapon_residency->scene(*weapon_ticket):nullptr;return i<=arsenal_tickets.size()&&arsenal_tickets[i-1]&&arsenal_residencies[i-1]?arsenal_residencies[i-1]->scene(*arsenal_tickets[i-1]):nullptr;};
         update_two_part_scene(ability_residency, ability_ticket, ability_meshes,
                               ability_generation, ability_failure_reported,
                               "Authored Hound ability content");
@@ -1007,6 +1090,15 @@ int main(const int argument_count, const char* const* arguments) try {
             review_snapshot->player.ability = review_view.ability;
             review_snapshot->hud.primary_ability_active = review_view.ability != gloom::gameplay::SliceAbility::none;
             review_snapshot->hud.weapon_ready_fraction = 1.0F;
+            if(pickup_review) {
+                const auto& definitions=gloom::gameplay::original_factory().pickups;
+                const auto found=std::ranges::find_if(definitions,[](const auto& p){return p.kind==gloom::gameplay::PickupKind::shield && p.reward==50;});
+                if(found==definitions.end())throw std::runtime_error{"Pickup review shield missing"};
+                auto& p=review_snapshot->pickups[static_cast<std::size_t>(found-definitions.begin())];
+                const std::string_view name=review_view.name;
+                if(name=="pickup-pulling") {p.phase=gloom::gameplay::PickupPhase::pulling;p.pulling_player=1;p.position.z+=1.5F;p.position.y+=.5F;}
+                if(name=="pickup-collected") {p.phase=gloom::gameplay::PickupPhase::respawning;p.respawn_remaining=1500;}
+            }
             if (character_review) {
                 const auto view=review_frames/32;
                 review_snapshot->opponent.character = view==2 || view==3 ? gloom::gameplay::SliceCharacter::shadow : gloom::gameplay::SliceCharacter::archangel;
@@ -1037,14 +1129,17 @@ int main(const int argument_count, const char* const* arguments) try {
         const auto current_frame = std::chrono::steady_clock::now();
         const std::chrono::duration<double> measured_elapsed = current_frame - previous_frame;
         previous_frame = current_frame;
-        const double elapsed = animation_review && review_ready ? 1.0/animation_fps : (visual_review || (vertical_slice && original_factory && !factory_surface_generation)) ? 0.0 : (network_scene_smoke || vertical_slice_smoke)
+        const double elapsed = game_ui && game_ui->paused && !vertical_slice_host && !vertical_slice_join ? 0.0 : animation_review && review_ready ? 1.0/animation_fps : (visual_review || (vertical_slice && original_factory && !factory_surface_generation)) ? 0.0 : (network_scene_smoke || vertical_slice_smoke)
                                    ? network_fixed_delta
                                    : measured_elapsed.count();
         presentation_seconds+=elapsed;
 
         if (vertical_slice) {
             slice_accumulator = std::min(slice_accumulator + elapsed, 0.25);
-            const auto input_state = window_view->input_state();
+            auto input_state = window_view->input_state();
+            if(game_ui && !input_state.fire_primary && !input_state.fire_secondary && !input_state.menu_confirm && !input_state.jump && !input_state.use_primary_ability)ui_suppress_game_input=false;
+            if(game_ui && (game_ui->blocked || ui_suppress_game_input)){input_state.move_left=input_state.move_right=input_state.move_forward=input_state.move_backward=false;
+                input_state.dodge=input_state.jump=input_state.fire_primary=input_state.fire_secondary=input_state.use_primary_ability=false;input_state.look_delta_x=input_state.look_delta_y=0;}
             if (vertical_slice_browse && !slice_match_selected) {
                 if (slice_match_browser.poll()) {
                     if (!slice_match_browser.error().empty()) {
@@ -1097,7 +1192,7 @@ int main(const int argument_count, const char* const* arguments) try {
                     }
                 }
             }
-            if (slice_match_selected && interactive_slice_selection && !slice_selection_confirmed) {
+            if (!game_ui && slice_match_selected && interactive_slice_selection && !slice_selection_confirmed) {
                 const bool previous = input_state.menu_previous && !slice_previous_menu_left;
                 const bool next = input_state.menu_next && !slice_previous_menu_right;
                 if (previous || next) {
@@ -1133,8 +1228,8 @@ int main(const int argument_count, const char* const* arguments) try {
             if (!vertical_slice_smoke && !vertical_slice_host && !visual_review) {
                 slice_first_person.look(input_state.look_delta_x, input_state.look_delta_y);
             }
-            bool jump_requested = input_state.jump && !slice_previous_jump_pressed;
-            slice_previous_jump_pressed = input_state.jump;
+            slice_actions.update(input_state,!game_ui || (!game_ui->blocked && !ui_suppress_game_input));
+            bool jump_requested = slice_actions.jump;
             bool ability_requested = input_state.use_primary_ability &&
                                      !slice_previous_ability_pressed;
             slice_previous_ability_pressed = input_state.use_primary_ability;
@@ -1178,7 +1273,10 @@ int main(const int argument_count, const char* const* arguments) try {
                     .aim_z = aim.z,
                     .jump = jump_requested,
                     .fire_primary = fire,
+                    .fire_secondary = input_state.fire_secondary,
                     .use_primary_ability = ability_requested,
+                    .dodge = slice_actions.dodge,
+                    .weapon_selection = input_state.weapon_selection,
                 };
                 if (vertical_slice_host) {
                     for (const auto& outgoing : slice_remote_host->tick_clients()) {
@@ -1201,6 +1299,7 @@ int main(const int argument_count, const char* const* arguments) try {
                     slice_simulation->tick(slice_input);
                 }
                 jump_requested = false;
+                slice_actions.consume();
                 ability_requested = false;
                 if (!vertical_slice_host && !vertical_slice_join) {
                     const auto& slice = slice_simulation->snapshot();
@@ -1228,6 +1327,7 @@ int main(const int argument_count, const char* const* arguments) try {
                 }
                 const bool jump_this_tick = jump_requested;
                 jump_requested = false;
+                slice_actions.consume();
                 const bool was_grounded = network_client->local_state().grounded;
                 auto input = network_client->create_input(axes.x, axes.z, jump_this_tick);
                 auto encoded_input = gloom::network::encode_message(input);
@@ -1307,6 +1407,7 @@ int main(const int argument_count, const char* const* arguments) try {
             if (pending_game_ticket.valid() && pending_game_ticket.wait_for(std::chrono::seconds{0}) == std::future_status::ready) {
                 const auto ticket = pending_game_ticket.get();
                 if (!ticket) {
+                    ui_notice="No se pudo autorizar el acceso: "+ticket.error();
                     slice_reconnect_pending = false;
                     window_view->set_relative_mouse_mode(false);
                     if (vertical_slice_browse) slice_match_selected = false;
@@ -1326,6 +1427,7 @@ int main(const int argument_count, const char* const* arguments) try {
                 prepare_game_ticket();
                 if (!game_tickets) slice_remote_connection = transport_view->connect(slice_endpoint);
                 slice_reconnect_pending = false;
+                slice_admission_deadline=current_frame+std::chrono::seconds{10};
                 std::cout << "Reconnecting authoritative slice at " << slice_endpoint << ".\n";
             }
             while (auto event = transport_view->poll_event()) {
@@ -1391,6 +1493,7 @@ int main(const int argument_count, const char* const* arguments) try {
                 }
             }
             if (slice_admission_deadline && current_frame >= *slice_admission_deadline) {
+                ui_notice="No se pudo entrar en la sala. Comprueba la dirección y el acceso, o reintenta.";
                 const auto failed_connection = slice_remote_connection;
                 slice_remote_connection = gloom::network::invalid_connection;
                 slice_admission_deadline.reset();
@@ -1734,6 +1837,11 @@ int main(const int argument_count, const char* const* arguments) try {
             throw std::runtime_error{"Built-in GPU assets did not become resident"};
         }
         auto complete_instances = render_instances;
+        if(vertical_slice){const auto& state=current_slice_snapshot();for(std::size_t i=0;i<state.projectile_count;++i){const auto& p=state.projectiles[i];const auto color=p.weapon==gloom::gameplay::SliceWeapon::iron_hell_goat?gloom::render::Color{1,.18F,.02F,1}:gloom::render::Color{.25F,.85F,1,1};complete_instances.push_back({.mesh=gloom::render::builtin_cube_mesh,.transform={.position={p.position_x,p.position_y,p.position_z},.scale={p.radius,p.radius,p.radius}},.color=color,.particle=true,.soft_distance=.2F});}}
+        if(game_ui && complete_instances.size()>=visual_bodies.size()+18){
+            complete_instances[visual_bodies.size()+9].transform.scale={};
+            for(std::size_t i=14;i<18;++i)complete_instances[visual_bodies.size()+i].transform.scale={};
+        }
         if (vertical_slice && original_characters && (!visual_review || animation_review)) {
             const auto& slice=current_slice_snapshot();
             const auto base=visual_bodies.size();
@@ -1743,7 +1851,8 @@ int main(const int argument_count, const char* const* arguments) try {
             };
             const auto* opponent_scene=resident_character(slice.opponent.character);
             const auto* local_scene=resident_character(slice.player.character);
-            const auto* weapon_scene=weapon_ticket?weapon_residency->scene(*weapon_ticket):nullptr;
+            const auto* local_weapon_scene=resident_weapon(slice.player.weapon);
+            const auto* opponent_weapon_scene=resident_weapon(slice.opponent.weapon);
             std::vector<gloom::render::RenderInstance> current;
             const auto append=[&](const gloom::assets::ResidentScene& scene,const gloom::render::Transform& parent,
                                   bool fps,const gloom::gameplay::CharacterAnimationFrame* frame,bool cut) {
@@ -1779,17 +1888,17 @@ int main(const int argument_count, const char* const* arguments) try {
                     .rotation={0,std::sin(yaw*.5F),0,std::cos(yaw*.5F)}};
                 append(*opponent_scene,parent,false,&frame,frame.cut);
                 combat_effects.observe(particles,slice.opponent,frame,parent,slice.simulation_tick,false);
-                if (weapon_scene && slice.opponent.alive)
-                    append(*weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
+                if (opponent_weapon_scene && slice.opponent.alive)
+                    append(*opponent_weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
             }
-            if (weapon_scene && local_scene && local_scene->bind_rig) {
+            if (local_weapon_scene && local_scene && local_scene->bind_rig) {
                 const auto frame=local_animator.update(*local_scene->bind_rig,slice.player,elapsed,false,false,true);
                 const auto parent=gloom::render::camera_relative_transform(camera,{.039F,-1.106F,.355F},{.70F,.70F,.70F});
                 combat_effects.observe(particles,slice.player,frame,parent,slice.simulation_tick,true);
                 if (!slice.hud.dead && !slice.hud.primary_ability_active) {
                     complete_instances[base+12].transform.scale={};complete_instances[base+13].transform.scale={};
                     append(*local_scene,parent,true,&frame,frame.cut);
-                    append(*weapon_scene,gloom::render::attach_transform(parent,frame.weapon),true,nullptr,frame.cut);
+                    append(*local_weapon_scene,gloom::render::attach_transform(parent,frame.weapon),true,nullptr,frame.cut);
                 }
             }
             previous_animated_instances=current;
@@ -1824,7 +1933,8 @@ int main(const int argument_count, const char* const* arguments) try {
             const auto character_index=static_cast<std::size_t>(slice.opponent.character);
             const auto* character_scene=character_tickets[character_index]
                 ? character_residencies[character_index]->scene(*character_tickets[character_index]) : nullptr;
-            const auto* weapon_scene=weapon_ticket ? weapon_residency->scene(*weapon_ticket) : nullptr;
+            const auto* weapon_scene=resident_weapon(slice.opponent.weapon);
+            const auto* local_weapon_scene=resident_weapon(slice.player.weapon);
             std::vector<gloom::render::Transform> current_transforms;
             const auto append=[&](const gloom::assets::ResidentScene& scene,const gloom::render::Transform& parent,
                                   bool first_person,gloom::render::Color tint=gloom::render::Color{}) {
@@ -1865,11 +1975,11 @@ int main(const int argument_count, const char* const* arguments) try {
                     }
                 }
             }
-            if (weapon_scene && !slice.hud.primary_ability_active) {
+            if (local_weapon_scene && !slice.hud.primary_ability_active) {
                 complete_instances[base+12].transform.scale={};complete_instances[base+13].transform.scale={};
                 if (!slice.hud.dead) {
                 const auto hand=gloom::render::camera_relative_transform(camera,{.20F,-.28F,.60F},{.30F,.30F,.30F});
-                append(*weapon_scene,hand,true);
+                append(*local_weapon_scene,hand,true);
                 if (slice.hud.weapon_ready_fraction<.34F) {
                     const auto muzzle=gloom::render::attach_transform(hand,{.position={.13F,.40F,.90F}});
                     complete_instances.push_back({.transform={.position=muzzle.position,.scale={.015F,.015F,.035F}},
@@ -1881,8 +1991,41 @@ int main(const int argument_count, const char* const* arguments) try {
             previous_original_character=slice.opponent.character;
         }
         if (vertical_slice && original_factory && factory_surface_residency && factory_surface_ticket) {
-            if (const auto* scene = factory_surface_residency->scene(*factory_surface_ticket))
-                complete_instances.insert(complete_instances.end(), scene->instances.begin(), scene->instances.end());
+            if (const auto* scene = factory_surface_residency->scene(*factory_surface_ticket)) {
+                const auto& definitions=gloom::gameplay::original_factory().pickups;
+                const auto& state=current_slice_snapshot();
+                for(auto instance:scene->instances) {
+                    const auto found=std::ranges::find(definitions,instance.source_node,&gloom::gameplay::PickupDefinition::source_node);
+                    if(found!=definitions.end() && instance.source_node!=~0U && !factory_review) {
+                        const auto i=static_cast<std::size_t>(found-definitions.begin());
+                        if(i>=state.pickup_count || state.pickups[i].phase==gloom::gameplay::PickupPhase::respawning)continue;
+                        const auto& p=state.pickups[i].position;
+                        instance.transform.position.x+=p.x-found->position.x;
+                        instance.transform.position.y+=p.y-found->position.y;
+                        instance.transform.position.z+=p.z-found->position.z;
+                    }
+                    complete_instances.push_back(instance);
+                }
+                // Original modifier archetypes are particles. The skinned MiniGun
+                // uses the already resident arsenal mesh omitted by the map importer.
+                if(!factory_review)for(std::size_t i=0;i<state.pickup_count;++i) {
+                    if(definitions[i].source_node!=~0U || state.pickups[i].phase==gloom::gameplay::PickupPhase::respawning)continue;
+                    const auto& p=state.pickups[i].position;
+                    if(definitions[i].kind==gloom::gameplay::PickupKind::weapon) {
+                        if(const auto* weapon=resident_weapon(definitions[i].weapon)) {
+                            for(auto instance:weapon->instances) {
+                                instance.transform=gloom::render::attach_transform({.position={p.x,p.y,p.z}},instance.transform);
+                                complete_instances.push_back(instance);
+                            }
+                            continue;
+                        }
+                    }
+                    const auto color=definitions[i].kind==gloom::gameplay::PickupKind::damage?
+                        gloom::render::Color{1,.18F,.08F,1}:gloom::render::Color{.15F,.6F,1,1};
+                    complete_instances.push_back({.mesh=gloom::render::builtin_cube_mesh,
+                        .transform={.position={p.x,p.y,p.z},.scale={.22F,.22F,.22F}},.color=color,.particle=true,.soft_distance=.15F});
+                }
+            }
         }
         const auto source_instances = std::span<const gloom::render::RenderInstance>{complete_instances};
         const float render_aspect = drawable_size.second == 0
@@ -1891,18 +2034,23 @@ int main(const int argument_count, const char* const* arguments) try {
                                               static_cast<float>(drawable_size.second);
         const auto visible = visibility.build(camera, render_aspect, source_instances);
         const auto lighting = lighting_builder.build(camera, render_aspect, point_lights,
-            vertical_slice && original_factory ? gloom::render::DirectionalLight{.intensity=0.9F} : gloom::render::DirectionalLight{},
+            vertical_slice && original_factory ? gloom::render::DirectionalLight{.intensity=1.08F} : gloom::render::DirectionalLight{},
             vertical_slice ? gloom::render::EnvironmentLighting{
                 .sky_radiance = {0.20F, 0.24F, 0.30F},
                 .ground_radiance = {0.08F, 0.075F, 0.07F},
                 .intensity = original_factory ? 0.35F : 1.0F,
-                .probe = original_factory ? gloom::gameplay::original_factory().environment_probe : nullptr} : gloom::render::EnvironmentLighting{});
+                .probe = original_factory ? gloom::gameplay::original_factory().environment_probe : nullptr,
+                .ambient_fill = original_factory ? 0.65F : 0.0F} : gloom::render::EnvironmentLighting{});
         const auto lighting_view = lighting.view();
         auto snapshot = visible.snapshot();
         snapshot.presentation_seconds = visual_review && !animation_review ? 45.0F : static_cast<float>(presentation_seconds);
         snapshot.lighting = &lighting_view;
         snapshot.shadow_instances = source_instances;
+        if(game_ui)snapshot.ui=&game_ui->canvas.data();
         renderer_view->draw(snapshot);
+        if(ui_flow && frame_count>15 && frame_count%8==5 && !ui_flow_captured[ui_flow_stage]){
+            renderer_view->capture_next_frame(desktop_session->flow_output/("game-stage-"+std::to_string(ui_flow_stage)+".ppm"));ui_flow_captured[ui_flow_stage]=true;
+        }
         if (review_ready && animation_review && (review_frames==0 ||
             review_frames*30/static_cast<std::size_t>(animation_fps)!=(review_frames-1)*30/static_cast<std::size_t>(animation_fps))) {
             const auto number=review_frames*30/static_cast<std::size_t>(animation_fps);
@@ -1992,6 +2140,10 @@ int main(const int argument_count, const char* const* arguments) try {
     }
 
     const auto job_metrics = jobs_view->metrics();
+    if(ui_flow){
+        if(ui_flow_stage!=8 || !ui_return_to_menu || !ui_flow_entity)throw std::runtime_error{"UI flow did not finish through the leave confirmation"};
+        std::cout<<"UI flow passed: browser -> selection -> ready -> play -> reconnect -> leave; entity="<<ui_flow_entity<<", character="<<static_cast<unsigned>(slice_remote_client->desired_selection().character)<<'\n';
+    }
     if (visual_review && review_frames != (animation_review?static_cast<std::size_t>(animation_fps*animation_seconds):review_views.size()*32))
         throw std::runtime_error{"Visual review closed before every view was captured"};
     if (vertical_slice_smoke && (!slice_saw_kill || !slice_saw_respawn)) {
@@ -2033,10 +2185,12 @@ int main(const int argument_count, const char* const* arguments) try {
     ability_catalog.reset();
     combat_effects.reset(particles);
     effects_residency.reset();effects_loader.reset();effects_catalog.reset();
+    for(auto& value:arsenal_residencies)value.reset();for(auto& value:arsenal_loaders)value.reset();for(auto& value:arsenal_catalogs)value.reset();
     weapon_residency.reset();
     weapon_loader.reset();
     weapon_catalog.reset();
     factory_filesystem.reset();
+    if(desktop_session && !ui_return_to_menu)desktop_session->quit=true;
     engine.stop();
 
     std::cout << "Gloom Vulkan/Jolt scene completed successfully.\n";
@@ -2103,6 +2257,39 @@ int main(const int argument_count, const char* const* arguments) try {
     }
     return 0;
 } catch (const std::exception& error) {
+    if(desktop_session)throw;
     std::cerr << "Gloom startup failed: " << error.what() << '\n';
     return 1;
 }
+
+int main(int argc,const char* const* argv) try {
+    if(argc>1 && std::string_view{argv[1]}=="--ui-flow-review"){
+        if(argc!=6)throw std::invalid_argument{"Usage: gloom --ui-flow-review ENDPOINT OUTPUT NAME archangel|shadow"};
+        gloom::desktop::Session session;session.flow_output=argv[3];session.flow_name=argv[4];session.flow_selection=std::string_view{argv[5]}=="shadow"?4:3;
+        std::filesystem::create_directories(session.flow_output);
+        session.directory=gloom::gameplay::make_in_memory_match_directory();
+        const auto now=static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+        const auto advertised=session.directory->advertise({.match_id="ui-factory",.instance_id="ui-review",.display_name="Factory UI acceptance",.endpoint=argv[2]},now,600000);
+        if(!advertised)throw std::runtime_error{advertised.error()};
+        auto launch=gloom::desktop::menu(session);if(launch.empty())throw std::runtime_error{"UI review did not enter the selected match"};
+        launch.insert(launch.begin(),"gloom");std::vector<const char*> arguments;for(const auto& a:launch)arguments.push_back(a.c_str());
+        return run_game(static_cast<int>(arguments.size()),arguments.data(),&session);
+    }
+    if(argc>1 && std::string_view{argv[1]}=="--ui-review"){
+        if(argc!=3)throw std::invalid_argument{"Usage: gloom --ui-review OUTPUT"};
+        gloom::desktop::Session session;
+        for(const auto size:std::array{std::pair{1280U,720U},std::pair{1920U,1080U},std::pair{2560U,1080U}})
+            static_cast<void>(gloom::desktop::menu(session,std::filesystem::path{argv[2]}/std::to_string(size.first),size.first,size.second));
+        return 0;
+    }
+    if(argc>1 && std::string_view{argv[1]}!="--desktop")return run_game(argc,argv);
+    gloom::desktop::Session session;
+    while(!session.quit){
+        auto launch=gloom::desktop::menu(session);if(launch.empty())break;
+        launch.insert(launch.begin(),"gloom");std::vector<const char*> arguments;
+        for(const auto& argument:launch)arguments.push_back(argument.c_str());
+        try{static_cast<void>(run_game(static_cast<int>(arguments.size()),arguments.data(),&session));}
+        catch(const std::exception& e){session.notice=e.what();}
+    }
+    return 0;
+}catch(const std::exception& e){std::cerr<<"Gloom: "<<e.what()<<'\n';return 1;}

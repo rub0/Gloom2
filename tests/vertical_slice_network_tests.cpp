@@ -104,9 +104,11 @@ void test_original_factory_network() {
     VerticalSliceRemoteClient client;
     constexpr gloom::network::ConnectionId connection=178;
     admit(host,client,connection,0.0);
+    // Original digital movement is faster and has inertia. A bounded walk
+    // exercises reconciliation without deliberately running into the lava.
     for (unsigned tick=0;tick<180;++tick) {
         const auto now=tick/60.0;
-        for (const auto& input:client.create_input({.axis_z=-.5F,.jump=tick==60}))
+        for (const auto& input:client.create_input({.axis_z=tick<20?-1.F:0.F,.jump=tick==60}))
             static_cast<void>(host.receive(connection,wire(input.message),now));
         for (const auto& message:host.tick_clients()) {
             if (const auto reply=client.receive(wire(message.message),now))
@@ -122,6 +124,50 @@ void test_original_factory_network() {
     for (unsigned tick=0;tick<10;++tick) for (const auto& message:host.tick_clients())
         static_cast<void>(client.receive(wire(message.message),4.1+tick/60.0));
     expect(client.snapshot().scene_id==original_factory().scene_id && host.active_clients()==1,"Factory reconnect changed scene");
+}
+
+void test_pickup_contention_and_reconnect() {
+    using namespace gloom::gameplay;
+    VerticalSliceRemoteHost host{SliceRemoteHostSettings{.original_factory=true}};
+    VerticalSliceRemoteClient first,second;
+    admit(host,first,281,0);admit(host,second,282,0);
+    const auto& defs=original_factory().pickups;
+    const auto found=std::ranges::find(defs,std::string{"Orb4"},&PickupDefinition::name);
+    expect(found!=defs.end(),"Missing shared-range pickup fixture");
+    const auto index=static_cast<std::size_t>(found-defs.begin());
+    const auto p=found->position;
+    bool delay_second_snapshot=true;
+    const auto deliver=[&](double now) {
+        for(const auto& m:host.tick_clients()) {
+            if(delay_second_snapshot && m.connection==282 && m.message.kind==gloom::network::MessageKind::gameplay_snapshot)continue;
+            auto& client=m.connection==281?first:second;
+            if(const auto reply=client.receive(wire(m.message),now))
+                static_cast<void>(host.receive(m.connection,wire(reply->message),now));
+        }
+    };
+    for(unsigned tick=0;tick<6;++tick)deliver(tick/60.0);
+    for(unsigned tick=0;tick<200;++tick) {
+        const auto aim=[&](auto& client,gloom::network::ConnectionId connection) {
+            const auto& actor=connection==281?host.snapshot().player:host.snapshot().opponent;
+            for(const auto& input:client.create_input({.aim_x=p.x-actor.position_x,.aim_y=p.y-actor.position_y-.9F,.aim_z=p.z-actor.position_z,.fire_secondary=true}))
+                static_cast<void>(host.receive(connection,wire(input.message),.1+tick/60.0));
+        };
+        aim(first,281);aim(second,282);deliver(.1+tick/60.0);
+    }
+    expect(host.snapshot().pickups[index].phase==PickupPhase::respawning,"Contested pickup did not disappear");
+    expect(host.snapshot().player.life+host.snapshot().opponent.life==2*legacy_default_life+found->reward,"Two clients duplicated/lost life reward");
+    expect(!second.has_snapshot(),"Late initial snapshot fixture received state early");
+    delay_second_snapshot=false;
+    for(unsigned tick=0;tick<3;++tick)deliver(3.5+tick/60.0);
+    expect(first.snapshot().pickups[index].phase==PickupPhase::respawning && second.snapshot().pickups[index].phase==PickupPhase::respawning,"Clients disagree on pickup visibility");
+    host.disconnected(282);admit(host,second,282,4,true);
+    for(unsigned tick=0;tick<6;++tick)deliver(4.1+tick/60.0);
+    expect(second.snapshot().pickups[index].phase==PickupPhase::respawning && second.snapshot().pickups[index].respawn_remaining>0,"Reconnect restored collected pickup");
+    const auto remaining=host.snapshot().pickups[index].respawn_remaining;
+    for(unsigned tick=0;tick<remaining+3U;++tick)deliver(4.3+tick/60.0);
+    expect(host.snapshot().pickups[index].phase==PickupPhase::available &&
+        first.snapshot().pickups[index].phase==PickupPhase::available &&
+        second.snapshot().pickups[index].phase==PickupPhase::available,"Respawn visibility did not reach both clients");
 }
 
 void test_injected_verified_identity() {
@@ -529,6 +575,7 @@ int main() try {
     test_host_abandonment_outcome();
     test_adverse_gameplay_link();
     test_original_factory_network();
+    test_pickup_contention_and_reconnect();
     std::cout << "Gloom remote vertical-slice tests completed successfully.\n";
     return 0;
 } catch (const std::exception& error) {

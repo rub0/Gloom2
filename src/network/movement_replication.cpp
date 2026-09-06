@@ -37,6 +37,7 @@ struct QuantizedMovementState {
     std::int16_t velocity_y{0};
     std::int16_t velocity_z{0};
     bool grounded{false};
+    bool air_dodge_available{false};
 };
 
 template <typename Integer>
@@ -103,6 +104,7 @@ template <typename Signed>
         .velocity_y = quantize_velocity(state.velocity_y),
         .velocity_z = quantize_velocity(state.velocity_z),
         .grounded = state.grounded,
+        .air_dodge_available = state.air_dodge_available,
     };
 }
 
@@ -119,6 +121,7 @@ template <typename Signed>
         .velocity_y = static_cast<float>(state.velocity_y) / velocity_quantization,
         .velocity_z = static_cast<float>(state.velocity_z) / velocity_quantization,
         .grounded = state.grounded,
+        .air_dodge_available = state.air_dodge_available,
     };
 }
 
@@ -131,7 +134,7 @@ template <typename Signed>
     mask |= current.velocity_x != baseline.velocity_x ? velocity_x_changed : 0;
     mask |= current.velocity_y != baseline.velocity_y ? velocity_y_changed : 0;
     mask |= current.velocity_z != baseline.velocity_z ? velocity_z_changed : 0;
-    mask |= current.grounded != baseline.grounded ? grounded_changed : 0;
+    mask |= (current.grounded != baseline.grounded || current.air_dodge_available != baseline.air_dodge_available) ? grounded_changed : 0;
     return mask;
 }
 
@@ -234,6 +237,7 @@ void validate_settings(const ReplicationSettings& settings) {
     state.velocity_y = blend(left.velocity_y, right.velocity_y);
     state.velocity_z = blend(left.velocity_z, right.velocity_z);
     state.grounded = alpha < 0.5 ? left.grounded : right.grounded;
+    state.air_dodge_available = alpha < 0.5 ? left.air_dodge_available : right.air_dodge_available;
     return state;
 }
 
@@ -318,7 +322,7 @@ ProtocolMessage encode_movement_input_batch(const std::span<const MovementInput>
         append_integer(message.payload, input.simulation_tick);
         append_float(message.payload, input.axis_x);
         append_float(message.payload, input.axis_z);
-        append_integer(message.payload, static_cast<std::uint8_t>(input.jump));
+        append_integer(message.payload, static_cast<std::uint8_t>((input.jump?1:0)|(input.dodge?2:0)));
         previous_sequence = input.sequence;
     }
     return message;
@@ -346,8 +350,9 @@ decode_movement_input_batch(const ProtocolMessage& message) {
         input.axis_x = read_float(message.payload, offset);
         input.axis_z = read_float(message.payload, offset);
         const std::uint8_t jump = read_integer<std::uint8_t>(message.payload, offset);
-        input.jump = jump != 0;
-        if (jump > 1 || !std::isfinite(input.axis_x) || !std::isfinite(input.axis_z) ||
+        input.jump = (jump & 1) != 0;
+        input.dodge = (jump & 2) != 0;
+        if (jump > 3 || !std::isfinite(input.axis_x) || !std::isfinite(input.axis_z) ||
             std::abs(input.axis_x) > 1.0F || std::abs(input.axis_z) > 1.0F ||
             (!inputs.empty() &&
              !sequence_more_recent(input.sequence, inputs.back().sequence))) {
@@ -474,7 +479,7 @@ struct EncodedSnapshotRecord {
             append_signed(message.payload, record.state.velocity_z);
         }
         if ((record.mask & grounded_changed) != 0) {
-            append_integer(message.payload, static_cast<std::uint8_t>(record.state.grounded));
+            append_integer(message.payload, static_cast<std::uint8_t>((record.state.grounded ? 1 : 0) | (record.state.air_dodge_available << 1)));
         }
     }
     return message;
@@ -588,10 +593,11 @@ decode_world_snapshot(const ProtocolMessage& message, const WorldSnapshot* basel
         }
         if ((mask & grounded_changed) != 0) {
             const auto grounded = read_integer<std::uint8_t>(message.payload, offset);
-            if (grounded > 1) {
+            if (grounded > 3) {
                 return std::unexpected{"Snapshot grounded field is invalid"};
             }
-            state.grounded = grounded != 0;
+            state.grounded = (grounded & 1) != 0;
+            state.air_dodge_available = (grounded & 2) != 0;
         }
     }
     if (offset != message.payload.size()) {
@@ -683,6 +689,7 @@ void AuthoritativeMovementServer::teleport_entity(const NetworkEntityId entity,
     state.velocity_y = 0.0F;
     state.velocity_z = 0.0F;
     state.grounded = position_y <= 0.0F;
+    state.air_dodge_available = false;
     state.simulation_tick = simulation_tick_;
 }
 
@@ -725,6 +732,7 @@ void AuthoritativeMovementServer::receive(const NetworkEntityId controlled_entit
         std::max(client.input_metrics.maximum_batch_size, inputs->size());
 
     bool pending_jump = client.pending_input && client.pending_input->jump;
+    bool pending_dodge = client.pending_input && client.pending_input->dodge;
     for (std::size_t index = 0; index < inputs->size(); ++index) {
         const auto& input = (*inputs)[index];
         if ((client.has_acknowledged_input &&
@@ -737,6 +745,7 @@ void AuthoritativeMovementServer::receive(const NetworkEntityId controlled_entit
             ++client.input_metrics.redundant_commands;
         }
         pending_jump = pending_jump || input.jump;
+        pending_dodge = pending_dodge || input.dodge;
         if (!client.pending_input ||
             sequence_more_recent(input.sequence, client.pending_input->sequence)) {
             client.pending_input = input;
@@ -744,6 +753,7 @@ void AuthoritativeMovementServer::receive(const NetworkEntityId controlled_entit
     }
     if (client.pending_input) {
         client.pending_input->jump = pending_jump;
+        client.pending_input->dodge = pending_dodge;
     }
 }
 
@@ -767,6 +777,7 @@ std::optional<ProtocolMessage> AuthoritativeMovementServer::tick() {
         input.simulation_tick = simulation_tick_;
         state = simulate_movement_unchecked(state, input, delta, settings_);
         entity_inputs_[entity_id].jump = false;
+        entity_inputs_[entity_id].dodge = false;
     }
     if (settings_.resolve_entity_collisions) {
         std::vector<NetworkEntityId> collision_entities;
@@ -1065,12 +1076,12 @@ MovementState PredictedMovementClient::simulate_local(MovementState state,
 
 ProtocolMessage PredictedMovementClient::create_input(const float axis_x,
                                                       const float axis_z,
-                                                      const bool jump) {
+                                                      const bool jump, const bool dodge) {
     MovementInput input{.sequence = next_input_sequence_++,
                         .simulation_tick = local_state_.simulation_tick + 1,
                         .axis_x = axis_x,
                         .axis_z = axis_z,
-                        .jump = jump};
+                        .jump = jump, .dodge = dodge};
     std::vector<MovementInput> batch;
     const auto& pending = prediction_.pending();
     const std::size_t previous_count =

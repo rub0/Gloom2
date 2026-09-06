@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gloom/gameplay/slice_selection.hpp>
+#include <gloom/gameplay/legacy_pickups.hpp>
 #include <gloom/network/movement_replication.hpp>
 #include <gloom/physics/world.hpp>
 
@@ -43,7 +44,10 @@ struct SliceInput {
     float aim_z{0.0F};
     bool jump{false};
     bool fire_primary{false};
+    bool fire_secondary{false};
     bool use_primary_ability{false};
+    bool dodge{false};
+    std::uint8_t weapon_selection{255};
 };
 
 struct ArenaBox {
@@ -93,12 +97,18 @@ struct CombatantView {
     bool primary_ability_active{false};
     bool alive{true};
     bool grounded{true};
+    bool air_dodge_available{false};
     float aim_pitch{0};
     std::uint32_t shot_sequence{0};
     std::uint64_t shot_tick{0};
     std::array<float, 3> shot_impact{};
     bool shot_hit{false};
     bool shot_contact{false};
+    std::array<std::uint16_t, slice_weapon_count> ammunition{};
+    std::uint8_t owned_weapons{1};
+    float weapon_charge_fraction{0};
+    std::uint16_t damage_modifier_ticks{};
+    std::uint16_t cooldown_modifier_ticks{};
 };
 
 struct SliceHud {
@@ -111,6 +121,9 @@ struct SliceHud {
     bool dead{false};
     std::uint32_t kills{0};
     std::uint32_t deaths{0};
+    std::uint16_t ammunition{1};
+    std::uint16_t maximum_ammunition{1};
+    float weapon_charge_fraction{0};
 };
 
 struct SliceNetworkMetrics {
@@ -132,6 +145,14 @@ struct KinematicMechanismView {
     float velocity_z{0.0F};
 };
 
+struct WeaponProjectileView {
+    std::uint32_t id{};
+    network::NetworkEntityId owner{};
+    SliceWeapon weapon{SliceWeapon::shotgun};
+    float position_x{},position_y{},position_z{};
+    float radius{};
+};
+
 struct SliceSnapshot {
     std::uint64_t simulation_tick{0};
     CombatantView player;
@@ -139,7 +160,11 @@ struct SliceSnapshot {
     KinematicMechanismView factory_lift;
     SliceHud hud;
     SliceNetworkMetrics network;
+    std::array<WeaponProjectileView,32> projectiles{};
+    std::uint8_t projectile_count{};
     std::uint32_t scene_id{0};
+    std::array<PickupView,factory_pickup_count> pickups{};
+    std::uint8_t pickup_count{};
 };
 
 struct SlicePresentationFeedbackState {
@@ -185,6 +210,11 @@ public:
     void tick(const SliceInput& input);
     void tick(const SliceInput& player_input, const SliceInput& opponent_input);
     void add_shield(network::NetworkEntityId entity, float amount);
+    [[nodiscard]] bool acquire_weapon(network::NetworkEntityId entity,
+                                      SliceWeapon weapon, std::uint16_t ammunition);
+    [[nodiscard]] bool add_ammunition(network::NetworkEntityId entity,
+                                      SliceWeapon weapon, std::uint16_t ammunition);
+    [[nodiscard]] bool select_weapon(network::NetworkEntityId entity, SliceWeapon weapon);
     [[nodiscard]] bool set_selection(network::NetworkEntityId entity,
                                      SlicePlayerSelection selection);
     [[nodiscard]] const SliceSnapshot& snapshot() const noexcept;

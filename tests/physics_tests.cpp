@@ -49,6 +49,17 @@ int main() try {
         .transform = {.position = {0.0F, -0.5F, 0.0F}},
         .motion = gloom::physics::MotionType::static_body,
     });
+    const auto ceiling=world.create_body(gloom::physics::BodyDesc{
+        .shape={.type=gloom::physics::ShapeType::box,.half_extent={3,.2F,3}},
+        .transform={.position={0,2.2F,0}}});
+    const auto hit=world.query_character_motion({.position={0,.1F,0},.radius=.45F,.cylinder_half_height=.45F},
+        {2,16,0},1.F/60,{0,-32,0},.075F);
+    expect(hit.velocity.y<=.001F,"Ceiling collision preserved upward momentum");
+    expect_near(hit.velocity.x,2,.001F,"Ceiling collision removed tangential momentum");
+    const auto fall=world.query_character_motion({.position=hit.position,.radius=.45F,.cylinder_half_height=.45F},
+        {hit.velocity.x,hit.velocity.y-32.F/60,0},1.F/60,{0,-32,0},.075F);
+    expect(fall.position.y<hit.position.y,"Character stayed suspended after ceiling contact");
+    world.destroy_body(ceiling);
     const auto sphere = world.create_body(gloom::physics::BodyDesc{
         .shape = {.type = gloom::physics::ShapeType::sphere, .radius = 0.5F},
         .transform = {.position = {0.0F, 5.0F, 0.0F}},

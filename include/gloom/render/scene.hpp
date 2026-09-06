@@ -90,6 +90,7 @@ struct RenderBatch {
     std::uint32_t instance_count{0};
 };
 
+struct UiDrawData;
 struct RenderSnapshot {
     float presentation_seconds{0.0F};
     Camera camera;
@@ -97,6 +98,7 @@ struct RenderSnapshot {
     std::span<const RenderBatch> batches;
     const ClusteredLightingView* lighting{nullptr};
     std::span<const RenderInstance> shadow_instances;
+    const UiDrawData* ui{nullptr};
 };
 
 [[nodiscard]] Transform interpolate(const Transform& previous,

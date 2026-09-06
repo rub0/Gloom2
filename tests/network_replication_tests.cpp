@@ -91,7 +91,7 @@ void test_movement_wire_schemas() {
                       .position_z = 3.0F,
                       .velocity_x = 4.0F,
                       .velocity_y = 1.0F,
-                      .velocity_z = 5.0F},
+                      .velocity_z = 5.0F,.air_dodge_available=true},
                      {.entity = 2,
                       .simulation_tick = 456,
                       .position_x = -2.0F,
@@ -103,11 +103,12 @@ void test_movement_wire_schemas() {
     const auto decoded_snapshot = gloom::network::decode_world_snapshot(snapshot_message);
     expect(decoded_snapshot && decoded_snapshot->simulation_tick == 456 &&
                decoded_snapshot->acknowledged_input == 75 &&
-               decoded_snapshot->entities.size() == 2 &&
+               decoded_snapshot->entities.size() == 2 && decoded_snapshot->entities[0].air_dodge_available &&
                decoded_snapshot->entities[1].position_z == -3.0F,
            "World snapshot round trip changed values");
 
     auto delta_state = snapshot;
+    delta_state.entities.front().air_dodge_available=false;
     delta_state.simulation_tick = 457;
     delta_state.acknowledged_input = 76;
     delta_state.entities.front().position_x = 2.123F;
@@ -121,7 +122,7 @@ void test_movement_wire_schemas() {
     expect(!gloom::network::decode_world_snapshot(delta_message),
            "Delta snapshot decoded without its baseline");
     const auto decoded_delta = gloom::network::decode_world_snapshot(delta_message, &snapshot);
-    expect(decoded_delta && decoded_delta->entities.size() == 2 &&
+    expect(decoded_delta && decoded_delta->entities.size() == 2 && !decoded_delta->entities.front().air_dodge_available &&
                decoded_delta->entities.front().entity == 1 &&
                std::abs(decoded_delta->entities.front().position_x - 2.123F) < 0.0021F &&
                decoded_delta->entities.back().entity == 3,

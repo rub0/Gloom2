@@ -297,17 +297,36 @@
     [ANIMATION_VFX.md](ANIMATION_VFX.md), ADR 0064 and the
     [acceptance report](../reports/animation-vfx-2026-09-03/README.md).
 
-## Next
-
-The remaining visual restoration scope is milestone 64. See
-[ART_RESTORATION.md](ART_RESTORATION.md) and ADR 0061 for its source audit
-and acceptance criteria. This milestone is planned, not completed:
-
 64. Graphical HUD, menu, browser, lobby and roster selection: original visual
     identity, scalable layout and complete existing online flow inside the UI.
+    Recover 112 bitmaps from 17 SWFs and two original fonts without a Flash
+    runtime. Validate keyboard/mouse focus and DPI, 48 Vulkan captures, and two
+    graphical clients through ready, play, reconnect and confirmed leave.
+    All **41 tests validated** after correcting a cursor-dependent gallery fixture
+    (40 passed in the full run; the remaining UI test passed on rerun).
+    See [UI.md](UI.md), ADR 0065 and the
+    [acceptance report](../reports/ui-2026-09-04/README.md).
 
-Audio, broader UX/settings, new gameplay/balance, external deployment acceptance
-and optimization/distribution are deferred until this scope is complete.
+## Gameplay migration (requested 2026-09-04)
+
+65. Original character physics — complete: source-derived momentum, ground
+    and air friction, class profiles, jumps and double-tap dodge; shared authority
+    and prediction on Factory collision. Protocol 15. See
+    [GAMEPLAY_MIGRATION.md](GAMEPLAY_MIGRATION.md) and ADR 0066.
+66. Original arsenal — complete: five weapons, inventory/ammunition, primary and
+    secondary state machines, authoritative replicated projectiles, original
+    FPS/TPS presentation, damage and protocol 16. Magnetic return, MiniGun charge
+    and steerable charged fireballs remain distinct. See [ARSENAL.md](ARSENAL.md)
+    and ADR 0067. Full suite plus corrected Factory rerun: **43/43 validated**.
+67. Factory pickups — complete: fourteen original archetypes at 73 source map
+    locations, rewards/caps, weapon acquisition, ammo, health/shield, temporary
+    modifiers, respawn and concurrent authoritative pickup/reconnect. Protocol 18;
+    see the [acceptance report](../reports/pickups-2026-09-06/README.md).
+
+The shared source audit covers 28 original files and all three map variants.
+Audio, broader UX/settings, new class abilities, external deployment acceptance
+and optimization/distribution remain deferred. Visual restoration milestones
+59–64 remain complete.
 
 No scheduled networking milestone remains. Milestones 45–57 cover verified
 identity, dedicated sessions/reconnect, discovery, leased publication, durable

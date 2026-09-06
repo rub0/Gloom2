@@ -36,6 +36,7 @@ struct EnvironmentLighting {
     float intensity{1.0F};
     float exposure{1.0F};
     std::shared_ptr<const EnvironmentProbe> probe;
+    float ambient_fill{0.0F};
 };
 
 struct LightClusterRange {
