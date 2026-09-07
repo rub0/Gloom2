@@ -9,7 +9,7 @@
 
 namespace gloom::network {
 
-inline constexpr std::uint16_t protocol_version = 18;
+inline constexpr std::uint16_t protocol_version = 19;
 inline constexpr std::size_t protocol_header_size = 28;
 inline constexpr std::size_t maximum_protocol_payload = 1024 * 1024;
 

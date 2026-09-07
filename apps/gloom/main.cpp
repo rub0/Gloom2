@@ -1,6 +1,7 @@
 #include <gloom/platform/movement_actions.hpp>
 #include <gloom/assets/asset_loader.hpp>
 #include "desktop.hpp"
+#include "audio_review.hpp"
 #include "game_ui.hpp"
 #include <gloom/assets/residency_coordinator.hpp>
 #include <gloom/assets/scene_catalog.hpp>
@@ -895,6 +896,20 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets/effects/recipes.json")};
     gloom::gameplay::CombatEffects combat_effects;
     const bool graphical_ui=vertical_slice && !automated_graphics;
+    std::shared_ptr<gloom::gameplay::AudioPresentation> game_audio;
+    if(graphical_ui){
+        game_audio=desktop_session?desktop_session->audio:nullptr;
+        if(!game_audio){
+            gloom::assets::VirtualFileSystem fs;fs.mount("game",std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets");fs.mount("cache",std::filesystem::path{GLOOM_BINARY_ROOT}/"content");
+            game_audio=std::make_shared<gloom::gameplay::AudioPresentation>(fs,true);
+            if(desktop_session)desktop_session->audio=game_audio;
+        }
+        game_audio->scene_reset();std::cout<<game_audio->diagnostic()<<'\n';
+    }
+    // Scope exit also handles admission failures and exceptions.
+    struct AudioSceneGuard {std::shared_ptr<gloom::gameplay::AudioPresentation> value;~AudioSceneGuard(){if(value)value->scene_reset();}} audio_guard{game_audio};
+    auto audio_time=std::chrono::steady_clock::now();
+    bool audio_waiting_for_snapshot=vertical_slice_join;
     std::optional<gloom::desktop::GameUi> game_ui;
     bool ui_return_to_menu=false,ui_mouse_captured=false,ui_suppress_game_input=true;
     std::string ui_notice;
@@ -1455,6 +1470,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         slice_remote_connection = gloom::network::invalid_connection;
                         slice_admission_deadline.reset();
                         slice_reconnect_pending = true;
+                        audio_waiting_for_snapshot=true;
+                        if(game_audio)game_audio->scene_reset();
                         slice_reconnect_at = current_frame + std::chrono::seconds{1};
                         std::cout << "Authoritative slice connection lost ("
                                   << event->description << "); retrying in one second.\n";
@@ -1483,7 +1500,12 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                              {.payload = bytes,
                                               .delivery = response->delivery});
                     }
-                    if (decoded->kind == gloom::network::MessageKind::server_welcome) slice_admission_deadline.reset();
+                    if (decoded->kind == gloom::network::MessageKind::server_welcome) {
+                        slice_admission_deadline.reset();audio_waiting_for_snapshot=true;
+                        if(game_audio)game_audio->scene_reset();
+                    }
+                    if(decoded->kind==gloom::network::MessageKind::gameplay_snapshot&&slice_remote_client->has_snapshot()&&slice_remote_client->snapshot().simulation_tick==decoded->simulation_tick)
+                        audio_waiting_for_snapshot=false;
                     if (slice_remote_client->lobby().revision > previous_lobby_revision) {
                         print_lobby(slice_remote_client->lobby());
                         if (!interactive_slice_selection || slice_selection_confirmed) {
@@ -1516,6 +1538,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             camera.target = {camera.position.x + forward.x,
                              camera.position.y + forward.y,
                              camera.position.z + forward.z};
+            if(game_audio){const auto now=std::chrono::steady_clock::now();
+                if(audio_waiting_for_snapshot)game_audio->menu(std::chrono::duration<double>(now-audio_time).count());
+                else game_audio->update(slice,{.position={camera.position.x,camera.position.y,camera.position.z},
+                    .forward={forward.x,forward.y,forward.z},.velocity={slice.player.velocity_x,slice.player.velocity_y,slice.player.velocity_z}},
+                    game_ui&&game_ui->paused,std::chrono::duration<double>(now-audio_time).count());audio_time=now;}
         }
         const auto physics_stats = physics_view->statistics();
         if (!vulkan_sync_stress) {
@@ -2263,6 +2290,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
 }
 
 int main(int argc,const char* const* argv) try {
+    if(argc>1 && std::string_view{argv[1]}=="--audio-review"){
+        if(argc<3||argc>4)throw std::invalid_argument{"Usage: gloom --audio-review DIR [--device]"};
+        return gloom::review::audio_review(argv[2],argc==4&&std::string_view{argv[3]}=="--device");
+    }
     if(argc>1 && std::string_view{argv[1]}=="--ui-flow-review"){
         if(argc!=6)throw std::invalid_argument{"Usage: gloom --ui-flow-review ENDPOINT OUTPUT NAME archangel|shadow"};
         gloom::desktop::Session session;session.flow_output=argv[3];session.flow_name=argv[4];session.flow_selection=std::string_view{argv[5]}=="shadow"?4:3;

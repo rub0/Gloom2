@@ -1,0 +1,1403 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "ambient/bassy_fan.wav",
+      "sha256": "c5db0ee86fff6e5cb2ee4cde1c8dfb8b00c4dff1e53e84ec0e619cac20998c46",
+      "references": [
+        "Exes/media/maps/Dungeons_client.txt:591",
+        "Exes/media/maps/Dungeons_client.txt:598",
+        "Exes/media/maps/Dungeons_server.txt:591",
+        "Exes/media/maps/Dungeons_server.txt:598",
+        "Exes/media/maps/Factory_client.txt:464",
+        "Exes/media/maps/Factory_server.txt:464"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 144499,
+      "duration_seconds": 6.553243,
+      "peak": 0.999969
+    },
+    {
+      "path": "ambient/deep_atmosphere.wav",
+      "sha256": "94c68fd1500df35e51af70f54aa8bc77d49fb081c410b518bc4a3e74695a7aa6",
+      "references": [
+        "Exes/media/maps/Dungeons_client.txt:605",
+        "Exes/media/maps/Dungeons_client.txt:612",
+        "Exes/media/maps/Dungeons_client.txt:619",
+        "Exes/media/maps/Dungeons_server.txt:605",
+        "Exes/media/maps/Dungeons_server.txt:612",
+        "Exes/media/maps/Dungeons_server.txt:619",
+        "Exes/media/maps/Factory_client.txt:471",
+        "Exes/media/maps/Factory_client.txt:478",
+        "Exes/media/maps/Factory_client.txt:485",
+        "Exes/media/maps/Factory_client.txt:492",
+        "Exes/media/maps/Factory_server.txt:471",
+        "Exes/media/maps/Factory_server.txt:478",
+        "Exes/media/maps/Factory_server.txt:485",
+        "Exes/media/maps/Factory_server.txt:492"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 140985,
+      "duration_seconds": 6.393878,
+      "peak": 0.707886
+    },
+    {
+      "path": "ambient/door_chain_cave.mp3",
+      "sha256": "83844c833190ca0ae8f7199ee4a3134292dd83a6cc895bf0208d03761c2c602a",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 44100,
+      "frames": 1243620,
+      "duration_seconds": 28.2,
+      "peak": 0.60554
+    },
+    {
+      "path": "ambient/drops_cave.mp3",
+      "sha256": "69a2cb365705ee2fb046a2d54e1fe8d7e6262c4911e8a56914bceac742937132",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 44100,
+      "frames": 1933932,
+      "duration_seconds": 43.853333,
+      "peak": 0.506784
+    },
+    {
+      "path": "ambient/force.wav",
+      "sha256": "ead8dbbdffb4a7365f1c409c129ccbcacd8c8d758f91c8d24258ba5ee97e504a",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 56245,
+      "duration_seconds": 2.550794,
+      "peak": 0.46405
+    },
+    {
+      "path": "ambient/lava_quiet.wav",
+      "sha256": "838ec1e72b2c433408a342a48518987edcb2124932eeb477d59653540b13d6ea",
+      "references": [
+        "Exes/media/maps/Dungeons_client.txt:563",
+        "Exes/media/maps/Dungeons_client.txt:577",
+        "Exes/media/maps/Dungeons_client.txt:584",
+        "Exes/media/maps/Dungeons_server.txt:563",
+        "Exes/media/maps/Dungeons_server.txt:577",
+        "Exes/media/maps/Dungeons_server.txt:584",
+        "Exes/media/maps/Factory_client.txt:436",
+        "Exes/media/maps/Factory_client.txt:443",
+        "Exes/media/maps/Factory_client.txt:450",
+        "Exes/media/maps/Factory_client.txt:457",
+        "Exes/media/maps/Factory_server.txt:436",
+        "Exes/media/maps/Factory_server.txt:443",
+        "Exes/media/maps/Factory_server.txt:450",
+        "Exes/media/maps/Factory_server.txt:457"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 64822,
+      "duration_seconds": 2.939773,
+      "peak": 0.248749
+    },
+    {
+      "path": "ambient/loop_deep.ogg",
+      "sha256": "3eb4a3a7a4fe473010a3755cf478550e4ab05ac458117f45bae94655bf72cd22",
+      "references": [
+        "Exes/media/maps/Dungeons_client.txt:556",
+        "Exes/media/maps/Dungeons_client.txt:570",
+        "Exes/media/maps/Dungeons_client.txt:626",
+        "Exes/media/maps/Dungeons_client.txt:640",
+        "Exes/media/maps/Dungeons_client.txt:647",
+        "Exes/media/maps/Dungeons_server.txt:556",
+        "Exes/media/maps/Dungeons_server.txt:570",
+        "Exes/media/maps/Dungeons_server.txt:626",
+        "Exes/media/maps/Dungeons_server.txt:640",
+        "Exes/media/maps/Dungeons_server.txt:647"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "ogg",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 806415,
+      "duration_seconds": 36.572109,
+      "peak": 0.920251
+    },
+    {
+      "path": "ambient/sinister.wav",
+      "sha256": "ffc0671bf8d97ff405370e4c4a6dc3ad8c5fcf5ff899144ceaa21be6ac354bc0",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 120481,
+      "duration_seconds": 5.463991,
+      "peak": 0.999969
+    },
+    {
+      "path": "ambient/sinister_portal.wav",
+      "sha256": "f30df8504c23a746b1cbf7250318e4730a512d4cce0ce86fae99f1091f29ea77",
+      "references": [
+        "Exes/media/maps/Dungeons_client.txt:633",
+        "Exes/media/maps/Dungeons_server.txt:633"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 133410,
+      "duration_seconds": 6.05034,
+      "peak": 0.999969
+    },
+    {
+      "path": "character/archangelShield.ogg",
+      "sha256": "290ba70fff454a9834bf0719118089b0698befdf815585ba19ef6dfc638036ba",
+      "references": [
+        "Src/Logic/Entity/Components/Archangel.cpp:140"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "ogg",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 24064,
+      "duration_seconds": 1.091338,
+      "peak": 0.890022
+    },
+    {
+      "path": "character/heartBeat.wav",
+      "sha256": "7e45759a1bff6baad2e63b963ff9329487bb17a6c86411733a2b1ed6416d9297",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 743426,
+      "duration_seconds": 15.488042,
+      "peak": 1.0
+    },
+    {
+      "path": "character/houndBite.wav",
+      "sha256": "1e93c5d2c68c160c601666707bbd512719bb61c0d1c2c2b44e60725948491b5a",
+      "references": [
+        "Src/Logic/Entity/Components/Hound.cpp:175"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 62957,
+      "duration_seconds": 1.427596,
+      "peak": 0.512268
+    },
+    {
+      "path": "character/houndSmell.wav",
+      "sha256": "c65a8f75ba1c548ac7173531356eb5a09ea431409918952b9273b05fac94c30f",
+      "references": [
+        "Src/Logic/Entity/Components/Hound.cpp:121",
+        "Src/Logic/Entity/Components/Hound.cpp:195"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 720321,
+      "duration_seconds": 16.33381,
+      "peak": 1.0
+    },
+    {
+      "path": "character/jump.wav",
+      "sha256": "835debb2548138e6aec5cf8051e7a188ec89f51df595f410aff456e06f8dd835",
+      "references": [
+        "Src/Logic/Entity/Components/CharacterSound.cpp:116",
+        "Exes/media/maps/archetypes.txt:507",
+        "Exes/media/maps/archetypes.txt:570",
+        "Exes/media/maps/archetypes.txt:645",
+        "Exes/media/maps/archetypes.txt:708",
+        "Exes/media/maps/archetypes.txt:763",
+        "Exes/media/maps/archetypes.txt:837",
+        "Exes/media/maps/archetypes.txt:899",
+        "Exes/media/maps/archetypes.txt:964",
+        "Exes/media/maps/archetypes.txt:1124"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 15194,
+      "duration_seconds": 0.68907,
+      "peak": 0.487488
+    },
+    {
+      "path": "character/lifeDome.mp3",
+      "sha256": "4e54d196478613007eff40e7092de4ab93ba5a3220486b1db5670e2c97e12bb5",
+      "references": [
+        "Src/Logic/Entity/Components/Archangel.cpp:168"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 290304,
+      "duration_seconds": 6.048,
+      "peak": 0.960181
+    },
+    {
+      "path": "character/scream.ogg",
+      "sha256": "5c6b153c7c79652b360fb06c3ad1d8d8eb5079b7d159216dc6b4a2219916837d",
+      "references": [
+        "Src/Logic/Entity/Components/Screamer.cpp:215"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "ogg",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 46554,
+      "duration_seconds": 2.111293,
+      "peak": 1.107865
+    },
+    {
+      "path": "character/screamerShield.wav",
+      "sha256": "e0fefc8cc66096981ec6519609d8389b93dd66254ef440416833819b51b3e612",
+      "references": [
+        "Src/Logic/Entity/Components/Screamer.cpp:327"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 182594,
+      "duration_seconds": 4.140454,
+      "peak": 0.747131
+    },
+    {
+      "path": "character/shadow.ogg",
+      "sha256": "a20ba5d85ae8601c2421dbedc3421a0173545de24fc99289a3cb0d5613e2ee66",
+      "references": [
+        "Src/Logic/Entity/Components/Shadow.cpp:97",
+        "Src/Logic/Entity/Components/Shadow.cpp:114",
+        "Src/Logic/Entity/Components/Shadow.cpp:135"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "ogg",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 232741,
+      "duration_seconds": 10.555147,
+      "peak": 0.512442
+    },
+    {
+      "path": "character/shadowFlash.wav",
+      "sha256": "6d388b69b35cfbbbdf8509b1318d72b885b4b2276a775d18cc5c0d61c6355075",
+      "references": [
+        "Src/Logic/Entity/Components/Shadow.cpp:169"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 2,
+      "sample_rate": 44100,
+      "frames": 170848,
+      "duration_seconds": 3.874104,
+      "peak": 0.935608
+    },
+    {
+      "path": "character/shadowIn.ogg",
+      "sha256": "9fdefccba8b9ea86fb077baf6fcdd199c4ec916a4600d3f773f513057abc0900",
+      "references": [
+        "Src/Logic/Entity/Components/Shadow.cpp:136"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "ogg",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 54783,
+      "duration_seconds": 2.48449,
+      "peak": 1.173935
+    },
+    {
+      "path": "character/shadowOut.ogg",
+      "sha256": "b0b5ffd59f80784ec05a46d302f03826fcf19e3baeb1b9e2df671a5154755065",
+      "references": [
+        "Src/Logic/Entity/Components/Shadow.cpp:79"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "ogg",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 40639,
+      "duration_seconds": 1.843039,
+      "peak": 1.084493
+    },
+    {
+      "path": "character/sideJump.wav",
+      "sha256": "b3eec257432dc458df52eec42f1a6ca7e9967375dd4ae8a7f840fbda88c91a75",
+      "references": [
+        "Src/Logic/Entity/Components/CharacterSound.cpp:122",
+        "Exes/media/maps/archetypes.txt:508",
+        "Exes/media/maps/archetypes.txt:571",
+        "Exes/media/maps/archetypes.txt:646",
+        "Exes/media/maps/archetypes.txt:709",
+        "Exes/media/maps/archetypes.txt:764",
+        "Exes/media/maps/archetypes.txt:838",
+        "Exes/media/maps/archetypes.txt:900",
+        "Exes/media/maps/archetypes.txt:965",
+        "Exes/media/maps/archetypes.txt:1125"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 10254,
+      "duration_seconds": 0.465034,
+      "peak": 0.999939
+    },
+    {
+      "path": "damage/dying groan.wav",
+      "sha256": "e6763d722a821a89b509aab37259ca75462237d7d8ac2f1e1e67681f61267124",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 39485,
+      "duration_seconds": 1.790703,
+      "peak": 0.749359
+    },
+    {
+      "path": "damage/girl_grunt.wav",
+      "sha256": "e7a5b5f9876ca4a3396c59b5c782963d7f38c891c7bf7f77d83c55ff806f9c9e",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 24641,
+      "duration_seconds": 0.558753,
+      "peak": 1.0
+    },
+    {
+      "path": "damage/ImpaleFlesh1.wav",
+      "sha256": "732a8c73b807279b6f2717eb47140d4b105cb33182f181e43a5018f4b96af55f",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 45738,
+      "duration_seconds": 1.037143,
+      "peak": 1.0
+    },
+    {
+      "path": "damage/ImpaleFlesh5.wav",
+      "sha256": "0ae0b91b55c4a71c72aad6fe16bf5909c96b5bcfd9bacb083008f7d6ce5202a7",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 49282,
+      "duration_seconds": 1.117506,
+      "peak": 0.891235
+    },
+    {
+      "path": "damage/landingMaleGrunt.wav",
+      "sha256": "fafb685be657610b5dec2ff937e5a5e7ecc44e5574156064526adee36b79f599",
+      "references": [
+        "Src/Logic/Entity/Components/CharacterSound.cpp:103"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 7023,
+      "duration_seconds": 0.318503,
+      "peak": 0.995239
+    },
+    {
+      "path": "damage/lava_burned.wav",
+      "sha256": "4ea16997389f1aa35549869a338f2093f40d14df030c381a7659cc7e3cbf8bfc",
+      "references": [
+        "Src/Logic/Entity/Components/Life.cpp:351"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 44710,
+      "duration_seconds": 2.027664,
+      "peak": 0.502289
+    },
+    {
+      "path": "damage/pain.wav",
+      "sha256": "baeb1f86f8fbdf6a9014fa7bed9c77d0c7534c6ef35d2ceee064a9806f981e4e",
+      "references": [
+        "Exes/media/maps/archetypes.txt:509",
+        "Exes/media/maps/archetypes.txt:572",
+        "Exes/media/maps/archetypes.txt:647",
+        "Exes/media/maps/archetypes.txt:710",
+        "Exes/media/maps/archetypes.txt:765",
+        "Exes/media/maps/archetypes.txt:839",
+        "Exes/media/maps/archetypes.txt:901",
+        "Exes/media/maps/archetypes.txt:966",
+        "Exes/media/maps/archetypes.txt:1126"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 12430,
+      "duration_seconds": 0.563719,
+      "peak": 0.946503
+    },
+    {
+      "path": "damage/slingdth_04.wav",
+      "sha256": "a2bc09b8120bc5bb4b5d6de21c29a604e0663ec837f69f37943f6cf5aa98f207",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 33954,
+      "duration_seconds": 1.539864,
+      "peak": 0.947937
+    },
+    {
+      "path": "damage/splatdeath_03.wav",
+      "sha256": "bb8bd865fa0a3722c47125c3f0304df2e9af029bb56b0dc16673e3daf440b748",
+      "references": [
+        "Src/Logic/Entity/Components/Life.cpp:361",
+        "Exes/media/maps/archetypes.txt:510",
+        "Exes/media/maps/archetypes.txt:573",
+        "Exes/media/maps/archetypes.txt:648",
+        "Exes/media/maps/archetypes.txt:711",
+        "Exes/media/maps/archetypes.txt:766",
+        "Exes/media/maps/archetypes.txt:840",
+        "Exes/media/maps/archetypes.txt:902",
+        "Exes/media/maps/archetypes.txt:967",
+        "Exes/media/maps/archetypes.txt:1127"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 38655,
+      "duration_seconds": 1.753061,
+      "peak": 1.0
+    },
+    {
+      "path": "feedback/bell.mp3",
+      "sha256": "a3a51dde2f4f29b253f3ac496d55f597b6ebdb1f2805250f2f4ad0115b964a5c",
+      "references": [
+        "Src/Logic/Maps/Scoreboard.cpp:166"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 231552,
+      "duration_seconds": 4.824,
+      "peak": 1.070565
+    },
+    {
+      "path": "feedback/Big hit.mp3",
+      "sha256": "92820c3319d3fc90d231579cf473d5cf87fa621a1ec717af0e4d65b5cedbb30a",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 218880,
+      "duration_seconds": 4.56,
+      "peak": 1.023139
+    },
+    {
+      "path": "feedback/Chipped.mp3",
+      "sha256": "9f626d365e04884ca902404b2c1bb7c6fa17686c999e729a2c850e4dc4a3e443",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 92160,
+      "duration_seconds": 1.92,
+      "peak": 1.010842
+    },
+    {
+      "path": "feedback/Dark hit, echo.mp3",
+      "sha256": "97ee77f9d771625b1dd95c8cea34a271424b021db82d561e3fecb31a3cac40f1",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 145152,
+      "duration_seconds": 3.024,
+      "peak": 1.0288
+    },
+    {
+      "path": "feedback/Dark hit, power down.mp3",
+      "sha256": "f54ec81270048760bb43e35802acb82b67d576ddcd0d4b07084d98ba7a74a944",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 173952,
+      "duration_seconds": 3.624,
+      "peak": 1.005364
+    },
+    {
+      "path": "feedback/headshot.wav",
+      "sha256": "2e312324347ea32924e613ced9f070709a216b2e01433a24a9f721e27ab16754",
+      "references": [
+        "Src/Logic/Entity/Components/Sniper.cpp:145"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 43126,
+      "duration_seconds": 1.955828,
+      "peak": 1.0
+    },
+    {
+      "path": "feedback/play.wav",
+      "sha256": "7b37e94527a4c2b7c0f40291d64cc241722770124101563fe7fab441425186b5",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 34419,
+      "duration_seconds": 1.560952,
+      "peak": 1.0
+    },
+    {
+      "path": "footsteps/clank1.wav",
+      "sha256": "45b44900a567a2e2571528ee0059c88769b3bfb5f4a56d92bffee0ae0c5b6bb2",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 8704,
+      "duration_seconds": 0.394739,
+      "peak": 0.353271
+    },
+    {
+      "path": "footsteps/fisico.wav",
+      "sha256": "ccbabe12677c03584f6ab8ae566de7d7471c501d5122208ced313a6bd76d33d2",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 40651,
+      "duration_seconds": 0.921791,
+      "peak": 0.994843
+    },
+    {
+      "path": "footsteps/footStep.wav",
+      "sha256": "d1fcebde0d4bb12a0f71449390e06cc07497babd276af455e5f1d6ba749c7c5f",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 37917,
+      "duration_seconds": 0.859796,
+      "peak": 0.693176
+    },
+    {
+      "path": "footsteps/footStep2.wav",
+      "sha256": "378a0d817ff5827abdc9bce5907614d68e53178ac70207ccc53e3a0cc81a5d73",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 41329,
+      "duration_seconds": 0.937166,
+      "peak": 0.945831
+    },
+    {
+      "path": "footsteps/shn_kafel_1.wav",
+      "sha256": "87f31096e031197e43a79d8a847928beac47c5d460c28972345608a2e4ed277f",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 16990,
+      "duration_seconds": 0.385261,
+      "peak": 0.957458
+    },
+    {
+      "path": "footsteps/step1.wav",
+      "sha256": "67861e0b12d952bdad3f4c533dd80d3b5d5430b98abf28e01722f84c3de4a233",
+      "references": [
+        "Src/Logic/Entity/Components/CharacterSound.cpp:29",
+        "Exes/media/maps/archetypes.txt:506",
+        "Exes/media/maps/archetypes.txt:569",
+        "Exes/media/maps/archetypes.txt:644",
+        "Exes/media/maps/archetypes.txt:707",
+        "Exes/media/maps/archetypes.txt:762",
+        "Exes/media/maps/archetypes.txt:836",
+        "Exes/media/maps/archetypes.txt:898",
+        "Exes/media/maps/archetypes.txt:963",
+        "Exes/media/maps/archetypes.txt:1123"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 6297,
+      "duration_seconds": 0.285578,
+      "peak": 0.605011
+    },
+    {
+      "path": "footsteps/supermalla_escenario1.wav",
+      "sha256": "ccbabe12677c03584f6ab8ae566de7d7471c501d5122208ced313a6bd76d33d2",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 40651,
+      "duration_seconds": 0.921791,
+      "peak": 0.994843
+    },
+    {
+      "path": "gameplay/plasma.wav",
+      "sha256": "43c862fb95bcfcd3e2e273e8fd3038d565fb4272ae37dbc481e5b7ed776c26a4",
+      "references": [
+        "Exes/media/maps/archetypes.txt:1247"
+      ],
+      "imported": false,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 189242,
+      "duration_seconds": 4.291202,
+      "peak": 1.0
+    },
+    {
+      "path": "gameplay/plasma2.wav",
+      "sha256": "d5ca03ad0759ca406e4c8749a14f08b10619fe71ff8f6da007b42084a95b4da1",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 27719,
+      "duration_seconds": 1.257098,
+      "peak": 1.0
+    },
+    {
+      "path": "gameplay/spawn.wav",
+      "sha256": "8bfcecdb65937790c86c9799ca69ad5da88babc790b8d9120fb5616f521cf188",
+      "references": [
+        "Src/Logic/Entity/Components/ClientRespawn.cpp:129",
+        "Src/Logic/Entity/Components/SpawnPlayer.cpp:111",
+        "Exes/media/maps/archetypes.txt:511",
+        "Exes/media/maps/archetypes.txt:574",
+        "Exes/media/maps/archetypes.txt:649",
+        "Exes/media/maps/archetypes.txt:712",
+        "Exes/media/maps/archetypes.txt:767",
+        "Exes/media/maps/archetypes.txt:841",
+        "Exes/media/maps/archetypes.txt:903",
+        "Exes/media/maps/archetypes.txt:968",
+        "Exes/media/maps/archetypes.txt:1128"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 16192,
+      "duration_seconds": 0.734331,
+      "peak": 1.0
+    },
+    {
+      "path": "items/armor.wav",
+      "sha256": "0c2661a98770acd5577c7ed016dd2550c7f9aa7e806f9ea3cf51747c3126319e",
+      "references": [
+        "Exes/media/maps/archetypes.txt:55",
+        "Exes/media/maps/archetypes.txt:79"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 18399,
+      "duration_seconds": 0.834422,
+      "peak": 1.0
+    },
+    {
+      "path": "items/Drum powerup.mp3",
+      "sha256": "f01f45a89cc1478cfbe399537da6d902ed243bd6af4c7db032d59873cee205c6",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 40320,
+      "duration_seconds": 0.84,
+      "peak": 1.007162
+    },
+    {
+      "path": "items/healthPack.wav",
+      "sha256": "54e59015af00d01460ca2b593875f53b42caa3f12a71db4ec83be9b99caebdaa",
+      "references": [
+        "Exes/media/maps/archetypes.txt:157"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 19140,
+      "duration_seconds": 0.868027,
+      "peak": 1.0
+    },
+    {
+      "path": "items/healthVial.wav",
+      "sha256": "b33cf5f86eb536751abb9b814d69f76e12813aec826ccb496c057a1d7efb1513",
+      "references": [
+        "Exes/media/maps/archetypes.txt:258"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 17494,
+      "duration_seconds": 0.793379,
+      "peak": 1.0
+    },
+    {
+      "path": "items/holdable.wav",
+      "sha256": "044c1aca42f336244fd55cbada4f117fa03569cd5824f6e260db5ec194701929",
+      "references": [
+        "Exes/media/maps/archetypes.txt:106",
+        "Exes/media/maps/archetypes.txt:133"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 44528,
+      "duration_seconds": 2.01941,
+      "peak": 0.970795
+    },
+    {
+      "path": "items/st_takehealth.ogg",
+      "sha256": "1f641430ec28350c5a85d863716f10c202830e722aff06ed3fcc74e96d5a5f5c",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "ogg",
+      "channels": 2,
+      "sample_rate": 22050,
+      "frames": 22052,
+      "duration_seconds": 1.000091,
+      "peak": 1.240139
+    },
+    {
+      "path": "items/wearoff.wav",
+      "sha256": "1c99890c3cdb9c8802831ba9485cac9dfdd08b95be2446f06129d32965462e99",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 22424,
+      "duration_seconds": 1.016961,
+      "peak": 0.989685
+    },
+    {
+      "path": "land/fall.wav",
+      "sha256": "7137ee9e6a1a759872ea18555e80975245ae559efaa43bf64bc1c207c3666934",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 21569,
+      "duration_seconds": 0.489093,
+      "peak": 0.999969
+    },
+    {
+      "path": "land/land.wav",
+      "sha256": "ebd704a6f4f335607ce685d36d15b2b86c36a5d235b5ac9099b7ae77268036ad",
+      "references": [
+        "Src/Logic/Entity/Components/CharacterSound.cpp:99"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 8041,
+      "duration_seconds": 0.182336,
+      "peak": 0.999969
+    },
+    {
+      "path": "music/themeGloom.wav",
+      "sha256": "cdd66b7ecaf74c722ed680f93f593e7bd906378122cf89004b690c64fdaf1eef",
+      "references": [
+        "Src/Application/MenuState.cpp:77"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 2,
+      "sample_rate": 48000,
+      "frames": 2091689,
+      "duration_seconds": 43.576854,
+      "peak": 0.180573
+    },
+    {
+      "path": "troll/sebollas.wav",
+      "sha256": "2d88b4508e2c0916254e0ade2043e4396ca0c7b75627e5716c6824109ec51ecc",
+      "references": [],
+      "imported": false,
+      "status": "excluded_troll",
+      "format": "wav",
+      "channels": 2,
+      "sample_rate": 44100,
+      "frames": 196356,
+      "duration_seconds": 4.452517,
+      "peak": 0.325562
+    },
+    {
+      "path": "troll/Slap Chop (Spanish Version).mp3",
+      "sha256": "476a13868319c7c1b2f9837fed3a80431fc863b0ff7bd74786823707949e078e",
+      "references": [],
+      "imported": false,
+      "status": "excluded_troll",
+      "format": "mp3",
+      "channels": 2,
+      "sample_rate": 44100,
+      "frames": 5353344,
+      "duration_seconds": 121.39102,
+      "peak": 0.337977
+    },
+    {
+      "path": "troll/slapchot.wav",
+      "sha256": "d1375dbe2658693b2550f69b49c9c1048786f681f42dcac67f742ae580ce6e0d",
+      "references": [],
+      "imported": false,
+      "status": "excluded_troll",
+      "format": "wav",
+      "channels": 2,
+      "sample_rate": 44100,
+      "frames": 37909,
+      "duration_seconds": 0.859615,
+      "peak": 0.311096
+    },
+    {
+      "path": "weapons/ammoPickup.wav",
+      "sha256": "37e0b88c0abceb4a825cd4d78dd55c403a8b6d69cdac378fe849127855f85c15",
+      "references": [
+        "Exes/media/maps/archetypes.txt:308",
+        "Exes/media/maps/archetypes.txt:355",
+        "Exes/media/maps/archetypes.txt:403",
+        "Exes/media/maps/archetypes.txt:450"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 3099,
+      "duration_seconds": 0.140544,
+      "peak": 0.999573
+    },
+    {
+      "path": "weapons/change.wav",
+      "sha256": "d599fd6f00f6ff9f0f464a0797478bac1e8505bfb709a2d0fd6ec2dc6b5d330b",
+      "references": [
+        "Src/Logic/Entity/Components/HudWeapons.cpp:368",
+        "Src/Logic/Entity/Components/HudWeapons.cpp:557"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 11175,
+      "duration_seconds": 0.506803,
+      "peak": 0.999969
+    },
+    {
+      "path": "weapons/explotion.wav",
+      "sha256": "48417b91964b977612256d69ef8b87c11ff996b214c9f67c66b7424268a97dae",
+      "references": [],
+      "imported": true,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 37968,
+      "duration_seconds": 1.721905,
+      "peak": 1.0,
+      "selection_reason": "Original explosion sample for authoritative fireball contacts"
+    },
+    {
+      "path": "weapons/hit/elec_ric.wav",
+      "sha256": "16773cdf75fad93b01bd67ff0aa1ceba9661846bc83468b293d98aaba21cd671",
+      "references": [
+        "Src/Logic/Entity/Components/Sniper.cpp:117",
+        "Src/Logic/Entity/Components/Sniper.cpp:236"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 36248,
+      "duration_seconds": 1.6439,
+      "peak": 0.466766
+    },
+    {
+      "path": "weapons/hit/fireball_hit.wav",
+      "sha256": "ca1e5ccf0122e1caa4599eeb05bb24f3a00be33600e2db1606a7cefb85b03db3",
+      "references": [
+        "Src/Logic/Entity/Components/FireBallController.cpp:213"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 32049,
+      "duration_seconds": 1.453469,
+      "peak": 0.999969
+    },
+    {
+      "path": "weapons/hit/ric2.wav",
+      "sha256": "39053601104449bc42aaeaeafb917ddaba8c4cb8007af0515ed0206ddd3dd10b",
+      "references": [
+        "Src/Logic/Entity/Components/MagneticBullet.cpp:103"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 23547,
+      "duration_seconds": 1.067891,
+      "peak": 1.0
+    },
+    {
+      "path": "weapons/hit/ric3.wav",
+      "sha256": "f921e4da1cc1bca35855caf3d7432694aa113bebc158b62b69164b33034ce2e4",
+      "references": [
+        "Src/Logic/Entity/Components/MagneticBullet.cpp:103"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 24040,
+      "duration_seconds": 1.090249,
+      "peak": 1.0
+    },
+    {
+      "path": "weapons/ironHellGoat/ignite_pitch.wav",
+      "sha256": "474a30ceeddf29a0894590fde69a01e0cba70b9b247b7aae5f7aaabbbea79d9b",
+      "references": [],
+      "imported": true,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 2,
+      "sample_rate": 22050,
+      "frames": 55895,
+      "duration_seconds": 2.534921,
+      "peak": 1.0,
+      "selection_reason": "Original ignition sample for current weapon charge/guidance loops"
+    },
+    {
+      "path": "weapons/ironHellGoat/ironHellGoatPickup.wav",
+      "sha256": "a94a652d5d8f137d90b45ee5189fdab64a350ef314ebe5b0262698fe8fa8db42",
+      "references": [
+        "Exes/media/maps/archetypes.txt:425"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 11894,
+      "duration_seconds": 0.53941,
+      "peak": 0.950012
+    },
+    {
+      "path": "weapons/ironHellGoat/shootFireball.wav",
+      "sha256": "7b12f8691be3493ca5988fd14ed73cf867f2888caaf91b29dfbbd75bad4d84f7",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 76290,
+      "duration_seconds": 1.729932,
+      "peak": 0.891205
+    },
+    {
+      "path": "weapons/ironHellGoat/shootFireBall2.wav",
+      "sha256": "63c20fcfe56b97d59a51621ec7cb6c7cd94dfec7f61968560b5c3fd46a859342",
+      "references": [
+        "Src/Logic/Entity/Components/IronHellGoatFeedback.cpp:64"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 124160,
+      "duration_seconds": 2.81542,
+      "peak": 0.999969
+    },
+    {
+      "path": "weapons/ironHellGoat/shootFireball3.wav",
+      "sha256": "e34ea8a8d2c3ce1c500de5891f00503b83ecb4f1a87d815707d69371d8dd9a07",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 44100,
+      "frames": 87552,
+      "duration_seconds": 1.985306,
+      "peak": 0.858643
+    },
+    {
+      "path": "weapons/minigun/minigunHolster.mp3",
+      "sha256": "9373b9f529182b46c08384d6bc56200b2b37205869a1f843c08fc443b2075b5e",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 1,
+      "sample_rate": 11025,
+      "frames": 11520,
+      "duration_seconds": 1.044898,
+      "peak": 0.959938
+    },
+    {
+      "path": "weapons/minigun/minigunPickup.wav",
+      "sha256": "3a56926f40ab8cc614314d2ade6e5f5e073e3e300a3faf7661a66ba57d0ba884",
+      "references": [
+        "Exes/media/maps/archetypes.txt:378"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 21291,
+      "duration_seconds": 0.965578,
+      "peak": 0.353882
+    },
+    {
+      "path": "weapons/minigun/shoot.wav",
+      "sha256": "34b9a6ed4ee9fcfd19f1dd93b5213aceda006582e861b51efbf7704d9aa29884",
+      "references": [
+        "Src/Logic/Entity/Components/MiniGunFeedback.cpp:148",
+        "Src/Logic/Entity/Components/MiniGunFeedback.cpp:161"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 6432,
+      "duration_seconds": 0.291701,
+      "peak": 1.0
+    },
+    {
+      "path": "weapons/noammo.wav",
+      "sha256": "30f367e95cf5193d4c6d964b642d7b10d49fdaf354afdfb686e4661256c3db56",
+      "references": [
+        "Exes/media/maps/archetypes.txt:512",
+        "Exes/media/maps/archetypes.txt:575",
+        "Exes/media/maps/archetypes.txt:650",
+        "Exes/media/maps/archetypes.txt:713",
+        "Exes/media/maps/archetypes.txt:768",
+        "Exes/media/maps/archetypes.txt:842",
+        "Exes/media/maps/archetypes.txt:904",
+        "Exes/media/maps/archetypes.txt:969",
+        "Exes/media/maps/archetypes.txt:1129",
+        "Exes/media/maps/archetypes.txt:1357",
+        "Exes/media/maps/archetypes.txt:1376",
+        "Exes/media/maps/archetypes.txt:1401",
+        "Exes/media/maps/archetypes.txt:1422",
+        "Exes/media/maps/archetypes.txt:1443"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 2683,
+      "duration_seconds": 0.121678,
+      "peak": 1.0
+    },
+    {
+      "path": "weapons/shotgun/shotgun.wav",
+      "sha256": "e7410f9cb2660ca799d85aa4167a5e1fb14f54d17aae46ac3a009f6a45fd7cbf",
+      "references": [
+        "Exes/media/maps/archetypes.txt:1421"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 43786,
+      "duration_seconds": 1.98576,
+      "peak": 1.0
+    },
+    {
+      "path": "weapons/shotgun/shotgunHolster.mp3",
+      "sha256": "b1a4bbba0d97b10d13c5e98f5a544de988fb1f6f378777e913b6e1c1c0e43cba",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 1,
+      "sample_rate": 11025,
+      "frames": 11520,
+      "duration_seconds": 1.044898,
+      "peak": 0.996072
+    },
+    {
+      "path": "weapons/shotgun/shotgunPickup.wav",
+      "sha256": "47b5a5e19ce6496e61ecab1b63db398ed8a9e87a94206dab200e7777a61c8bcf",
+      "references": [
+        "Exes/media/maps/archetypes.txt:283"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 16725,
+      "duration_seconds": 0.758503,
+      "peak": 0.988525
+    },
+    {
+      "path": "weapons/sniper/sniper.wav",
+      "sha256": "029189982cf53fb457086c6238b356b9d02f012759adc99cb74f199bf3ffc63a",
+      "references": [
+        "Exes/media/maps/archetypes.txt:1442"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 34190,
+      "duration_seconds": 1.550567,
+      "peak": 1.0
+    },
+    {
+      "path": "weapons/sniper/sniperHolster.mp3",
+      "sha256": "d7969600f4afa52b9ce0c4150ce8c8a536b89cb85ad3d43c36b62bf01201a750",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 1,
+      "sample_rate": 11025,
+      "frames": 10368,
+      "duration_seconds": 0.940408,
+      "peak": 1.018707
+    },
+    {
+      "path": "weapons/sniper/sniperPickup.wav",
+      "sha256": "9c4836fbcc6c8f3a8c47ea4bfcb58412ec10e9806765c9791e95ebbbc7b4e168",
+      "references": [
+        "Exes/media/maps/archetypes.txt:330"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 29610,
+      "duration_seconds": 1.342857,
+      "peak": 0.950012
+    },
+    {
+      "path": "weapons/soulReaper/goreHit.wav",
+      "sha256": "e10646d71412232ab79da0c8a891fc81a9ba30a236bf53dc4aef3d01d2327636",
+      "references": [
+        "Src/Logic/Entity/Components/SoulReaper.cpp:169"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 3960,
+      "duration_seconds": 0.179592,
+      "peak": 0.996582
+    },
+    {
+      "path": "weapons/soulReaper/hammer.wav",
+      "sha256": "cdbc67b61eab48e68006919f4e01de35dadcfa15b2db572734dc55e855361d4b",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 17024,
+      "duration_seconds": 0.772063,
+      "peak": 0.944
+    },
+    {
+      "path": "weapons/soulReaper/miss.wav",
+      "sha256": "012a7af1d4f187d6e836c3747c09b48352e4e4900f6704e0660198e03262e887",
+      "references": [
+        "Src/Logic/Entity/Components/SoulReaper.cpp:178"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 6405,
+      "duration_seconds": 0.290476,
+      "peak": 0.999847
+    },
+    {
+      "path": "weapons/soulReaper/soulReaperHolster.mp3",
+      "sha256": "e15b192b99ca6d0ca5697812de30b2459a3644a75a9fcb5d0b5b413a441b8931",
+      "references": [],
+      "imported": false,
+      "status": "orphan",
+      "format": "mp3",
+      "channels": 1,
+      "sample_rate": 11025,
+      "frames": 12672,
+      "duration_seconds": 1.149388,
+      "peak": 1.121396
+    },
+    {
+      "path": "weapons/soulReaper/wallHit.wav",
+      "sha256": "7a04a9d1b9e0eeed4f3bc445a6a1267d1068477688fcf68008aee14d6edd020a",
+      "references": [
+        "Src/Logic/Entity/Components/SoulReaper.cpp:123"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 8034,
+      "duration_seconds": 0.364354,
+      "peak": 0.950012
+    },
+    {
+      "path": "weapons/soulReaper/wallHit2.wav",
+      "sha256": "747aabd6237176ae1bc62669cb08c7ec65fb26aa2147f6a3e1ab43f02ace7322",
+      "references": [
+        "Src/Logic/Entity/Components/SoulReaper.cpp:123"
+      ],
+      "imported": true,
+      "status": "referenced",
+      "format": "wav",
+      "channels": 1,
+      "sample_rate": 22050,
+      "frames": 3994,
+      "duration_seconds": 0.181134,
+      "peak": 0.950012
+    }
+  ],
+  "missing_references": {
+    "gun.wav": [
+      "Exes/media/maps/archetypes.txt:1398"
+    ],
+    "plasma.wav": [
+      "Exes/media/maps/archetypes.txt:1267",
+      "Exes/media/maps/archetypes.txt:1375"
+    ],
+    "shootfireball3.wav": [
+      "Exes/media/maps/archetypes.txt:1342"
+    ]
+  },
+  "duplicates": [
+    [
+      "footsteps/fisico.wav",
+      "footsteps/supermalla_escenario1.wav"
+    ]
+  ]
+}

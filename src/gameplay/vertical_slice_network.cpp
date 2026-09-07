@@ -19,14 +19,17 @@
 namespace gloom::gameplay {
 namespace {
 
-constexpr std::size_t combatant_payload_size = 115;
+constexpr std::size_t combatant_payload_size = 116;
 constexpr std::size_t hud_payload_size = 36;
 constexpr std::size_t network_payload_size = 48;
 constexpr std::size_t mechanism_payload_size = 32;
 constexpr std::size_t projectiles_payload_size = 32*29+1;
+constexpr std::size_t audio_event_payload_size = 38;
+constexpr std::uint64_t audio_redundancy_ticks = 60;
+static_assert(audio::event_capacity <= 255);
 constexpr std::size_t slice_payload_size = combatant_payload_size * 2 +
                                            mechanism_payload_size + hud_payload_size +
-                                           network_payload_size + projectiles_payload_size + 4 + 1;
+                                           network_payload_size + projectiles_payload_size + 4 + 1 + 8 + 1;
 constexpr std::size_t maximum_pending_remote_inputs = 256;
 
 template <typename Integer>
@@ -88,6 +91,7 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     append_integer(output,view.owned_weapons);
     append_float(output,view.weapon_charge_fraction);
     append_integer(output,view.damage_modifier_ticks);append_integer(output,view.cooldown_modifier_ticks);
+    append_integer(output,static_cast<std::uint8_t>(view.audio_guiding));
 }
 
 [[nodiscard]] CombatantView read_combatant(const std::span<const std::byte> input,
@@ -126,6 +130,9 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     view.weapon_charge_fraction=read_float(input,offset);
     view.damage_modifier_ticks=read_integer<std::uint16_t>(input,offset);
     view.cooldown_modifier_ticks=read_integer<std::uint16_t>(input,offset);
+    const auto guiding=read_integer<std::uint8_t>(input,offset);
+    if(guiding>1)throw std::runtime_error{"Invalid audio guiding flag"};
+    view.audio_guiding=guiding!=0;
     return view;
 }
 
@@ -318,14 +325,31 @@ network::ProtocolMessage encode_slice_snapshot(const SliceSnapshot& snapshot,
         append_integer(message.payload,p.respawn_remaining);
         append_integer(message.payload,static_cast<std::uint8_t>(p.phase));append_integer(message.payload,p.pulling_player);
     }
+    append_integer(message.payload,snapshot.audio_events.sequence);
+    std::vector<const audio::Event*> recent_audio;
+    const auto first_audio=snapshot.audio_events.sequence>=audio::event_capacity?
+        snapshot.audio_events.sequence-audio::event_capacity+1:1;
+    for(auto audio_sequence=first_audio;audio_sequence<=snapshot.audio_events.sequence;++audio_sequence){
+        const auto& e=snapshot.audio_events.events[(audio_sequence-1)%audio::event_capacity];
+        if(e.sequence!=audio_sequence||e.cue>=audio::Cue::count||!std::isfinite(e.position.x)||!std::isfinite(e.position.y)||!std::isfinite(e.position.z)||e.tick>snapshot.simulation_tick)
+            throw std::invalid_argument{"Invalid audio event journal"};
+        if(snapshot.simulation_tick-e.tick<=audio_redundancy_ticks)recent_audio.push_back(&e);
+    }
+    append_integer(message.payload,static_cast<std::uint8_t>(recent_audio.size()));
+    for(const auto* event:recent_audio){const auto& e=*event;
+        append_integer(message.payload,e.sequence);append_integer(message.payload,e.tick);append_integer(message.payload,e.actor);
+        append_integer(message.payload,static_cast<std::uint8_t>(e.cue));
+        append_float(message.payload,e.position.x);append_float(message.payload,e.position.y);append_float(message.payload,e.position.z);
+        append_integer(message.payload,static_cast<std::uint8_t>(e.spatial));
+    }
     return message;
 }
 
 std::expected<SliceSnapshot, std::string>
-decode_slice_snapshot(const network::ProtocolMessage& message) {
+decode_slice_snapshot(const network::ProtocolMessage& message) try {
     if (message.kind != network::MessageKind::gameplay_snapshot ||
         message.payload.size() < slice_payload_size ||
-        message.payload.size() > slice_payload_size+factory_pickup_count*16 || message.sequence == 0) {
+        message.payload.size() > slice_payload_size+factory_pickup_count*16+audio::event_capacity*audio_event_payload_size || message.sequence == 0) {
         return std::unexpected{"Message is not a Gloom slice snapshot"};
     }
     std::size_t offset = 0;
@@ -362,7 +386,7 @@ decode_slice_snapshot(const network::ProtocolMessage& message) {
     for(auto& p:snapshot.projectiles){p.id=read_integer<std::uint32_t>(message.payload,offset);p.owner=read_integer<std::uint64_t>(message.payload,offset);p.weapon=static_cast<SliceWeapon>(read_integer<std::uint8_t>(message.payload,offset));p.position_x=read_float(message.payload,offset);p.position_y=read_float(message.payload,offset);p.position_z=read_float(message.payload,offset);p.radius=read_float(message.payload,offset);}
     snapshot.scene_id = read_integer<std::uint32_t>(message.payload, offset);
     snapshot.pickup_count=read_integer<std::uint8_t>(message.payload,offset);
-    if(snapshot.pickup_count>factory_pickup_count || message.payload.size()!=slice_payload_size+snapshot.pickup_count*16)
+    if(snapshot.pickup_count>factory_pickup_count || message.payload.size()<slice_payload_size+snapshot.pickup_count*16)
         return std::unexpected{"Invalid pickup payload length"};
     for(auto& p:std::span{snapshot.pickups}.first(snapshot.pickup_count)) {
         p.position={read_float(message.payload,offset),read_float(message.payload,offset),read_float(message.payload,offset)};
@@ -371,6 +395,22 @@ decode_slice_snapshot(const network::ProtocolMessage& message) {
         p.pulling_player=read_integer<std::uint8_t>(message.payload,offset);
     }
     if(!valid_pickups(snapshot))return std::unexpected{"Invalid pickup snapshot"};
+    snapshot.audio_events.sequence=read_integer<std::uint64_t>(message.payload,offset);
+    const auto audio_count=read_integer<std::uint8_t>(message.payload,offset);
+    if(audio_count>audio::event_capacity||message.payload.size()!=slice_payload_size+snapshot.pickup_count*16+audio_count*audio_event_payload_size)
+        return std::unexpected{"Invalid audio event payload length"};
+    std::uint64_t previous_audio_sequence{};
+    for(std::size_t i=0;i<audio_count;++i){audio::Event e;
+        e.sequence=read_integer<std::uint64_t>(message.payload,offset);e.tick=read_integer<std::uint64_t>(message.payload,offset);e.actor=read_integer<std::uint64_t>(message.payload,offset);
+        e.cue=static_cast<audio::Cue>(read_integer<std::uint8_t>(message.payload,offset));
+        e.position={read_float(message.payload,offset),read_float(message.payload,offset),read_float(message.payload,offset)};
+        const auto spatial=read_integer<std::uint8_t>(message.payload,offset);e.spatial=spatial!=0;
+        if(spatial>1||e.cue>=audio::Cue::count||!std::isfinite(e.position.x)||!std::isfinite(e.position.y)||!std::isfinite(e.position.z)||e.sequence>snapshot.audio_events.sequence||e.tick>snapshot.simulation_tick||
+           snapshot.simulation_tick-e.tick>audio_redundancy_ticks||!e.sequence||e.sequence<=previous_audio_sequence)
+            return std::unexpected{"Invalid audio event"};
+        previous_audio_sequence=e.sequence;
+        snapshot.audio_events.events[(e.sequence-1)%audio::event_capacity]=e;
+    }
     if (!valid_combatant(snapshot.player) || !valid_combatant(snapshot.opponent) ||
         ((snapshot.scene_id != 0 and snapshot.scene_id != original_factory().scene_id) || (snapshot.scene_id == 0 && !valid_mechanism(snapshot.factory_lift)) || (snapshot.scene_id != 0 && snapshot.factory_lift.entity != 0)) ||
         !std::isfinite(snapshot.hud.life_fraction) ||
@@ -385,7 +425,7 @@ decode_slice_snapshot(const network::ProtocolMessage& message) {
         return std::unexpected{"Slice snapshot fields are invalid"};
     }
     return snapshot;
-}
+}catch(const std::exception& e){return std::unexpected{std::string{"Invalid slice snapshot: "}+e.what()};}
 
 struct VerticalSliceRemoteHost::Impl {
     struct RemoteControl {
@@ -734,6 +774,7 @@ const SliceLobbyState& VerticalSliceRemoteHost::lobby() const noexcept {
 }
 
 struct VerticalSliceRemoteClient::Impl {
+    std::uint64_t audio_epoch{};
     explicit Impl(SlicePlayerIdentity configured_identity,
                   const SlicePlayerSelection configured_selection,
                   const bool automatic_selection)
@@ -853,6 +894,7 @@ std::optional<SliceWireMessage>
 VerticalSliceRemoteClient::receive(const network::ProtocolMessage& message,
                                    const double now_seconds) {
     if (message.kind == network::MessageKind::server_welcome) {
+        ++impl_->audio_epoch;
         impl_->session.accept(message);
         if (impl_->session.controlled_entity() != VerticalSliceSimulation::player_entity &&
             impl_->session.controlled_entity() != VerticalSliceSimulation::opponent_entity) {
@@ -970,6 +1012,7 @@ VerticalSliceRemoteClient::receive(const network::ProtocolMessage& message,
         impl_->prediction->reset_local_state(movement.entities.front());
     }
     impl_->snapshot = *decoded;
+    impl_->snapshot.audio_epoch=impl_->audio_epoch;
     const auto& predicted = impl_->prediction->local_state();
     impl_->snapshot.player.position_x = predicted.position_x;
     impl_->snapshot.player.position_y = predicted.position_y;

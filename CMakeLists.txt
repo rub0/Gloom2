@@ -57,6 +57,10 @@ endforeach()
 option(GLOOM_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 add_library(gloom_engine STATIC
+    src/audio/mixer.cpp
+    src/backends/sdl_audio.cpp
+    src/gameplay/audio_events.cpp
+    src/gameplay/audio_presentation.cpp
     src/assets/asset.cpp
     src/assets/animation.cpp
     src/assets/asset_loader.cpp
@@ -207,6 +211,10 @@ if(MSVC)
     target_compile_options(gloom PRIVATE /utf-8)
 endif()
 target_link_libraries(gloom PRIVATE gloom_engine)
+add_custom_target(gloom_audio_content
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets/audio/cooked" "${CMAKE_BINARY_DIR}/content/audio"
+    VERBATIM)
+add_dependencies(gloom gloom_audio_content)
 target_compile_definitions(gloom PRIVATE
     GLOOM_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}"
     GLOOM_BINARY_ROOT="${CMAKE_CURRENT_BINARY_DIR}"
@@ -517,6 +525,20 @@ if(BUILD_TESTING)
 
     add_executable(gloom_legacy_arsenal_tests tests/legacy_arsenal_tests.cpp)
     add_executable(gloom_legacy_pickups_tests tests/legacy_pickups_tests.cpp)
+    add_executable(gloom_audio_tests tests/audio_tests.cpp)
+    target_link_libraries(gloom_audio_tests PRIVATE gloom_engine)
+    target_compile_definitions(gloom_audio_tests PRIVATE GLOOM_SOURCE_ROOT="${CMAKE_SOURCE_DIR}" GLOOM_BINARY_ROOT="${CMAKE_BINARY_DIR}")
+    add_dependencies(gloom_audio_tests gloom_audio_content)
+    add_test(NAME gloom.audio COMMAND gloom_audio_tests)
+    add_executable(gloom_audio_network_tests tests/audio_network_tests.cpp)
+    target_link_libraries(gloom_audio_network_tests PRIVATE gloom_engine)
+    target_compile_definitions(gloom_audio_network_tests PRIVATE GLOOM_BINARY_ROOT="${CMAKE_BINARY_DIR}")
+    add_dependencies(gloom_audio_network_tests gloom_audio_content)
+    add_test(NAME gloom.audio_network COMMAND gloom_audio_network_tests)
+    add_executable(gloom_audio_backend_tests tests/audio_backend_tests.cpp)
+    target_link_libraries(gloom_audio_backend_tests PRIVATE gloom_engine)
+    add_test(NAME gloom.audio_no_device COMMAND gloom_audio_backend_tests)
+    set_tests_properties(gloom.audio_no_device PROPERTIES ENVIRONMENT "SDL_AUDIODRIVER=gloom_missing_driver")
     target_link_libraries(gloom_legacy_pickups_tests PRIVATE gloom_engine)
     add_test(NAME gloom.legacy_pickups COMMAND gloom_legacy_pickups_tests)
     target_link_libraries(gloom_legacy_arsenal_tests PRIVATE gloom_engine)

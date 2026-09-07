@@ -1,14 +1,16 @@
 # Traspaso de Gloom
 
-Actualizado: 6 de septiembre de 2026, tras cerrar el hito 67. Traspaso para el hito 68.
+Actualizado: 7 de septiembre de 2026, tras cerrar técnicamente el hito 68.
+Traspaso para definir el hito 69.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
 ## Estado y cuidado del workspace
 
 - Proyecto: `D:\Projects\Gloom`. Original: `D:\Projects\Gloom-Legacy`.
-- El commit de cierre del 67 consolida también los cambios pendientes de los
-  hitos anteriores que necesita esta versión. Consultar `git log -1` para su hash.
+- El commit de cierre del 68 consolida también la definición previa de su alcance
+  y todos los recursos originales que necesita esta versión. Consultar `git log -1`
+  para su hash.
   Revisar `git status` antes de editar y conservar cualquier cambio nuevo;
   no usar reset, checkout ni clean para limpiar. Commit local y push son acciones
   distintas: no asumir que el último hito ya está subido a GitHub.
@@ -31,10 +33,11 @@ y crear el commit de cierre según `AGENTS.md`.
 - Vida/escudo: barras verticales exteriores al marco de armas, símbolos
   originales. Cooldown en círculo lateral. FPS medidos y XYZ arriba a la izquierda.
 - Lava letal al contacto incluso con escudo. Relleno ambiente 0,65 y luces +20 %.
-- Protocolo actual **18**; Factory incluye recogibles y reglas en su huella.
-  Documentos históricos que indican protocolos 15/16/17 describen entregas previas.
+- Protocolo actual **19**; añade eventos de audio semánticos con ventana redundante
+  variable. Documentos históricos que indican protocolos 15–18 describen entregas
+  previas.
 
-## Último hito cerrado: 67, recogibles de Factory
+## Hito anterior: 67, recogibles de Factory
 
 14 arquetipos en 73 ubicaciones auditadas: recompensas únicas en la autoridad,
 topes, reserva de munición sin arma, adquisición, respawn y tirón del Soul Reaper.
@@ -56,27 +59,42 @@ está pendiente; el cierre técnico no implica esa confirmación manual.
 Si se revisan recogibles, leer solo la sección 67 de
 [GAMEPLAY_MIGRATION.md](GAMEPLAY_MIGRATION.md) y las partes pertinentes del informe.
 
-## Siguiente hito: 68, alcance pendiente de definir
+## Último hito cerrado: 68, audio original
 
-El roadmap termina en el 67. No hay todavía objetivo ni criterios de aceptación
-acordados para el 68. Este traspaso prepara su continuación, sin asignarle una
-funcionalidad por defecto. Pendientes del roadmap: habilidades de clase restantes,
-audio, UX/ajustes, despliegue externo y optimización/distribución; ninguno constituye
-por sí solo el encargo del siguiente hito.
+Backend SDL3 desacoplado con fallback nulo, mezclador a 48 kHz, buses, límite de
+voces, loops y lifecycle seguro. Música compartida entre menú/partida; pausa atenúa
+música y silencia efectos/ambiente. Listener en cámara local, primera persona
+estéreo y fuentes remotas/impactos/recogibles/nueve ambientes de Factory en 3D.
+Volúmenes configurables con `GLOOM_AUDIO_MASTER`, `GLOOM_AUDIO_MUSIC` y
+`GLOOM_AUDIO_EFFECTS` en `[0,1]`.
 
-Al retomar:
+Auditoría reproducible de 89 archivos: 37 importados/cocinados, 3 referencias
+ausentes conocidas, un grupo duplicado y `troll` excluido. PCM GAU1 preserva la
+salida decodificada y valida formato, canales, frecuencia, duración y finitud.
+Reglas: `docs/AUDIO.md`; inventario: `assets/audio/inventory.json`; informe:
+`reports/audio-2026-09-06/README.md`.
 
-1. Leer este estado y revisar `git status`; continuar sobre este workspace.
-2. Usar el objetivo que indique el usuario para el 68. Si solo pide «implementar
-   el hito 68» y sigue sin estar definido, solicitar su alcance antes de implementar.
-3. Leer únicamente el tramo final de `docs/ROADMAP.md` y los archivos relacionados
-   con ese objetivo. Registrar alcance, exclusiones y aceptación antes de cambiar código.
-4. Conservar las decisiones de los hitos 65–67 y usar sus pruebas como regresión
-   cuando se toquen movimiento, arsenal, recogibles, HUD o red.
+Pasos cada 365 ms solo con desplazamiento y apoyo. Umbrales físicos convertidos:
+aterrizaje -6,5625 m/s y gruñido -18,75 m/s. Disparos/cargas, impactos, explosión,
+retorno/guiado, sin munición, cambio/adquisición, daño, muerte y respawn emiten
+eventos autoritativos. Diario de 128 eventos; protocolo 19 envía solo el último
+segundo con redundancia. Primer snapshot, repetición/reordenación y reconexión no
+reproducen one-shots históricos; los bucles vigentes se reconstruyen.
+
+Validación: **11/11 pruebas focalizadas**, auditoría/cooker y smoke SDL3 real sobre
+`Headphones (High Definition Audio Device)`. Secuencia regenerable de 58 s en el
+informe. Sigue pendiente que una persona confirme subjetivamente volumen, timbre
+y espacialización; el cierre técnico no sustituye esa escucha.
+
+## Siguiente hito: 69, alcance pendiente de definir
+
+No hay objetivo acordado. Pendientes generales: habilidades de clase restantes,
+UX/ajustes, despliegue externo y optimización/distribución. Al retomarlo, usar el
+objetivo que indique el usuario y leer solo las fuentes relacionadas.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
-`build/windows-vs/Debug/gloom_slice_server.exe` también está recompilado con
-protocolo 18. Las capturas del 67 se reproducen con `gloom --pickup-review DIR`.
+`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 19.
+Revisión de audio: `gloom --audio-review DIR [--device]`.
 
 ## Mapa mínimo de archivos
 
@@ -94,6 +112,10 @@ protocolo 18. Las capturas del 67 se reproducen con `gloom --pickup-review DIR`.
 - Red: `src/gameplay/vertical_slice_network.cpp`,
   `src/network/movement_replication.cpp`, `include/gloom/network/protocol.hpp`.
 - Presentación: `apps/gloom/main.cpp`, `apps/gloom/game_ui.hpp`.
+- Audio: contratos en `include/gloom/audio`, mezclador en `src/audio`, backend
+  SDL3 en `src/backends/sdl_audio.cpp`; eventos/presentación en `src/gameplay`.
+- Pipeline de audio: `tools/legacy/audit_audio.py`, contenido en `assets/audio`,
+  reglas en `docs/AUDIO.md` e informe en `reports/audio-2026-09-06`.
 - Regresiones: `tests/legacy_arsenal_tests.cpp`, `tests/vertical_slice_tests.cpp`,
   `tests/vertical_slice_network_tests.cpp`, `tests/legacy_movement_tests.cpp`.
 
@@ -109,13 +131,19 @@ protocolo 18. Las capturas del 67 se reproducen con `gloom --pickup-review DIR`.
 - Hito 67: **9/9**, incluyendo recogibles, arsenal, simulación, dos clientes con
   contención/primer snapshot tardío/reconexión/respawn, protocolo, GNS, movimiento,
   servidor dedicado y smoke gráfico. Logs/capturas en el informe del hito.
+- Hito 68: **11/11**, auditoría y corrupción WAV/OGG/MP3, mezclador/backend nulo,
+  eventos, dos clientes bajo pérdida/reordenación, reconexión, protocolo 19,
+  arsenal/recogibles/movimiento/transporte, dedicado, smoke de dispositivo y
+  smoke gráfico Vulkan/Jolt.
 - PowerShell; CMake/CTest: `D:/Dev/CMake/bin`, preset `windows-debug`.
   Ejecutable: `build/windows-vs/Debug/gloom.exe`.
 - Compilar motor antes de enlazar ejecutables. Con
   `/p:BuildProjectReferences=false` se omite reconstruir dependencias: usarlo
   únicamente cuando ya estén actualizadas, para no validar una biblioteca vieja.
 - Python disponible: `.cache/legacy-tools/Scripts/python.exe` (Ogre, Pillow,
-  numpy, av). `python` puede apuntar al alias de Microsoft Store.
+  numpy, av). PyAV puede inspeccionar/decodificar los WAV/OGG/MP3 durante la
+  importación offline; el runtime no debe depender de este entorno. `python`
+  puede apuntar al alias de Microsoft Store.
 
 ## Trabajo con contexto reducido
 

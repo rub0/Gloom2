@@ -1,11 +1,13 @@
 #pragma once
 #include <gloom/gameplay/match_discovery.hpp>
+#include <gloom/gameplay/audio_presentation.hpp>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 namespace gloom::desktop {
 struct Session {
+    std::shared_ptr<gameplay::AudioPresentation> audio;
     std::shared_ptr<gameplay::SliceMatchDirectory> directory;
     std::function<std::expected<std::string,std::string>()> identity;
     std::string notice;

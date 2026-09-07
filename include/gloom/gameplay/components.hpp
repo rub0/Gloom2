@@ -125,6 +125,7 @@ struct WeaponComponent {
     bool shot_hit{false};
     bool shot_contact{false};
     float aim_pitch{0};
+    bool audio_guiding{};
 };
 
 struct AbilityComponent {

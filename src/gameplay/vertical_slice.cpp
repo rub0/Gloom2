@@ -1,4 +1,5 @@
 #include <gloom/gameplay/vertical_slice.hpp>
+#include <gloom/gameplay/audio_events.hpp>
 #include <gloom/gameplay/factory_scene.hpp>
 #include <gloom/gameplay/component_replication.hpp>
 #include <gloom/gameplay/kinematic_motion.hpp>
@@ -620,6 +621,12 @@ struct VerticalSliceSimulation::Impl {
                 position.position_y+0.9F+aim_y*result->distance,position.position_z+aim_z*result->distance};
             shooter.weapon->shot_hit=result->status==network::FireValidationStatus::hit;
             shooter.weapon->shot_contact=shooter.weapon->shot_hit || result->distance<maximum_distance;
+            if(shooter.weapon->shot_contact){
+                const auto& p=shooter.weapon->shot_impact;
+                const auto cue=shooter.weapon->arsenal.active_weapon()==SliceWeapon::soul_reaper?
+                    (shooter.weapon->shot_hit?audio::Cue::reaper_gore:audio::Cue::reaper_wall):audio::Cue::electric_hit;
+                audio_journal.emit(movement_server->simulation_tick(),shooter.entity(),cue,{p[0],p[1],p[2]},true);
+            }
         }
         if (!result || result->status != network::FireValidationStatus::hit ||
             result->target != target.entity()) {
@@ -638,8 +645,16 @@ struct VerticalSliceSimulation::Impl {
     bool route_weapon_actions(const network::ConnectionId connection, Combatant& shooter,
                               Combatant& target, const SliceInput& input) {
         bool hit=false;
+        shooter.weapon->audio_guiding=false;
         if(shooter.health->respawn_remaining) {shooter.weapon->arsenal.clear_modifiers();return false;}
         for(const auto& action:shooter.weapon->arsenal.tick({input.fire_primary,input.fire_secondary})) {
+            const auto audio_position=component_movement(shooter);
+            if(action.kind!=LegacyWeaponActionKind::pull_item&&action.kind!=LegacyWeaponActionKind::steer_fireballs&&action.kind!=LegacyWeaponActionKind::recall_projectiles)
+                audio_journal.emit(movement_server->simulation_tick(),shooter.entity(),weapon_fire_cue(action.weapon),
+                    {audio_position.position_x,audio_position.position_y+.9F,audio_position.position_z});
+            if(action.kind==LegacyWeaponActionKind::recall_projectiles)
+                audio_journal.emit(movement_server->simulation_tick(),shooter.entity(),audio::Cue::electric_hit,
+                    {audio_position.position_x,audio_position.position_y+.9F,audio_position.position_z});
             shooter.weapon->cooldown_remaining=shooter.weapon->arsenal.cooldown_remaining();
             switch(action.kind){
             case LegacyWeaponActionKind::hitscan:
@@ -659,6 +674,7 @@ struct VerticalSliceSimulation::Impl {
                     {input.aim_x,input.aim_y,input.aim_z},action.range));
                 break;
             case LegacyWeaponActionKind::steer_fireballs:
+                shooter.weapon->audio_guiding=std::ranges::any_of(projectiles,[&](const Projectile& p){return p.owner==shooter.entity()&&p.weapon==SliceWeapon::iron_hell_goat;});
                 {const float l=std::sqrt(input.aim_x*input.aim_x+input.aim_y*input.aim_y+input.aim_z*input.aim_z);if(l>=1e-5F)for(auto& p:projectiles)if(p.owner==shooter.entity()&&p.weapon==SliceWeapon::iron_hell_goat){p.dx=input.aim_x/l;p.dy=input.aim_y/l;p.dz=input.aim_z/l;}}break;
             }
         }
@@ -666,7 +682,24 @@ struct VerticalSliceSimulation::Impl {
         return hit;
     }
 
-    bool advance_projectiles(Combatant& owner,Combatant& target){bool hit=false;const auto owner_pos=component_movement(owner);const auto target_pos=component_movement(target);for(auto& p:projectiles){if(p.owner!=owner.entity()||!p.life)continue;if(p.returning){const float x=owner_pos.position_x-p.x,y=owner_pos.position_y+.9F-p.y,z=owner_pos.position_z-p.z;const float l=std::sqrt(x*x+y*y+z*z);if(l<.35F){p.life=0;continue;}p.dx=x/l;p.dy=y/l;p.dz=z/l;}p.x+=p.dx*p.speed/60.F;p.y+=p.dy*p.speed/60.F;p.z+=p.dz*p.speed/60.F;--p.life;const float x=target_pos.position_x-p.x,y=target_pos.position_y+.9F-p.y,z=target_pos.position_z-p.z;const float range=p.radius+.55F;if(x*x+y*y+z*z<=range*range&&target.health->respawn_remaining==0){static_cast<void>(apply_damage(owner,target,p.damage));owner.weapon->shot_sequence=owner.weapon->next_fire_sequence++;owner.weapon->shot_tick=movement_server->simulation_tick();owner.weapon->shot_impact={p.x,p.y,p.z};owner.weapon->shot_hit=owner.weapon->shot_contact=true;p.life=0;hit=true;}}std::erase_if(projectiles,[](const Projectile& p){return !p.life;});return hit;}
+    bool advance_projectiles(Combatant& owner,Combatant& target){
+        bool hit=false;const auto owner_pos=component_movement(owner);const auto target_pos=component_movement(target);
+        for(auto& p:projectiles){
+            if(p.owner!=owner.entity()||!p.life)continue;
+            if(p.returning){const float x=owner_pos.position_x-p.x,y=owner_pos.position_y+.9F-p.y,z=owner_pos.position_z-p.z;const float l=std::sqrt(x*x+y*y+z*z);
+                if(l<.35F){p.life=0;continue;}p.dx=x/l;p.dy=y/l;p.dz=z/l;}
+            p.x+=p.dx*p.speed/60.F;p.y+=p.dy*p.speed/60.F;p.z+=p.dz*p.speed/60.F;--p.life;
+            const float x=target_pos.position_x-p.x,y=target_pos.position_y+.9F-p.y,z=target_pos.position_z-p.z;const float range=p.radius+.55F;
+            if(x*x+y*y+z*z<=range*range&&target.health->respawn_remaining==0){
+                static_cast<void>(apply_damage(owner,target,p.damage));owner.weapon->shot_sequence=owner.weapon->next_fire_sequence++;
+                owner.weapon->shot_tick=movement_server->simulation_tick();owner.weapon->shot_impact={p.x,p.y,p.z};owner.weapon->shot_hit=owner.weapon->shot_contact=true;
+                audio_journal.emit(movement_server->simulation_tick(),owner.entity(),p.weapon==SliceWeapon::iron_hell_goat?audio::Cue::fireball_hit:audio::Cue::ricochet,{p.x,p.y,p.z},true);
+                if(p.explosion>0)audio_journal.emit(movement_server->simulation_tick(),owner.entity(),audio::Cue::explosion,{p.x,p.y,p.z},true);
+                p.life=0;hit=true;
+            }
+        }
+        std::erase_if(projectiles,[](const Projectile& p){return !p.life;});return hit;
+    }
 
     bool activate_ability(const network::ConnectionId connection,
                           Combatant& combatant,
@@ -757,6 +790,7 @@ struct VerticalSliceSimulation::Impl {
     }
 
     void tick(const SliceInput& player_input, const SliceInput& opponent_input) {
+        const auto audio_before=snapshot;
         if(player_input.weapon_selection<slice_weapon_count)static_cast<void>(player.weapon->arsenal.select(static_cast<SliceWeapon>(player_input.weapon_selection)));
         if(opponent_input.weapon_selection<slice_weapon_count)static_cast<void>(opponent.weapon->arsenal.select(static_cast<SliceWeapon>(opponent_input.weapon_selection)));
         const bool player_respawned = respawn_if_ready(player);
@@ -880,6 +914,8 @@ struct VerticalSliceSimulation::Impl {
             --opponent.ability->active_remaining;
         }
         refresh_snapshot();
+        audio_observer.observe(audio_before,snapshot,player_input,opponent_input,audio_journal);
+        snapshot.audio_events=audio_journal;
     }
 
     [[nodiscard]] CombatantView view(const Combatant& combatant,
@@ -917,7 +953,8 @@ struct VerticalSliceSimulation::Impl {
                 .owned_weapons = [&]{std::uint8_t value=0;for(std::size_t i=0;i<slice_weapon_count;++i)if(combatant.weapon->arsenal.owns(static_cast<SliceWeapon>(i)))value|=static_cast<std::uint8_t>(1U<<i);return value;}(),
                 .weapon_charge_fraction = combatant.weapon->arsenal.charge_fraction(),
                 .damage_modifier_ticks = combatant.weapon->arsenal.damage_modifier_ticks(),
-                .cooldown_modifier_ticks = combatant.weapon->arsenal.cooldown_modifier_ticks()};
+                .cooldown_modifier_ticks = combatant.weapon->arsenal.cooldown_modifier_ticks(),
+                .audio_guiding = combatant.weapon->audio_guiding};
     }
 
     void refresh_snapshot() {
@@ -958,11 +995,14 @@ struct VerticalSliceSimulation::Impl {
             .scene_id = use_original_factory ? original_factory().scene_id : 0U,
         };
         snapshot.projectile_count=static_cast<std::uint8_t>(std::min<std::size_t>(projectiles.size(),snapshot.projectiles.size()));
+        snapshot.audio_events=audio_journal;
         snapshot.pickup_count=static_cast<std::uint8_t>(pickups.views().size());
         std::ranges::copy(pickups.views(),snapshot.pickups.begin());
         for(std::size_t i=0;i<snapshot.projectile_count;++i){const auto& p=projectiles[i];snapshot.projectiles[i]={p.id,p.owner,p.weapon,p.x,p.y,p.z,p.radius};}
     }
 
+    audio::EventJournal audio_journal;
+    GameplayAudioEvents audio_observer;
     network::ReplicationSettings movement_settings;
     std::vector<ArenaBox> arena_boxes;
     std::vector<ArenaSurface> arena_surfaces;
@@ -1114,6 +1154,7 @@ SliceSnapshot VerticalSliceSimulation::snapshot_for(
     result.scene_id=impl_->use_original_factory ? original_factory().scene_id : 0U;
     result.pickups=impl_->snapshot.pickups;
     result.pickup_count=impl_->snapshot.pickup_count;
+    result.audio_events=impl_->snapshot.audio_events;
     return result;
 }
 

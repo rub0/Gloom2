@@ -4,6 +4,7 @@
 #include <gloom/gameplay/legacy_pickups.hpp>
 #include <gloom/network/movement_replication.hpp>
 #include <gloom/physics/world.hpp>
+#include <gloom/audio/events.hpp>
 
 #include <cstdint>
 #include <array>
@@ -109,6 +110,7 @@ struct CombatantView {
     float weapon_charge_fraction{0};
     std::uint16_t damage_modifier_ticks{};
     std::uint16_t cooldown_modifier_ticks{};
+    bool audio_guiding{};
 };
 
 struct SliceHud {
@@ -165,6 +167,9 @@ struct SliceSnapshot {
     std::uint32_t scene_id{0};
     std::array<PickupView,factory_pickup_count> pickups{};
     std::uint8_t pickup_count{};
+    audio::EventJournal audio_events;
+    // Local presentation generation, never serialized. Changes on accepted reconnect.
+    std::uint64_t audio_epoch{};
 };
 
 struct SlicePresentationFeedbackState {

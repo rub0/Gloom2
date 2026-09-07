@@ -49,6 +49,12 @@ struct Login {
 };
 }
 std::vector<std::string> menu(Session& session,const std::filesystem::path& review,unsigned width,unsigned height){
+    if(review.empty()&&!session.audio){
+        assets::VirtualFileSystem fs;fs.mount("game",std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets");fs.mount("cache",std::filesystem::path{GLOOM_BINARY_ROOT}/"content");
+        session.audio=std::make_shared<gameplay::AudioPresentation>(fs,true);
+    }
+    if(session.audio)session.audio->scene_reset();
+    auto audio_time=std::chrono::steady_clock::now();
     backends::SdlWindow window{{.title="Gloom",.width=width,.height=height}};window.start();
     render::RendererSettings settings;settings.upload_budget_bytes_per_frame=64U*1024*1024;
     backends::DiligentRenderer renderer{window,settings};renderer.start();
@@ -65,6 +71,9 @@ std::vector<std::string> menu(Session& session,const std::filesystem::path& revi
     std::optional<GameUi> review_game;if(!review.empty())review_game.emplace();
     if(!review.empty())std::filesystem::create_directories(review);
     while(window.poll_events()){
+        const auto audio_now=std::chrono::steady_clock::now();
+        if(session.audio)session.audio->menu(std::chrono::duration<double>(audio_now-audio_time).count());
+        audio_time=audio_now;
         if(login.future.valid() && login.future.wait_for(std::chrono::seconds{0})==std::future_status::ready){
             notice=login.future.get();if(notice.empty() && !login.cancel){session.directory=login.directory;session.identity=login.identity;static_cast<void>(browser.begin_refresh(*session.directory,now_ms()));}
         }
