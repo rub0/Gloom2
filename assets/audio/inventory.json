@@ -728,7 +728,7 @@
       "references": [
         "Exes/media/maps/archetypes.txt:1247"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "wav",
       "channels": 1,

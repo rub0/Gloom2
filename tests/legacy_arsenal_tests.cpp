@@ -41,6 +41,7 @@ int main()try{
     close(actions[0].damage,100,"Fireball maximum damage differs");
     close(actions[0].projectile_radius,5*.15F,"Fireball maximum radius differs");
     close(actions[0].explosion_radius,30*.15F,"Fireball explosion radius differs");
+    close(actions[0].projectile_speed,.035F*1000*.15F,"Fireball millisecond speed conversion differs");
     actions=arsenal.tick({.secondary=true});
     require(actions.size()==1&&actions[0].kind==LegacyWeaponActionKind::steer_fireballs,"IronHellGoat secondary steering missing");
     require(!arsenal.add_ammo(SliceWeapon::iron_hell_goat,50)||arsenal.active_ammo()==30,"Ammo cap exceeded");
@@ -53,6 +54,23 @@ int main()try{
     const auto decoded=decode_slice_snapshot(encoded);
     require(decoded&&decoded->projectile_count==12&&decoded->player.ammunition[2]==59,"Projectile/inventory snapshot round trip failed");
     for(int i=0;i<40;++i)simulation.tick({.aim_x=1});
-    require(simulation.snapshot().opponent.life<legacy_default_life,"Authoritative magnetic projectile never hit");
+    require(simulation.snapshot().opponent.life==legacy_default_life&&simulation.snapshot().player.shot_contact,
+        "Blockout furnace did not occlude the authoritative magnetic projectile");
+    VerticalSliceSimulation factory{{.opponent_ai_enabled=false,.original_factory=true}};
+    require(factory.acquire_weapon(VerticalSliceSimulation::player_entity,SliceWeapon::iron_hell_goat,30),"Factory fireball acquisition failed");
+    require(factory.select_weapon(VerticalSliceSimulation::player_entity,SliceWeapon::iron_hell_goat),"Factory fireball selection failed");
+    factory.tick({.aim_z=-1,.fire_primary=true});factory.tick({.aim_z=-1});
+    require(factory.snapshot().projectile_count==1,"Factory fireball was not launched");
+    for(int i=0;i<599&&factory.snapshot().projectile_count;++i)factory.tick({.aim_z=-1});
+    require(factory.snapshot().projectile_count==0&&factory.snapshot().player.shot_contact&&factory.snapshot().player.shot_explosion,
+        "Factory fireball crossed collision or expired without exploding");
+    unsigned fireball_hits=0,duplicate_explosions=0;
+    for(const gloom::audio::Event& event:factory.snapshot().audio_events.events){
+        fireball_hits+=event.cue==gloom::audio::Cue::fireball_hit;
+        duplicate_explosions+=event.cue==gloom::audio::Cue::explosion;
+    }
+    require(fireball_hits==1&&duplicate_explosions==0,"Fireball impact emitted doubled explosion audio");
+    const auto factory_wire=decode_slice_snapshot(encode_slice_snapshot(factory.snapshot(),8,2));
+    require(factory_wire&&factory_wire->player.shot_explosion,"Projectile explosion presentation was lost on the wire");
     std::cout<<"legacy arsenal tests passed\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}

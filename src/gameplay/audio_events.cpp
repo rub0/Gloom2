@@ -26,6 +26,13 @@ void GameplayAudioEvents::observe(const SliceSnapshot& before,const SliceSnapsho
                 ((a.grounded&&!b.grounded)||(!a.grounded&&a.air_dodge_available&&!b.air_dodge_available));
             if(dodged)emit(Cue::dodge);
             else if(a.grounded&&!b.grounded&&input.jump&&b.velocity_y>0)emit(Cue::jump);
+            if(after.scene_id==original_factory().scene_id &&
+               inside_factory_jumper({b.position_x,b.position_y,b.position_z}) &&
+               b.velocity_y>original_factory().jumper.force.y*legacy_unit_scale/legacy_motion_step*.75F &&
+               a.velocity_y<b.velocity_y*.75F)
+                journal.emit(after.simulation_tick,b.entity,Cue::jumper,
+                    {original_factory().jumper.position.x,original_factory().jumper.position.y,
+                     original_factory().jumper.position.z},true);
             if(!a.grounded&&b.grounded){const float impact=a.velocity_y+legacy_gravity/60.F;
                 if(impact<-.7F*legacy_unit_scale/legacy_motion_step)emit(Cue::land);
                 if(impact<-2.F*legacy_unit_scale/legacy_motion_step)emit(Cue::land_grunt);

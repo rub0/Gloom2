@@ -105,6 +105,7 @@ struct CombatantView {
     std::array<float, 3> shot_impact{};
     bool shot_hit{false};
     bool shot_contact{false};
+    bool shot_explosion{false};
     std::array<std::uint16_t, slice_weapon_count> ammunition{};
     std::uint8_t owned_weapons{1};
     float weapon_charge_fraction{0};

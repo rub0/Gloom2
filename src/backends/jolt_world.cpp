@@ -9,6 +9,9 @@
 #include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
+#include <Jolt/Physics/Collision/NarrowPhaseQuery.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
@@ -19,6 +22,7 @@
 #include <Jolt/RegisterTypes.h>
 
 #include <algorithm>
+#include <assert.h>
 #include <cmath>
 #include <mutex>
 #include <stdexcept>
@@ -781,6 +785,17 @@ physics::Vec3 JoltWorld::linear_velocity(const physics::BodyId body) const {
 void JoltWorld::set_linear_velocity(const physics::BodyId body, const physics::Vec3 velocity) {
     require_running();
     impl_->system.GetBodyInterface().SetLinearVelocity(impl_->checked_body(body), to_jolt(velocity));
+}
+
+float JoltWorld::cast_ray(const physics::Vec3 origin,const physics::Vec3 direction,const float maximum_distance) const {
+    require_running();
+    assert(std::isfinite(origin.x)&&std::isfinite(origin.y)&&std::isfinite(origin.z));
+    assert(std::isfinite(direction.x)&&std::isfinite(direction.y)&&std::isfinite(direction.z));
+    assert(std::abs(direction.x*direction.x+direction.y*direction.y+direction.z*direction.z-1.F)<.01F);
+    assert(std::isfinite(maximum_distance)&&maximum_distance>0);
+    const JPH::RRayCast ray{JPH::RVec3{to_jolt(origin)},to_jolt(direction)*maximum_distance};
+    JPH::RayCastResult hit;
+    return impl_->system.GetNarrowPhaseQuery().CastRay(ray,hit)?hit.mFraction*maximum_distance:maximum_distance;
 }
 
 std::vector<physics::TriggerEvent> JoltWorld::take_trigger_events() {

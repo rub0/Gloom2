@@ -11,7 +11,8 @@ constexpr std::array rules{
     LegacyWeaponRule{SliceWeapon::sniper,10,1,2,0,0,90,18,0,70,30,600*legacy_gameplay_scale,0,0,0,50*legacy_gameplay_scale},
     LegacyWeaponRule{SliceWeapon::shotgun,60,1,0,0,12,90,0,0,9,5,0,12,.5F*legacy_gameplay_scale,2*legacy_gameplay_scale/.016F,0},
     LegacyWeaponRule{SliceWeapon::minigun,200,1,0,50,0,6,6,600,5,0,600*legacy_gameplay_scale,1.5F,0,0,0},
-    LegacyWeaponRule{SliceWeapon::iron_hell_goat,30,0,0,5,1,45,0,120,50,100,0,0,2*legacy_gameplay_scale,.15F*60*legacy_gameplay_scale,10*legacy_gameplay_scale},
+    LegacyWeaponRule{SliceWeapon::iron_hell_goat,30,0,0,5,1,45,0,120,50,100,0,0,
+        2*legacy_gameplay_scale,.15F*1000*legacy_gameplay_scale,10*legacy_gameplay_scale},
 };
 constexpr std::size_t index(SliceWeapon weapon) noexcept { return static_cast<std::size_t>(weapon); }
 }
@@ -93,7 +94,13 @@ std::span<const LegacyWeaponAction> LegacyArsenal::tick(const LegacyArsenalInput
         break;
     case SliceWeapon::iron_hell_goat:
         if(input.primary&&(charge_ticks_||!cooldown_)&&ammo_[index(active_)]&&charge_ticks_<r.charge_ticks){++charge_ticks_;const auto target=static_cast<std::uint16_t>(std::max(1.F,std::ceil(charge_fraction()*r.maximum_charge_ammo)));while(charge_ammo_<target&&spend(1))++charge_ammo_;}
-        if(primary_release&&charge_ammo_){const float f=charge_fraction();emit({LegacyWeaponActionKind::charged_fireball,active_,1,charge_ammo_,r.primary_damage+(r.secondary_damage-r.primary_damage)*f,0,0,(2+3*f)*legacy_gameplay_scale,(.15F+(.035F-.15F)*f)*60*legacy_gameplay_scale,(10+20*f)*legacy_gameplay_scale,f});controllable_fireballs_=true;charge_ticks_=charge_ammo_=0;cooldown_=r.primary_cooldown_ticks;}
+        if(primary_release&&charge_ammo_){
+            const float f=charge_fraction();
+            emit({LegacyWeaponActionKind::charged_fireball,active_,1,charge_ammo_,
+                r.primary_damage+(r.secondary_damage-r.primary_damage)*f,0,0,(2+3*f)*legacy_gameplay_scale,
+                (.15F+(.035F-.15F)*f)*1000*legacy_gameplay_scale,(10+20*f)*legacy_gameplay_scale,f});
+            controllable_fireballs_=true;charge_ticks_=charge_ammo_=0;cooldown_=r.primary_cooldown_ticks;
+        }
         if(input.secondary&&controllable_fireballs_)basic(LegacyWeaponActionKind::steer_fireballs,0,0,0,0);
         break;
     }

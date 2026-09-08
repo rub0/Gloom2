@@ -2,6 +2,7 @@
 #include <gloom/gameplay/audio_events.hpp>
 #include <gloom/gameplay/vertical_slice_network.hpp>
 #include <gloom/gameplay/factory_scene.hpp>
+#include <gloom/gameplay/legacy_movement.hpp>
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -54,6 +55,12 @@ int main()try{
         a.player.velocity_y=-10;boundary.observe(a,b,{},{},landing);
         require(has(landing,audio::Cue::land)&&!has(landing,audio::Cue::land_grunt),"Landing/grunt thresholds collapsed");}
     before=after;after.player.grounded=false;observer.observe(before,after,{.axis_x=1,.dodge=true},{},events);require(has(events,audio::Cue::dodge),"Dodge missing");
+    before=after;before.scene_id=after.scene_id=gameplay::original_factory().scene_id;
+    before.player.position_x=after.player.position_x=gameplay::original_factory().jumper.position.x;
+    before.player.position_y=after.player.position_y=gameplay::original_factory().jumper.position.y;
+    before.player.position_z=after.player.position_z=gameplay::original_factory().jumper.position.z;
+    before.player.velocity_y=0;after.player.velocity_y=gameplay::original_factory().jumper.force.y*gameplay::legacy_unit_scale/gameplay::legacy_motion_step;
+    observer.observe(before,after,{},{},events);require(has(events,audio::Cue::jumper),"Jumper audio missing");
     before=after;after.player.life=50;observer.observe(before,after,{},{},events);require(has(events,audio::Cue::pain),"Pain missing");
     before=after;after.player.alive=false;observer.observe(before,after,{},{},events);before=after;after.player.alive=true;observer.observe(before,after,{},{},events);
     require(has(events,audio::Cue::death)&&has(events,audio::Cue::spawn),"Death/respawn missing");

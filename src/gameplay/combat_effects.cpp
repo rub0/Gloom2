@@ -25,7 +25,7 @@ void CombatEffects::observe(render::ParticleSystem& particles,const CombatantVie
         if (v.alive && v.shot_sequence!=state.view.shot_sequence && v.shot_tick<=tick && tick-v.shot_tick<=15) {
             particles.burst(v.entity,"muzzle",point(frame.muzzle),direction,v.entity*1000003+v.shot_sequence,fps);++events_;
             if (v.shot_contact) {
-                particles.burst(v.entity,"impact",{v.shot_impact[0],v.shot_impact[1],v.shot_impact[2]},
+                particles.burst(v.entity,v.shot_explosion?"explosion_review":"impact",{v.shot_impact[0],v.shot_impact[1],v.shot_impact[2]},
                     {-direction.x,.2F,-direction.z},v.entity*1000003+v.shot_sequence);++events_;
             }
         }

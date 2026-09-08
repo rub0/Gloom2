@@ -18,6 +18,10 @@ int main() try {
     require(factory.entity_count==97 && factory.spawns.size()==9,"Factory entity normalization");
     require(factory.collision->vertices.size()==3564 && factory.collision->indices.size()==17568,"RepX topology changed");
     const auto movement=gameplay::factory_movement_settings();
+    network::MovementState jumper{.entity=1,.position_x=factory.jumper.position.x,
+        .position_y=factory.jumper.position.y,.position_z=factory.jumper.position.z,.grounded=true};
+    jumper=network::simulate_movement(jumper,{.simulation_tick=1},1.0/60,movement);
+    require(!jumper.grounded&&jumper.velocity_x>4.0F&&jumper.velocity_y>30.0F,"Factory jumper did not apply its original impulse");
     network::MovementState falling{.entity=1,.position_x=60,.position_y=1};
     for(unsigned i=1;i<=120;++i) falling=network::simulate_movement(falling,{.simulation_tick=i},1.0/60,movement);
     require(falling.position_y<factory.lava_center.y && !falling.grounded,"Lava void was replaced by the old infinite ground plane");

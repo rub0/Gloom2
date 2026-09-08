@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 7 de septiembre de 2026, tras cerrar técnicamente el hito 68.
-Traspaso para definir el hito 69.
+Actualizado: 8 de septiembre de 2026, tras cerrar técnicamente el hito 69.
+Traspaso para definir el hito 70.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -33,11 +33,11 @@ y crear el commit de cierre según `AGENTS.md`.
 - Vida/escudo: barras verticales exteriores al marco de armas, símbolos
   originales. Cooldown en círculo lateral. FPS medidos y XYZ arriba a la izquierda.
 - Lava letal al contacto incluso con escudo. Relleno ambiente 0,65 y luces +20 %.
-- Protocolo actual **19**; añade eventos de audio semánticos con ventana redundante
-  variable. Documentos históricos que indican protocolos 15–18 describen entregas
+- Protocolo actual **20**; añade clase de impacto explosivo y audio del jumper a
+  los eventos semánticos con ventana redundante. Documentos históricos que indican protocolos 15–19 describen entregas
   previas.
 
-## Hito anterior: 67, recogibles de Factory
+## Hito 67, recogibles de Factory
 
 14 arquetipos en 73 ubicaciones auditadas: recompensas únicas en la autoridad,
 topes, reserva de munición sin arma, adquisición, respawn y tirón del Soul Reaper.
@@ -59,7 +59,7 @@ está pendiente; el cierre técnico no implica esa confirmación manual.
 Si se revisan recogibles, leer solo la sección 67 de
 [GAMEPLAY_MIGRATION.md](GAMEPLAY_MIGRATION.md) y las partes pertinentes del informe.
 
-## Último hito cerrado: 68, audio original
+## Hito 68, audio original
 
 Backend SDL3 desacoplado con fallback nulo, mezclador a 48 kHz, buses, límite de
 voces, loops y lifecycle seguro. Música compartida entre menú/partida; pausa atenúa
@@ -86,14 +86,32 @@ Validación: **11/11 pruebas focalizadas**, auditoría/cooker y smoke SDL3 real 
 informe. Sigue pendiente que una persona confirme subjetivamente volumen, timbre
 y espacialización; el cierre técnico no sustituye esa escucha.
 
-## Siguiente hito: 69, alcance pendiente de definir
+## Último hito cerrado: 69, revisión jugable
+
+La captura del usuario confirmó tres regresiones. IronHellGoat convertía como ticks
+una velocidad Legacy por milisegundo y volaba 16,67 veces demasiado lento; sus
+proyectiles no consultaban la geometría y `Jumper1` seguía explícitamente diferido.
+
+IronHellGoat vuela ahora a 22,5–5,25 m/s según carga, nace delante de la cápsula,
+barre su radio contra sólidos/triángulos y destruye/explota en el primer contacto.
+Daño radial, estela y destello son autoritativos/replicados. Un impacto emite solo
+`fireball_hit`, sin el segundo clip de explosión que se solapaba. `Jumper1` aplica
+en autoridad y predicción su fuerza original (4,6875/32,8125/0 m/s) y reproduce
+`gameplay/plasma.wav` en 3D. Protocolo **20**.
+
+Validación: **12/12 pruebas focalizadas**, auditoría de 89 audios con 38 importados,
+smoke Vulkan de 90 frames (381 partículas, 0 descartadas) y ejecutables cliente/
+servidor recompilados. Informe: `reports/gameplay-fixes-2026-09-07/README.md`.
+Queda pendiente la nueva confirmación jugable/subjetiva del usuario.
+
+## Siguiente hito: 70, alcance pendiente de definir
 
 No hay objetivo acordado. Pendientes generales: habilidades de clase restantes,
 UX/ajustes, despliegue externo y optimización/distribución. Al retomarlo, usar el
 objetivo que indique el usuario y leer solo las fuentes relacionadas.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
-`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 19.
+`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 20.
 Revisión de audio: `gloom --audio-review DIR [--device]`.
 
 ## Mapa mínimo de archivos
@@ -135,6 +153,9 @@ Revisión de audio: `gloom --audio-review DIR [--device]`.
   eventos, dos clientes bajo pérdida/reordenación, reconexión, protocolo 19,
   arsenal/recogibles/movimiento/transporte, dedicado, smoke de dispositivo y
   smoke gráfico Vulkan/Jolt.
+- Hito 69: **12/12** focalizadas sobre físicas, arsenal, audio/red, Factory, movimiento,
+  VFX, simulación/red/transporte, protocolo y dedicado. Auditoría 89/38 y smoke
+  Vulkan de 90 frames; no se repitió la suite completa ni una partida manual.
 - PowerShell; CMake/CTest: `D:/Dev/CMake/bin`, preset `windows-debug`.
   Ejecutable: `build/windows-vs/Debug/gloom.exe`.
 - Compilar motor antes de enlazar ejecutables. Con

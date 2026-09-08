@@ -141,8 +141,9 @@ arranca con la misma Factory mediante su prueba de ejecutable.
 
 ## Límites y trabajo siguiente
 
-- El manifiesto conserva pickups, mejoras, jumper y demás objetos con su
-  estado de implementación. Recuperar su arte no añade mecánicas jugables.
+- El manifiesto conserva pickups, mejoras y demás objetos con su estado de
+  implementación. Recogibles y jumper ya tienen mecánica autoritativa; recuperar
+  el arte de otro objeto no implica por sí solo restaurar su gameplay.
 - Una Minigun con esqueleto queda pendiente de 62; la importación lo diagnostica.
   Falta en origen la textura opcional `ironhellgoat_glow.png`; se conserva el
   resto de su material y se registra esa ausencia.

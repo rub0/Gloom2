@@ -26,7 +26,7 @@ items/armor.wav items/holdable.wav items/healthPack.wav items/healthVial.wav
 weapons/ammoPickup.wav weapons/shotgun/shotgunPickup.wav weapons/sniper/sniperPickup.wav
 weapons/minigun/minigunPickup.wav weapons/ironHellGoat/ironHellGoatPickup.wav
 music/themeGloom.wav ambient/lava_quiet.wav ambient/bassy_fan.wav ambient/deep_atmosphere.wav
-weapons/ironHellGoat/ignite_pitch.wav""".split()
+weapons/ironHellGoat/ignite_pitch.wav gameplay/plasma.wav""".split()
 
 
 def decode(path):

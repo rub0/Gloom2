@@ -35,9 +35,11 @@ Los eventos semánticos autoritativos llevan secuencia y posición, nunca muestr
 El primer snapshot establece la línea base: no reproduce eventos históricos.
 Las confirmaciones repetidas se descartan. No se predicen one-shots locales:
 se presentan desde la misma fuente autoritativa que los remotos, una única vez.
-Los bucles vigentes se reconstruyen desde estado actual. Los campos adicionales
-requieren protocolo 19: el 18 no distinguía disparo de impacto de proyectil ni
-preservaba saltos/aterrizajes entre snapshots.
+Los bucles vigentes se reconstruyen desde estado actual. Los campos introducidos
+en el hito 68 requirieron protocolo 19. El hito 69 usa protocolo 20: replica la
+clase explosiva del impacto e incorpora el evento 3D del jumper. Cada bola de
+IronHellGoat emite un solo clip de impacto; se eliminó la superposición simultánea
+de `fireball_hit` y `explotion`.
 
 La revisión auditiva humana y el smoke de dispositivo se registran separadamente
 de las pruebas del mezclador y de eventos; una prueba numérica no certifica timbre.

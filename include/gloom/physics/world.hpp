@@ -158,6 +158,7 @@ public:
                                      float delta_seconds) = 0;
     [[nodiscard]] virtual Vec3 linear_velocity(BodyId body) const = 0;
     virtual void set_linear_velocity(BodyId body, Vec3 velocity) = 0;
+    [[nodiscard]] virtual float cast_ray(Vec3 origin, Vec3 direction, float maximum_distance) const = 0;
     [[nodiscard]] virtual std::vector<TriggerEvent> take_trigger_events() = 0;
     [[nodiscard]] virtual CharacterId create_character(const CharacterDesc& description) = 0;
     virtual void destroy_character(CharacterId character) = 0;

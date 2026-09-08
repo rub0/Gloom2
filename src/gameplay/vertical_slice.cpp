@@ -621,6 +621,7 @@ struct VerticalSliceSimulation::Impl {
                 position.position_y+0.9F+aim_y*result->distance,position.position_z+aim_z*result->distance};
             shooter.weapon->shot_hit=result->status==network::FireValidationStatus::hit;
             shooter.weapon->shot_contact=shooter.weapon->shot_hit || result->distance<maximum_distance;
+            shooter.weapon->shot_explosion=false;
             if(shooter.weapon->shot_contact){
                 const auto& p=shooter.weapon->shot_impact;
                 const auto cue=shooter.weapon->arsenal.active_weapon()==SliceWeapon::soul_reaper?
@@ -663,9 +664,29 @@ struct VerticalSliceSimulation::Impl {
                 hit=route_fire(connection,shooter,target,input.aim_x,input.aim_y,input.aim_z,
                                action.damage,action.range)||hit;break;
             case LegacyWeaponActionKind::magnetic_projectiles:
-                {const auto position=component_movement(shooter);for(std::uint16_t pellet=0;pellet<action.projectile_count&&projectiles.size()<32;++pellet){const float side=(static_cast<int>(pellet%4)-1.5F)*.012F;const float up=(static_cast<int>(pellet/4)-1.F)*.012F;float dx=input.aim_x+side*input.aim_z,dy=input.aim_y+up,dz=input.aim_z-side*input.aim_x;const float l=std::sqrt(dx*dx+dy*dy+dz*dz);if(l<1e-5F)continue;projectiles.push_back({next_projectile_id++,shooter.entity(),action.weapon,position.position_x,position.position_y+.9F,position.position_z,dx/l,dy/l,dz/l,action.projectile_speed,action.projectile_radius,action.damage,0});}}break;
+                {const network::MovementState position=component_movement(shooter);
+                for(std::uint16_t pellet=0;pellet<action.projectile_count&&projectiles.size()<32;++pellet){
+                    const float side=(static_cast<int>(pellet%4)-1.5F)*.012F;
+                    const float up=(static_cast<int>(pellet/4)-1.F)*.012F;
+                    float dx=input.aim_x+side*input.aim_z,dy=input.aim_y+up,dz=input.aim_z-side*input.aim_x;
+                    const float l=std::sqrt(dx*dx+dy*dy+dz*dz);
+                    if(l<1e-5F)continue;
+                    dx/=l;dy/=l;dz/=l;
+                    const float offset=.45F+action.projectile_radius+.075F;
+                    projectiles.push_back({next_projectile_id++,shooter.entity(),action.weapon,
+                        position.position_x+dx*offset,position.position_y+.9F+dy*offset,position.position_z+dz*offset,
+                        dx,dy,dz,action.projectile_speed,action.projectile_radius,action.damage,0});
+                }}break;
             case LegacyWeaponActionKind::charged_fireball:
-                {const auto position=component_movement(shooter);const float l=std::sqrt(input.aim_x*input.aim_x+input.aim_y*input.aim_y+input.aim_z*input.aim_z);if(l>=1e-5F&&projectiles.size()<32)projectiles.push_back({next_projectile_id++,shooter.entity(),action.weapon,position.position_x,position.position_y+.9F,position.position_z,input.aim_x/l,input.aim_y/l,input.aim_z/l,action.projectile_speed,action.projectile_radius,action.damage,action.explosion_radius});}break;
+                {const network::MovementState position=component_movement(shooter);
+                const float l=std::sqrt(input.aim_x*input.aim_x+input.aim_y*input.aim_y+input.aim_z*input.aim_z);
+                if(l>=1e-5F&&projectiles.size()<32){
+                    const float dx=input.aim_x/l,dy=input.aim_y/l,dz=input.aim_z/l;
+                    const float offset=.45F+action.projectile_radius+.075F;
+                    projectiles.push_back({next_projectile_id++,shooter.entity(),action.weapon,
+                        position.position_x+dx*offset,position.position_y+.9F+dy*offset,position.position_z+dz*offset,
+                        dx,dy,dz,action.projectile_speed,action.projectile_radius,action.damage,action.explosion_radius});
+                }}break;
             case LegacyWeaponActionKind::recall_projectiles:
                 for(auto& p:projectiles)if(p.owner==shooter.entity()&&p.weapon==SliceWeapon::shotgun)p.returning=true;
                 break;
@@ -682,21 +703,56 @@ struct VerticalSliceSimulation::Impl {
         return hit;
     }
 
+    float projectile_target_distance(const Projectile& p,const Combatant& target,float maximum) const {
+        if(target.health->respawn_remaining)return maximum;
+        const network::MovementState position=component_movement(target);
+        const float x=p.x-position.position_x,y=p.y-position.position_y-.9F,z=p.z-position.position_z;
+        const float projection=x*p.dx+y*p.dy+z*p.dz;
+        const float radius=p.radius+.55F;
+        const float discriminant=projection*projection-(x*x+y*y+z*z-radius*radius);
+        if(discriminant<0)return maximum;
+        const float distance=-projection-std::sqrt(discriminant);
+        return distance>=0&&distance<maximum?distance:maximum;
+    }
+
+    float projectile_world_distance(const Projectile& p,float maximum) const {
+        const physics::Vec3 direction{p.dx,p.dy,p.dz};
+        if(p.explosion<=0)return authoritative_physics->cast_ray({p.x,p.y,p.z},direction,maximum);
+        const physics::Vec3 origins[7]{{p.x,p.y,p.z},{p.x+p.radius,p.y,p.z},{p.x-p.radius,p.y,p.z},
+            {p.x,p.y+p.radius,p.z},{p.x,p.y-p.radius,p.z},{p.x,p.y,p.z+p.radius},{p.x,p.y,p.z-p.radius}};
+        for(const physics::Vec3 origin:origins){
+            if(maximum<=0)break;
+            maximum=authoritative_physics->cast_ray(origin,direction,maximum);
+        }
+        return maximum;
+    }
+
     bool advance_projectiles(Combatant& owner,Combatant& target){
-        bool hit=false;const auto owner_pos=component_movement(owner);const auto target_pos=component_movement(target);
-        for(auto& p:projectiles){
+        bool hit=false;const network::MovementState owner_pos=component_movement(owner);
+        for(Projectile& p:projectiles){
             if(p.owner!=owner.entity()||!p.life)continue;
             if(p.returning){const float x=owner_pos.position_x-p.x,y=owner_pos.position_y+.9F-p.y,z=owner_pos.position_z-p.z;const float l=std::sqrt(x*x+y*y+z*z);
                 if(l<.35F){p.life=0;continue;}p.dx=x/l;p.dy=y/l;p.dz=z/l;}
-            p.x+=p.dx*p.speed/60.F;p.y+=p.dy*p.speed/60.F;p.z+=p.dz*p.speed/60.F;--p.life;
-            const float x=target_pos.position_x-p.x,y=target_pos.position_y+.9F-p.y,z=target_pos.position_z-p.z;const float range=p.radius+.55F;
-            if(x*x+y*y+z*z<=range*range&&target.health->respawn_remaining==0){
-                static_cast<void>(apply_damage(owner,target,p.damage));owner.weapon->shot_sequence=owner.weapon->next_fire_sequence++;
-                owner.weapon->shot_tick=movement_server->simulation_tick();owner.weapon->shot_impact={p.x,p.y,p.z};owner.weapon->shot_hit=owner.weapon->shot_contact=true;
-                audio_journal.emit(movement_server->simulation_tick(),owner.entity(),p.weapon==SliceWeapon::iron_hell_goat?audio::Cue::fireball_hit:audio::Cue::ricochet,{p.x,p.y,p.z},true);
-                if(p.explosion>0)audio_journal.emit(movement_server->simulation_tick(),owner.entity(),audio::Cue::explosion,{p.x,p.y,p.z},true);
-                p.life=0;hit=true;
-            }
+            const float step=p.speed/60.F;
+            const float target_distance=projectile_target_distance(p,target,step+.0001F);
+            const float world_distance=projectile_world_distance(p,step+.0001F);
+            const float contact=std::min(target_distance,world_distance);
+            p.x+=p.dx*std::min(step,contact);p.y+=p.dy*std::min(step,contact);p.z+=p.dz*std::min(step,contact);--p.life;
+            if(contact>step)continue;
+            const bool target_contact=target_distance<=world_distance;
+            bool damaged=false;
+            if(p.explosion>0&&target.health->respawn_remaining==0){
+                const network::MovementState position=component_movement(target);
+                const float x=position.position_x-p.x,y=position.position_y+.9F-p.y,z=position.position_z-p.z;
+                const float distance=std::max(0.F,std::sqrt(x*x+y*y+z*z)-.55F);
+                if(distance<p.explosion)damaged=apply_damage(owner,target,p.damage*(1-distance/p.explosion));
+            }else if(target_contact)damaged=apply_damage(owner,target,p.damage);
+            owner.weapon->shot_sequence=owner.weapon->next_fire_sequence++;
+            owner.weapon->shot_tick=movement_server->simulation_tick();owner.weapon->shot_impact={p.x,p.y,p.z};
+            owner.weapon->shot_hit=damaged;owner.weapon->shot_contact=true;owner.weapon->shot_explosion=p.explosion>0;
+            audio_journal.emit(movement_server->simulation_tick(),owner.entity(),
+                p.explosion>0?audio::Cue::fireball_hit:audio::Cue::ricochet,{p.x,p.y,p.z},true);
+            p.life=0;hit=damaged||hit;
         }
         std::erase_if(projectiles,[](const Projectile& p){return !p.life;});return hit;
     }
@@ -949,6 +1005,7 @@ struct VerticalSliceSimulation::Impl {
                 .shot_impact = combatant.weapon->shot_impact,
                 .shot_hit = combatant.weapon->shot_hit,
                 .shot_contact = combatant.weapon->shot_contact,
+                .shot_explosion = combatant.weapon->shot_explosion,
                 .ammunition = [&]{std::array<std::uint16_t,slice_weapon_count> value{};for(std::size_t i=0;i<value.size();++i)value[i]=combatant.weapon->arsenal.ammo(static_cast<SliceWeapon>(i));return value;}(),
                 .owned_weapons = [&]{std::uint8_t value=0;for(std::size_t i=0;i<slice_weapon_count;++i)if(combatant.weapon->arsenal.owns(static_cast<SliceWeapon>(i)))value|=static_cast<std::uint8_t>(1U<<i);return value;}(),
                 .weapon_charge_fraction = combatant.weapon->arsenal.charge_fraction(),

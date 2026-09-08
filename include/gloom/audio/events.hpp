@@ -7,7 +7,7 @@ enum class Cue : std::uint8_t {
     reaper_miss,reaper_wall,reaper_wall2,reaper_gore,shotgun,sniper,minigun,fireball,
     electric_hit,ricochet,ricochet2,fireball_hit,explosion,armor,modifier,health_pack,
     health_vial,ammo,shotgun_pickup,sniper_pickup,minigun_pickup,fireball_pickup,
-    music,lava,fan,atmosphere,ignition,count
+    music,lava,fan,atmosphere,ignition,jumper,count
 };
 inline constexpr std::array<std::string_view,static_cast<std::size_t>(Cue::count)> cue_paths{
     "footsteps/step1.wav","character/jump.wav","character/sidejump.wav","land/land.wav",
@@ -19,7 +19,7 @@ inline constexpr std::array<std::string_view,static_cast<std::size_t>(Cue::count
     "weapons/explotion.wav","items/armor.wav","items/holdable.wav","items/healthpack.wav","items/healthvial.wav",
     "weapons/ammopickup.wav","weapons/shotgun/shotgunpickup.wav","weapons/sniper/sniperpickup.wav",
     "weapons/minigun/minigunpickup.wav","weapons/ironhellgoat/ironhellgoatpickup.wav","music/themegloom.wav",
-    "ambient/lava_quiet.wav","ambient/bassy_fan.wav","ambient/deep_atmosphere.wav","weapons/ironhellgoat/ignite_pitch.wav"
+    "ambient/lava_quiet.wav","ambient/bassy_fan.wav","ambient/deep_atmosphere.wav","weapons/ironhellgoat/ignite_pitch.wav","gameplay/plasma.wav"
 };
 struct Event {std::uint64_t sequence{},tick{},actor{};Cue cue{};Vec3 position{};bool spatial{};};
 // Factory can authoritatively consume all 73 pickups in one simulation tick.

@@ -1864,7 +1864,19 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             throw std::runtime_error{"Built-in GPU assets did not become resident"};
         }
         auto complete_instances = render_instances;
-        if(vertical_slice){const auto& state=current_slice_snapshot();for(std::size_t i=0;i<state.projectile_count;++i){const auto& p=state.projectiles[i];const auto color=p.weapon==gloom::gameplay::SliceWeapon::iron_hell_goat?gloom::render::Color{1,.18F,.02F,1}:gloom::render::Color{.25F,.85F,1,1};complete_instances.push_back({.mesh=gloom::render::builtin_cube_mesh,.transform={.position={p.position_x,p.position_y,p.position_z},.scale={p.radius,p.radius,p.radius}},.color=color,.particle=true,.soft_distance=.2F});}}
+        if(vertical_slice) {
+            const gloom::gameplay::SliceSnapshot& state=current_slice_snapshot();
+            for(std::size_t i=0;i<state.projectile_count;++i) {
+                const gloom::gameplay::WeaponProjectileView& p=state.projectiles[i];
+                const bool fireball=p.weapon==gloom::gameplay::SliceWeapon::iron_hell_goat;
+                const gloom::render::Color color=fireball?gloom::render::Color{2.5F,.4F,.025F,1}:gloom::render::Color{.25F,.85F,1,1};
+                const float scale=fireball?p.radius*.28F:p.radius;
+                complete_instances.push_back({.mesh=gloom::render::builtin_cube_mesh,
+                    .transform={.position={p.position_x,p.position_y,p.position_z},.scale={scale,scale,scale}},
+                    .color=color,.particle=true,.soft_distance=.2F});
+                if(fireball)particles.emitter(0x100000000ULL+p.id,0x100000000ULL+p.id,"fireball_trail",{p.position_x,p.position_y,p.position_z});
+            }
+        }
         if(game_ui && complete_instances.size()>=visual_bodies.size()+18){
             complete_instances[visual_bodies.size()+9].transform.scale={};
             for(std::size_t i=14;i<18;++i)complete_instances[visual_bodies.size()+i].transform.scale={};

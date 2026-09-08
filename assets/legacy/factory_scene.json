@@ -41,7 +41,7 @@
     {
       "id": "Jumper1",
       "type": "Jumper",
-      "status": "visual-only; gameplay deferred",
+      "status": "implemented; authoritative impulse, audio and prediction",
       "source": {
         "type": "Jumper",
         "position": [

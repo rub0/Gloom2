@@ -14,7 +14,7 @@ inline int audio_review(const std::filesystem::path& directory,bool device){
     if(device&&!presentation.device_available())throw std::runtime_error{"Audio review requires a real playback device"};
     const std::array cues{audio::Cue::music,audio::Cue::step,audio::Cue::jump,audio::Cue::dodge,audio::Cue::land,audio::Cue::land_grunt,
         audio::Cue::reaper_miss,audio::Cue::reaper_gore,audio::Cue::shotgun,audio::Cue::sniper,audio::Cue::minigun,audio::Cue::fireball,
-        audio::Cue::electric_hit,audio::Cue::fireball_hit,audio::Cue::explosion,audio::Cue::no_ammo,audio::Cue::armor,audio::Cue::health_pack,
+        audio::Cue::electric_hit,audio::Cue::fireball_hit,audio::Cue::explosion,audio::Cue::no_ammo,audio::Cue::armor,audio::Cue::health_pack,audio::Cue::jumper,
         audio::Cue::modifier,audio::Cue::ammo,audio::Cue::shotgun_pickup,audio::Cue::change,audio::Cue::pain,audio::Cue::death,audio::Cue::spawn,
         audio::Cue::ignition,audio::Cue::lava,audio::Cue::fan,audio::Cue::atmosphere};
     constexpr unsigned seconds=58,rate=48000,frames=seconds*rate;

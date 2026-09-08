@@ -41,3 +41,16 @@ temporales afectan a los ataques emitidos y la cadencia del arsenal.
 `gloom.legacy_arsenal` cubre las
 cinco máquinas de estado, inventario, consumo, límites, carga, retorno, guiado,
 proyectiles, round trip de red y daño después del vuelo.
+
+## Corrección jugable — hito 69
+
+Las velocidades de IronHellGoat proceden del desplazamiento Legacy por
+milisegundo, no por tick: tras aplicar la escala 0,15 son 22,5–5,25 m/s. La
+conversión anterior usaba 60 en vez de 1000 y dejaba el vuelo 16,67 veces más
+lento. La bola nace delante de la cápsula, barre su radio contra la geometría,
+se destruye en el primer contacto y aplica daño de explosión con caída radial.
+
+El impacto replica si es explosivo y activa una única presentación coordinada:
+sonido `fireball_hit`, destello de explosión y estela de fuego. No se superponen
+dos clips de explosión para el mismo contacto. Los proyectiles magnéticos también
+respetan desde este hito los sólidos del blockout y la malla de Factory.

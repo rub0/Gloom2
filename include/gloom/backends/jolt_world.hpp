@@ -34,6 +34,8 @@ public:
                              float delta_seconds) override;
     [[nodiscard]] physics::Vec3 linear_velocity(physics::BodyId body) const override;
     void set_linear_velocity(physics::BodyId body, physics::Vec3 velocity) override;
+    [[nodiscard]] float cast_ray(physics::Vec3 origin, physics::Vec3 direction,
+                                 float maximum_distance) const override;
     [[nodiscard]] std::vector<physics::TriggerEvent> take_trigger_events() override;
     [[nodiscard]] physics::CharacterId create_character(
         const physics::CharacterDesc& description) override;

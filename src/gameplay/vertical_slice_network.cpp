@@ -19,7 +19,7 @@
 namespace gloom::gameplay {
 namespace {
 
-constexpr std::size_t combatant_payload_size = 116;
+constexpr std::size_t combatant_payload_size = 117;
 constexpr std::size_t hud_payload_size = 36;
 constexpr std::size_t network_payload_size = 48;
 constexpr std::size_t mechanism_payload_size = 32;
@@ -87,6 +87,7 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     for (float x:view.shot_impact) append_float(output,x);
     append_integer(output,static_cast<std::uint8_t>(view.shot_hit));
     append_integer(output,static_cast<std::uint8_t>(view.shot_contact));
+    append_integer(output,static_cast<std::uint8_t>(view.shot_explosion));
     for(const auto value:view.ammunition)append_integer(output,value);
     append_integer(output,view.owned_weapons);
     append_float(output,view.weapon_charge_fraction);
@@ -125,6 +126,7 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     for (auto& x:view.shot_impact) x=read_float(input,offset);
     view.shot_hit=read_integer<std::uint8_t>(input,offset)!=0;
     view.shot_contact=read_integer<std::uint8_t>(input,offset)!=0;
+    view.shot_explosion=read_integer<std::uint8_t>(input,offset)!=0;
     for(auto& value:view.ammunition)value=read_integer<std::uint16_t>(input,offset);
     view.owned_weapons=read_integer<std::uint8_t>(input,offset);
     view.weapon_charge_fraction=read_float(input,offset);

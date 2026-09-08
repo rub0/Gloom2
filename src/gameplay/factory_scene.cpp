@@ -61,12 +61,17 @@ FactoryScene load_factory() {
         ++scene.entity_count;
         const auto type=entity["type"].get_string().value();
         const auto source=entity["source"];
+        const auto resolved=entity["resolved"];
         if (type=="SpawnPoint") scene.spawns.push_back({vector(source["position"],scale),static_cast<float>(source["yaw"].get_double().value())});
         else if (type=="Lava") {
             scene.lava_center=vector(source["position"],scale);
             scene.lava_half_width=static_cast<float>(source["plane_width"].get_double().value())*scale*0.5F;
         }
-        const auto resolved=entity["resolved"];
+        else if(type=="Jumper") {
+            scene.jumper.position=vector(source["position"],scale);
+            scene.jumper.force=vector(source["force"]);
+            scene.jumper.half_extent=vector(resolved["physic_dimensions"],scale*.5F);
+        }
         double reward{};
         // Generic Ammo (SniperAmmo1) has no recovered archetype and is excluded
         // by the gameplay audit's 14-type/73-location contract.
@@ -111,8 +116,9 @@ FactoryScene load_factory() {
     for (const auto i:scene.collision->indices) word(i);
     for (const auto spawn:scene.spawns) {point(spawn.position);word(std::bit_cast<std::uint32_t>(spawn.yaw));}
     point(scene.lava_center);word(std::bit_cast<std::uint32_t>(scene.lava_half_width));
+    point(scene.jumper.position);point(scene.jumper.force);point(scene.jumper.half_extent);
     // Original movement contract revision: incompatible prediction must not join.
-    word(68);
+    word(69);
     word(67); // Pickup rule/identity contract, including source-level overrides.
     for(const auto& p:scene.pickups) {
         for(unsigned char c:p.name)word(c);
@@ -140,6 +146,12 @@ const FactoryScene& original_factory() {
     static const auto scene=load_factory();
     return scene;
 }
+bool inside_factory_jumper(const physics::Vec3 position) noexcept {
+    const FactoryJumper& jumper=original_factory().jumper;
+    return std::abs(position.x-jumper.position.x)<=jumper.half_extent.x+.45F &&
+           std::abs(position.y-jumper.position.y)<=jumper.half_extent.y+.15F &&
+           std::abs(position.z-jumper.position.z)<=jumper.half_extent.z+.45F;
+}
 network::ReplicationSettings factory_movement_settings(std::function<SliceCharacter(network::NetworkEntityId)> character) {
     network::ReplicationSettings settings;
     settings.resolve_entity_collisions=true;
@@ -165,6 +177,13 @@ network::ReplicationSettings factory_movement_settings(std::function<SliceCharac
         state.velocity_y=moved.grounded?0.F:moved.velocity.y;
         state.velocity_z=moved.velocity.z;
         state.grounded=moved.grounded; state.simulation_tick=input.simulation_tick;
+        if(inside_factory_jumper(moved.position)) {
+            const physics::Vec3 force=original_factory().jumper.force;
+            state.velocity_x+=force.x*legacy_unit_scale/legacy_motion_step;
+            state.velocity_y+=force.y*legacy_unit_scale/legacy_motion_step;
+            state.velocity_z+=force.z*legacy_unit_scale/legacy_motion_step;
+            state.grounded=false;
+        }
         return state;
     };
     return settings;

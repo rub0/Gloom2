@@ -354,6 +354,33 @@
       "source_recipe": "Blood: review only; no new gore gameplay event"
     },
     {
+      "name": "fireball_trail",
+      "material": 6,
+      "burst": 0,
+      "rate": 80,
+      "life": 0.28,
+      "speed": 0.15,
+      "spread": 0.22,
+      "gravity": 0,
+      "size_start": 0.16,
+      "size_end": 0.035,
+      "color_start": [
+        2.5,
+        0.55,
+        0.04,
+        0.8
+      ],
+      "color_end": [
+        0.35,
+        0.03,
+        0.005,
+        0
+      ],
+      "trail_seconds": 0.08,
+      "distortion": 0,
+      "source_recipe": "mp_rocket_large/mp_rocket_small fire and smoke trail"
+    },
+    {
       "name": "explosion_review",
       "material": 6,
       "burst": 8,
@@ -378,7 +405,7 @@
       ],
       "trail_seconds": 0,
       "distortion": 0,
-      "source_recipe": "original Fire/Explosion texture: review only; no explosive weapon"
+      "source_recipe": "original Fire/Explosion texture; IronHellGoat authoritative impact"
     }
   ]
 }
