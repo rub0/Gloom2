@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
 Actualizado: 8 de septiembre de 2026, tras cerrar técnicamente el hito 69.
-Traspaso para definir el hito 70.
+Hito 70 definido: habilidades de clase restantes; implementación pendiente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -104,11 +104,42 @@ smoke Vulkan de 90 frames (381 partículas, 0 descartadas) y ejecutables cliente
 servidor recompilados. Informe: `reports/gameplay-fixes-2026-09-07/README.md`.
 Queda pendiente la nueva confirmación jugable/subjetiva del usuario.
 
-## Siguiente hito: 70, alcance pendiente de definir
+## Siguiente hito: 70, habilidades de clase restantes
 
-No hay objetivo acordado. Pendientes generales: habilidades de clase restantes,
-UX/ajustes, despliegue externo y optimización/distribución. Al retomarlo, usar el
-objetivo que indique el usuario y leer solo las fuentes relacionadas.
+Estado: **planificado, pendiente de implementación**, acordado el 8 de septiembre
+de 2026. Objetivo: completar las habilidades originales del roster jugable,
+integradas en selección, combate, presentación y multijugador.
+
+Alcance y orden de trabajo:
+
+1. Auditar en Legacy las habilidades de cada clase y contrastarlas con Bite,
+   Guard y las selecciones actuales. Documentar la correspondencia entre nombres
+   originales y roster actual, activación, costes, duración, cooldown, efectos,
+   cancelación y reglas de muerte/respawn. No inventar reglas ni valores ausentes;
+   registrar las discrepancias y resolver las decisiones de diseño con el usuario.
+2. Implementar las habilidades restantes con autoridad del servidor y estados
+   compartidos para predicción/reconciliación cuando corresponda. Integrar los
+   loadouts válidos, controles, cooldown y limpieza al morir o cambiar de sesión.
+3. Recuperar e integrar animaciones, efectos y audio originales disponibles,
+   con presentación FPS/TPS, indicadores de HUD y eventos replicados sin duplicados.
+4. Validar en Factory, local y con dos clientes: activación, límites, daño/efectos,
+   cooldown, muerte/respawn, pérdida/reordenación y reconexión. Revisar rendimiento,
+   inspeccionar capturas y dejar una secuencia jugable reproducible por habilidad.
+
+Criterios de cierre: inventario auditado sin habilidades omitidas silenciosamente;
+reglas implementadas y probadas para cada habilidad acordada; cliente y servidor
+recompilados; protocolo actualizado si cambia el contrato; informe de resultados,
+documentación y commit local. Separar el cierre técnico de la aceptación jugable
+del usuario. No marcar el hito terminado con habilidades del alcance aún diferidas.
+
+Contexto mínimo al retomarlo: este documento, las secciones pertinentes de
+`docs/CHARACTERS.md`, los contratos de loadout/habilidades y
+`src/gameplay/vertical_slice.cpp`; después, solo las fuentes Legacy de las
+habilidades identificadas. Guardar la auditoría y aceptación en
+`reports/abilities-70/README.md` al ejecutar el hito.
+
+Fuera de este hito: UX/ajustes generales, despliegue externo y optimización/
+distribución general. Conservar las reglas de movimiento y arsenal ya aceptadas.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
 `build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 20.
