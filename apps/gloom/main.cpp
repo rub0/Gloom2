@@ -248,14 +248,17 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                      std::string_view{arguments[1]} == "--network-scene-smoke";
     const bool vulkan_sync_stress =
         argument_count > 1 && std::string_view{arguments[1]} == "--vulkan-sync-stress";
+    const bool performance_1080p = argument_count > 1 &&
+                                   std::string_view{arguments[1]} == "--vertical-slice-performance-1080p";
     const bool vertical_slice = argument_count > 1 &&
                                 (visual_review || std::string_view{arguments[1]} == "--vertical-slice" ||
                                  std::string_view{arguments[1]} == "--vertical-slice-smoke" ||
+                                 performance_1080p ||
                                  std::string_view{arguments[1]} == "--vertical-slice-host" ||
                                  std::string_view{arguments[1]} == "--vertical-slice-join" ||
                                  std::string_view{arguments[1]} == "--vertical-slice-browse");
     const bool vertical_slice_smoke = argument_count > 1 &&
-                                      std::string_view{arguments[1]} == "--vertical-slice-smoke";
+                                      (std::string_view{arguments[1]} == "--vertical-slice-smoke" || performance_1080p);
     const bool vertical_slice_host = argument_count > 1 &&
                                      std::string_view{arguments[1]} == "--vertical-slice-host";
     const bool vertical_slice_browse = argument_count > 1 &&
@@ -356,8 +359,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                      : network_demo
                      ? "Gloom Network Lab - blue: predicted local, orange: interpolated remote"
                      : "Gloom - SDL3 + Vulkan",
-        .width = animation_review?640U:1280U,
-        .height = animation_review?360U:720U,
+        .width = animation_review ? 640U : performance_1080p ? 1920U : 1280U,
+        .height = animation_review ? 360U : performance_1080p ? 1080U : 720U,
         .resizable = true,
     });
     auto* window_view = window.get();
@@ -884,9 +887,13 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     auto drawable_size = window_view->drawable_size();
     std::uint32_t frame_count = 0;
     std::uint64_t performance_frame_nanoseconds = 0;
+    std::uint64_t performance_iteration_nanoseconds = 0;
     std::uint64_t performance_visibility_nanoseconds = 0;
     std::uint64_t performance_lighting_nanoseconds = 0;
     std::uint32_t performance_frame_samples = 0;
+    std::size_t performance_submitted_instances = 0;
+    std::size_t performance_visible_instances = 0;
+    std::size_t performance_batches = 0;
     double slice_accumulator = 0.0;
     bool slice_saw_kill = false;
     bool slice_saw_respawn = false;
@@ -939,6 +946,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         window_view->set_relative_mouse_mode(false);
     }
     while (window_view->poll_events()) {
+        const auto performance_iteration_started = std::chrono::steady_clock::now();
         if(game_ui){
             const auto size=window_view->drawable_size();
             const auto* lobby=vertical_slice_host?&slice_remote_host->lobby():vertical_slice_join?&slice_remote_client->lobby():nullptr;
@@ -1909,6 +1917,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             throw std::runtime_error{"Built-in GPU assets did not become resident"};
         }
         auto complete_instances = render_instances;
+        complete_instances.reserve(render_instances.size() + 512U);
         if(vertical_slice) {
             const gloom::gameplay::SliceSnapshot& state=current_slice_snapshot();
             for(std::size_t i=0;i<state.projectile_count;++i) {
@@ -1938,6 +1947,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             const auto* local_weapon_scene=resident_weapon(slice.player.weapon);
             const auto* opponent_weapon_scene=resident_weapon(slice.opponent.weapon);
             std::vector<gloom::render::RenderInstance> current;
+            current.reserve(64);
             const auto append=[&](const gloom::assets::ResidentScene& scene,const gloom::render::Transform& parent,
                                   bool fps,const gloom::gameplay::CharacterAnimationFrame* frame,bool cut) {
                 for (auto instance:scene.instances) {
@@ -2033,6 +2043,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             const auto* weapon_scene=resident_weapon(slice.opponent.weapon);
             const auto* local_weapon_scene=resident_weapon(slice.player.weapon);
             std::vector<gloom::render::Transform> current_transforms;
+            current_transforms.reserve(64);
             const auto append=[&](const gloom::assets::ResidentScene& scene,const gloom::render::Transform& parent,
                                   bool first_person,gloom::render::Color tint=gloom::render::Color{}) {
                 for (auto instance:scene.instances) {
@@ -2135,6 +2146,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                               static_cast<float>(drawable_size.second);
         const auto performance_visibility_started = std::chrono::steady_clock::now();
         const auto visible = visibility.build(camera, render_aspect, source_instances);
+        performance_submitted_instances = visible.metrics.submitted_instances;
+        performance_visible_instances = visible.metrics.visible_instances;
+        performance_batches = visible.metrics.batches;
         performance_visibility_nanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now() - performance_visibility_started).count());
         const auto performance_lighting_started = std::chrono::steady_clock::now();
@@ -2170,6 +2184,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         if (vertical_slice_smoke) {
             performance_frame_nanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::steady_clock::now() - performance_frame_started).count());
+            performance_iteration_nanoseconds += static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now() - performance_iteration_started).count());
             ++performance_frame_samples;
         }
         if (review_ready && ++review_frames == (animation_review?static_cast<std::size_t>(animation_fps*animation_seconds):review_views.size()*32)) break;
@@ -2242,7 +2258,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
 
         if ((smoke_test && frame_count >= 10) ||
             (network_scene_smoke && frame_count >= 180) ||
-            (vertical_slice_smoke && frame_count >= 360) ||
+            (vertical_slice_smoke && frame_count >= (performance_1080p ? 720 : 360)) ||
             (vulkan_sync_stress && frame_count >= 600)) {
             break;
         }
@@ -2258,20 +2274,20 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     }
     if (visual_review && review_frames != (animation_review?static_cast<std::size_t>(animation_fps*animation_seconds):review_views.size()*32))
         throw std::runtime_error{"Visual review closed before every view was captured"};
-    if (vertical_slice_smoke && (!slice_saw_kill || !slice_saw_respawn)) {
+    if (vertical_slice_smoke && !performance_1080p && (!slice_saw_kill || !slice_saw_respawn)) {
         throw std::runtime_error{"Vertical slice did not complete its kill/respawn loop"};
     }
-    if (vertical_slice_smoke && factory_lift_generation == 0) {
+    if (vertical_slice_smoke && !performance_1080p && factory_lift_generation == 0) {
         throw std::runtime_error{"Authored Factory cargo lift did not become resident"};
     }
-    if (vertical_slice_smoke && factory_surface_generation == 0) {
+    if (vertical_slice_smoke && !performance_1080p && factory_surface_generation == 0) {
         throw std::runtime_error{"Authored Factory surface modules did not become resident"};
     }
-    if (vertical_slice_smoke &&
+    if (vertical_slice_smoke && !performance_1080p &&
         (character_generations[0] == 0 || character_generations[1] == 0)) {
         throw std::runtime_error{"Authored roster characters did not become resident"};
     }
-    if (vertical_slice_smoke && (weapon_generation == 0 || ability_generation == 0)) {
+    if (vertical_slice_smoke && !performance_1080p && (weapon_generation == 0 || ability_generation == 0)) {
         throw std::runtime_error{"Authored first-person content did not become resident"};
     }
     if (vertical_slice && !vertical_slice_smoke && !vertical_slice_host) {
@@ -2281,11 +2297,14 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         const auto metrics = renderer_view->frame_metrics();
         const double frame_milliseconds = static_cast<double>(performance_frame_nanoseconds) /
                                           static_cast<double>(performance_frame_samples) / 1'000'000.0;
+        const double iteration_milliseconds = static_cast<double>(performance_iteration_nanoseconds) /
+                                              static_cast<double>(performance_frame_samples) / 1'000'000.0;
         const double visibility_milliseconds = static_cast<double>(performance_visibility_nanoseconds) /
                                                static_cast<double>(performance_frame_samples) / 1'000'000.0;
         const double lighting_milliseconds = static_cast<double>(performance_lighting_nanoseconds) /
                                              static_cast<double>(performance_frame_samples) / 1'000'000.0;
-        std::cout << "Performance: " << performance_frame_samples << " frames, avg frame " << frame_milliseconds
+        std::cout << "Performance: " << performance_frame_samples << " frames, avg loop " << iteration_milliseconds
+                  << " ms (" << (1000.0 / iteration_milliseconds) << " FPS), render " << frame_milliseconds
                   << " ms (" << (1000.0 / frame_milliseconds) << " FPS), visibility " << visibility_milliseconds
                   << " ms, lighting " << lighting_milliseconds << " ms, GPU filtered "
                   << metrics.filtered_gpu_frame_milliseconds << " ms [shadow " << metrics.shadow_nanoseconds / 1'000'000.0
@@ -2293,7 +2312,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                   << metrics.tone_map_nanoseconds / 1'000'000.0 << ", temporal "
                   << metrics.temporal_resolve_nanoseconds / 1'000'000.0 << " ms], render "
                   << metrics.render_width << "x" << metrics.render_height << " / output "
-                  << metrics.output_width << "x" << metrics.output_height << ".\n";
+                  << metrics.output_width << "x" << metrics.output_height << ", instances "
+                  << performance_submitted_instances << " submitted / " << performance_visible_instances
+                  << " visible / " << performance_batches << " batches.\n";
     }
     factory_surface_residency.reset();
     factory_surface_loader.reset();

@@ -153,6 +153,21 @@ Esta referencia no sustituye la medición de la partida humana a 1920×1080 ni
 explica por sí sola los 13 FPS reportados. El siguiente frente es perfilar
 skinning/presentación, asignaciones por frame y sombras en esa configuración.
 
+## Hito 73, perfil 1080p y reservas de presentación
+
+Se añadió `--vertical-slice-performance-1080p`, que ejecuta el escenario de
+perfil a 1920×1080, mide el loop completo y expone instancias/batches. El caso
+mide **32,32 FPS** en 720 frames: 30,9369 ms por loop, 29,4376 ms de
+render/presentación, 6,84914 ms de visibilidad, 0,269229 ms de iluminación y
+3,54779 ms GPU. Son 227 instancias sometidas, 71 visibles y 26 batches; la
+memoria pico es 702,32 MB device-local y 42,67 MB host-visible. Esto descarta
+que el cuello sea la cantidad de geometría o el culling y señala presentación y
+streaming de recursos.
+
+La lista completa de instancias y las listas animadas reservan capacidad antes
+de añadir proyectiles, personajes y efectos, reduciendo realojos y copias por
+frame. Informe ampliado: `reports/performance-2026-09-09/README.md`.
+
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
 `build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 21.
 Revisión de audio: `gloom --audio-review DIR [--device]`.

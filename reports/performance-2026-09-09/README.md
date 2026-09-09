@@ -56,6 +56,21 @@ garantía para 1920×1080 ni para una partida humana con todos los efectos.
 Logs locales regenerables: `reports/performance-baseline-2026-09-09/` (ignorados
 por Git).
 
+## Perfil 1080p
+
+Comando: `build/windows-vs/Debug/gloom.exe --vertical-slice-performance-1080p`.
+Con 1920×1080 y 720 frames, la ejecución mide 30,9369 ms por loop (32,32 FPS),
+29,4376 ms en el tramo de render/presentación, 6,84914 ms en visibilidad,
+0,269229 ms en iluminación y 3,54779 ms de GPU filtrada. La escena sometió 227
+instancias, de las que 71 fueron visibles y formaron 26 batches. El pico de
+memoria fue 702,32 MB usados de 928 MB device-local y 42,67 MB de 112 MB
+host-visible.
+
+Este modo revela que el problema 1080p no es el número de instancias ni el
+culling: el trabajo CPU de presentación y la carga/streaming de recursos dominan
+la iteración. Se reservaron también las listas de instancias animadas y una
+capacidad inicial para proyectiles/efectos para reducir realojos por frame.
+
 ## Siguiente paso
 
 Medir una sesión jugable a la resolución real del usuario y perfilar el coste de
