@@ -19,7 +19,7 @@
 namespace gloom::gameplay {
 namespace {
 
-constexpr std::size_t combatant_payload_size = 123;
+constexpr std::size_t combatant_payload_size = 127;
 constexpr std::size_t hud_payload_size = 41;
 constexpr std::size_t network_payload_size = 48;
 constexpr std::size_t mechanism_payload_size = 32;
@@ -76,6 +76,7 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     append_float(output, view.facing_z);
     append_integer(output, view.kills);
     append_integer(output, view.deaths);
+    append_integer(output, view.current_spree);
     append_integer(output, static_cast<std::uint8_t>(view.character));
     append_integer(output, static_cast<std::uint8_t>(view.weapon));
     append_integer(output, static_cast<std::uint8_t>(view.ability));
@@ -115,6 +116,7 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     view.facing_z = read_float(input, offset);
     view.kills = read_integer<std::uint32_t>(input, offset);
     view.deaths = read_integer<std::uint32_t>(input, offset);
+    view.current_spree = read_integer<std::uint32_t>(input, offset);
     view.character = static_cast<SliceCharacter>(read_integer<std::uint8_t>(input, offset));
     view.weapon = static_cast<SliceWeapon>(read_integer<std::uint8_t>(input, offset));
     view.ability = static_cast<SliceAbility>(read_integer<std::uint8_t>(input, offset));

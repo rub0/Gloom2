@@ -531,7 +531,7 @@
       "references": [
         "Src/Logic/Maps/Scoreboard.cpp:166"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "mp3",
       "channels": 2,

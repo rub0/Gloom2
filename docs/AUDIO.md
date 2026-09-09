@@ -44,7 +44,8 @@ de `fireball_hit` y `explotion`.
 El hito 70 usa protocolo 21 e incorpora ocho archivos para Bite, Berserker,
 Diamond Skin, Life Dome, Invisibility y Flash. Los one-shots se deduplican con el
 diario autoritativo; el loop de Shadow se reconstruye desde el estado vigente.
-El inventario resultante contiene 46 recursos importados de 89 auditados.
+El inventario resultante contiene 47 recursos importados de 89 auditados; el hito 75
+añade `feedback/bell.mp3` para el aviso local de racha.
 
 La revisión auditiva humana y el smoke de dispositivo se registran separadamente
 de las pruebas del mezclador y de eventos; una prueba numérica no certifica timbre.

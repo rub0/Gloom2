@@ -29,6 +29,7 @@ music/themeGloom.wav ambient/lava_quiet.wav ambient/bassy_fan.wav ambient/deep_a
 weapons/ironHellGoat/ignite_pitch.wav gameplay/plasma.wav""".split()
 SELECTED += """character/houndBite.wav character/archangelShield.ogg character/houndSmell.wav character/lifeDome.mp3
 character/shadow.ogg character/shadowFlash.wav character/shadowIn.ogg character/shadowOut.ogg""".split()
+SELECTED += """feedback/bell.mp3""".split()
 
 
 def decode(path):
@@ -88,7 +89,8 @@ def main():
                       "referenced" if name.lower() in refs else "orphan", **metadata)
         if included and not record["references"]:
             record["selection_reason"] = {"weapons/explotion.wav": "Original explosion sample for authoritative fireball contacts",
-                "weapons/ironhellgoat/ignite_pitch.wav": "Original ignition sample for current weapon charge/guidance loops"}[name.lower()]
+                "weapons/ironhellgoat/ignite_pitch.wav": "Original ignition sample for current weapon charge/guidance loops",
+                "feedback/bell.mp3": "Original local kill-spree announcement cue"}[name.lower()]
         records.append(record)
         if included:
             target = ROOT / "assets/audio/original" / name

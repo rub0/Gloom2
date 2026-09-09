@@ -64,14 +64,22 @@ int main()try{
     before=after;after.player.life=50;observer.observe(before,after,{},{},events);require(has(events,audio::Cue::pain),"Pain missing");
     before=after;after.player.alive=false;observer.observe(before,after,{},{},events);before=after;after.player.alive=true;observer.observe(before,after,{},{},events);
     require(has(events,audio::Cue::death)&&has(events,audio::Cue::spawn),"Death/respawn missing");
+    {gameplay::SliceSnapshot spree_before=after,spree_after=after;spree_after.player.kills=spree_before.player.kills+1;spree_after.player.current_spree=3;
+        audio::EventJournal spree_events;gameplay::GameplayAudioEvents spree_observer;spree_observer.observe(spree_before,spree_after,{},{},spree_events);
+        require(has(spree_events,audio::Cue::spree),"Third consecutive kill did not emit spree audio");
+        spree_before=spree_after;spree_after.player.kills++;spree_after.player.current_spree=4;spree_observer.observe(spree_before,spree_after,{},{},spree_events);
+        require(spree_events.sequence==1,"Non-threshold kill emitted spree audio");
+        spree_before=spree_after;spree_after.player.kills++;spree_after.player.current_spree=3;spree_observer.observe(spree_before,spree_after,{},{},spree_events);
+        require(spree_events.sequence==2,"Spree reset threshold did not emit audio");}
     before=after;before.player.weapon=after.player.weapon=gameplay::SliceWeapon::sniper;observer.observe(before,after,{.fire_primary=true},{},events);require(has(events,audio::Cue::no_ammo),"Dry fire missing");
     for(unsigned weapon=0;weapon<gameplay::slice_weapon_count;++weapon){
         gameplay::VerticalSliceSimulation simulation{false};const auto w=static_cast<gameplay::SliceWeapon>(weapon);
         require(simulation.acquire_weapon(1,w,100),"Weapon acquisition failed");require(simulation.select_weapon(1,w),"Weapon select failed");
         for(unsigned tick=0;tick<35;++tick)simulation.tick({.aim_x=1,.fire_primary=tick<30});
         require(has(simulation.snapshot().audio_events,gameplay::weapon_fire_cue(w)),"Weapon did not emit fire audio");
-        auto encoded=gameplay::encode_slice_snapshot(simulation.snapshot(),0,1);const auto decoded=gameplay::decode_slice_snapshot(encoded);
-        require(decoded&&decoded->audio_events.sequence==simulation.snapshot().audio_events.sequence,"Audio network roundtrip failed");
+        auto network_snapshot=simulation.snapshot();network_snapshot.player.current_spree=6;
+        auto encoded=gameplay::encode_slice_snapshot(network_snapshot,0,1);const auto decoded=gameplay::decode_slice_snapshot(encoded);
+        require(decoded&&decoded->player.current_spree==6&&decoded->audio_events.sequence==simulation.snapshot().audio_events.sequence,"Audio/streak network roundtrip failed");
         encoded.payload.pop_back();require(!gameplay::decode_slice_snapshot(encoded),"Truncated network audio accepted");
     }
     gameplay::VerticalSliceSimulation hound_abilities{false};
@@ -103,10 +111,14 @@ int main()try{
     auto state=factory.snapshot();presentation.update(state,{},false,.02);require(presentation.mixer().metrics().active==10,"Factory loops missing");
     state.audio_events.emit(state.simulation_tick,1,audio::Cue::jump,{});presentation.update(state,{},false,.02);
     require(presentation.events_played()==1,"One-shot missing");presentation.update(state,{},false,.02);require(presentation.events_played()==1,"Repeated snapshot played twice");
+    state.audio_events.emit(state.simulation_tick,2,audio::Cue::spree,{});presentation.update(state,{},false,.02);
+    require(presentation.events_played()==1,"Remote spree played for local listener");
+    state.audio_events.emit(state.simulation_tick,1,audio::Cue::spree,{});presentation.update(state,{},false,.02);
+    require(presentation.events_played()==2,"Local spree was not played");
     state.player.weapon=gameplay::SliceWeapon::iron_hell_goat;state.player.weapon_charge_fraction=.5F;presentation.update(state,{},false,.02);
     require(presentation.mixer().metrics().active>=11,"Charge loop missing");
     state.audio_epoch++;state.audio_events.emit(state.simulation_tick,1,audio::Cue::death,{});presentation.update(state,{},false,.02);
-    require(presentation.events_played()==1,"Reconnect played historical one-shot");
+    require(presentation.events_played()==2,"Reconnect played historical one-shot");
     presentation.scene_reset();require(presentation.mixer().metrics().active==1,"Scene loop leaked or music stopped");
     std::cout<<"Audio: load/corruption, mix, voices, loop/stop, buses, spatialization, null, events, weapons, network and reconnect passed\n";
     return 0;

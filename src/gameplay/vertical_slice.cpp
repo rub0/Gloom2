@@ -588,6 +588,8 @@ struct VerticalSliceSimulation::Impl {
         target.ability->flash_factor = 0.0F;
         ++target.health->deaths;
         ++attacker.score->kills;
+        ++attacker.score->current_spree;
+        target.score->current_spree = 0;
         return true;
     }
 
@@ -608,6 +610,7 @@ struct VerticalSliceSimulation::Impl {
         target.ability->secondary_active_remaining = 0;
         target.ability->flash_factor = 0.0F;
         ++target.health->deaths;
+        target.score->current_spree = 0;
         return true;
     }
 
@@ -1079,6 +1082,7 @@ struct VerticalSliceSimulation::Impl {
                  .facing_z = combatant.movement->facing_z,
                  .kills = combatant.score->kills,
                  .deaths = combatant.health->deaths,
+                 .current_spree = combatant.score->current_spree,
                  .character = combatant.loadout->selection.character,
                  .weapon = combatant.weapon->arsenal.active_weapon(),
                  .ability = combatant.loadout->selection.ability,

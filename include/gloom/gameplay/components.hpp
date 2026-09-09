@@ -168,6 +168,7 @@ struct CharacterPresentationComponent {
 
 struct ScoreComponent {
     std::uint32_t kills{0};
+    std::uint32_t current_spree{0};
 };
 
 struct SliceCharacterDesc {

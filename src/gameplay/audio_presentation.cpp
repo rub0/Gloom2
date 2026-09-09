@@ -44,7 +44,7 @@ void AudioPresentation::update(const SliceSnapshot& s,audio::Listener listener,b
     }
     for(const auto& e:cursor_.observe(s.audio_events,s.simulation_tick)){
         // Paused events are consumed, so unpausing never bursts old combat sounds.
-        if(!paused){play(e.cue,{.position=e.position,.spatial=e.spatial||e.actor!=s.player.entity});++events_played_;}
+        if(!paused&&!(e.cue==audio::Cue::spree&&e.actor!=s.player.entity)){play(e.cue,{.position=e.position,.spatial=e.spatial||e.actor!=s.player.entity});++events_played_;}
     }
     const std::array combatants{s.player,s.opponent};
     for(std::size_t i=0;i<2;++i){const auto& c=combatants[i];const bool active=c.alive&&c.weapon_charge_fraction>0;

@@ -104,6 +104,7 @@ struct CombatantView {
     float facing_z{0.0F};
     std::uint32_t kills{0};
     std::uint32_t deaths{0};
+    std::uint32_t current_spree{0};
     SliceCharacter character{SliceCharacter::hound};
     SliceWeapon weapon{SliceWeapon::soul_reaper};
     SliceAbility ability{SliceAbility::bite};

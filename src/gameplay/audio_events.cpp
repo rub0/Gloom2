@@ -13,6 +13,7 @@ void GameplayAudioEvents::observe(const SliceSnapshot& before,const SliceSnapsho
     for(std::size_t i=0;i<2;++i){const auto& a=old[i];const auto& b=now[i];const auto& input=inputs[i];
         const audio::Vec3 p{b.position_x,b.position_y+.9F,b.position_z};
         const auto emit=[&](Cue cue){journal.emit(after.simulation_tick,b.entity,cue,p);};
+        if(b.alive&&b.kills>a.kills&&b.current_spree<=27&&b.current_spree%3==0)emit(Cue::spree);
         if(a.alive&&!b.alive)emit(Cue::death);
         else if(!a.alive&&b.alive)emit(Cue::spawn);
         else if(b.alive&&(b.life<a.life||b.shield<a.shield))emit(Cue::pain);

@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 9 de septiembre de 2026, hito 74 de rendimiento.
+Actualizado: 9 de septiembre de 2026, hito 75 de rachas de bajas y audio.
 Siguiente paso: revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -201,8 +201,22 @@ Ejecutable para jugar y medir: `build/windows-vs/Release/gloom.exe`.
 Comandos: `--vertical-slice-performance-720p` y `--vertical-slice-performance-1080p`.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
-`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 21.
+`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 22.
 Revisión de audio: `gloom --audio-review DIR [--device]`.
+
+## Hito 75, rachas de bajas y audio
+
+La autoridad mantiene `current_spree` por combatiente: aumenta únicamente al
+conseguir una baja atribuida a otro jugador y se reinicia al morir, incluida la
+muerte ambiental. Se replica junto a los snapshots con el protocolo **22**.
+La semántica Legacy reproduce `feedback/bell.mp3` en 3, 6, 9, …, 27 bajas
+consecutivas; el cliente solo lo presenta cuando el actor es el jugador local,
+por lo que no hay sonidos duplicados por eventos remotos.
+
+Validación: auditoría/cocción de audio (**47/89** importados), build Debug de
+`gloom_audio_tests` y prueba focalizada de audio completa, incluyendo umbrales,
+reinicio, serialización de racha y filtros local/remoto. Informe:
+`reports/kill-streak-75/README.md`.
 
 ## Mapa mínimo de archivos
 
