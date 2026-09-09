@@ -3,8 +3,8 @@
 El inventario reproducible se genera con `tools/legacy/audit_audio.py LEGACY_ROOT`.
 Escanea referencias de código y mapas, elimina comentarios C++, identifica ausentes
 y duplicados por SHA-256 y decodifica todos los WAV/OGG/MP3 para verificarlos.
-La selección explícita importa los sonidos del gameplay restaurado y el tema de
-`Application/MenuState.cpp`; las habilidades pendientes y `troll` quedan fuera.
+La selección explícita importa los sonidos del gameplay restaurado, las seis
+habilidades originales y el tema de `Application/MenuState.cpp`; `troll` queda fuera.
 `--import-assets` conserva los originales y cocina PCM flotante GAU1;
 `--check` comprueba inventario, originales y cocción byte a byte. No hay rutas
 absolutas en el inventario ni dependencia de FMOD o Python en el ejecutable.
@@ -40,6 +40,11 @@ en el hito 68 requirieron protocolo 19. El hito 69 usa protocolo 20: replica la
 clase explosiva del impacto e incorpora el evento 3D del jumper. Cada bola de
 IronHellGoat emite un solo clip de impacto; se eliminó la superposición simultánea
 de `fireball_hit` y `explotion`.
+
+El hito 70 usa protocolo 21 e incorpora ocho archivos para Bite, Berserker,
+Diamond Skin, Life Dome, Invisibility y Flash. Los one-shots se deduplican con el
+diario autoritativo; el loop de Shadow se reconstruye desde el estado vigente.
+El inventario resultante contiene 46 recursos importados de 89 auditados.
 
 La revisión auditiva humana y el smoke de dispositivo se registran separadamente
 de las pruebas del mezclador y de eventos; una prueba numérica no certifica timbre.

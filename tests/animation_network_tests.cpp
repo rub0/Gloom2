@@ -60,8 +60,8 @@ void clients(const std::string& external) {
     if(embedded){physics.start();host=std::make_unique<gameplay::VerticalSliceRemoteHost>(gameplay::SliceRemoteHostSettings{.authoritative_physics=&physics,.original_factory=true});
         server=std::make_unique<backends::GnsTransport>();server->start();endpoint=server->listen("127.0.0.1:0");}
     backends::GnsTransport a,b;a.start();b.start();
-    gameplay::VerticalSliceRemoteClient first{{.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::none},true};
-    gameplay::VerticalSliceRemoteClient second{{.character=gameplay::SliceCharacter::shadow,.ability=gameplay::SliceAbility::none},true};
+    gameplay::VerticalSliceRemoteClient first{{.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::diamond_skin},true};
+    gameplay::VerticalSliceRemoteClient second{{.character=gameplay::SliceCharacter::shadow,.ability=gameplay::SliceAbility::invisibility},true};
     auto ca=a.connect(endpoint);network::ConnectionId cb=network::invalid_connection;
     bool hello_a=false,hello_b=false,reconnecting=false,reconnected=false;int resumed=0;
     Driver driver;

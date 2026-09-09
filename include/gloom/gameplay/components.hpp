@@ -132,8 +132,11 @@ struct WeaponComponent {
 struct AbilityComponent {
     std::uint32_t cooldown_remaining{0};
     std::uint32_t active_remaining{0};
+    std::uint32_t secondary_cooldown_remaining{0};
+    std::uint32_t secondary_active_remaining{0};
     std::uint32_t next_sequence{1};
     bool hit_consumed{false};
+    float flash_factor{0.0F};
 };
 
 struct CharacterLoadoutComponent {

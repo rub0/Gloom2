@@ -35,10 +35,12 @@ void test_two_clients(bool original_factory=false) {
         gloom::gameplay::SliceRemoteHostSettings{.original_factory=original_factory}};
     const auto initial=host.snapshot();
     gloom::gameplay::VerticalSliceRemoteClient first{
-        original_factory ? gloom::gameplay::SlicePlayerSelection{.character=gloom::gameplay::SliceCharacter::archangel,.ability=gloom::gameplay::SliceAbility::none}
+        original_factory ? gloom::gameplay::SlicePlayerSelection{.character=gloom::gameplay::SliceCharacter::archangel,
+                             .ability=gloom::gameplay::SliceAbility::diamond_skin}
                          : gloom::gameplay::SlicePlayerSelection{},true};
     gloom::gameplay::VerticalSliceRemoteClient second{
-        original_factory ? gloom::gameplay::SlicePlayerSelection{.character=gloom::gameplay::SliceCharacter::shadow,.ability=gloom::gameplay::SliceAbility::none}
+        original_factory ? gloom::gameplay::SlicePlayerSelection{.character=gloom::gameplay::SliceCharacter::shadow,
+                             .ability=gloom::gameplay::SliceAbility::invisibility}
                          : gloom::gameplay::SlicePlayerSelection{},true};
     server_transport.start();
     first_transport.start();

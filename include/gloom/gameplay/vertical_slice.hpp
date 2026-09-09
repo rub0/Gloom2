@@ -29,6 +29,17 @@ inline constexpr double hound_bite_cooldown_seconds = 25.0;
 inline constexpr float hound_guard_shield = 50.0F;
 inline constexpr double hound_guard_duration_seconds = 1.0;
 inline constexpr double hound_guard_cooldown_seconds = 15.0;
+inline constexpr double hound_berserker_duration_seconds = 20.0;
+inline constexpr double hound_berserker_cooldown_seconds = 20.0;
+inline constexpr double archangel_diamond_duration_seconds = 5.0;
+inline constexpr double archangel_diamond_cooldown_seconds = 25.0;
+inline constexpr float archangel_life_dome_heal = 10.0F;
+inline constexpr double archangel_life_dome_duration_seconds = 10.0;
+inline constexpr double archangel_life_dome_cooldown_seconds = 10.0;
+inline constexpr double shadow_invisibility_duration_seconds = 5.0;
+inline constexpr double shadow_invisibility_cooldown_seconds = 25.0;
+inline constexpr float shadow_flash_range = 150.0F * legacy_gameplay_scale;
+inline constexpr double shadow_flash_cooldown_seconds = 1.0;
 
 enum class ArenaMaterial : std::uint8_t {
     floor,
@@ -47,6 +58,7 @@ struct SliceInput {
     bool fire_primary{false};
     bool fire_secondary{false};
     bool use_primary_ability{false};
+    bool use_secondary_ability{false};
     bool dodge{false};
     std::uint8_t weapon_selection{255};
 };
@@ -95,7 +107,10 @@ struct CombatantView {
     SliceCharacter character{SliceCharacter::hound};
     SliceWeapon weapon{SliceWeapon::soul_reaper};
     SliceAbility ability{SliceAbility::bite};
+    SliceSecondaryAbility secondary_ability{SliceSecondaryAbility::berserker};
     bool primary_ability_active{false};
+    bool secondary_ability_active{false};
+    float flash_factor{0.0F};
     bool alive{true};
     bool grounded{true};
     bool air_dodge_available{false};
@@ -119,7 +134,9 @@ struct SliceHud {
     float shield_fraction{0.0F};
     float weapon_ready_fraction{1.0F};
     float primary_ability_ready_fraction{1.0F};
+    float secondary_ability_ready_fraction{1.0F};
     bool primary_ability_active{false};
+    bool secondary_ability_active{false};
     bool hit_marker{false};
     bool dead{false};
     std::uint32_t kills{0};

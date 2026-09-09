@@ -239,6 +239,7 @@ void test_two_players_and_reconnect() {
                  .aim_z = aim_z / aim_length,
                  .fire_primary = tick >= 45,
                  .use_primary_ability = tick == 10,
+                 .use_secondary_ability = tick == 20,
              })) {
             static_cast<void>(host.receive(second_connection, wire(outgoing.message),
                                            static_cast<double>(tick) / 60.0));
@@ -263,8 +264,9 @@ void test_two_players_and_reconnect() {
                first.snapshot().opponent.ability == SliceAbility::guard,
            "Per-client snapshots did not place the controlled combatant first");
     expect(second.snapshot().player.shield == hound_guard_shield &&
-               host.snapshot().network.authorized_ability_commands == 1,
-           "Guard selection was not authorized and replicated over the remote slice");
+               second.snapshot().player.secondary_ability==SliceSecondaryAbility::berserker &&
+               second.snapshot().player.secondary_ability_active && host.snapshot().network.authorized_ability_commands == 2,
+           "Guard/Berserker selection was not authorized and replicated over the remote slice");
     expect(first.snapshot().player.position_z < -2.0F &&
                second.snapshot().player.position_z < -1.0F &&
                std::abs(first.snapshot().player.position_z -
@@ -297,6 +299,9 @@ void test_two_players_and_reconnect() {
     }
     expect(host.session_metrics().unauthorized_messages == 0,
            "Resumed player traffic failed ownership authorization");
+    expect(second.snapshot().player.secondary_ability==SliceSecondaryAbility::berserker &&
+               second.snapshot().player.secondary_ability_active,
+           "Reconnection did not restore the authoritative Berserker state");
 }
 
 void test_host_abandonment_outcome() {

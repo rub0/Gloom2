@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 8 de septiembre de 2026, tras cerrar técnicamente el hito 69.
-Hito 70 definido: habilidades de clase restantes; implementación pendiente.
+Actualizado: 9 de septiembre de 2026, tras cerrar técnicamente el hito 70.
+Siguiente paso: revisión jugable de las seis habilidades con el usuario.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -33,8 +33,8 @@ y crear el commit de cierre según `AGENTS.md`.
 - Vida/escudo: barras verticales exteriores al marco de armas, símbolos
   originales. Cooldown en círculo lateral. FPS medidos y XYZ arriba a la izquierda.
 - Lava letal al contacto incluso con escudo. Relleno ambiente 0,65 y luces +20 %.
-- Protocolo actual **20**; añade clase de impacto explosivo y audio del jumper a
-  los eventos semánticos con ventana redundante. Documentos históricos que indican protocolos 15–19 describen entregas
+- Protocolo actual **21**; replica habilidad primaria/secundaria, cooldown, estado
+  activo y factor de Flash. Documentos históricos que indican protocolos 15–20 describen entregas
   previas.
 
 ## Hito 67, recogibles de Factory
@@ -104,45 +104,37 @@ smoke Vulkan de 90 frames (381 partículas, 0 descartadas) y ejecutables cliente
 servidor recompilados. Informe: `reports/gameplay-fixes-2026-09-07/README.md`.
 Queda pendiente la nueva confirmación jugable/subjetiva del usuario.
 
-## Siguiente hito: 70, habilidades de clase restantes
+## Último hito cerrado: 70, habilidades de clase
 
-Estado: **planificado, pendiente de implementación**, acordado el 8 de septiembre
-de 2026. Objetivo: completar las habilidades originales del roster jugable,
-integradas en selección, combate, presentación y multijugador.
+Las seis habilidades del roster original disponible están integradas. Hound usa
+Bite (`Q`) y Berserker (`E`); Archangel, Diamond Skin y Life Dome; Shadow,
+Invisibility y Flash. Guard permanece como loadout compatible. Screamer sigue
+fuera del roster porque carece de modelo y definición de contenido propia.
 
-Alcance y orden de trabajo:
+Decisiones del usuario: Berserker conserva fidelidad literal a la ruta ejecutable
+Legacy —20 s de estado, olor y audio, sin bonus de daño/cadencia— y podrá calibrarse
+después. Life Dome cura 10 puntos solo al propio Archangel, nunca al enemigo.
+Diamond Skin inmuniza frente a combate durante 5 s sin impedir la lava letal.
+Flash conserva alcance, orientación y línea de visión Legacy. Muerte, respawn y
+cambio de selección limpian estados y loops.
 
-1. Auditar en Legacy las habilidades de cada clase y contrastarlas con Bite,
-   Guard y las selecciones actuales. Documentar la correspondencia entre nombres
-   originales y roster actual, activación, costes, duración, cooldown, efectos,
-   cancelación y reglas de muerte/respawn. No inventar reglas ni valores ausentes;
-   registrar las discrepancias y resolver las decisiones de diseño con el usuario.
-2. Implementar las habilidades restantes con autoridad del servidor y estados
-   compartidos para predicción/reconciliación cuando corresponda. Integrar los
-   loadouts válidos, controles, cooldown y limpieza al morir o cambiar de sesión.
-3. Recuperar e integrar animaciones, efectos y audio originales disponibles,
-   con presentación FPS/TPS, indicadores de HUD y eventos replicados sin duplicados.
-4. Validar en Factory, local y con dos clientes: activación, límites, daño/efectos,
-   cooldown, muerte/respawn, pérdida/reordenación y reconexión. Revisar rendimiento,
-   inspeccionar capturas y dejar una secuencia jugable reproducible por habilidad.
+La autoridad valida las activaciones; snapshots y protocolo **21** replican ambas
+habilidades, cooldowns, estados y factor de Flash bajo pérdida/reordenación,
+primer snapshot y reconexión. HUD Q/E, audio original y VFX FPS/TPS están
+integrados. Inventario de audio: 89 auditados, 46 importados, tres ausentes
+conocidos y un duplicado.
 
-Criterios de cierre: inventario auditado sin habilidades omitidas silenciosamente;
-reglas implementadas y probadas para cada habilidad acordada; cliente y servidor
-recompilados; protocolo actualizado si cambia el contrato; informe de resultados,
-documentación y commit local. Separar el cierre técnico de la aceptación jugable
-del usuario. No marcar el hito terminado con habilidades del alcance aún diferidas.
+Validación: build Debug completo, **47/47 pruebas**, auditoría de audio y smoke
+Vulkan/Jolt. Se inspeccionaron seis capturas deterministas generadas mediante
+`gloom --ability-review DIR`. Informe y comandos:
+`reports/abilities-70/README.md`.
 
-Contexto mínimo al retomarlo: este documento, las secciones pertinentes de
-`docs/CHARACTERS.md`, los contratos de loadout/habilidades y
-`src/gameplay/vertical_slice.cpp`; después, solo las fuentes Legacy de las
-habilidades identificadas. Guardar la auditoría y aceptación en
-`reports/abilities-70/README.md` al ejecutar el hito.
-
-Fuera de este hito: UX/ajustes generales, despliegue externo y optimización/
-distribución general. Conservar las reglas de movimiento y arsenal ya aceptadas.
+Siguiente paso: sesión jugable humana con cada habilidad y dos clientes. Ese pase
+puede abrir ajustes de Berserker o presentación, pero no queda funcionalidad del
+alcance técnico diferida. No hay un hito 71 definido todavía.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
-`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 20.
+`build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 21.
 Revisión de audio: `gloom --audio-review DIR [--device]`.
 
 ## Mapa mínimo de archivos
@@ -167,6 +159,9 @@ Revisión de audio: `gloom --audio-review DIR [--device]`.
   reglas en `docs/AUDIO.md` e informe en `reports/audio-2026-09-06`.
 - Regresiones: `tests/legacy_arsenal_tests.cpp`, `tests/vertical_slice_tests.cpp`,
   `tests/vertical_slice_network_tests.cpp`, `tests/legacy_movement_tests.cpp`.
+- Habilidades: contratos en `slice_selection.hpp`, `vertical_slice.hpp` y
+  `components.hpp`; autoridad en `vertical_slice.cpp`, red en
+  `vertical_slice_network.cpp` y revisión con `gloom --ability-review DIR`.
 
 ## Validación y herramientas
 
@@ -187,6 +182,8 @@ Revisión de audio: `gloom --audio-review DIR [--device]`.
 - Hito 69: **12/12** focalizadas sobre físicas, arsenal, audio/red, Factory, movimiento,
   VFX, simulación/red/transporte, protocolo y dedicado. Auditoría 89/38 y smoke
   Vulkan de 90 frames; no se repitió la suite completa ni una partida manual.
+- Hito 70: **47/47** pruebas Debug, auditoría 89/46 y smoke Vulkan con seis
+  capturas inspeccionadas. Falta la aceptación jugable/subjetiva humana.
 - PowerShell; CMake/CTest: `D:/Dev/CMake/bin`, preset `windows-debug`.
   Ejecutable: `build/windows-vs/Debug/gloom.exe`.
 - Compilar motor antes de enlazar ejecutables. Con

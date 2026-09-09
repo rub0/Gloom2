@@ -34,7 +34,9 @@ intensidad emisiva es 4. Los controles son reproducibles en
 ## Selección y compatibilidad
 
 El selector del cliente ofrece Hound con sus loadouts existentes, Archangel y
-Shadow. Los dos nuevos usan Soul Reaper sin habilidades nuevas. El nombre
+Shadow. Hound dispone de Bite/Guard y Berserker; Archangel de Diamond Skin y
+Life Dome; Shadow de Invisibility y Flash. `Q` activa la primaria y `E` la
+secundaria. El nombre
 `berserker-reaper` sigue admitiéndose para partidas de desarrollo existentes y
 se presenta como Hound; ya no se ofrece como clase original independiente.
 Screamer queda pendiente de un modelo y una definición de contenido propia.
@@ -47,10 +49,10 @@ Screamer queda pendiente de un modelo y una definición de contenido propia.
 .\build\windows-vs\Debug\gloom.exe --vertical-slice-join 127.0.0.1:27020 Nyx shadow-reaper
 ```
 
-El protocolo es 14. Los IDs existentes se conservan; Archangel y Shadow son
-2 y 3. Cápsula, vida, alcance, cooldown, autoridad de disparo y cámara siguen
-las reglas anteriores. Esta incorporación de arte no implementa los poderes
-originales de las dos clases ni modifica el balance.
+El protocolo actual es 21. Los IDs existentes se conservan; Archangel y Shadow
+son 2 y 3. Cápsula, vida, alcance, autoridad de disparo y cámara siguen las reglas
+anteriores. Las reglas de habilidad y sus decisiones de fidelidad están en el
+[informe del hito 70](../reports/abilities-70/README.md).
 
 ## Conversión y rigs
 

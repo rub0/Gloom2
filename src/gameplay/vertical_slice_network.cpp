@@ -19,8 +19,8 @@
 namespace gloom::gameplay {
 namespace {
 
-constexpr std::size_t combatant_payload_size = 117;
-constexpr std::size_t hud_payload_size = 36;
+constexpr std::size_t combatant_payload_size = 123;
+constexpr std::size_t hud_payload_size = 41;
 constexpr std::size_t network_payload_size = 48;
 constexpr std::size_t mechanism_payload_size = 32;
 constexpr std::size_t projectiles_payload_size = 32*29+1;
@@ -79,7 +79,10 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     append_integer(output, static_cast<std::uint8_t>(view.character));
     append_integer(output, static_cast<std::uint8_t>(view.weapon));
     append_integer(output, static_cast<std::uint8_t>(view.ability));
+    append_integer(output, static_cast<std::uint8_t>(view.secondary_ability));
     append_integer(output, static_cast<std::uint8_t>(view.primary_ability_active));
+    append_integer(output, static_cast<std::uint8_t>(view.secondary_ability_active));
+    append_float(output, view.flash_factor);
     append_integer(output, static_cast<std::uint8_t>(view.alive));
     append_integer(output, static_cast<std::uint8_t>((view.grounded ? 1 : 0) | (view.air_dodge_available << 1)));
     append_float(output,view.aim_pitch);
@@ -115,7 +118,10 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
     view.character = static_cast<SliceCharacter>(read_integer<std::uint8_t>(input, offset));
     view.weapon = static_cast<SliceWeapon>(read_integer<std::uint8_t>(input, offset));
     view.ability = static_cast<SliceAbility>(read_integer<std::uint8_t>(input, offset));
+    view.secondary_ability = static_cast<SliceSecondaryAbility>(read_integer<std::uint8_t>(input, offset));
     view.primary_ability_active = read_integer<std::uint8_t>(input, offset) != 0;
+    view.secondary_ability_active = read_integer<std::uint8_t>(input, offset) != 0;
+    view.flash_factor = read_float(input, offset);
     view.alive = read_integer<std::uint8_t>(input, offset) != 0;
     const auto movement_flags=read_integer<std::uint8_t>(input, offset);
     if(movement_flags>3)throw std::runtime_error{"Invalid movement flags"};
@@ -141,7 +147,9 @@ void append_combatant(std::vector<std::byte>& output, const CombatantView& view)
 [[nodiscard]] bool valid_combatant(const CombatantView& view) noexcept {
     for(std::size_t i=0;i<slice_weapon_count;++i)
         if(view.ammunition[i]>legacy_weapon_rule(static_cast<SliceWeapon>(i)).maximum_ammo)return false;
-    return view.entity != 0 && view.damage_modifier_ticks<=900 && view.cooldown_modifier_ticks<=900 && std::isfinite(view.aim_pitch) && std::abs(view.aim_pitch)<=1.571F &&
+    return view.entity != 0 && view.secondary_ability == secondary_ability({.character=view.character,.weapon=view.weapon,.ability=view.ability}) &&
+           std::isfinite(view.flash_factor) && view.flash_factor >= 0.0F && view.damage_modifier_ticks<=900 && view.cooldown_modifier_ticks<=900 &&
+           std::isfinite(view.aim_pitch) && std::abs(view.aim_pitch)<=1.571F &&
            std::isfinite(view.weapon_charge_fraction) && view.weapon_charge_fraction>=0 && view.weapon_charge_fraction<=1 &&
            view.owned_weapons>0 && (view.owned_weapons&~0x1fU)==0 &&
            std::ranges::all_of(view.shot_impact,[](float x){return std::isfinite(x);}) &&
@@ -208,6 +216,7 @@ struct AbilityCommand {
     float aim_x{0.0F};
     float aim_y{0.0F};
     float aim_z{0.0F};
+    bool secondary{false};
 };
 
 struct WeaponCommand {std::uint32_t sequence{};network::NetworkEntityId entity{};float aim_x{},aim_y{},aim_z{};bool primary{},secondary{};std::uint8_t selection{255};};
@@ -218,18 +227,19 @@ struct WeaponCommand {std::uint32_t sequence{};network::NetworkEntityId entity{}
     network::ProtocolMessage message;
     message.kind = network::MessageKind::ability_command;
     message.sequence = command.sequence;
-    message.payload.reserve(20);
+    message.payload.reserve(21);
     append_integer(message.payload, command.entity);
     append_float(message.payload, command.aim_x);
     append_float(message.payload, command.aim_y);
     append_float(message.payload, command.aim_z);
+    append_integer(message.payload, static_cast<std::uint8_t>(command.secondary));
     return message;
 }
 
 [[nodiscard]] std::optional<AbilityCommand>
 decode_ability_command(const network::ProtocolMessage& message) {
     if (message.kind != network::MessageKind::ability_command || message.sequence == 0 ||
-        message.payload.size() != 20) {
+        message.payload.size() != 21) {
         return std::nullopt;
     }
     std::size_t offset = 0;
@@ -239,15 +249,17 @@ decode_ability_command(const network::ProtocolMessage& message) {
     command.aim_x = read_float(message.payload, offset);
     command.aim_y = read_float(message.payload, offset);
     command.aim_z = read_float(message.payload, offset);
+    const auto secondary = read_integer<std::uint8_t>(message.payload, offset);
     const float length = std::sqrt(command.aim_x * command.aim_x +
                                    command.aim_y * command.aim_y +
                                    command.aim_z * command.aim_z);
-    if (command.entity == 0 || !std::isfinite(length) || length < 1.0e-5F) {
+    if (command.entity == 0 || secondary > 1 || !std::isfinite(length) || length < 1.0e-5F) {
         return std::nullopt;
     }
     command.aim_x /= length;
     command.aim_y /= length;
     command.aim_z /= length;
+    command.secondary = secondary != 0;
     return command;
 }
 
@@ -282,6 +294,7 @@ network::ProtocolMessage encode_slice_snapshot(const SliceSnapshot& snapshot,
         !std::isfinite(snapshot.hud.shield_fraction) ||
         !std::isfinite(snapshot.hud.weapon_ready_fraction) ||
         !std::isfinite(snapshot.hud.primary_ability_ready_fraction) ||
+        !std::isfinite(snapshot.hud.secondary_ability_ready_fraction) ||
         !std::isfinite(snapshot.hud.weapon_charge_fraction) ||
         snapshot.hud.weapon_charge_fraction<0 || snapshot.hud.weapon_charge_fraction>1 ||
         snapshot.hud.ammunition>snapshot.hud.maximum_ammunition || snapshot.projectile_count>snapshot.projectiles.size() ||
@@ -301,8 +314,10 @@ network::ProtocolMessage encode_slice_snapshot(const SliceSnapshot& snapshot,
     append_float(message.payload, snapshot.hud.shield_fraction);
     append_float(message.payload, snapshot.hud.weapon_ready_fraction);
     append_float(message.payload, snapshot.hud.primary_ability_ready_fraction);
+    append_float(message.payload, snapshot.hud.secondary_ability_ready_fraction);
     append_integer(message.payload,
                    static_cast<std::uint8_t>(snapshot.hud.primary_ability_active));
+    append_integer(message.payload, static_cast<std::uint8_t>(snapshot.hud.secondary_ability_active));
     append_integer(message.payload, static_cast<std::uint8_t>(snapshot.hud.hit_marker));
     append_integer(message.payload, static_cast<std::uint8_t>(snapshot.hud.dead));
     append_integer(message.payload, static_cast<std::uint8_t>(snapshot.player.alive));
@@ -364,8 +379,10 @@ decode_slice_snapshot(const network::ProtocolMessage& message) try {
     snapshot.hud.shield_fraction = read_float(message.payload, offset);
     snapshot.hud.weapon_ready_fraction = read_float(message.payload, offset);
     snapshot.hud.primary_ability_ready_fraction = read_float(message.payload, offset);
+    snapshot.hud.secondary_ability_ready_fraction = read_float(message.payload, offset);
     snapshot.hud.primary_ability_active =
         read_integer<std::uint8_t>(message.payload, offset) != 0;
+    snapshot.hud.secondary_ability_active = read_integer<std::uint8_t>(message.payload, offset) != 0;
     snapshot.hud.hit_marker = read_integer<std::uint8_t>(message.payload, offset) != 0;
     snapshot.hud.dead = read_integer<std::uint8_t>(message.payload, offset) != 0;
     static_cast<void>(read_integer<std::uint8_t>(message.payload, offset));
@@ -419,6 +436,7 @@ decode_slice_snapshot(const network::ProtocolMessage& message) try {
         !std::isfinite(snapshot.hud.shield_fraction) ||
         !std::isfinite(snapshot.hud.weapon_ready_fraction) ||
         !std::isfinite(snapshot.hud.primary_ability_ready_fraction) ||
+        !std::isfinite(snapshot.hud.secondary_ability_ready_fraction) ||
         !std::isfinite(snapshot.hud.weapon_charge_fraction) ||
         snapshot.hud.weapon_charge_fraction<0 || snapshot.hud.weapon_charge_fraction>1 ||
         snapshot.hud.ammunition>snapshot.hud.maximum_ammunition || snapshot.projectile_count>snapshot.projectiles.size() ||
@@ -443,6 +461,7 @@ struct VerticalSliceRemoteHost::Impl {
         bool secondary_fire{false};
         std::uint8_t weapon_selection{255};
         bool ability{false};
+        bool secondary_ability{false};
         std::deque<network::MovementInput> pending_inputs;
         std::uint32_t latest_received_input{0};
         bool has_received_input{false};
@@ -666,7 +685,8 @@ VerticalSliceRemoteHost::receive(const network::ConnectionId connection,
             control->second.aim_x = ability->aim_x;
             control->second.aim_y = ability->aim_y;
             control->second.aim_z = ability->aim_z;
-            control->second.ability = true;
+            if (ability->secondary) control->second.secondary_ability = true;
+            else control->second.ability = true;
             ++impl_->authorized_ability_commands;
         } else {
             ++impl_->rejected_commands;
@@ -720,6 +740,7 @@ std::vector<SliceHostMessage> VerticalSliceRemoteHost::tick_clients() {
                          .fire_primary = control.fire,
                          .fire_secondary = control.secondary_fire,
                          .use_primary_ability = std::exchange(control.ability, false),
+                         .use_secondary_ability = std::exchange(control.secondary_ability, false),
                          .dodge = std::exchange(control.dodge, false)};
         input.weapon_selection=std::exchange(control.weapon_selection,static_cast<std::uint8_t>(255));
         if (control.entity == VerticalSliceSimulation::player_entity) {
@@ -1102,6 +1123,11 @@ VerticalSliceRemoteClient::create_input(const SliceInput& input) {
                                  std::isfinite(aim_length) && aim_length >= 1.0e-5F &&
                                  std::isfinite(horizontal_aim_length) &&
                                  horizontal_aim_length >= 1.0e-5F;
+    const bool request_secondary_ability = !dead && input.use_secondary_ability &&
+                                 !impl_->ability_request_pending &&
+                                 impl_->snapshot.player.secondary_ability != SliceSecondaryAbility::none &&
+                                 impl_->snapshot.hud.secondary_ability_ready_fraction >= 0.999F &&
+                                 std::isfinite(aim_length) && aim_length >= 1.0e-5F;
     if (request_ability && impl_->snapshot.player.ability == SliceAbility::bite) {
         impl_->predicted_ability_remaining = 30;
         impl_->predicted_ability_x = input.aim_x / horizontal_aim_length;
@@ -1134,17 +1160,17 @@ VerticalSliceRemoteClient::create_input(const SliceInput& input) {
         impl_->next_fire_tick = impl_->snapshot.simulation_tick +
             legacy_weapon_rule(impl_->snapshot.player.weapon).primary_cooldown_ticks;
     }
-    if (!request_ability) {
+    if (!request_ability && !request_secondary_ability) {
         return output;
     }
-    output.push_back({.message = encode_ability_command({
-                          .sequence = impl_->next_ability_sequence++,
-                          .entity = impl_->session.controlled_entity(),
-                          .aim_x = input.aim_x / aim_length,
-                          .aim_y = input.aim_y / aim_length,
-                          .aim_z = input.aim_z / aim_length,
-                      }),
-                      .delivery = network::Delivery::reliable});
+    if (request_ability) output.push_back({.message = encode_ability_command({
+        .sequence = impl_->next_ability_sequence++, .entity = impl_->session.controlled_entity(),
+        .aim_x = input.aim_x / aim_length, .aim_y = input.aim_y / aim_length, .aim_z = input.aim_z / aim_length}),
+        .delivery = network::Delivery::reliable});
+    if (request_secondary_ability) output.push_back({.message = encode_ability_command({
+        .sequence = impl_->next_ability_sequence++, .entity = impl_->session.controlled_entity(),
+        .aim_x = input.aim_x / aim_length, .aim_y = input.aim_y / aim_length, .aim_z = input.aim_z / aim_length, .secondary = true}),
+        .delivery = network::Delivery::reliable});
     impl_->ability_request_pending = true;
     impl_->ability_request_tick = impl_->snapshot.simulation_tick;
     return output;

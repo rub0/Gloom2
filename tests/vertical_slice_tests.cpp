@@ -398,6 +398,72 @@ int main() try {
                cooldown_reuse.snapshot().hud.primary_ability_active,
            "Bite did not become reusable after its authoritative cooldown");
 
+    VerticalSliceSimulation berserker{false};
+    berserker.tick({.aim_x=1.0F,.use_secondary_ability=true});
+    expect(berserker.snapshot().player.secondary_ability==SliceSecondaryAbility::berserker &&
+           berserker.snapshot().player.secondary_ability_active && berserker.snapshot().hud.secondary_ability_ready_fraction<1.0F,
+           "Literal Legacy Berserker state did not activate");
+    berserker.tick({.aim_x=1.0F,.fire_primary=true});
+    VerticalSliceSimulation baseline_damage{false};baseline_damage.tick({});baseline_damage.tick({.aim_x=1.0F,.fire_primary=true});
+    expect_near(berserker.snapshot().opponent.life,baseline_damage.snapshot().opponent.life,"Cosmetic-only Berserker changed weapon damage");
+    expect_near(berserker.snapshot().hud.weapon_ready_fraction,baseline_damage.snapshot().hud.weapon_ready_fraction,
+                "Cosmetic-only Berserker changed weapon cooldown");
+    for(std::uint32_t tick=0;tick<1'198;++tick)berserker.tick({});
+    expect(!berserker.snapshot().player.secondary_ability_active,"Berserker exceeded its Legacy 20 second duration");
+
+    VerticalSliceSimulation diamond{false};
+    expect(diamond.set_selection(VerticalSliceSimulation::player_entity,{.character=SliceCharacter::archangel,.ability=SliceAbility::diamond_skin}),
+           "Archangel abilities were rejected");
+    for(std::uint32_t tick=0;tick<75;++tick)diamond.tick({.axis_z=-1,.aim_x=1},{.axis_z=-1,.aim_x=-1});
+    const auto diamond_before=diamond.snapshot();
+    const float diamond_aim_x=diamond_before.player.position_x-diamond_before.opponent.position_x;
+    const float diamond_aim_y=diamond_before.player.position_y-diamond_before.opponent.position_y;
+    const float diamond_aim_z=diamond_before.player.position_z-diamond_before.opponent.position_z;
+    const float diamond_aim_length=std::sqrt(diamond_aim_x*diamond_aim_x+diamond_aim_y*diamond_aim_y+diamond_aim_z*diamond_aim_z);
+    diamond.tick({.aim_x=-diamond_aim_x/diamond_aim_length,.aim_y=-diamond_aim_y/diamond_aim_length,
+                  .aim_z=-diamond_aim_z/diamond_aim_length,.use_primary_ability=true},
+                 {.aim_x=diamond_aim_x/diamond_aim_length,.aim_y=diamond_aim_y/diamond_aim_length,
+                  .aim_z=diamond_aim_z/diamond_aim_length,.fire_primary=true});
+    expect_near(diamond.snapshot().player.life,legacy_default_life,"Diamond Skin did not grant complete immunity");
+    expect(diamond.snapshot().player.primary_ability_active,"Diamond Skin presentation state missing");
+
+    VerticalSliceSimulation dome{false};
+    expect(dome.set_selection(VerticalSliceSimulation::player_entity,{.character=SliceCharacter::archangel,.ability=SliceAbility::diamond_skin}),
+           "Life Dome loadout was rejected");
+    for(std::uint32_t tick=0;tick<75;++tick)dome.tick({.axis_z=-1,.aim_x=1},{.axis_z=-1,.aim_x=-1});
+    const auto dome_before=dome.snapshot();
+    const float dome_aim_x=dome_before.player.position_x-dome_before.opponent.position_x;
+    const float dome_aim_y=dome_before.player.position_y-dome_before.opponent.position_y;
+    const float dome_aim_z=dome_before.player.position_z-dome_before.opponent.position_z;
+    const float dome_aim_length=std::sqrt(dome_aim_x*dome_aim_x+dome_aim_y*dome_aim_y+dome_aim_z*dome_aim_z);
+    dome.tick({.aim_x=-dome_aim_x/dome_aim_length,.aim_y=-dome_aim_y/dome_aim_length,.aim_z=-dome_aim_z/dome_aim_length},
+              {.aim_x=dome_aim_x/dome_aim_length,.aim_y=dome_aim_y/dome_aim_length,.aim_z=dome_aim_z/dome_aim_length,.fire_primary=true});
+    const float damaged_life=dome.snapshot().player.life;
+    expect(damaged_life<legacy_default_life,"Life Dome test could not establish damage");
+    const float enemy_life=dome.snapshot().opponent.life;
+    dome.tick({.aim_x=1,.use_secondary_ability=true},{.aim_x=-1});
+    expect_near(dome.snapshot().player.life,damaged_life+archangel_life_dome_heal,
+                "Life Dome did not heal Archangel exactly once");
+    expect_near(dome.snapshot().opponent.life,enemy_life,"Life Dome healed the enemy");
+    expect(dome.snapshot().player.secondary_ability==SliceSecondaryAbility::life_dome && dome.snapshot().player.secondary_ability_active,
+           "Life Dome state was not exposed");
+
+    VerticalSliceSimulation shadow{false};
+    expect(shadow.set_selection(VerticalSliceSimulation::player_entity,{.character=SliceCharacter::shadow,.ability=SliceAbility::invisibility}),
+           "Shadow abilities were rejected");
+    shadow.tick({.aim_x=1,.use_primary_ability=true},{.aim_x=-1});
+    expect(shadow.snapshot().player.primary_ability_active,"Shadow invisibility state missing");
+    for(std::uint32_t tick=0;tick<75;++tick)shadow.tick({.axis_z=-1,.aim_x=1},{.axis_z=-1,.aim_x=-1});
+    shadow.tick({.aim_x=1,.use_secondary_ability=true},{.aim_x=-1});
+    expect(shadow.snapshot().opponent.flash_factor>1.0F && shadow.snapshot().player.secondary_ability==SliceSecondaryAbility::flash,
+           "Shadow flash did not pass radius, facing and visibility filters");
+
+    VerticalSliceSimulation occluded_flash{false};
+    expect(occluded_flash.set_selection(VerticalSliceSimulation::player_entity,{.character=SliceCharacter::shadow,.ability=SliceAbility::invisibility}),
+           "Occluded Shadow loadout was rejected");
+    occluded_flash.tick({.aim_x=1,.use_secondary_ability=true},{.aim_x=-1});
+    expect(occluded_flash.snapshot().opponent.flash_factor==0.0F,"Shadow flash crossed solid geometry");
+
     FirstPersonController controller;
     const auto initial_forward = controller.forward();
     expect_near(initial_forward.x, 1.0F, "FPS controller did not initially face the opponent");

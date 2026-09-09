@@ -28,6 +28,15 @@ constexpr std::uint32_t bite_duration_ticks = 30;
 constexpr std::uint32_t bite_cooldown_ticks = 1'500;
 constexpr std::uint32_t guard_duration_ticks = 60;
 constexpr std::uint32_t guard_cooldown_ticks = 900;
+constexpr std::uint32_t berserker_duration_ticks = 1'200;
+constexpr std::uint32_t berserker_cooldown_ticks = 1'200;
+constexpr std::uint32_t diamond_duration_ticks = 300;
+constexpr std::uint32_t diamond_cooldown_ticks = 1'500;
+constexpr std::uint32_t life_dome_duration_ticks = 600;
+constexpr std::uint32_t life_dome_cooldown_ticks = 600;
+constexpr std::uint32_t invisibility_duration_ticks = 300;
+constexpr std::uint32_t invisibility_cooldown_ticks = 1'500;
+constexpr std::uint32_t flash_cooldown_ticks = 60;
 constexpr std::uint32_t hit_marker_ticks = 12;
 constexpr network::NetworkEntityId factory_lift_network_entity = 100;
 constexpr network::ConnectionId player_connection = 101;
@@ -41,7 +50,19 @@ constexpr network::ConnectionId opponent_connection = 102;
     switch (ability) {
         case SliceAbility::bite: return bite_cooldown_ticks;
         case SliceAbility::guard: return guard_cooldown_ticks;
+        case SliceAbility::diamond_skin: return diamond_cooldown_ticks;
+        case SliceAbility::invisibility: return invisibility_cooldown_ticks;
         case SliceAbility::none: return 0;
+    }
+    return 0;
+}
+
+[[nodiscard]] constexpr std::uint32_t secondary_ability_cooldown_ticks(const SliceSecondaryAbility ability) noexcept {
+    switch (ability) {
+        case SliceSecondaryAbility::berserker: return berserker_cooldown_ticks;
+        case SliceSecondaryAbility::life_dome: return life_dome_cooldown_ticks;
+        case SliceSecondaryAbility::flash: return flash_cooldown_ticks;
+        case SliceSecondaryAbility::none: return 0;
     }
     return 0;
 }
@@ -526,7 +547,10 @@ struct VerticalSliceSimulation::Impl {
         combatant.weapon->arsenal.clear_modifiers();
         combatant.ability->cooldown_remaining = 0;
         combatant.ability->active_remaining = 0;
+        combatant.ability->secondary_cooldown_remaining = 0;
+        combatant.ability->secondary_active_remaining = 0;
         combatant.ability->hit_consumed = false;
+        combatant.ability->flash_factor = 0.0F;
         if (use_original_factory) {
             const auto& spawns=original_factory().spawns;
             const auto& spawn=spawns[(combatant.health->deaths*2+combatant.entity()-1)%spawns.size()];
@@ -544,7 +568,12 @@ struct VerticalSliceSimulation::Impl {
         return true;
     }
 
+    static bool damage_immune(const Combatant& target) {
+        return target.loadout->selection.ability == SliceAbility::diamond_skin && target.ability->active_remaining != 0;
+    }
+
     static bool apply_damage(Combatant& attacker, Combatant& target, const float damage) {
+        if (damage_immune(target)) return false;
         const float absorbed =
             std::min(target.shield->value, damage * legacy_shield_absorption);
         target.shield->value -= absorbed;
@@ -554,6 +583,9 @@ struct VerticalSliceSimulation::Impl {
         }
         target.health->life = 0.0F;
         target.health->respawn_remaining = respawn_ticks;
+        target.ability->active_remaining = 0;
+        target.ability->secondary_active_remaining = 0;
+        target.ability->flash_factor = 0.0F;
         ++target.health->deaths;
         ++attacker.score->kills;
         return true;
@@ -572,6 +604,9 @@ struct VerticalSliceSimulation::Impl {
         }
         target.health->life = 0.0F;
         target.health->respawn_remaining = respawn_ticks;
+        target.ability->active_remaining = 0;
+        target.ability->secondary_active_remaining = 0;
+        target.ability->flash_factor = 0.0F;
         ++target.health->deaths;
         return true;
     }
@@ -787,8 +822,52 @@ struct VerticalSliceSimulation::Impl {
                 combatant.shield->value + hound_guard_shield);
             combatant.ability->active_remaining = guard_duration_ticks;
             combatant.ability->hit_consumed = true;
+        } else if (selected == SliceAbility::diamond_skin) {
+            combatant.ability->active_remaining = diamond_duration_ticks;
+            combatant.ability->hit_consumed = true;
+        } else if (selected == SliceAbility::invisibility) {
+            combatant.ability->active_remaining = invisibility_duration_ticks;
+            combatant.ability->hit_consumed = true;
         }
         combatant.ability->cooldown_remaining = ability_cooldown_ticks(selected);
+        ++authorized_ability_commands;
+        return true;
+    }
+
+    bool activate_secondary_ability(const network::ConnectionId connection, Combatant& combatant, Combatant& target, const SliceInput& input) {
+        const SliceSecondaryAbility selected = secondary_ability(combatant.loadout->selection);
+        if (!input.use_secondary_ability || combatant.health->respawn_remaining != 0 ||
+            combatant.ability->secondary_cooldown_remaining != 0 || selected == SliceSecondaryAbility::none) return false;
+        const auto owner = sessions.controlled_entity(connection);
+        if (!owner || *owner != combatant.entity()) {
+            ++rejected_commands;
+            return false;
+        }
+        if (selected == SliceSecondaryAbility::berserker) {
+            combatant.ability->secondary_active_remaining = berserker_duration_ticks;
+        } else if (selected == SliceSecondaryAbility::life_dome) {
+            combatant.health->life = std::min(legacy_maximum_life, combatant.health->life + archangel_life_dome_heal);
+            combatant.ability->secondary_active_remaining = life_dome_duration_ticks;
+        } else if (selected == SliceSecondaryAbility::flash) {
+            const float difference_x = combatant.transform->position_x - target.transform->position_x;
+            const float difference_z = combatant.transform->position_z - target.transform->position_z;
+            const float distance = std::sqrt(difference_x * difference_x + difference_z * difference_z);
+            if (target.health->respawn_remaining == 0 && distance > 1.0e-5F && distance <= shadow_flash_range) {
+                combatant.ability->secondary_active_remaining = 2;
+                const float direction_x = difference_x / distance;
+                const float direction_z = difference_z / distance;
+                const float facing = std::clamp(target.movement->facing_x * direction_x + target.movement->facing_z * direction_z, -1.0F, 1.0F);
+                const network::FireCommand probe{.sequence = combatant.ability->next_sequence++, .shooter = target.entity(),
+                    .estimated_server_tick = movement_server->simulation_tick(), .aim_x = direction_x, .aim_z = direction_z,
+                    .maximum_distance = distance + 0.05F};
+                const auto result = combat.validate(probe);
+                if (facing >= 0.0F && result.status == network::FireValidationStatus::hit && result.target == combatant.entity()) {
+                    const float angle = std::acos(facing) * 57.2957795F;
+                    target.ability->flash_factor = angle > 1.0F ? 50.0F * (90.0F / angle) : 50.0F;
+                }
+            }
+        }
+        combatant.ability->secondary_cooldown_remaining = secondary_ability_cooldown_ticks(selected);
         ++authorized_ability_commands;
         return true;
     }
@@ -879,6 +958,10 @@ struct VerticalSliceSimulation::Impl {
         if (opponent.ability->cooldown_remaining != 0) {
             --opponent.ability->cooldown_remaining;
         }
+        if (player.ability->secondary_cooldown_remaining != 0) --player.ability->secondary_cooldown_remaining;
+        if (opponent.ability->secondary_cooldown_remaining != 0) --opponent.ability->secondary_cooldown_remaining;
+        if (player.ability->flash_factor > 0.0F) player.ability->flash_factor = std::max(0.0F, player.ability->flash_factor - 0.5F);
+        if (opponent.ability->flash_factor > 0.0F) opponent.ability->flash_factor = std::max(0.0F, opponent.ability->flash_factor - 0.5F);
 
         const auto update_facing = [](Combatant& combatant, const SliceInput& input) {
             const float length = std::sqrt(input.aim_x * input.aim_x +
@@ -895,6 +978,8 @@ struct VerticalSliceSimulation::Impl {
         static_cast<void>(activate_ability(player.authority->connection, player, player_input));
         static_cast<void>(activate_ability(opponent.authority->connection, opponent,
                                            opponent_input));
+        static_cast<void>(activate_secondary_ability(player.authority->connection, player, opponent, player_input));
+        static_cast<void>(activate_secondary_ability(opponent.authority->connection, opponent, player, opponent_input));
 
         const auto movement_axis_x = [](const Combatant& combatant, const SliceInput& input) {
             return combatant.loadout->selection.ability == SliceAbility::bite &&
@@ -969,6 +1054,8 @@ struct VerticalSliceSimulation::Impl {
         if (opponent.ability->active_remaining != 0) {
             --opponent.ability->active_remaining;
         }
+        if (player.ability->secondary_active_remaining != 0) --player.ability->secondary_active_remaining;
+        if (opponent.ability->secondary_active_remaining != 0) --opponent.ability->secondary_active_remaining;
         refresh_snapshot();
         audio_observer.observe(audio_before,snapshot,player_input,opponent_input,audio_journal);
         snapshot.audio_events=audio_journal;
@@ -995,7 +1082,10 @@ struct VerticalSliceSimulation::Impl {
                  .character = combatant.loadout->selection.character,
                  .weapon = combatant.weapon->arsenal.active_weapon(),
                  .ability = combatant.loadout->selection.ability,
+                 .secondary_ability = secondary_ability(combatant.loadout->selection),
                  .primary_ability_active = combatant.ability->active_remaining != 0,
+                 .secondary_ability_active = combatant.ability->secondary_active_remaining != 0,
+                 .flash_factor = combatant.ability->flash_factor,
                 .alive = combatant.health->respawn_remaining == 0,
                 .grounded = movement.grounded,
                 .air_dodge_available = movement.air_dodge_available,
@@ -1033,9 +1123,14 @@ struct VerticalSliceSimulation::Impl {
                                           player.ability->cooldown_remaining) /
                                           static_cast<float>(ability_cooldown_ticks(
                                               player.loadout->selection.ability)),
+                     .secondary_ability_ready_fraction =
+                         secondary_ability(player.loadout->selection) == SliceSecondaryAbility::none ? 0.0F :
+                         1.0F - static_cast<float>(player.ability->secondary_cooldown_remaining) /
+                             static_cast<float>(secondary_ability_cooldown_ticks(secondary_ability(player.loadout->selection))),
                      .primary_ability_active =
                          player.loadout->selection.ability != SliceAbility::none &&
                          player.ability->active_remaining != 0,
+                     .secondary_ability_active = player.ability->secondary_active_remaining != 0,
                     .hit_marker = player.presentation->hit_marker_ticks != 0,
                     .dead = player.health->respawn_remaining != 0,
                     .kills = player.score->kills,
@@ -1149,6 +1244,9 @@ bool VerticalSliceSimulation::set_selection(const network::NetworkEntityId entit
         combatant->ability->active_remaining = 0;
         combatant->ability->hit_consumed = false;
     }
+    combatant->ability->secondary_cooldown_remaining = 0;
+    combatant->ability->secondary_active_remaining = 0;
+    combatant->ability->flash_factor = 0.0F;
     impl_->refresh_snapshot();
     return true;
 }
@@ -1194,9 +1292,14 @@ SliceSnapshot VerticalSliceSimulation::snapshot_for(
                                      local.ability->cooldown_remaining) /
                                      static_cast<float>(ability_cooldown_ticks(
                                          local.loadout->selection.ability)),
+                .secondary_ability_ready_fraction =
+                    secondary_ability(local.loadout->selection) == SliceSecondaryAbility::none ? 0.0F :
+                    1.0F - static_cast<float>(local.ability->secondary_cooldown_remaining) /
+                        static_cast<float>(secondary_ability_cooldown_ticks(secondary_ability(local.loadout->selection))),
                 .primary_ability_active =
                     local.loadout->selection.ability != SliceAbility::none &&
                     local.ability->active_remaining != 0,
+                .secondary_ability_active = local.ability->secondary_active_remaining != 0,
                 .hit_marker = local.presentation->hit_marker_ticks != 0,
                 .dead = local.health->respawn_remaining != 0,
                 .kills = local.score->kills,

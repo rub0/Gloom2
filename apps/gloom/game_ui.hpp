@@ -57,10 +57,20 @@ public:
                     if(s.hud.weapon_charge_fraction>0)canvas.rect({x,697,86*s.hud.weapon_charge_fraction,3},{1,.32F,.12F,1});}
             }
             if(s.player.ability!=gameplay::SliceAbility::none){
-                canvas.image(s.player.ability==gameplay::SliceAbility::bite?"bite":"heal",{174,587,42,42});
+                const std::string_view icon=s.player.ability==gameplay::SliceAbility::bite?"bite":
+                    s.player.ability==gameplay::SliceAbility::invisibility?"shadow":"heal";
+                canvas.image(icon,{174,587,42,42});
                 canvas.ring(195,608,25,s.hud.primary_ability_ready_fraction,
                     s.hud.primary_ability_active?render::UiColor{1,.8F,.2F,1}:render::ui_cyan);
                 canvas.text(188,555,"Q",15,render::ui_cyan);
+            }
+            if(s.player.secondary_ability!=gameplay::SliceSecondaryAbility::none){
+                const std::string_view icon=s.player.secondary_ability==gameplay::SliceSecondaryAbility::life_dome?"heal":
+                    s.player.secondary_ability==gameplay::SliceSecondaryAbility::flash?"shield_icon":"bite";
+                canvas.image(icon,{220,587,42,42});
+                canvas.ring(241,608,25,s.hud.secondary_ability_ready_fraction,
+                    s.hud.secondary_ability_active?render::UiColor{1,.45F,.12F,1}:render::ui_cyan);
+                canvas.text(235,555,"E",15,render::ui_cyan);
             }
             canvas.panel({478,22,324,59});canvas.text(506,37,std::to_string(s.hud.kills)+"  BAJAS    /    "+std::to_string(s.hud.deaths)+"  MUERTES",20);
             if(s.player.damage_modifier_ticks)canvas.text(920,90,"DAÑO x3  "+std::to_string((s.player.damage_modifier_ticks+59)/60)+" s",20);
@@ -68,6 +78,8 @@ public:
             if(!s.hud.dead)canvas.image("crosshair",{623,343,34,34},s.hud.hit_marker?render::UiColor{1,.25F,.15F,1}:render::ui_ink);
             else {canvas.panel({340,264,600,170});canvas.text(486,286,"HAS CAÍDO",46,render::ui_cyan,true);
                 canvas.text(413,366,"Reaparición en "+std::to_string(static_cast<int>(std::ceil(s.player.respawn_remaining_seconds)))+" s",25);}
+            if(s.player.flash_factor>1.0F)canvas.rect({0,0,static_cast<float>(width),static_cast<float>(height)},
+                {1,1,1,std::clamp(s.player.flash_factor/50.0F,0.18F,1.0F)});
 
         }
         if(!playing && !confirm_leave){

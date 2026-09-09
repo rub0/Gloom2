@@ -74,6 +74,22 @@ int main()try{
         require(decoded&&decoded->audio_events.sequence==simulation.snapshot().audio_events.sequence,"Audio network roundtrip failed");
         encoded.payload.pop_back();require(!gameplay::decode_slice_snapshot(encoded),"Truncated network audio accepted");
     }
+    gameplay::VerticalSliceSimulation hound_abilities{false};
+    hound_abilities.tick({.aim_x=1,.use_primary_ability=true,.use_secondary_ability=true});
+    require(has(hound_abilities.snapshot().audio_events,audio::Cue::hound_bite)&&
+            has(hound_abilities.snapshot().audio_events,audio::Cue::hound_berserker),"Hound ability audio missing");
+    gameplay::VerticalSliceSimulation archangel_abilities{false};
+    require(archangel_abilities.set_selection(1,{.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::diamond_skin}),
+            "Archangel audio loadout rejected");
+    archangel_abilities.tick({.aim_x=1,.use_primary_ability=true,.use_secondary_ability=true});
+    require(has(archangel_abilities.snapshot().audio_events,audio::Cue::diamond_skin)&&
+            has(archangel_abilities.snapshot().audio_events,audio::Cue::life_dome),"Archangel ability audio missing");
+    gameplay::VerticalSliceSimulation shadow_abilities{false};
+    require(shadow_abilities.set_selection(1,{.character=gameplay::SliceCharacter::shadow,.ability=gameplay::SliceAbility::invisibility}),
+            "Shadow audio loadout rejected");
+    shadow_abilities.tick({.aim_x=1,.use_primary_ability=true,.use_secondary_ability=true});
+    require(has(shadow_abilities.snapshot().audio_events,audio::Cue::shadow_in)&&
+            has(shadow_abilities.snapshot().audio_events,audio::Cue::shadow_flash),"Shadow ability audio missing");
     // Presentation tests use the same cache layout as the packaged application.
     assets::VirtualFileSystem presentation_fs;presentation_fs.mount("cache",std::filesystem::path{GLOOM_BINARY_ROOT}/"content");
     gameplay::AudioPresentation presentation{presentation_fs,false};

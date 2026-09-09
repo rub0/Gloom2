@@ -24,6 +24,7 @@ struct InputState {
     bool fire_primary{false};
     bool fire_secondary{false};
     bool use_primary_ability{false};
+    bool use_secondary_ability{false};
     bool menu_previous{false};
     bool menu_next{false};
     bool menu_confirm{false};

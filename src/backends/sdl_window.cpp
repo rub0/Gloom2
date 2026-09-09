@@ -137,6 +137,7 @@ bool SdlWindow::poll_events() {
         .fire_primary = (mouse_buttons & SDL_BUTTON_LMASK) != 0,
         .fire_secondary = (mouse_buttons & SDL_BUTTON_RMASK) != 0,
         .use_primary_ability = pressed(SDL_SCANCODE_Q),
+        .use_secondary_ability = pressed(SDL_SCANCODE_E),
         .menu_previous = pressed(SDL_SCANCODE_LEFT),
         .menu_next = pressed(SDL_SCANCODE_RIGHT),
         .menu_confirm = pressed(SDL_SCANCODE_RETURN) ||

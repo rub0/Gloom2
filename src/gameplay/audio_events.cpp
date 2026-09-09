@@ -17,6 +17,17 @@ void GameplayAudioEvents::observe(const SliceSnapshot& before,const SliceSnapsho
         else if(!a.alive&&b.alive)emit(Cue::spawn);
         else if(b.alive&&(b.life<a.life||b.shield<a.shield))emit(Cue::pain);
         if(a.weapon!=b.weapon&&b.alive)emit(Cue::change);
+        if(b.alive&&b.primary_ability_active&&!a.primary_ability_active){
+            if(b.ability==SliceAbility::bite)emit(Cue::hound_bite);
+            else if(b.ability==SliceAbility::diamond_skin)emit(Cue::diamond_skin);
+            else if(b.ability==SliceAbility::invisibility)emit(Cue::shadow_in);
+        }
+        if(b.alive&&a.primary_ability_active&&!b.primary_ability_active&&b.ability==SliceAbility::invisibility)emit(Cue::shadow_out);
+        if(b.alive&&b.secondary_ability_active&&!a.secondary_ability_active){
+            if(b.secondary_ability==SliceSecondaryAbility::berserker)emit(Cue::hound_berserker);
+            else if(b.secondary_ability==SliceSecondaryAbility::life_dome)emit(Cue::life_dome);
+            else if(b.secondary_ability==SliceSecondaryAbility::flash)emit(Cue::shadow_flash);
+        }
         if(a.alive&&b.alive){
             const float dx=b.position_x-a.position_x,dz=b.position_z-a.position_z;
             if(a.grounded&&b.grounded&&dx*dx+dz*dz>.000025F&&dx*dx+dz*dz<4){

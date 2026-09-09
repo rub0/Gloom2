@@ -21,6 +21,7 @@ private:
     std::array<SliceWeapon,2> charge_weapon_{};
     std::uint64_t epoch_{};
     std::array<audio::VoiceId,2> guide_{};
+    std::array<audio::VoiceId,2> shadow_{};
     std::array<audio::VoiceId,factory_pickup_count> pull_{};
     bool scene_initialized_{};std::uint32_t scene_{};std::uint64_t tick_{},local_{},events_played_{};
     void ensure_music();

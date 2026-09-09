@@ -118,7 +118,8 @@ int main() try {
     auto bad=recipes;bad[0].life=-1;rejects([&]{render::ParticleSystem p{bad};});
     const auto rig=assets::import_gltf(root/"characters/original/archangel.gltf");
     gameplay::CharacterAnimator animator;gameplay::CombatEffects events;render::ParticleSystem p{recipes};
-    gameplay::CombatantView v{.entity=2,.facing_x=0,.facing_z=1,.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::none};
+    gameplay::CombatantView v{.entity=2,.facing_x=0,.facing_z=1,.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::diamond_skin,
+        .secondary_ability=gameplay::SliceSecondaryAbility::life_dome};
     auto frame=animator.update(*rig,v,.01);events.observe(p,v,frame,{},100,true);
     v.shot_sequence=1;v.shot_tick=101;v.shot_contact=true;
     events.observe(p,v,frame,{},101,true);const auto count=p.metrics().spawned;

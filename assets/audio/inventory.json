@@ -175,7 +175,7 @@
       "references": [
         "Src/Logic/Entity/Components/Archangel.cpp:140"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "ogg",
       "channels": 1,
@@ -203,7 +203,7 @@
       "references": [
         "Src/Logic/Entity/Components/Hound.cpp:175"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "wav",
       "channels": 1,
@@ -219,7 +219,7 @@
         "Src/Logic/Entity/Components/Hound.cpp:121",
         "Src/Logic/Entity/Components/Hound.cpp:195"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "wav",
       "channels": 1,
@@ -258,7 +258,7 @@
       "references": [
         "Src/Logic/Entity/Components/Archangel.cpp:168"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "mp3",
       "channels": 2,
@@ -305,7 +305,7 @@
         "Src/Logic/Entity/Components/Shadow.cpp:114",
         "Src/Logic/Entity/Components/Shadow.cpp:135"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "ogg",
       "channels": 1,
@@ -320,7 +320,7 @@
       "references": [
         "Src/Logic/Entity/Components/Shadow.cpp:169"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "wav",
       "channels": 2,
@@ -335,7 +335,7 @@
       "references": [
         "Src/Logic/Entity/Components/Shadow.cpp:136"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "ogg",
       "channels": 1,
@@ -350,7 +350,7 @@
       "references": [
         "Src/Logic/Entity/Components/Shadow.cpp:79"
       ],
-      "imported": false,
+      "imported": true,
       "status": "referenced",
       "format": "ogg",
       "channels": 1,

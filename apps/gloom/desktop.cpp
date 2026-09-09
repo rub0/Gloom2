@@ -164,8 +164,12 @@ std::vector<std::string> menu(Session& session,const std::filesystem::path& revi
             fixture.player.life=175;fixture.player.shield=35;fixture.hud.life_fraction=.7F;fixture.hud.shield_fraction=.35F;
             fixture.hud.kills=3;fixture.hud.deaths=1;
             gameplay::SliceLobbyState lobby;lobby.phase=gameplay::SliceMatchPhase::active;
-            lobby.players={{.entity=1,.identity={1,"Nyx"},.selection={.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::none},.connected=true,.ready=true},
-                           {.entity=2,.identity={2,"Rook"},.selection={.character=gameplay::SliceCharacter::shadow,.ability=gameplay::SliceAbility::none},.connected=true,.ready=false}};
+            lobby.players={{.entity=1,.identity={1,"Nyx"},
+                                .selection={.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::diamond_skin},
+                                .connected=true,.ready=true},
+                           {.entity=2,.identity={2,"Rook"},
+                                .selection={.character=gameplay::SliceCharacter::shadow,.ability=gameplay::SliceAbility::invisibility},
+                                .connected=true,.ready=false}};
             if(review_page==9){fixture.hud.dead=true;fixture.player.life=0;fixture.hud.life_fraction=0;fixture.player.respawn_remaining_seconds=3;}
             if(review_page==10)lobby.phase=gameplay::SliceMatchPhase::waiting;
             platform::InputState neutral;review_game->paused=review_page==12;review_game->was_playing=true;

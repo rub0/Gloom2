@@ -22,6 +22,8 @@ void CombatEffects::observe(render::ParticleSystem& particles,const CombatantVie
         if (v.alive && !state.view.grounded && v.grounded) burst("landing",foot);
         if (v.alive && v.life<state.view.life) burst("damage",chest);
         if (v.alive && ((v.primary_ability_active && !state.view.primary_ability_active && v.ability==SliceAbility::guard) || v.shield<state.view.shield)) burst("shield",chest);
+        if (v.alive && v.secondary_ability_active && !state.view.secondary_ability_active &&
+            v.secondary_ability==SliceSecondaryAbility::flash) burst("shield",chest);
         if (v.alive && v.shot_sequence!=state.view.shot_sequence && v.shot_tick<=tick && tick-v.shot_tick<=15) {
             particles.burst(v.entity,"muzzle",point(frame.muzzle),direction,v.entity*1000003+v.shot_sequence,fps);++events_;
             if (v.shot_contact) {

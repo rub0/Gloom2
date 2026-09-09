@@ -24,7 +24,10 @@ AudioPresentation::AudioPresentation(const assets::VirtualFileSystem& fs,bool de
 }
 audio::VoiceId AudioPresentation::play(audio::Cue cue,audio::VoiceDesc desc){return mixer_.play(clips_.at(static_cast<std::size_t>(cue)),desc);}
 void AudioPresentation::ensure_music(){if(!mixer_.playing(music_))music_=play(audio::Cue::music,{.bus=audio::Bus::music,.gain=.6F,.loop=true});}
-void AudioPresentation::scene_reset(){mixer_.stop_scene();mixer_.pause(false);cursor_.reset();charge_={};guide_={};pull_={};scene_initialized_=false;local_=tick_=0;}
+void AudioPresentation::scene_reset(){
+    mixer_.stop_scene();mixer_.pause(false);cursor_.reset();charge_={};guide_={};shadow_={};pull_={};
+    scene_initialized_=false;local_=tick_=0;
+}
 void AudioPresentation::menu(double elapsed){ensure_music();mixer_.pause(false);output_->pump(mixer_,elapsed);}
 void AudioPresentation::update(const SliceSnapshot& s,audio::Listener listener,bool paused,double elapsed){
     if(scene_initialized_&&(s.scene_id!=scene_||s.player.entity!=local_||s.audio_epoch!=epoch_))scene_reset();
@@ -51,6 +54,12 @@ void AudioPresentation::update(const SliceSnapshot& s,audio::Listener listener,b
         if(active)mixer_.move(charge_[i],{c.position_x,c.position_y+.9F,c.position_z});
         if(!c.alive||!c.audio_guiding){mixer_.stop(guide_[i]);guide_[i]=0;}
         else {if(!mixer_.playing(guide_[i]))guide_[i]=play(audio::Cue::ignition,{.gain=.08F,.spatial=i!=0,.loop=true});mixer_.move(guide_[i],{c.position_x,c.position_y+.9F,c.position_z});}
+        const bool invisible=c.alive&&c.ability==SliceAbility::invisibility&&c.primary_ability_active;
+        if(!invisible){mixer_.stop(shadow_[i]);shadow_[i]=0;}
+        else {
+            if(!mixer_.playing(shadow_[i]))shadow_[i]=play(audio::Cue::shadow_loop,{.gain=.32F,.spatial=i!=0,.loop=true});
+            mixer_.move(shadow_[i],{c.position_x,c.position_y+.9F,c.position_z});
+        }
     }
     for(std::size_t i=0;i<pull_.size();++i){
         if(i>=s.pickup_count||s.pickups[i].phase!=PickupPhase::pulling){mixer_.stop(pull_[i]);pull_[i]=0;}

@@ -59,10 +59,12 @@ int main() try {
     }
     for (const auto character:{gameplay::SliceCharacter::archangel,gameplay::SliceCharacter::shadow}) {
         gameplay::VerticalSliceSimulation simulation{{.opponent_ai_enabled=false,.original_factory=true}};
-        const gameplay::SlicePlayerSelection selection{.character=character,.ability=gameplay::SliceAbility::none};
+        const gameplay::SlicePlayerSelection selection{.character=character,.ability=character==gameplay::SliceCharacter::archangel?
+            gameplay::SliceAbility::diamond_skin:gameplay::SliceAbility::invisibility};
         require(gameplay::valid_slice_selection(selection),"Original character selection invalid");
-        require(!gameplay::valid_slice_selection({.character=character,.ability=gameplay::SliceAbility::bite}),"Unimplemented original ability enabled");
-        auto snapshot=simulation.snapshot();snapshot.player.character=character;snapshot.player.ability=gameplay::SliceAbility::none;
+        require(!gameplay::valid_slice_selection({.character=character,.ability=gameplay::SliceAbility::bite}),"Foreign original ability enabled");
+        auto snapshot=simulation.snapshot();snapshot.player.character=character;snapshot.player.ability=selection.ability;
+        snapshot.player.secondary_ability=gameplay::secondary_ability(selection);
         const auto decoded=gameplay::decode_slice_snapshot(gameplay::encode_slice_snapshot(snapshot,0,1));
         require(decoded && decoded->player.character==character,"Character identity lost on wire");
     }

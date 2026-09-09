@@ -8,6 +8,9 @@ struct View {
     const char* name;
     float x, y, z, yaw, pitch;
     gameplay::SliceAbility ability{gameplay::SliceAbility::none};
+    gameplay::SliceCharacter character{gameplay::SliceCharacter::hound};
+    gameplay::SliceSecondaryAbility secondary_ability{gameplay::SliceSecondaryAbility::none};
+    bool flash_target{};
 };
 inline constexpr std::array views{
     View{"factory", -8.0F, 3.0F, -7.0F, 0.95F, -0.30F},
@@ -42,5 +45,18 @@ inline constexpr std::array character_views{
     View{"soul-reaper-forward", -35.4855F, 0.10F, 8.9985F, 3.14159265F, 0.0F},
     View{"soul-reaper-up", -35.4855F, 0.10F, 8.9985F, 3.14159265F, 0.7F},
     View{"soul-reaper-down", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.7F},
+};
+inline constexpr std::array ability_views{
+    View{"hound-bite", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::bite},
+    View{"hound-berserker", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::bite,
+         gameplay::SliceCharacter::hound, gameplay::SliceSecondaryAbility::berserker},
+    View{"archangel-diamond-skin", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::diamond_skin,
+         gameplay::SliceCharacter::archangel},
+    View{"archangel-life-dome", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::diamond_skin,
+         gameplay::SliceCharacter::archangel, gameplay::SliceSecondaryAbility::life_dome},
+    View{"shadow-invisibility", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::invisibility,
+         gameplay::SliceCharacter::shadow},
+    View{"shadow-flash", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::invisibility,
+         gameplay::SliceCharacter::shadow, gameplay::SliceSecondaryAbility::flash, true},
 };
 }

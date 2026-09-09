@@ -27,6 +27,8 @@ weapons/ammoPickup.wav weapons/shotgun/shotgunPickup.wav weapons/sniper/sniperPi
 weapons/minigun/minigunPickup.wav weapons/ironHellGoat/ironHellGoatPickup.wav
 music/themeGloom.wav ambient/lava_quiet.wav ambient/bassy_fan.wav ambient/deep_atmosphere.wav
 weapons/ironHellGoat/ignite_pitch.wav gameplay/plasma.wav""".split()
+SELECTED += """character/houndBite.wav character/archangelShield.ogg character/houndSmell.wav character/lifeDome.mp3
+character/shadow.ogg character/shadowFlash.wav character/shadowIn.ogg character/shadowOut.ogg""".split()
 
 
 def decode(path):
