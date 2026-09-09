@@ -323,6 +323,16 @@
     modifiers, respawn and concurrent authoritative pickup/reconnect. Protocol 18;
     see the [acceptance report](../reports/pickups-2026-09-06/README.md).
 
+77. Pickup presentation — planned: make map pickups visually inviting without
+    changing their authoritative gameplay. Add local-space bobbing and slow yaw
+    rotation to the original position; add a restrained colored additive halo to
+    every pickup except health; optionally add proximity emphasis, respawn
+    appearance and a short collection flash. Keep the animation client-local,
+    avoid shadow-casting dynamic lights, preserve visibility/culling and define
+    deterministic capture tests for phase, bounds and the no-glow health rule.
+    No implementation has started. Scope and acceptance notes:
+    [pickup presentation](../reports/pickup-presentation-2026-09-09/README.md).
+
 The shared source audit covers 28 original files and all three map variants.
 Audio, broader UX/settings, new class abilities, external deployment acceptance
 and optimization/distribution remain deferred. Visual restoration milestones

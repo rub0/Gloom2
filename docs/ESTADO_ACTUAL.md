@@ -1,7 +1,8 @@
 # Traspaso de Gloom
 
 Actualizado: 9 de septiembre de 2026, hito 76 de marcador de partida.
-Siguiente paso: revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
+Siguiente paso: implementar el hito 77 de presentación visual de recogibles tras
+    la definición aprobada en `reports/pickup-presentation-2026-09-09`.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -55,6 +56,20 @@ Validación: **9/9 pruebas focalizadas** y cuatro capturas Vulkan inspeccionadas
 Informe: `reports/pickups-2026-09-06/README.md`. No se repitió la suite completa
 ni una sesión manual con dos clientes gráficos. La revisión jugable del usuario
 está pendiente; el cierre técnico no implica esa confirmación manual.
+
+## Hito 77, presentación visual de recogibles — planificado
+
+El objetivo aprobado es que los objetos del mapa inviten a recogerlos mediante
+flotación, giro y halo aditivo al estilo Quake. La lógica de disponibilidad,
+recompensa, respawn y red del hito 67 no se modifica. La presentación será local
+y estará anclada a la posición original del objeto para no introducir estado de
+red ni deriva física.
+
+Todos los recogibles salvo vida tendrán halo coloreado. La vida podrá flotar y
+girar, pero no emitirá brillo. Quedan por implementar y validar el bobbing, la
+rotación, el halo, el énfasis por proximidad y los efectos de aparición,
+recogida y respawn; estos últimos se mantienen opcionales hasta revisar la
+primera captura. No se ha modificado código ni recursos en este hito.
 
 Si se revisan recogibles, leer solo la sección 67 de
 [GAMEPLAY_MIGRATION.md](GAMEPLAY_MIGRATION.md) y las partes pertinentes del informe.
