@@ -78,6 +78,7 @@ add_library(gloom_engine STATIC
     src/gameplay/legacy_movement.cpp
     src/gameplay/legacy_arsenal.cpp
     src/gameplay/legacy_pickups.cpp
+    src/gameplay/pickup_presentation.cpp
     src/gameplay/factory_scene.cpp
     src/gameplay/match_lobby.cpp
     src/gameplay/match_discovery.cpp
@@ -525,6 +526,7 @@ if(BUILD_TESTING)
 
     add_executable(gloom_legacy_arsenal_tests tests/legacy_arsenal_tests.cpp)
     add_executable(gloom_legacy_pickups_tests tests/legacy_pickups_tests.cpp)
+    add_executable(gloom_pickup_presentation_tests tests/pickup_presentation_tests.cpp)
     add_executable(gloom_audio_tests tests/audio_tests.cpp)
     target_link_libraries(gloom_audio_tests PRIVATE gloom_engine)
     target_compile_definitions(gloom_audio_tests PRIVATE GLOOM_SOURCE_ROOT="${CMAKE_SOURCE_DIR}" GLOOM_BINARY_ROOT="${CMAKE_BINARY_DIR}")
@@ -541,6 +543,8 @@ if(BUILD_TESTING)
     set_tests_properties(gloom.audio_no_device PROPERTIES ENVIRONMENT "SDL_AUDIODRIVER=gloom_missing_driver")
     target_link_libraries(gloom_legacy_pickups_tests PRIVATE gloom_engine)
     add_test(NAME gloom.legacy_pickups COMMAND gloom_legacy_pickups_tests)
+    target_link_libraries(gloom_pickup_presentation_tests PRIVATE gloom_engine)
+    add_test(NAME gloom.pickup_presentation COMMAND gloom_pickup_presentation_tests)
     target_link_libraries(gloom_legacy_arsenal_tests PRIVATE gloom_engine)
     add_test(NAME gloom.legacy_arsenal COMMAND gloom_legacy_arsenal_tests)
 

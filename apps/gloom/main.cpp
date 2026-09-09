@@ -20,6 +20,7 @@
 #include <gloom/gameplay/character_animation.hpp>
 #include <gloom/gameplay/combat_effects.hpp>
 #include <gloom/gameplay/match_discovery.hpp>
+#include <gloom/gameplay/pickup_presentation.hpp>
 #include <gloom/gameplay/vertical_slice.hpp>
 #include <gloom/gameplay/vertical_slice_network.hpp>
 #include <gloom/network/combat.hpp>
@@ -62,6 +63,65 @@ struct VisualBody {
     gloom::render::Transform current;
     gloom::render::Color color;
 };
+
+constexpr gloom::render::RenderAssetId pickup_halo_texture{0x7069636b757001ULL};
+constexpr gloom::render::RenderAssetId pickup_halo_material{0x7069636b757002ULL};
+constexpr gloom::render::RenderAssetId pickup_halo_mesh{0x7069636b757003ULL};
+
+[[nodiscard]] gloom::render::MeshUpload pickup_halo_mesh_upload() {
+    return {.id = pickup_halo_mesh,
+        .vertices = {
+            {.position={-1,0,-1},.normal={0,1,0},.texture_coordinate={0,0}},
+            {.position={-1,0,+1},.normal={0,1,0},.texture_coordinate={0,1}},
+            {.position={+1,0,+1},.normal={0,1,0},.texture_coordinate={1,1}},
+            {.position={+1,0,-1},.normal={0,1,0},.texture_coordinate={1,0}}},
+        .indices = {0,1,2,0,2,3}};
+}
+
+[[nodiscard]] gloom::render::TextureUpload pickup_halo_upload() {
+    constexpr gloom::uint32 extent = 32;
+    std::vector<std::byte> pixels(extent * extent * 4);
+    for (gloom::uint32 y = 0; y < extent; ++y) for (gloom::uint32 x = 0; x < extent; ++x) {
+        const float fx = (static_cast<float>(x) + 0.5F) / (extent * 0.5F) - 1.0F;
+        const float fy = (static_cast<float>(y) + 0.5F) / (extent * 0.5F) - 1.0F;
+        const float radius = std::sqrt(fx * fx + fy * fy);
+        const float edge = std::max(0.0F, 1.0F - radius);
+        const auto intensity = static_cast<unsigned char>(edge * edge * 255.0F);
+        const gloom::uint32 offset = (y * extent + x) * 4;
+        pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = static_cast<std::byte>(intensity);
+        pixels[offset + 3] = std::byte{0xff};
+    }
+    return {.id = pickup_halo_texture, .srgb = false, .mip_levels = {{.width = extent, .height = extent, .data = std::move(pixels)}}};
+}
+
+[[nodiscard]] gloom::render::Color pickup_halo_color(const gloom::gameplay::PickupDefinition& definition, const float alpha) noexcept {
+    using gloom::gameplay::PickupKind;
+    if (definition.kind == PickupKind::shield) return {.12F, .48F, 1.0F, alpha};
+    if (definition.kind == PickupKind::damage) return {1.0F, .10F, .025F, alpha};
+    if (definition.kind == PickupKind::cooldown) return {.08F, .72F, 1.0F, alpha};
+    if (definition.kind == PickupKind::ammo) return {1.0F, .58F, .08F, alpha};
+    return {1.0F, .28F, .055F, alpha};
+}
+
+void apply_pickup_visual(gloom::render::RenderInstance& instance, const gloom::gameplay::PickupVisual visual) noexcept {
+    const float sine = std::sin(visual.yaw * 0.5F);
+    const float cosine = std::cos(visual.yaw * 0.5F);
+    const auto rotation = instance.transform.rotation;
+    instance.transform.position.y += visual.vertical_offset;
+    instance.transform.rotation = {
+        cosine * rotation.x + sine * rotation.z,
+        cosine * rotation.y + sine * rotation.w,
+        cosine * rotation.z - sine * rotation.x,
+        cosine * rotation.w - sine * rotation.y};
+    instance.transform.scale.x *= visual.scale;
+    instance.transform.scale.y *= visual.scale;
+    instance.transform.scale.z *= visual.scale;
+    instance.color.alpha *= visual.opacity;
+    if (visual.opacity < 0.999F) {
+        instance.alpha_mode_override = 2;
+        instance.casts_shadow = false;
+    }
+}
 
 constexpr std::array slice_roster{
     gloom::gameplay::SlicePlayerSelection{},
@@ -390,6 +450,14 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     constexpr gloom::render::RenderAssetId streaming_smoke_texture{0x600d600d};
     constexpr gloom::render::RenderAssetId streaming_budget_texture_a{0x600d600e};
     constexpr gloom::render::RenderAssetId streaming_budget_texture_b{0x600d600f};
+    if (vertical_slice && original_factory) {
+        renderer_view->enqueue(pickup_halo_mesh_upload());
+        renderer_view->enqueue(pickup_halo_upload());
+        gloom::render::MaterialUpload halo{.id = pickup_halo_material, .base_color = {2.0F, 2.0F, 2.0F, 1.0F}, .base_color_texture = pickup_halo_texture};
+        halo.surface.alpha_mode = 3;
+        halo.surface.double_sided = true;
+        renderer_view->enqueue(halo);
+    }
     if (smoke_test) {
         renderer_view->enqueue(gloom::render::TextureUpload{
             .id = streaming_smoke_texture,
@@ -918,6 +986,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     auto previous_original_character=gloom::gameplay::SliceCharacter::hound;
     double presentation_seconds=0;
     gloom::gameplay::CharacterAnimator opponent_animator,local_animator;
+    gloom::gameplay::PickupPresentation pickup_presentation;
     std::vector<gloom::render::RenderInstance> previous_animated_instances;
     decltype(previous_animated_instances) current_animated_instances;
     decltype(render_instances) complete_instances;
@@ -1161,6 +1230,12 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 const std::string_view name=review_view.name;
                 if(name=="pickup-pulling") {p.phase=gloom::gameplay::PickupPhase::pulling;p.pulling_player=1;p.position.z+=1.5F;p.position.y+=.5F;}
                 if(name=="pickup-collected") {p.phase=gloom::gameplay::PickupPhase::respawning;p.respawn_remaining=1500;}
+                if(name=="pickup-life") {
+                    p.phase=gloom::gameplay::PickupPhase::respawning;p.respawn_remaining=1500;
+                    const auto life=std::ranges::find_if(definitions,[](const auto& definition){return definition.kind==gloom::gameplay::PickupKind::life;});
+                    if(life==definitions.end())throw std::runtime_error{"Pickup review life missing"};
+                    review_snapshot->pickups[static_cast<std::size_t>(life-definitions.begin())].position=found->position;
+                }
             }
             if (character_review) {
                 const auto view=review_frames/32;
@@ -1207,7 +1282,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         previous_frame = current_frame;
         const double elapsed = game_ui && game_ui->paused && !vertical_slice_host && !vertical_slice_join ? 0.0 :
             performance_test ? (profile_ready ? 1.0 / 60.0 : 0.0) :
-            animation_review && review_ready ? 1.0/animation_fps : ability_review && review_ready ? 1.0/60.0 :
+            animation_review && review_ready ? 1.0/animation_fps : (ability_review || pickup_review) && review_ready ? 1.0/60.0 :
             (visual_review || (vertical_slice && original_factory && !factory_surface_generation)) ? 0.0 : (network_scene_smoke || vertical_slice_smoke)
                                    ? network_fixed_delta
                                    : measured_elapsed.count();
@@ -2126,6 +2201,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             if (const auto* scene = factory_surface_residency->scene(*factory_surface_ticket)) {
                 const auto& definitions=gloom::gameplay::original_factory().pickups;
                 const auto& state=current_slice_snapshot();
+                pickup_presentation.update(state.pickups.data(), state.pickup_count, static_cast<float>(elapsed));
                 for(auto instance:scene->instances) {
                     const auto found=std::ranges::find(definitions,instance.source_node,&gloom::gameplay::PickupDefinition::source_node);
                     if(found!=definitions.end() && instance.source_node!=~0U && !factory_review) {
@@ -2135,6 +2211,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         instance.transform.position.x+=p.x-found->position.x;
                         instance.transform.position.y+=p.y-found->position.y;
                         instance.transform.position.z+=p.z-found->position.z;
+                        apply_pickup_visual(instance,pickup_presentation.visual(
+                            static_cast<gloom::uint32>(i),found->kind,static_cast<float>(presentation_seconds)));
                     }
                     complete_instances.push_back(instance);
                 }
@@ -2143,10 +2221,12 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 if(!factory_review)for(std::size_t i=0;i<state.pickup_count;++i) {
                     if(definitions[i].source_node!=~0U || state.pickups[i].phase==gloom::gameplay::PickupPhase::respawning)continue;
                     const auto& p=state.pickups[i].position;
+                    const auto visual=pickup_presentation.visual(static_cast<gloom::uint32>(i),definitions[i].kind,static_cast<float>(presentation_seconds));
                     if(definitions[i].kind==gloom::gameplay::PickupKind::weapon) {
                         if(const auto* weapon=resident_weapon(definitions[i].weapon)) {
                             for(auto instance:weapon->instances) {
                                 instance.transform=gloom::render::attach_transform({.position={p.x,p.y,p.z}},instance.transform);
+                                apply_pickup_visual(instance,visual);
                                 complete_instances.push_back(instance);
                             }
                             continue;
@@ -2156,6 +2236,15 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         gloom::render::Color{1,.18F,.08F,1}:gloom::render::Color{.15F,.6F,1,1};
                     complete_instances.push_back({.mesh=gloom::render::builtin_cube_mesh,
                         .transform={.position={p.x,p.y,p.z},.scale={.22F,.22F,.22F}},.color=color,.particle=true,.soft_distance=.15F});
+                    apply_pickup_visual(complete_instances.back(),visual);
+                }
+                if(!factory_review)for(std::size_t i=0;i<state.pickup_count;++i) {
+                    if(state.pickups[i].phase==gloom::gameplay::PickupPhase::respawning || definitions[i].kind==gloom::gameplay::PickupKind::life)continue;
+                    const auto visual=pickup_presentation.visual(static_cast<gloom::uint32>(i),definitions[i].kind,static_cast<float>(presentation_seconds));
+                    const auto& p=state.pickups[i].position;
+                    complete_instances.push_back({.mesh=pickup_halo_mesh,.material=pickup_halo_material,
+                        .transform={.position={p.x,p.y+visual.vertical_offset-.05F,p.z},.scale={.72F,.72F,.72F}},
+                        .color=pickup_halo_color(definitions[i],visual.halo_alpha),.casts_shadow=false});
                 }
             }
         }

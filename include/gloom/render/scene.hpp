@@ -81,6 +81,9 @@ struct RenderInstance {
     RenderAssetId arms_mesh;
     bool particle{false};
     float distortion{0},soft_distance{0};
+    // 0xff keeps the material mode. Presentation effects may force one instance
+    // through the blend/additive pass without duplicating its material textures.
+    std::uint8_t alpha_mode_override{0xff};
 };
 
 struct RenderBatch {

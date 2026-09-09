@@ -1,8 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 9 de septiembre de 2026, hito 76 de marcador de partida.
-Siguiente paso: implementar el hito 77 de presentación visual de recogibles tras
-    la definición aprobada en `reports/pickup-presentation-2026-09-09`.
+Actualizado: 9 de septiembre de 2026, hito 77 de presentación de recogibles.
+Siguiente paso: revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -57,7 +56,7 @@ Informe: `reports/pickups-2026-09-06/README.md`. No se repitió la suite complet
 ni una sesión manual con dos clientes gráficos. La revisión jugable del usuario
 está pendiente; el cierre técnico no implica esa confirmación manual.
 
-## Hito 77, presentación visual de recogibles — planificado
+## Último hito cerrado: 77, presentación visual de recogibles
 
 El objetivo aprobado es que los objetos del mapa inviten a recogerlos mediante
 flotación, giro y halo aditivo al estilo Quake. La lógica de disponibilidad,
@@ -65,12 +64,17 @@ recompensa, respawn y red del hito 67 no se modifica. La presentación será loc
 y estará anclada a la posición original del objeto para no introducir estado de
 red ni deriva física.
 
-Todos los recogibles salvo vida tendrán halo coloreado. La vida podrá flotar y
-girar, pero no emitirá brillo. Quedan por implementar y validar el bobbing, la
-rotación, el halo y la animación de aparición/respawn mediante escala y
-opacidad. El énfasis por proximidad y el destello de recogida son extensiones
-opcionales hasta revisar la primera captura. No se ha modificado código ni
-recursos en este hito.
+Los 73 recogibles flotan hasta ±8 cm y giran a 0,72 rad/s con fases distribuidas.
+Escudo, armas, munición y modificadores llevan un halo radial aditivo coloreado;
+vida flota y gira sin brillo. Aparición y respawn interpolan en 0,45 s desde 35 %
+de escala y opacidad cero. La presentación es local, no modifica autoridad ni
+protocolo, no añade luces dinámicas ni sombras y el halo evita la copia de escena
+de las partículas.
+
+Builds Debug/Release, **48/48 pruebas** y cinco capturas Vulkan inspeccionadas.
+El énfasis por proximidad y el destello de recogida continúan como pulido opcional;
+queda pendiente la confirmación subjetiva en una partida humana. Informe:
+`reports/pickup-presentation-2026-09-09/README.md`.
 
 Si se revisan recogibles, leer solo la sección 67 de
 [GAMEPLAY_MIGRATION.md](GAMEPLAY_MIGRATION.md) y las partes pertinentes del informe.

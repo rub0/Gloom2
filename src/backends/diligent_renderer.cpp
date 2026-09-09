@@ -2205,6 +2205,11 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 }
             }
     };
+    const auto instance_alpha_mode = [&](const render::RenderInstance& instance) {
+        if (instance.alpha_mode_override != 0xff) return static_cast<std::uint32_t>(instance.alpha_mode_override);
+        const auto material = impl_->materials.find(instance.material);
+        return material == impl_->materials.end() ? 0U : material->second.surface.alpha_mode;
+    };
     const float aspect = static_cast<float>(impl_->output_extent.width) /
                          static_cast<float>(impl_->output_extent.height);
     const auto view = camera_view(snapshot.camera);
@@ -2375,7 +2380,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 auto material=impl_->materials.find(instance.material);
                 if (material==impl_->materials.end()) material=impl_->materials.find(render::builtin_default_material);
                 const auto& shadow_material=material->second;
-                if (shadow_material.surface.alpha_mode>=2) continue;
+                if (shadow_material.surface.alpha_mode>=2 || (instance.alpha_mode_override>=2 && instance.alpha_mode_override!=0xff)) continue;
                 impl_->immediate_context->SetPipelineState(shadow_material.surface.double_sided ? impl_->double_sided_shadow_pipeline : impl_->shadow_pipeline);
                 auto texture=impl_->textures.find(shadow_material.base_color_texture);
                 if (texture==impl_->textures.end()) texture=impl_->textures.find(render::builtin_white_texture);
@@ -2447,7 +2452,8 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
     impl_->immediate_context->SetPipelineState(impl_->scene_pipeline);
     const auto draw_batch = [&](const render::RenderAssetId mesh_id,
                                 const render::RenderAssetId material_id,
-                                const std::span<const render::RenderInstance> instances, bool view_models) {
+                                const std::span<const render::RenderInstance> instances, bool view_models,
+                                const std::uint32_t forced_alpha_mode = 0xff) {
         const auto mesh = impl_->meshes.find(mesh_id);
         if (mesh == impl_->meshes.end()) {
             return;
@@ -2456,7 +2462,8 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         const render::MaterialUpload default_material{.id = render::builtin_default_material};
         const auto& material_data =
             material == impl_->materials.end() ? default_material : material->second;
-        const auto variant=std::min(material_data.surface.alpha_mode,3U)*2U+(material_data.surface.double_sided?1U:0U);
+        const auto alpha_mode = forced_alpha_mode == 0xff ? material_data.surface.alpha_mode : forced_alpha_mode;
+        const auto variant=std::min(alpha_mode,3U)*2U+(material_data.surface.double_sided?1U:0U);
         impl_->immediate_context->SetPipelineState(impl_->surface_pipelines[variant]);
         const auto find_texture = [&](const render::RenderAssetId requested,
                                       const render::RenderAssetId fallback) {
@@ -2514,7 +2521,8 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         impl_->immediate_context->SetIndexBuffer(
             mesh->second.indices, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         for (const auto& instance : instances) {
-            if (instance.view_model != view_models || std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F) continue;
+            if (instance.view_model != view_models || (forced_alpha_mode == 0xff && instance.alpha_mode_override>=2 && instance.alpha_mode_override!=0xff) ||
+                std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F) continue;
             const auto world = world_matrix(instance.transform);
             const auto previous_world = world_matrix(instance.has_previous_transform
                                                           ? instance.previous_transform
@@ -2558,7 +2566,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             constants->surface_parameters={surface.normal_scale,surface.occlusion_strength,surface.specular_factor,surface.anisotropy_strength};
             constants->specular_color_rotation={surface.specular_color[0],surface.specular_color[1],surface.specular_color[2],surface.anisotropy_rotation};
             constants->surface_animation={surface.uv_scroll[0],surface.uv_scroll[1],surface.lava_wave,surface.alpha_cutoff};
-            constants->surface_flags={static_cast<float>(surface.alpha_mode),surface.double_sided?1.0F:0.0F,
+            constants->surface_flags={static_cast<float>(alpha_mode),surface.double_sided?1.0F:0.0F,
                 snapshot.presentation_seconds,material_data.extra_textures[4]!=render::builtin_white_texture?1.0F:0.0F};
             for (std::size_t slot=0;slot<surface.mapping.size();++slot) {
                 const auto& map=surface.mapping[slot];
@@ -2609,8 +2617,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         if (snapshot.batches.empty()) {
             for (const auto& instance : snapshot.instances) {
                 if (instance.view_model != view_models) continue;
-                const auto material=impl_->materials.find(instance.material);
-                if (material!=impl_->materials.end() && material->second.surface.alpha_mode>=2) transparent.push_back(&instance);
+                if (instance_alpha_mode(instance)>=2) transparent.push_back(&instance);
                 else draw_batch(instance.mesh,instance.material,{&instance,1},view_models);
             }
         } else {
@@ -2622,8 +2629,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 bool has_opaque = false;
                 for (const auto& instance : instances) {
                     if (instance.view_model != view_models) continue;
-                    const auto material=impl_->materials.find(instance.material);
-                    if (material!=impl_->materials.end() && material->second.surface.alpha_mode>=2) transparent.push_back(&instance);
+                    if (instance_alpha_mode(instance)>=2) transparent.push_back(&instance);
                     else has_opaque = true;
                 }
                 if (has_opaque) draw_batch(batch.mesh, batch.material, instances, view_models);
@@ -2643,7 +2649,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             return Diligent::dot(delta,delta);
         };
         std::stable_sort(transparent.begin(),transparent.end(),[&](const auto* a,const auto* b){return distance(a)>distance(b);});
-        for (const auto* instance : transparent) draw_batch(instance->mesh,instance->material,{instance,1},view_models);
+        for (const auto* instance : transparent) draw_batch(instance->mesh,instance->material,{instance,1},view_models,instance_alpha_mode(*instance));
     }
     impl_->previous_view_projection = current_view_projection;
     impl_->previous_camera = snapshot.camera;

@@ -323,15 +323,14 @@
     modifiers, respawn and concurrent authoritative pickup/reconnect. Protocol 18;
     see the [acceptance report](../reports/pickups-2026-09-06/README.md).
 
-77. Pickup presentation — planned: make map pickups visually inviting without
-    changing their authoritative gameplay. Add local-space bobbing and slow yaw
-    rotation to the original position; add a restrained colored additive halo to
-    every pickup except health; add scale/opacity animation on appearance and
-    respawn, plus optionally add proximity emphasis and a short collection
-    flash. Keep the animation client-local,
-    avoid shadow-casting dynamic lights, preserve visibility/culling and define
-    deterministic capture tests for phase, bounds and the no-glow health rule.
-    No implementation has started. Scope and acceptance notes:
+77. Pickup presentation — complete: all 73 pickups use deterministic local
+    bobbing and slow yaw rotation. Shield, weapons, ammunition and modifiers add
+    a restrained family-colored radial halo; health deliberately has none.
+    Appearance and respawn ease scale from 35 % and opacity from zero to their
+    full values in 0.45 s. Presentation remains outside authority/protocol and
+    uses no dynamic lights, shadow-casting halos or per-frame particle copies.
+    Debug/Release builds, **48/48 tests** and five inspected Vulkan captures pass.
+    Proximity emphasis and collection flash remain optional future polish:
     [pickup presentation](../reports/pickup-presentation-2026-09-09/README.md).
 
 The shared source audit covers 28 original files and all three map variants.
