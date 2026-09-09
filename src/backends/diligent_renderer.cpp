@@ -2264,10 +2264,10 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             snapshot.lighting->light_indices.size() > 16U * 9U * 24U * 64U) {
             throw std::length_error{"Clustered lighting exceeds renderer buffer capacity"};
         }
-        std::vector<PointLightGpu> gpu_lights;
-        gpu_lights.reserve(point_light_count);
-        for (const auto& light : snapshot.lighting->point_lights) {
-            gpu_lights.push_back({
+        std::array<PointLightGpu, 256> gpu_lights{};
+        for (std::size_t light_index = 0; light_index < snapshot.lighting->point_lights.size(); ++light_index) {
+            const auto& light = snapshot.lighting->point_lights[light_index];
+            gpu_lights[light_index] = {
                 .position_range = {light.position.x,
                                    light.position.y,
                                    light.position.z,
@@ -2276,11 +2276,11 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                                     light.color.y,
                                     light.color.z,
                                     light.intensity},
-            });
+            };
         }
         upload_dynamic_buffer(impl_->point_light_buffer,
                               gpu_lights.data(),
-                              gpu_lights.size() * sizeof(PointLightGpu));
+                              point_light_count * sizeof(PointLightGpu));
         upload_dynamic_buffer(
             impl_->cluster_buffer,
             snapshot.lighting->clusters.data(),
@@ -2604,11 +2604,28 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         if (view_models) impl_->immediate_context->ClearDepthStencil(impl_->scene_depth_target,
             Diligent::CLEAR_DEPTH_FLAG, 1.0F, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         std::vector<const render::RenderInstance*> transparent;
-        for (const auto& instance : snapshot.instances) {
-            if (instance.view_model!=view_models) continue;
-            const auto material=impl_->materials.find(instance.material);
-            if (material!=impl_->materials.end() && material->second.surface.alpha_mode>=2) transparent.push_back(&instance);
-            else draw_batch(instance.mesh,instance.material,{&instance,1},view_models);
+        if (snapshot.batches.empty()) {
+            for (const auto& instance : snapshot.instances) {
+                if (instance.view_model != view_models) continue;
+                const auto material=impl_->materials.find(instance.material);
+                if (material!=impl_->materials.end() && material->second.surface.alpha_mode>=2) transparent.push_back(&instance);
+                else draw_batch(instance.mesh,instance.material,{&instance,1},view_models);
+            }
+        } else {
+            for (const auto& batch : snapshot.batches) {
+                if (batch.first_instance >= snapshot.instances.size()) continue;
+                const std::size_t count = std::min<std::size_t>(batch.instance_count,
+                                                                 snapshot.instances.size() - batch.first_instance);
+                const auto instances = snapshot.instances.subspan(batch.first_instance, count);
+                bool has_opaque = false;
+                for (const auto& instance : instances) {
+                    if (instance.view_model != view_models) continue;
+                    const auto material=impl_->materials.find(instance.material);
+                    if (material!=impl_->materials.end() && material->second.surface.alpha_mode>=2) transparent.push_back(&instance);
+                    else has_opaque = true;
+                }
+                if (has_opaque) draw_batch(batch.mesh, batch.material, instances, view_models);
+            }
         }
         if (std::ranges::any_of(transparent,[](const auto* instance){return instance->particle;})) {
             impl_->immediate_context->SetRenderTargets(0,nullptr,nullptr,Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE);

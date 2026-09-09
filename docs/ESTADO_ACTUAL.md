@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
 Actualizado: 9 de septiembre de 2026, tras cerrar técnicamente el hito 70.
-Siguiente paso: revisión jugable de las seis habilidades con el usuario.
+Siguiente paso: medir y optimizar el caso jugable a resolución real del usuario.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -131,7 +131,27 @@ Vulkan/Jolt. Se inspeccionaron seis capturas deterministas generadas mediante
 
 Siguiente paso: sesión jugable humana con cada habilidad y dos clientes. Ese pase
 puede abrir ajustes de Berserker o presentación, pero no queda funcionalidad del
-alcance técnico diferida. No hay un hito 71 definido todavía.
+alcance técnico diferida. El siguiente hito definido es la primera pasada de
+rendimiento descrita abajo.
+
+## Último hito cerrado: 71, primera pasada de rendimiento
+
+El renderer agrupaba batches de visibilidad pero los ignoraba al dibujar; ahora
+los draws opacos comparten pipeline, recursos y bindings por mesh/material. Los
+transparentes conservan su orden por distancia y existe compatibilidad para
+snapshots sin batches. La iluminación ya no crea una `vector` por cada celda de
+la rejilla 16×9×24: usa conteo plano, prefijo y relleno en dos pasadas. Las
+paletas de skinning reservan su capacidad antes de insertar matrices.
+
+El smoke vertical expone telemetría CPU/GPU y memoria. En 360 frames Vulkan
+Debug a 1280×720 mide 9,24366 ms/frame, **108,182 FPS**, 0,108311 ms de
+visibilidad, 0,275218 ms de iluminación y 1,12734 ms de GPU filtrada. La memoria
+pico de Diligent es 171,29 MB device-local y 7,02 MB host-visible. La suite
+completa queda en **47/47**. Informe: `reports/performance-2026-09-09/README.md`.
+
+Esta referencia no sustituye la medición de la partida humana a 1920×1080 ni
+explica por sí sola los 13 FPS reportados. El siguiente frente es perfilar
+skinning/presentación, asignaciones por frame y sombras en esa configuración.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
 `build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 21.

@@ -135,6 +135,8 @@ std::shared_ptr<render::SkinPose> skin_pose(const ImportedScene& scene, std::uin
         throw std::invalid_argument{"Invalid skin pose binding"};
     auto result=std::make_shared<render::SkinPose>();
     const auto inverse=rig_inverse(worlds[mesh_node]);const auto& skin=scene.skins[scene.nodes[mesh_node].skin];
+    result->matrices.reserve(skin.joints.size());
+    result->normal_matrices.reserve(skin.joints.size());
     for (std::size_t i=0;i<skin.joints.size();++i) {
         const auto m=rig_multiply(inverse,rig_multiply(worlds[skin.joints[i]],skin.inverse_bind_matrices[i]));
         result->matrices.push_back(m);const auto inv=rig_inverse(m);RigMatrix n{};
