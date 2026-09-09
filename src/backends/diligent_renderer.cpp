@@ -3,6 +3,7 @@
 #include <gloom/render/lighting.hpp>
 #include <gloom/render/temporal.hpp>
 #include <gloom/render/ui.hpp>
+#include <gloom/render/shadow_visibility.hpp>
 
 #include <BasicMath.hpp>
 #include <BasicPlatformDebug.hpp>
@@ -2369,6 +2370,8 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             for (const auto& instance : snapshot.shadow_instances.empty() ? snapshot.instances : snapshot.shadow_instances) {
                 if (instance.view_model || !instance.casts_shadow ||
                     std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F) continue;
+                const Diligent::float4x4 shadow_transform = world_matrix(instance.transform) * shadows.matrices[cascade];
+                if (!render::shadow_visible(instance.local_bounds, &shadow_transform.m00)) continue;
                 auto material=impl_->materials.find(instance.material);
                 if (material==impl_->materials.end()) material=impl_->materials.find(render::builtin_default_material);
                 const auto& shadow_material=material->second;
@@ -2403,8 +2406,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                         Diligent::MAP_WRITE,
                         Diligent::MAP_FLAG_DISCARD};
                     constants->skin_flags={instance.pose?static_cast<float>(instance.pose->matrices.size()):0,0,0,0};
-                    constants->world_view_projection = world_matrix(instance.transform) *
-                                                       shadows.matrices[cascade];
+                    constants->world_view_projection = shadow_transform;
                     const auto& uv=shadow_material.surface.mapping[0];
                     constants->mapping={uv.scale[0],uv.scale[1],uv.offset[0]+shadow_material.surface.uv_scroll[0]*snapshot.presentation_seconds,uv.offset[1]+shadow_material.surface.uv_scroll[1]*snapshot.presentation_seconds};
                     constants->rotation={std::cos(uv.rotation),std::sin(uv.rotation),static_cast<float>(uv.uv_set),0};

@@ -2,6 +2,13 @@
 
 Fecha: 9 de septiembre de 2026.
 
+**Corrección del hito 74:** este informe es histórico. Los 108 FPS eran el
+tramo de render de un smoke simplificado. El modo 1080p cargaba Factory original,
+incluía carga en la media y ejecutaba un guion de otra escena. No son una
+comparación de resoluciones ni pruebas de un cuello de botella en streaming.
+Las reservas locales seguían asignando memoria cada frame. Usar las mediciones
+y conclusiones corregidas de `reports/performance-74/README.md`.
+
 ## Resultado
 
 El renderer ya consumía `RenderBatch`, pero ignoraba esa información y hacía un
@@ -29,7 +36,7 @@ Resultado instrumentado, 360 frames, Debug, Vulkan, 1280×720:
 
 | Métrica | Resultado |
 | --- | ---: |
-| Frame CPU extremo a extremo | 9,24366 ms / 108,182 FPS |
+| Tramo de render CPU (no frame completo) | 9,24366 ms / 108,182 inverso ms |
 | Visibilidad | 0,108311 ms |
 | Iluminación CPU | 0,275218 ms |
 | GPU filtrada | 1,12734 ms |
@@ -66,9 +73,8 @@ instancias, de las que 71 fueron visibles y formaron 26 batches. El pico de
 memoria fue 702,32 MB usados de 928 MB device-local y 42,67 MB de 112 MB
 host-visible.
 
-Este modo revela que el problema 1080p no es el número de instancias ni el
-culling: el trabajo CPU de presentación y la carga/streaming de recursos dominan
-la iteración. Se reservaron también las listas de instancias animadas y una
+Esta medición no aislaba las causas: incluía carga y esperas del JobSystem en
+visibilidad. Se reservaron también las listas de instancias animadas y una
 capacidad inicial para proyectiles/efectos para reducir realojos por frame.
 
 ## Siguiente paso

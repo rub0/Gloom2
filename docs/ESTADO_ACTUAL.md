@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 9 de septiembre de 2026, tras cerrar técnicamente el hito 70.
-Siguiente paso: medir y optimizar el caso jugable a resolución real del usuario.
+Actualizado: 9 de septiembre de 2026, hito 74 de rendimiento.
+Siguiente paso: revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -143,11 +143,10 @@ snapshots sin batches. La iluminación ya no crea una `vector` por cada celda de
 la rejilla 16×9×24: usa conteo plano, prefijo y relleno en dos pasadas. Las
 paletas de skinning reservan su capacidad antes de insertar matrices.
 
-El smoke vertical expone telemetría CPU/GPU y memoria. En 360 frames Vulkan
-Debug a 1280×720 mide 9,24366 ms/frame, **108,182 FPS**, 0,108311 ms de
-visibilidad, 0,275218 ms de iluminación y 1,12734 ms de GPU filtrada. La memoria
-pico de Diligent es 171,29 MB device-local y 7,02 MB host-visible. La suite
-completa queda en **47/47**. Informe: `reports/performance-2026-09-09/README.md`.
+Corrección del hito 74: los 108 FPS publicados medían solo el tramo de render de
+una escena simplificada, no Factory jugable ni el frame completo. El resultado
+histórico de la suite fue 47/47, pero no sirve como benchmark comparable con
+Factory. Informe: `reports/performance-2026-09-09/README.md`.
 
 Esta referencia no sustituye la medición de la partida humana a 1920×1080 ni
 explica por sí sola los 13 FPS reportados. El siguiente frente es perfilar
@@ -160,13 +159,46 @@ perfil a 1920×1080, mide el loop completo y expone instancias/batches. El caso
 mide **32,32 FPS** en 720 frames: 30,9369 ms por loop, 29,4376 ms de
 render/presentación, 6,84914 ms de visibilidad, 0,269229 ms de iluminación y
 3,54779 ms GPU. Son 227 instancias sometidas, 71 visibles y 26 batches; la
-memoria pico es 702,32 MB device-local y 42,67 MB host-visible. Esto descarta
-que el cuello sea la cantidad de geometría o el culling y señala presentación y
-streaming de recursos.
+memoria pico es 702,32 MB device-local y 42,67 MB host-visible. Corrección del
+hito 74: esa media incluía carga y esperas de trabajos; no permitía atribuir el
+coste a visibilidad, streaming o resolución. Además se ejecutaba el guion del
+smoke simplificado sobre Factory y se habían omitido comprobaciones incompatibles.
 
 La lista completa de instancias y las listas animadas reservan capacidad antes
 de añadir proyectiles, personajes y efectos, reduciendo realojos y copias por
 frame. Informe ampliado: `reports/performance-2026-09-09/README.md`.
+
+## Hito 74, benchmark corregido y sombras
+
+Factory original se mide a 720p/1080p con la misma cámara, contenido y simulación:
+esperar todos los recursos solicitados, calentar 120 frames y medir otros 360,
+resolución nativa fija, sin VSync ni capturas. Informe de media/p50/p95/p99/máximo,
+seis etapas CPU y memoria de proceso. Fallo o cierre prematuro devuelve error.
+El benchmark no incluye HUD/audio ni un recorrido de combate completo.
+
+Se eliminó el sleep fijo de 16 ms del juego, que impedía alcanzar 100 FPS.
+VSync queda desactivado por defecto; `GLOOM_VSYNC=1` lo activa en partida.
+Se descartan conservadoramente las esferas fuera de cada volumen de sombras;
+el descarte usa espacio de luz y contempla escala no uniforme/reflejada. Las
+listas de presentación conservan capacidad entre frames; se intercambian las
+listas de animación actual/anterior sin copiar toda la lista.
+
+Ryzen 7 3700X / GTX 1070: Debug 1080p pasa de 41,273 a 32,934 ms con el benchmark
+corregido (20,2 % menos). Release 1080p: **144,17 FPS**, media 6,936 ms,
+p99 6,964 ms, máximo 7,111 ms. Release 720p: 546,76 FPS; ambas resoluciones
+terminan con 224 instancias/85 visibles/35 batches. No atribuir el salto de
+Debug a Release únicamente al cambio de código ni garantizar esos FPS en todo combate.
+
+Validación: builds Debug/Release; siete pruebas focalizadas únicas pasan
+(render_scene, visibility, factory/character_visual_review, vulkan_sync, ui_flow,
+vertical_slice_smoke). Las 13 capturas de Factory/personajes coinciden píxel a
+píxel con referencias. Se corrigió el límite de carga visual contado en frames
+por un límite temporal después de un fallo reproducido. Sin nueva suite completa.
+Memoria Release 1080p: 2085 MiB privados/1133 MiB working set; queda trabajo de
+residencia y retención de recursos. Detalle: `reports/performance-74/README.md`.
+
+Ejecutable para jugar y medir: `build/windows-vs/Release/gloom.exe`.
+Comandos: `--vertical-slice-performance-720p` y `--vertical-slice-performance-1080p`.
 
 El ejecutable actualizado es `build/windows-vs/Debug/gloom.exe`; el servidor
 `build/windows-vs/Debug/gloom_slice_server.exe` está recompilado con protocolo 21.

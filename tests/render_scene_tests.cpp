@@ -1,4 +1,6 @@
 #include <gloom/render/scene.hpp>
+#include <gloom/render/shadow_visibility.hpp>
+#include <stdio.h>
 
 #include <cmath>
 #include <iostream>
@@ -16,6 +18,24 @@ void expect_near(const float actual, const float expected, const char* message) 
 
 int main() try {
     using namespace gloom::render;
+    const float identity_clip[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+    const BoundingSphere outside[6] = {
+        {.center={-2,0,.5F},.radius=.1F}, {.center={2,0,.5F},.radius=.1F},
+        {.center={0,-2,.5F},.radius=.1F}, {.center={0,2,.5F},.radius=.1F},
+        {.center={0,0,-1},.radius=.1F}, {.center={0,0,2},.radius=.1F}};
+    for (gloom::uint32 i = 0; i < 6; ++i) {
+        if (shadow_visible(outside[i], identity_clip)) {
+            fprintf(stderr, "Shadow culling retained outside plane %u\n", i);
+            return 1;
+        }
+    }
+    const float stretched_clip[16] = {-4,0,0,0, 0,.2F,0,0, 0,0,1,0, 2,0,.5F,1};
+    if (!shadow_visible({.center={0,0,.5F},.radius=.1F}, identity_clip) ||
+        !shadow_visible({.center={1.1F,0,.5F},.radius=.1F}, identity_clip) ||
+        !shadow_visible({.radius=.3F}, stretched_clip) || shadow_visible({.radius=.1F}, stretched_clip)) {
+        fprintf(stderr, "Shadow culling lost an intersecting or mirrored/scaled sphere\n");
+        return 1;
+    }
     const auto rotate = [](Quaternion q, Vec3 v) {
         const Vec3 t{2*(q.y*v.z-q.z*v.y), 2*(q.z*v.x-q.x*v.z), 2*(q.x*v.y-q.y*v.x)};
         return Vec3{v.x+q.w*t.x+q.y*t.z-q.z*t.y, v.y+q.w*t.y+q.z*t.x-q.x*t.z,
