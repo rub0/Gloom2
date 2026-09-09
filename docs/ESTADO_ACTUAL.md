@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 9 de septiembre de 2026, hito 75 de rachas de bajas y audio.
+Actualizado: 9 de septiembre de 2026, hito 76 de marcador de partida.
 Siguiente paso: revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -33,8 +33,8 @@ y crear el commit de cierre según `AGENTS.md`.
 - Vida/escudo: barras verticales exteriores al marco de armas, símbolos
   originales. Cooldown en círculo lateral. FPS medidos y XYZ arriba a la izquierda.
 - Lava letal al contacto incluso con escudo. Relleno ambiente 0,65 y luces +20 %.
-- Protocolo actual **21**; replica habilidad primaria/secundaria, cooldown, estado
-  activo y factor de Flash. Documentos históricos que indican protocolos 15–20 describen entregas
+- Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
+  factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
 ## Hito 67, recogibles de Factory
@@ -217,6 +217,19 @@ Validación: auditoría/cocción de audio (**47/89** importados), build Debug de
 `gloom_audio_tests` y prueba focalizada de audio completa, incluyendo umbrales,
 reinicio, serialización de racha y filtros local/remoto. Informe:
 `reports/kill-streak-75/README.md`.
+
+## Último hito cerrado: 76, marcador de partida
+
+Mientras se mantiene `Tab` durante una partida aparece un marcador sobre el HUD,
+sin pausar ni bloquear el control. Presenta los dos combatientes con nombre,
+clase, bajas y muertes; ordena por bajas y usa menos muertes como desempate. El
+jugador local queda resaltado. Los nombres se resuelven por entidad desde la sala
+y la partida local usa etiquetas de reserva.
+
+La implementación reutiliza los contadores autoritativos ya presentes en
+`SliceSnapshot`, por lo que no cambia el protocolo **22**. Se añadió el estado 17
+a la galería de revisión y referencias deterministas para 1280×720, 1920×1080 y
+2560×1080. Informe y validación: `reports/scoreboard-76/README.md`.
 
 ## Mapa mínimo de archivos
 

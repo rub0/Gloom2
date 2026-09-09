@@ -77,7 +77,7 @@ int main(int argc, const char* const* argv) try {
     bool failed = false;
     const auto views=characters ? std::span<const gloom::review::View>{gloom::review::character_views} : factory ? std::span<const gloom::review::View>{gloom::review::factory_views} : std::span<const gloom::review::View>{gloom::review::views};
     std::vector<std::string> names;
-    if(ui){for(const auto width:{1280,1920,2560})for(int page=0;page<16;++page)names.push_back(std::to_string(width)+"/page-"+std::to_string(page)+".ppm");}
+    if(ui){for(const auto width:{1280,1920,2560})for(int page=0;page<17;++page)names.push_back(std::to_string(width)+"/page-"+std::to_string(page)+".ppm");}
     else for(const auto& view:views)names.push_back(std::string{view.name}+".ppm");
     for (const auto& name : names) {
         const auto actual = thumbnail(read(std::filesystem::path{argv[1]} / name));

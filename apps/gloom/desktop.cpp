@@ -67,7 +67,7 @@ std::vector<std::string> menu(Session& session,const std::filesystem::path& revi
     const std::array<std::string,5> labels{"Hound · Mordisco","Hound · Escudo","Hound · Soul Reaper","Archangel","Shadow"};
     std::vector<std::string> launch;
     unsigned flow_stage=0;
-    unsigned frame=0;const unsigned review_pages=16;
+    unsigned frame=0;const unsigned review_pages=17;
     std::optional<GameUi> review_game;if(!review.empty())review_game.emplace();
     if(!review.empty())std::filesystem::create_directories(review);
     while(window.poll_events()){
@@ -159,10 +159,14 @@ std::vector<std::string> menu(Session& session,const std::filesystem::path& revi
             if(ui.button("quit",{655,430,335,60},"Salir",!closing)){login.cancel=true;closing=true;}
         }
         const render::UiDrawData* draw_data=&ui.data();
-        if(!review.empty() && review_page>=8 && review_page<=13){
+        if(!review.empty() && ((review_page>=8 && review_page<=13) || review_page==16)){
             gameplay::SliceSnapshot fixture;fixture.player.character=gameplay::SliceCharacter::archangel;
             fixture.player.life=175;fixture.player.shield=35;fixture.hud.life_fraction=.7F;fixture.hud.shield_fraction=.35F;
             fixture.hud.kills=3;fixture.hud.deaths=1;
+            if(review_page==16){
+                fixture.player.entity=1;fixture.opponent.entity=2;fixture.player.kills=3;fixture.player.deaths=1;
+                fixture.opponent.kills=5;fixture.opponent.deaths=2;fixture.opponent.character=gameplay::SliceCharacter::shadow;
+            }
             gameplay::SliceLobbyState lobby;lobby.phase=gameplay::SliceMatchPhase::active;
             lobby.players={{.entity=1,.identity={1,"Nyx"},
                                 .selection={.character=gameplay::SliceCharacter::archangel,.ability=gameplay::SliceAbility::diamond_skin},
@@ -172,7 +176,7 @@ std::vector<std::string> menu(Session& session,const std::filesystem::path& revi
                                 .connected=true,.ready=false}};
             if(review_page==9){fixture.hud.dead=true;fixture.player.life=0;fixture.hud.life_fraction=0;fixture.player.respawn_remaining_seconds=3;}
             if(review_page==10)lobby.phase=gameplay::SliceMatchPhase::waiting;
-            platform::InputState neutral;review_game->paused=review_page==12;review_game->was_playing=true;
+            platform::InputState neutral;neutral.menu_tab=review_page==16;review_game->paused=review_page==12;review_game->was_playing=true;
             static_cast<void>(review_game->draw(w,h,neutral,fixture,&lobby,false,review_page!=13,review_page!=11,review_page==11,review_page!=10,3,"127.0.0.1:27020",{},120));
             draw_data=&review_game->canvas.data();
         }else if(!review.empty() && review_page==14){

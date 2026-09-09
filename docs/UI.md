@@ -39,6 +39,8 @@ sin estirar texto ni desplazar la retícula del centro de la cámara.
 - HUD: vida, escudo, retícula/impacto confirmado, arma y disponibilidad,
   habilidad/cooldown, bajas/muertes y cuenta atrás de respawn. No se inventa un
   contador de munición: Soul Reaper no tiene esa reserva en la simulación actual.
+- Marcador: mantener Tab durante la partida muestra nombre, clase, bajas y
+  muertes de ambos jugadores, ordenados por bajas; no pausa el combate.
 - Pausa, pérdida de foco, reconexión y abandono con confirmación. La pausa local
   detiene los ticks; la partida online continúa con input neutro.
 
@@ -79,7 +81,7 @@ el menú, conservando el contexto de acceso en memoria.
 .\build\windows-vs\Debug\gloom.exe --ui-review .cache/ui-review
 ```
 
-`--ui-review` captura 16 estados a 1280×720, 1920×1080 y 2560×1080. Los ejemplos
+`--ui-review` captura 17 estados a 1280×720, 1920×1080 y 2560×1080. Los ejemplos
 de autenticación, lista y HUD de esa galería son fixtures de presentación;
 no acreditan acceso a una cuenta externa. El recorrido `gloom.ui_flow` abre
 dos procesos gráficos y un servidor real. Inyecta mouse/teclado en la misma
@@ -98,6 +100,16 @@ python tools/legacy/verify_ui.py --legacy-root D:/Projects/Gloom-Legacy --refere
 La copia Legacy y las referencias visuales de hitos anteriores se conservan.
 Audio, ajustes amplios, cambios de cuenta, balance y despliegue público quedan
 fuera del hito 64.
+
+## Marcador de partida — hito 76
+
+`Tab` usa su estado mantenido de SDL y dibuja el marcador únicamente mientras la
+tecla permanece pulsada. Se conserva la lectura inmediata propia de un marcador
+tipo Quake: la simulación y el input de juego continúan. La vista toma nombres de
+la sala mediante la entidad y bajas/muertes del snapshot autoritativo; no mantiene
+una segunda copia de puntuaciones ni añade mensajes de red. La página 16 de
+`--ui-review` cubre el estado con el jugador local resaltado y el rival primero
+por tener más bajas.
 
 ## Correcciones de aceptación — 5 de septiembre de 2026
 

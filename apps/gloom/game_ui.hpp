@@ -13,6 +13,18 @@
 namespace gloom::desktop {
 struct GameUiAction {bool leave{},ready{},reconnect{};std::optional<std::size_t> selection;};
 class GameUi {
+    static std::string_view player_name(const gameplay::SliceLobbyState* lobby,network::NetworkEntityId entity,std::string_view fallback){
+        if(lobby)for(std::size_t i=0;i<lobby->players.size();++i)if(lobby->players[i].entity==entity)return lobby->players[i].identity.display_name;
+        return fallback;
+    }
+    static std::string_view character_name(gameplay::SliceCharacter character){
+        switch(character){
+        case gameplay::SliceCharacter::archangel:return "ARCHANGEL";
+        case gameplay::SliceCharacter::shadow:return "SHADOW";
+        case gameplay::SliceCharacter::berserker:return "BERSERKER";
+        default:return "HOUND";
+        }
+    }
 public:
     render::UiCanvas canvas{std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets/ui/original"};
     std::chrono::steady_clock::time_point fps_start{std::chrono::steady_clock::now()};
@@ -80,6 +92,29 @@ public:
                 canvas.text(413,366,"Reaparición en "+std::to_string(static_cast<int>(std::ceil(s.player.respawn_remaining_seconds)))+" s",25);}
             if(s.player.flash_factor>1.0F)canvas.rect({0,0,static_cast<float>(width),static_cast<float>(height)},
                 {1,1,1,std::clamp(s.player.flash_factor/50.0F,0.18F,1.0F)});
+
+            if(input.menu_tab && !paused && !confirm_leave){
+                const gameplay::CombatantView* first=&s.player;const gameplay::CombatantView* second=&s.opponent;
+                if(second->kills>first->kills || (second->kills==first->kills && second->deaths<first->deaths)){
+                    const gameplay::CombatantView* swap=first;first=second;second=swap;
+                }
+                canvas.rect({0,0,1280,720},{.005F,.012F,.014F,.72F});
+                canvas.panel({220,118,840,404});
+                canvas.text(268,145,"MARCADOR",42,render::ui_cyan,true);
+                canvas.text(270,200,"JUGADOR",16,render::ui_muted);canvas.text(578,200,"CLASE",16,render::ui_muted);
+                canvas.text(775,200,"BAJAS",16,render::ui_muted);canvas.text(900,200,"MUERTES",16,render::ui_muted);
+                for(unsigned row=0;row<2;++row){
+                    const gameplay::CombatantView& combatant=*(row?second:first);const bool local=combatant.entity==s.player.entity;const float y=235+row*104.F;
+                    canvas.rect({250,y,780,82},local?render::UiColor{.035F,.22F,.23F,.94F}:render::UiColor{.025F,.055F,.06F,.92F});
+                    canvas.rect({250,y,5,82},local?render::ui_cyan:render::UiColor{.24F,.32F,.33F,1});
+                    canvas.text(272,y+16,player_name(lobby,combatant.entity,local?"JUGADOR":"RIVAL"),26,local?render::ui_ink:render::ui_muted);
+                    if(local)canvas.text(272,y+50,"TÚ",13,render::ui_cyan);
+                    canvas.text(578,y+28,character_name(combatant.character),18,local?render::ui_ink:render::ui_muted);
+                    canvas.text(797,y+19,std::to_string(combatant.kills),32,local?render::ui_cyan:render::ui_ink,true);
+                    canvas.text(935,y+19,std::to_string(combatant.deaths),32,local?render::ui_cyan:render::ui_ink,true);
+                }
+                canvas.text(452,474,"MANTÉN TAB PARA VER EL MARCADOR",15,render::ui_muted);
+            }
 
         }
         if(!playing && !confirm_leave){

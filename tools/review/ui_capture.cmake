@@ -5,7 +5,7 @@ if(NOT result EQUAL 0 OR "${log}${errors}" MATCHES "VUID-|Validation Error|Dilig
     message(FATAL_ERROR "UI Vulkan capture failed: ${result}\n${errors}")
 endif()
 foreach(width 1280 1920 2560)
-    foreach(page RANGE 0 15)
+    foreach(page RANGE 0 16)
         if(NOT EXISTS "${OUTPUT}/${width}/page-${page}.ppm")
             message(FATAL_ERROR "Missing UI capture: ${width}/${page}")
         endif()
