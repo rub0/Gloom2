@@ -18,8 +18,8 @@ sin alterar la fidelidad funcional del Gloom original.
 - Halo aditivo coloreado para todos los recogibles excepto vida.
 - Vida sin brillo; puede conservar flotación y giro si la primera revisión visual
   no la hace demasiado llamativa.
-- Como extensiones opcionales: énfasis al acercarse, animación de aparición/
-  respawn y destello breve al recoger.
+- Animación de aparición y respawn mediante escala y opacidad.
+- Como extensiones opcionales: énfasis al acercarse y destello breve al recoger.
 
 ## Restricciones
 
@@ -34,5 +34,6 @@ sin alterar la fidelidad funcional del Gloom original.
 
 Capturas deterministas y revisión jugable comprobarán fase independiente del
 framerate, límites de desplazamiento, giro continuo, colores por arquetipo,
-ausencia de halo en vida, respawn y desaparición al recoger. Después se decidirá
-si se incluyen las extensiones opcionales.
+ausencia de halo en vida, aparición/respawn mediante escala y opacidad y
+desaparición al recoger. Después se decidirá si se incluyen las extensiones
+opcionales.

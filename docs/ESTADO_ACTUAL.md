@@ -67,9 +67,10 @@ red ni deriva física.
 
 Todos los recogibles salvo vida tendrán halo coloreado. La vida podrá flotar y
 girar, pero no emitirá brillo. Quedan por implementar y validar el bobbing, la
-rotación, el halo, el énfasis por proximidad y los efectos de aparición,
-recogida y respawn; estos últimos se mantienen opcionales hasta revisar la
-primera captura. No se ha modificado código ni recursos en este hito.
+rotación, el halo y la animación de aparición/respawn mediante escala y
+opacidad. El énfasis por proximidad y el destello de recogida son extensiones
+opcionales hasta revisar la primera captura. No se ha modificado código ni
+recursos en este hito.
 
 Si se revisan recogibles, leer solo la sección 67 de
 [GAMEPLAY_MIGRATION.md](GAMEPLAY_MIGRATION.md) y las partes pertinentes del informe.

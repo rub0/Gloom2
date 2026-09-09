@@ -326,8 +326,9 @@
 77. Pickup presentation — planned: make map pickups visually inviting without
     changing their authoritative gameplay. Add local-space bobbing and slow yaw
     rotation to the original position; add a restrained colored additive halo to
-    every pickup except health; optionally add proximity emphasis, respawn
-    appearance and a short collection flash. Keep the animation client-local,
+    every pickup except health; add scale/opacity animation on appearance and
+    respawn, plus optionally add proximity emphasis and a short collection
+    flash. Keep the animation client-local,
     avoid shadow-casting dynamic lights, preserve visibility/culling and define
     deterministic capture tests for phase, bounds and the no-glow health rule.
     No implementation has started. Scope and acceptance notes:
