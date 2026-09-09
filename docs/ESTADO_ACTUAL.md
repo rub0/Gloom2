@@ -1,7 +1,8 @@
 # Traspaso de Gloom
 
-Actualizado: 9 de septiembre de 2026, hito 77 de presentación de recogibles.
-Siguiente paso: revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
+Actualizado: 9 de septiembre de 2026, hito 78 de guía artística y primer boceto de Hound.
+Siguiente paso artístico: el usuario revisa la guía 0.1 y el boceto 01 antes de modelar.
+Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -36,6 +37,26 @@ y crear el commit de cierre según `AGENTS.md`.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 78, guía artística y boceto de Hound
+
+Entregada la [guía 0.1](DIRECCION_ARTISTICA.md) y la lámina
+`docs/art/hound/hound-concept-v01.png`: cuerpo completo, cabeza y guanteletes.
+Referencia elegida por el usuario: `D:\Descargas\Gloom\concept_hound2.jpg`,
+con copia intacta en `docs/art/characters/hound-original-concept.jpg`.
+Hound es humanoide bípedo: capucha, piel pálida, ojos naranja y armadura afilada.
+El diseño actual usa el cuerpo de Archangel, no un rig cuadrúpedo recuperado.
+
+Identidad desde los concepts originales; UT3 orienta peso y materiales y el toque
+de Overwatch 2 orienta claridad. Paleta, simplificación y nueva lámina son propuestas,
+no aprobación del usuario. Piel algo pétrea y peso de la armadura quedan como puntos
+de revisión. No hay modelo nuevo, instalación de Blender/MCP ni cambio de runtime.
+
+Validación documental, integridad de las tres referencias copiadas y revisión
+visual de la lámina. Prompt y procedencia guardados; no corresponde compilar ni
+repetir pruebas del motor para esta entrega de documentación y concept 2D.
+Informe: `reports/art-direction-78/README.md`. No comenzar modelado hasta que el
+usuario apruebe el boceto; después verificar Blender/MCP y exportación al cooker.
 
 ## Hito 67, recogibles de Factory
 
