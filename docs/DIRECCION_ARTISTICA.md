@@ -137,6 +137,9 @@ El siguiente entregable es un modelo básico de Hound, no la malla final.
 
 ## Próxima revisión: volumen básico de Hound
 
+El [volumen 01 y sus vistas](art/hound/blockout-v01/README.md) se entregan en el
+hito 80. Están pendientes de aprobación; el aspecto facetado no es acabado final.
+
 1. Frente, perfil y espalda: mantener el carácter y las proporciones aprobadas.
 2. Comprobar capucha, hombreras, manos y separación de articulaciones en 3D.
 3. Revisar escala frente al personaje actual antes de retopología, UVs y rig.

@@ -1,7 +1,8 @@
 # Blender → Gloom
 
-10 de septiembre de 2026 · Hito 79. Puente técnico validado; todavía no hay un
-nuevo modelo de Hound. Guía 0.1 y boceto 01 aprobados por el usuario.
+10 de septiembre de 2026 · Hito 79. Puente técnico validado. El hito 80 entrega
+el [primer volumen de Hound](art/hound/blockout-v01/README.md), pendiente de
+revisión. Guía 0.1 y boceto 2D 01 aprobados por el usuario.
 
 ## Instalación local validada
 
@@ -130,6 +131,10 @@ limita la espera a 10000 frames. Sin ese argumento conserva el visor interactivo
 La captura es un archivo del renderizador real, no una imagen generada por IA.
 
 ## Siguiente entrega: Hound básico
+
+Entregado como volumen 01 en el hito 80; pendiente de aceptación. Las herramientas
+Blender ya se han usado de forma nativa en esa tarea. La siguiente descripción
+conserva el alcance y la puerta de revisión acordados.
 
 Construir el volumen bípedo de la lámina aprobada: capucha, torso, hombreras,
 guanteletes, cintura y piernas; materiales planos y sin microdetalle. Guardar

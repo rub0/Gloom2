@@ -1,8 +1,8 @@
 # Traspaso de Gloom
 
-Actualizado: 10 de septiembre de 2026, hito 79 de puente local Blender–Gloom.
-Siguiente paso artístico: volumen básico bípedo de Hound, con frente/perfil/espalda
-para revisión. El usuario ha aprobado la guía 0.1 y el boceto 01; conservarlos.
+Actualizado: 10 de septiembre de 2026, hito 80 de volumen básico de Hound.
+Siguiente paso artístico: el usuario revisa el volumen 01 y sus vistas; no avanzar
+a acabado o rig hasta validarlo. Guía 0.1 y boceto 2D 01 ya aprobados; conservarlos.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -39,7 +39,32 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 79, puente local Blender–Gloom
+## Último hito cerrado: 80, volumen básico de Hound
+
+Fuente editable: `art/characters/hound/v01/hound-blockout-v01.blend`.
+[Frente/perfil/espalda y ficha](art/hound/blockout-v01/README.md), más tres cuartos.
+105 piezas, 6.974 triángulos evaluados y 7 materiales planos. Altura 1,80 m,
+igual al Archangel actual; ancho con filos 1,144 m y fondo 0,382 m.
+
+Capucha, ojos naranja, torso por placas, brazos desnudos, hombreras/guanteletes
+afilados y piernas. Rostro/manos son placeholders de volumen; espalda interpretada
+provisionalmente. El facetado no cambia la dirección artística a low-poly.
+No hay rig, texturas o UVs finales; no cambia el Hound jugable ni el gameplay.
+La lámina de vistas proviene de la malla real, no de generación 2D.
+
+MCP nativo de Blender ya disponible y usado directamente. Fuente .blend abierta
+y validada en background; glTF validado y geometría reconstruida con BIN idéntico.
+Cooker y visor Vulkan correctos (105/105 piezas), capturas revisadas y CTest **2/2**.
+105 batches corresponden a piezas editables: optimizar después de aceptar formas.
+No se ha validado deformación, agarres de armas, partida ni presupuesto de combate.
+Informe: `reports/hound-blockout-80/README.md`.
+
+Push solicitado y confirmado al repositorio público `rub0/Gloom2/main`:
+siete commits publicados hasta `988437d` (hito 79), hash remoto comprobado.
+El hito 80 se cierra con commit local; no extender automáticamente aquel push.
+Las siguientes revisiones deben conservar v01 y usar una nueva versión.
+
+## Hito 79, puente local Blender–Gloom
 
 Blender portable 4.5.13 LTS y Blender MCP 1.9.1 instalados en `.cache`, con Python
 aislado, perfil propio, telemetría desactivada, proveedores externos apagados y
@@ -62,9 +87,8 @@ Capturas Blender y Gloom inspeccionadas. No se repite la suite completa ni se
 afirma validación de rigs/animaciones desde Blender. Informe:
 `reports/blender-bridge-79/README.md`. No cambia el personaje jugable ni gameplay.
 
-El siguiente hito debe guardar el `.blend` real de Hound fuera de `.cache`,
-construir solo las masas principales y presentar frente/perfil/espalda. No hacer
-retopología, UVs, rig o texturas finales hasta la validación del volumen.
+La primera fuente Hound fuera de cache y las vistas se entregan en el hito 80.
+No hacer retopología, UVs, rig o texturas finales hasta la validación del volumen.
 
 ## Hito 78, guía artística y boceto de Hound — aprobados
 
