@@ -1,0 +1,14 @@
+# Project-local MCP. Adjust absolute paths if the checkout moves.
+[mcp_servers.blender]
+command = 'D:/Projects/Gloom/.cache/blender-mcp-env/Scripts/blender-mcp.exe'
+cwd = 'D:/Projects/Gloom'
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+enabled_tools = ['get_scene_info', 'get_object_info', 'get_viewport_screenshot', 'execute_blender_code']
+
+[mcp_servers.blender.env]
+BLENDER_HOST = 'localhost'
+BLENDER_PORT = '9876'
+BLENDER_MCP_SAFE_MODE = '1'
+DISABLE_TELEMETRY = 'true'
+BLENDERMCP_ADDONS_DIR = 'D:/Projects/Gloom/.cache/blender-profile/scripts/addons'

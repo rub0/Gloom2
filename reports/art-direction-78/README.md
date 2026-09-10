@@ -3,6 +3,11 @@
 9 de septiembre de 2026. Entrega de documentación y concept 2D; aceptación
 artística pendiente del usuario. No se entrega una malla ni se modifica el juego.
 
+Actualización posterior (hito 79, 10 de septiembre): el usuario ha aprobado la
+guía y la lámina con «asi esta perfecto, continua con lo siguiente». Las notas
+de revisión de este informe describen el estado de la entrega original, no una
+aprobación pendiente actual. Continúa el [flujo Blender](../../docs/BLENDER_WORKFLOW.md).
+
 ## Resultado
 
 - [Guía artística 0.1](../../docs/DIRECCION_ARTISTICA.md): jerarquía de referencias,

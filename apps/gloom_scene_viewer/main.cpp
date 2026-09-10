@@ -4,6 +4,7 @@
 #include <gloom/backends/diligent_renderer.hpp>
 #include <gloom/backends/sdl_window.hpp>
 #include <gloom/core/job_system.hpp>
+#include <gloom/core/types.hpp>
 #include <gloom/render/visibility.hpp>
 #include <gloom/render/lighting.hpp>
 
@@ -16,15 +17,16 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
+#include <stdio.h>
 
 int main(const int argument_count, const char* const* arguments) try {
-    if (argument_count != 5 && argument_count != 6) {
+    if (argument_count < 5 || argument_count > 7) {
         std::cerr << "Usage: gloom_scene_viewer <source-root> <cache-root> "
-                     "<game:/source.gltf> <cache:/output.gasset> [scene-copies]\n";
+                     "<game:/source.gltf> <cache:/output.gasset> [scene-copies] [review-output.ppm]\n";
         return 2;
     }
     std::uint32_t scene_copies = 1;
-    if (argument_count == 6) {
+    if (argument_count >= 6) {
         const std::string_view text{arguments[5]};
         const auto parsed = std::from_chars(text.data(), text.data() + text.size(), scene_copies);
         if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
@@ -54,6 +56,7 @@ int main(const int argument_count, const char* const* arguments) try {
     jobs.start();
     window.start();
     renderer.start();
+    bool review_complete = false;
     {
         gloom::assets::AsyncAssetLoader loader{jobs, filesystem, discovered->catalog};
         gloom::assets::AssetResidencyCoordinator residency{
@@ -76,6 +79,8 @@ int main(const int argument_count, const char* const* arguments) try {
         std::vector<gloom::render::RenderInstance> stress_instances;
         std::uint64_t prepared_generation = 0;
         gloom::render::VisibilityMetrics last_visibility;
+        gloom::uint32 review_ready_frames = 0;
+        gloom::uint32 review_total_frames = 0;
         while (window.poll_events()) {
             residency.update();
             const auto state = residency.state(ticket);
@@ -122,8 +127,15 @@ int main(const int argument_count, const char* const* arguments) try {
             const auto lighting_view = lighting.view();
             auto snapshot = visible.snapshot();
             snapshot.lighting = &lighting_view;
+            if (argument_count == 7 && scene != nullptr && ++review_ready_frames == 32) {
+                renderer.capture_next_frame(arguments[6]);
+            }
             renderer.draw(snapshot);
             renderer.end_frame();
+            if (argument_count == 7 && (++review_total_frames == 10000 || review_ready_frames == 32)) {
+                review_complete = review_ready_frames == 32;
+                break;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds{1});
         }
         std::cout << "Visibility: " << last_visibility.visible_instances << "/"
@@ -137,6 +149,10 @@ int main(const int argument_count, const char* const* arguments) try {
     renderer.stop();
     window.stop();
     jobs.stop();
+    if (argument_count == 7 && !review_complete) {
+        fprintf(stderr, "Scene review ended before the asset became ready.\n");
+        return 1;
+    }
     return 0;
 } catch (const std::exception& error) {
     std::cerr << "Scene viewer failed: " << error.what() << '\n';

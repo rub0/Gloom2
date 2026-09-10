@@ -1,7 +1,8 @@
 # Traspaso de Gloom
 
-Actualizado: 9 de septiembre de 2026, hito 78 de guía artística y primer boceto de Hound.
-Siguiente paso artístico: el usuario revisa la guía 0.1 y el boceto 01 antes de modelar.
+Actualizado: 10 de septiembre de 2026, hito 79 de puente local Blender–Gloom.
+Siguiente paso artístico: volumen básico bípedo de Hound, con frente/perfil/espalda
+para revisión. El usuario ha aprobado la guía 0.1 y el boceto 01; conservarlos.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -38,7 +39,34 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Hito 78, guía artística y boceto de Hound
+## Último hito cerrado: 79, puente local Blender–Gloom
+
+Blender portable 4.5.13 LTS y Blender MCP 1.9.1 instalados en `.cache`, con Python
+aislado, perfil propio, telemetría desactivada, proveedores externos apagados y
+modo seguro del MCP activo. `.codex/config.toml` registra cuatro herramientas
+locales. No se abren puertos a la red ni se usan servicios 3D de pago.
+
+Arranque: `tools/art/start_blender.ps1`. Flujo, reinstalación y límites de seguridad:
+[BLENDER_WORKFLOW.md](BLENDER_WORKFLOW.md). La sesión iniciada antes del registro
+puede necesitar recargar MCP para mostrar sus herramientas; se ha validado la
+conexión mediante un cliente stdio real, no mediante herramientas nativas ya cargadas.
+
+Fixture independiente: 3 mallas, 424 triángulos, 3 materiales y 1 PNG externo.
+Exportar **glTF separado**, no GLB con texturas embebidas: el cooker actual las
+rechaza. Metros, normales, UV0, conversión a Y-up y dependencias verificadas.
+Visor con captura opcional y salida tras 32 frames con la escena residente.
+
+Validación: build Release del visor/cooker y dos tests; CTest **2/2**, cliente MCP,
+verificador de fixture, cocción y render Vulkan con **3/3 piezas visibles**.
+Capturas Blender y Gloom inspeccionadas. No se repite la suite completa ni se
+afirma validación de rigs/animaciones desde Blender. Informe:
+`reports/blender-bridge-79/README.md`. No cambia el personaje jugable ni gameplay.
+
+El siguiente hito debe guardar el `.blend` real de Hound fuera de `.cache`,
+construir solo las masas principales y presentar frente/perfil/espalda. No hacer
+retopología, UVs, rig o texturas finales hasta la validación del volumen.
+
+## Hito 78, guía artística y boceto de Hound — aprobados
 
 Entregada la [guía 0.1](DIRECCION_ARTISTICA.md) y la lámina
 `docs/art/hound/hound-concept-v01.png`: cuerpo completo, cabeza y guanteletes.
@@ -48,15 +76,15 @@ Hound es humanoide bípedo: capucha, piel pálida, ojos naranja y armadura afila
 El diseño actual usa el cuerpo de Archangel, no un rig cuadrúpedo recuperado.
 
 Identidad desde los concepts originales; UT3 orienta peso y materiales y el toque
-de Overwatch 2 orienta claridad. Paleta, simplificación y nueva lámina son propuestas,
-no aprobación del usuario. Piel algo pétrea y peso de la armadura quedan como puntos
-de revisión. No hay modelo nuevo, instalación de Blender/MCP ni cambio de runtime.
+de Overwatch 2 orienta claridad. El usuario acepta guía y lámina con «asi esta
+perfecto, continua con lo siguiente». Conservar el peso de la armadura y la lectura
+ligeramente pétrea de esta imagen. La aceptación no aprueba vistas aún no resueltas.
 
 Validación documental, integridad de las tres referencias copiadas y revisión
 visual de la lámina. Prompt y procedencia guardados; no corresponde compilar ni
 repetir pruebas del motor para esta entrega de documentación y concept 2D.
-Informe: `reports/art-direction-78/README.md`. No comenzar modelado hasta que el
-usuario apruebe el boceto; después verificar Blender/MCP y exportación al cooker.
+Informe: `reports/art-direction-78/README.md`. El hito 78 no entregó modelo ni
+instalación; el puente Blender/MCP posterior está validado en el hito 79.
 
 ## Hito 67, recogibles de Factory
 
@@ -77,7 +105,7 @@ Informe: `reports/pickups-2026-09-06/README.md`. No se repitió la suite complet
 ni una sesión manual con dos clientes gráficos. La revisión jugable del usuario
 está pendiente; el cierre técnico no implica esa confirmación manual.
 
-## Último hito cerrado: 77, presentación visual de recogibles
+## Hito 77, presentación visual de recogibles
 
 El objetivo aprobado es que los objetos del mapa inviten a recogerlos mediante
 flotación, giro y halo aditivo al estilo Quake. La lógica de disponibilidad,

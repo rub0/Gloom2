@@ -1,8 +1,9 @@
 # Gloom — guía artística 0.1
 
-9 de septiembre de 2026 · Hito 78 · **Propuesta para revisión del usuario**.
-La referencia principal de Hound está elegida; el nuevo boceto y las reglas de
-acabado aún necesitan aprobación. Esta entrega no autoriza el modelado final.
+9 de septiembre de 2026 · Hito 78 · **Guía 0.1 y boceto 01 aprobados por el usuario**.
+Aceptación registrada en el hito 79, el 10 de septiembre: «asi esta perfecto,
+continua con lo siguiente». Se puede avanzar al modelo básico para validarlo;
+no se aprueban automáticamente las futuras vistas, el rig ni el acabado final.
 
 ## Intención y jerarquía de referencias
 
@@ -15,7 +16,7 @@ El aspecto debe sentirse hostil y material, con siluetas fáciles de leer en com
 3. Unreal Tournament 3 orienta peso, volumen y acabado de ciencia ficción industrial.
 4. Overwatch 2 aporta un toque de simplificación, planos claros y lectura del color.
 
-Estas influencias son criterios artísticos propuestos, no una proporción matemática
+Estas influencias son criterios artísticos aceptados, no una proporción matemática
 ni una petición de copiar personajes. No sustituir la identidad de Gloom por un
 soldado genérico, un perro robótico o un héroe de otro juego.
 
@@ -57,7 +58,7 @@ no valores medidos del original ni constantes aprobadas para shaders.
 | --- | --- | --- |
 | Hierro oscuro | `#35383B` | Reflejo contenido, planos anchos y desgaste en aristas expuestas |
 | Tela carbón | `#242327` | Mate, pliegues amplios, contraste suficiente frente al metal |
-| Piel ceniza de Hound | `#B7AB98` | Orgánica y mate; evitar aspecto cromado o de piedra tallada |
+| Piel ceniza de Hound | `#B7AB98` | Mate y pálida; conservar la lectura ligeramente pétrea de la lámina aprobada, sin convertirlo en gólem |
 | Tela granate/tierra | `#50362F` | Cintura y pantalones sobrios, costuras legibles de cerca |
 | Ojos de Hound | `#FF801E` | Foco pequeño de energía cálida, sin iluminar toda la armadura |
 | Dorado de Archangel | `#A88843` | Metal trabajado, no plástico amarillo |
@@ -101,13 +102,13 @@ Rasgos a conservar:
 - Guanteletes pesados con filos, cintura de tela oscura rojiza y grebas metálicas.
 - Manos que puedan empuñar el arsenal existente; ninguna arma nueva en esta lámina.
 
-Ajustes propuestos para revisión: superficies más ordenadas, separación material
+Ajustes aceptados en el boceto 01: superficies más ordenadas, separación material
 más evidente, desgaste selectivo y pose de pie para leer proporciones. La luz
 neutra sustituye el fondo de fuego para juzgar el diseño, no para cambiar su paleta.
 Los detalles de manos, cierres y articulaciones que no se ven en la referencia
 son interpretaciones; no constituyen un plano de fabricación aprobado.
 
-![Primer boceto del Hound — propuesta](art/hound/hound-concept-v01.png)
+![Primer boceto del Hound — aprobado](art/hound/hound-concept-v01.png)
 
 La lámina ofrece una vista principal y estudios de detalle. No es un turnaround
 ortográfico: espalda, perfil, grosores, uniones y recorrido de los filos todavía
@@ -117,7 +118,7 @@ deben resolverse en vistas adicionales y un modelo básico.
 
 | Paso | Qué debe pasar antes de continuar |
 | --- | --- |
-| Boceto 01 | Usuario valida identidad, proporciones, capucha, armadura y acabado |
+| Boceto 01 — aprobado | Conservar identidad, proporciones, capucha, peso de la armadura y acabado de esta lámina |
 | Modelo básico | Frente/perfil/espalda, escala y silueta aprobadas; revisar espacios para las articulaciones |
 | Rig de prueba | Caminar, apuntar y Bite sin penetraciones graves ni pérdida de volumen |
 | Acabado | UVs, materiales, costuras y detalle revisados con luz neutra y luz de Factory |
@@ -130,15 +131,15 @@ La escala visual documentada de 1,8 m sirve de referencia inicial, no de nueva
 decisión de gameplay. El futuro movimiento debe reflejar un humanoide pesado
 pero ágil y respetar la movilidad aceptada del juego.
 
-No empezar el modelo hasta la aprobación del boceto. Una vez aprobado, conectar
-y verificar Blender MCP con una escena pequeña y el cooker, antes de producir
-la malla final. Blender y su conexión no se han instalado ni validado en este hito.
+El boceto ya está aprobado. El [puente Blender–Gloom](BLENDER_WORKFLOW.md) se ha
+validado en el hito 79 con una escena pequeña, el cooker y el renderizador Vulkan.
+El siguiente entregable es un modelo básico de Hound, no la malla final.
 
-## Revisión que necesitamos ahora
+## Próxima revisión: volumen básico de Hound
 
-1. ¿El Hound conserva el carácter y la silueta del concept elegido?
-2. ¿La armadura tiene el equilibrio deseado entre peso y claridad de formas?
-3. ¿La piel, tela y ojos mantienen el tono oscuro sin perder legibilidad?
+1. Frente, perfil y espalda: mantener el carácter y las proporciones aprobadas.
+2. Comprobar capucha, hombreras, manos y separación de articulaciones en 3D.
+3. Revisar escala frente al personaje actual antes de retopología, UVs y rig.
 
 El [informe del hito 78](../reports/art-direction-78/README.md) recoge procedencia,
 prompt, revisión y limitaciones. Cada revisión nueva tendrá su propia versión;
