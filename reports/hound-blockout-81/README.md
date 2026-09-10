@@ -3,6 +3,10 @@
 10 de septiembre de 2026. Revisión del volumen inicial según los comentarios
 del usuario. Entrega técnica terminada; valoración artística de v02 pendiente.
 
+Actualización posterior: el usuario aprueba el diseño con «apruebo el diseño».
+Aceptación registrada en el [hito 82](../hound-approval-82/README.md);
+el resto de este informe conserva el estado y las pruebas de la entrega original.
+
 ## Resultado
 
 [Vistas y detalles de v02](../../docs/art/hound/blockout-v02/README.md).

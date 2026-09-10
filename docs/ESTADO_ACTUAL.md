@@ -1,8 +1,9 @@
 # Traspaso de Gloom
 
-Actualizado: 10 de septiembre de 2026, hito 81 de correcciones de Hound v02.
-Siguiente paso artístico: el usuario revisa el volumen 02 y sus detalles; no avanzar
-a acabado o rig hasta validarlo. Guía 0.1 y boceto 2D 01 ya aprobados; conservarlos.
+Actualizado: 10 de septiembre de 2026, hito 82 de aprobación de Hound v02.
+El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
+la guía 0.1 y el boceto 2D 01. Siguiente paso artístico: preparar la malla y un rig
+de prueba en una versión nueva; validar deformación y agarres antes del acabado final.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -39,7 +40,24 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 81, Hound v02 — clavículas, capucha y manos
+## Último hito cerrado: 82, diseño de Hound v02 aprobado
+
+El usuario acepta el diseño presentado en el hito 81 con «apruebo el diseño».
+La [v02 y sus detalles](art/hound/blockout-v02/README.md) quedan como referencia
+aprobada de silueta y volúmenes: hombros libres, armadura clavicular, capucha
+más cerrada y manos orientadas con placa dorsal completa en pico.
+
+Registro documental únicamente: no se modifica el modelo ni se inicia el rig.
+El siguiente hito debe conservar v02, trabajar en otra versión y preparar la
+malla para un rig de prueba. Comprobar caminar, apuntar y Bite, además de
+deformaciones, penetraciones y agarres. Evaluar el rig existente antes de
+decidir reutilizarlo. UVs/materiales finales e integración jugable siguen pendientes.
+
+Validación de diff, enlaces locales y alcance exclusivamente documental;
+no se repiten pruebas del motor para esta aceptación. Informe:
+`reports/hound-approval-82/README.md`. Commit local, sin push.
+
+## Hito 81, Hound v02 — clavículas, capucha y manos
 
 Fuente: `art/characters/hound/v02/hound-blockout-v02.blend`.
 [Vistas y detalles](art/hound/blockout-v02/README.md). La versión 01 se conserva
@@ -57,7 +75,8 @@ BIN idéntica, regresión de v01, cooker/visor Vulkan con 113/113 piezas y
 CTest **2/2**. Vistas y primeros planos inspeccionados. Sin rig, texturas finales,
 pruebas de deformación/agarres ni sustitución del personaje jugable.
 Informe: `reports/hound-blockout-81/README.md`. Hito con commit local, sin push.
-La valoración artística de v02 sigue pendiente; no avanzar a producción final.
+La valoración artística de v02 queda aprobada en el hito 82; el acabado final
+y la animación todavía requieren sus propias revisiones.
 
 ## Hito 80, volumen básico de Hound
 

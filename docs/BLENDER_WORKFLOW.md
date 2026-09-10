@@ -2,7 +2,7 @@
 
 10 de septiembre de 2026 · Hito 79. Puente técnico validado. El hito 80 entrega
 el primer volumen de Hound y el hito 81 su [revisión 02](art/hound/blockout-v02/README.md),
-pendiente de aprobación. Guía 0.1 y boceto 2D 01 aprobados por el usuario.
+aprobada por el usuario en el hito 82. Guía 0.1 y boceto 2D 01 también aprobados.
 
 ## Instalación local validada
 
@@ -130,17 +130,16 @@ con escena residente y sale por la ruta normal de liberación del renderizador;
 limita la espera a 10000 frames. Sin ese argumento conserva el visor interactivo.
 La captura es un archivo del renderizador real, no una imagen generada por IA.
 
-## Siguiente entrega: Hound básico
+## Hound básico aprobado; siguiente entrega: rig de prueba
 
-Entregado como volumen 01 en el hito 80; pendiente de aceptación. Las herramientas
-Blender ya se han usado de forma nativa en esa tarea. La siguiente descripción
-conserva el alcance y la puerta de revisión acordados.
+Entregado como volumen 01 en el hito 80, corregido en v02 en el hito 81 y
+aprobado en el hito 82. Las herramientas Blender ya se han usado de forma nativa.
+Conservar las fuentes v01/v02; preparar malla y rig de prueba en una versión nueva.
 
-Construir el volumen bípedo de la lámina aprobada: capucha, torso, hombreras,
-guanteletes, cintura y piernas; materiales planos y sin microdetalle. Guardar
-una fuente `.blend` fuera de `.cache` cuando sea un asset real. Entregar frente,
-perfil y espalda, comparar escala con el Hound/Archangel actual y pasar por el
-visor. Resolver espalda y articulaciones como propuestas nuevas para revisión.
-No sustituir el personaje del juego ni gastar trabajo en retopología, texturas
-finales o animación hasta validar ese volumen. El rig de 43 huesos es candidato
-a reutilización, no compatibilidad demostrada por esta prueba estática.
+Mantener silueta, escala y correcciones aprobadas. Revisar topología de zonas
+deformables y separación de placas rígidas; evaluar el rig existente antes de
+reutilizarlo. Entregar pruebas de caminar, apuntar y Bite, con revisión de
+penetraciones, conservación de volumen y agarres. El rig de 43 huesos es candidato
+a reutilización, no compatibilidad demostrada por las pruebas estáticas.
+UVs/texturas finales y sustitución del personaje jugable quedan para sus fases
+posteriores. Esta aceptación no cambia gameplay ni autoriza un push.

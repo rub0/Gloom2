@@ -119,7 +119,7 @@ deben resolverse en vistas adicionales y un modelo básico.
 | Paso | Qué debe pasar antes de continuar |
 | --- | --- |
 | Boceto 01 — aprobado | Conservar identidad, proporciones, capucha, peso de la armadura y acabado de esta lámina |
-| Modelo básico | Frente/perfil/espalda, escala y silueta aprobadas; revisar espacios para las articulaciones |
+| Modelo básico v02 — aprobado | Conservar silueta y volúmenes aceptados; comprobar articulaciones durante el rig de prueba |
 | Rig de prueba | Caminar, apuntar y Bite sin penetraciones graves ni pérdida de volumen |
 | Acabado | UVs, materiales, costuras y detalle revisados con luz neutra y luz de Factory |
 | Integración | Cocción, FPS/TPS, anclajes, bounds animados, LODs y coste real comprobados |
@@ -133,17 +133,20 @@ pero ágil y respetar la movilidad aceptada del juego.
 
 El boceto ya está aprobado. El [puente Blender–Gloom](BLENDER_WORKFLOW.md) se ha
 validado en el hito 79 con una escena pequeña, el cooker y el renderizador Vulkan.
-El siguiente entregable es un modelo básico de Hound, no la malla final.
+El modelo básico v02 está entregado y aprobado; todavía no es la malla final.
 
-## Próxima revisión: volumen básico de Hound
+## Volumen básico de Hound aprobado; próxima revisión: rig de prueba
 
 El [volumen 02 y sus detalles](art/hound/blockout-v02/README.md) aplica en el hito 81
 las correcciones del usuario sobre hombros, capucha y manos de la primera versión.
-Está pendiente de aprobación; el aspecto facetado no es acabado final.
+El usuario lo aprueba con «apruebo el diseño», registrado el 10 de septiembre
+de 2026 en el [hito 82](../reports/hound-approval-82/README.md).
+El aspecto facetado no es acabado final.
 
-1. Frente, perfil y espalda: mantener el carácter y las proporciones aprobadas.
-2. Comprobar capucha, hombreras, manos y separación de articulaciones en 3D.
-3. Revisar escala frente al personaje actual antes de retopología, UVs y rig.
+1. Conservar v02; preparar la malla y el rig de prueba en una nueva versión.
+2. Mantener hombros libres, armadura clavicular, capucha y manos aprobados.
+3. Evaluar reutilización del rig existente y comprobar caminar, apuntar y Bite,
+   deformación y agarres antes de UVs/materiales finales e integración jugable.
 
 El [informe del hito 78](../reports/art-direction-78/README.md) recoge procedencia,
 prompt, revisión y limitaciones. Cada revisión nueva tendrá su propia versión;

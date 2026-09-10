@@ -1,7 +1,8 @@
 # Hound — volumen básico 02
 
-10 de septiembre de 2026 · Hito 81 · **Revisión pendiente del usuario**.
-Corrige la versión 01 según sus comentarios; no es aprobación del acabado final.
+10 de septiembre de 2026 · Hito 81 · **Diseño aprobado por el usuario en el hito 82**.
+Aceptación: «apruebo el diseño». Corrige la versión 01 según sus comentarios;
+la aprobación corresponde a silueta y volúmenes, no al acabado final ni al rig.
 
 ![Frente, perfil y espalda](turnaround.png)
 
@@ -45,6 +46,11 @@ reemplazado el Hound jugable. 113 batches son un coste de la organización
 editable, no un presupuesto de producción.
 
 ## Reconstrucción
+
+Conservar esta v02 como referencia aprobada. El siguiente paso es preparar la
+malla y un rig de prueba en una nueva versión, manteniendo las formas aceptadas.
+Validar caminar, apuntar y Bite, deformaciones y agarres antes del acabado final.
+Ver [registro de aprobación](../../../../reports/hound-approval-82/README.md).
 
 Abrir la fuente v01 en Blender y ejecutar `tools/art/revise_hound_blockout_v02.py`
 mediante MCP. El script crea una escena nueva y se niega a sobrescribir v02.
