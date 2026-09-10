@@ -5,6 +5,8 @@ el primer volumen de Hound y el hito 81 su [revisión 02](art/hound/blockout-v02
 aprobada por el usuario en el hito 82. Guía 0.1 y boceto 2D 01 también aprobados.
 El [hito 83](../reports/hound-rig-83/README.md) entrega una base deformable v03:
 rig diagnóstico exportado y validado. Estabilizar la malla antes del rig definitivo.
+El [hito 84](../reports/hound-mesh-84/README.md) entrega v04 con brazos continuos;
+mantiene ese rig de prueba mientras continúa el trabajo de topología.
 
 ## Instalación local validada
 

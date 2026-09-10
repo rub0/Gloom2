@@ -1,10 +1,11 @@
 # Traspaso de Gloom
 
-Actualizado: 10 de septiembre de 2026, hito 83 de base deformable de Hound v03.
+Actualizado: 10 de septiembre de 2026, hito 84 de continuidad de brazos de Hound v04.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
-Siguiente paso artístico acordado: estabilizar la malla, empezando por uniones
-de hombros/brazos, antes de afinar pesos, controles y animaciones. Conservar v03.
+La v04 unifica hombro/bíceps/brazo; quedan conexiones/anatomía de manos, cintura,
+ropa y rostro. Estabilizar la malla antes de afinar pesos, controles y animaciones.
+Conservar v02/v03/v04 y usar otra versión para el siguiente pase.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -41,7 +42,26 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 83, malla y rig de prueba de Hound
+## Último hito cerrado: 84, hombros y brazos continuos
+
+[V04: comparación, fuente y vídeo](art/hound/mesh-v04/README.md).
+Dos superficies continuas sustituyen seis volúmenes superpuestos; 37 anillos
+de 32 vértices por brazo. Una malla, siete materiales, 17.466 triángulos (+336).
+103 componentes restantes y los 53 huesos de prueba conservados. La desviación
+dirigida máxima de vértices nuevos a las superficies anteriores es 2,763 mm.
+
+Validación de fuente/topología/pesos en 61 muestras y reimportación glTF en 13
+poses (error máximo 0,000002800 m); cooker/visor estático Vulkan 7/7 piezas,
+siete batches, CTest assets/gpu_assets Release 2/2 y animation_vfx Debug 1/1.
+Regresión de v03 comprobada; renders y vídeo inspeccionados. Informe:
+`reports/hound-mesh-84/README.md`. Hitos 83–84 con commit local, sin nuevo push.
+
+Este pase elimina las uniones visibles de los volúmenes del brazo; NO es malla
+definitiva ni validación exhaustiva de colisiones/agarres. Continuar anatomía y
+conexiones de manos/dedos, cintura/ropa y rostro, conservando el rig diagnóstico.
+Sin UVs/texturas finales, retargeting, caminar/Bite finales o sustitución jugable.
+
+## Hito 83, malla y rig de prueba de Hound
 
 [Fuente, vistas y vídeo v03](art/hound/rig-v03/README.md). Una malla, siete
 materiales/primitivas, 17.130 triángulos y 53 huesos; cuatro extremidades con

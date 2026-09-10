@@ -1,8 +1,11 @@
 '''Render the diagnostic joint clip, not a final locomotion or attack animation.'''
 import bpy
+import sys
 from mathutils import Vector
 
-scene = bpy.data.scenes['Hound_Rig_v03']
+version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v03'
+assert version in ('v03', 'v04')
+scene = bpy.data.scenes['Hound_Rig_v03' if version == 'v03' else 'Hound_Mesh_v04']
 bpy.context.window.scene = scene
 scene.frame_start, scene.frame_end = 1, 181
 scene.render.fps = 30
@@ -16,6 +19,7 @@ scene.render.ffmpeg.format = 'MPEG4'
 scene.render.ffmpeg.codec = 'H264'
 scene.render.ffmpeg.constant_rate_factor = 'MEDIUM'
 scene.render.ffmpeg.ffmpeg_preset = 'GOOD'
-scene.render.filepath = 'D:/Projects/Gloom/docs/art/hound/rig-v03/joint-check.mp4'
+folder = 'rig-v03' if version == 'v03' else 'mesh-v04'
+scene.render.filepath = 'D:/Projects/Gloom/docs/art/hound/'+folder+'/joint-check.mp4'
 bpy.ops.render.render(animation=True)
-print('HOUND03_JOINT_CHECK_VIDEO_RENDERED')
+print('HOUND_JOINT_CHECK_VIDEO_RENDERED', version)

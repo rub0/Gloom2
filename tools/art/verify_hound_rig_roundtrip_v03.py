@@ -1,16 +1,21 @@
 '''Load the exported glTF into a separate Blender scene; compare skinned poses to the source.'''
 import bpy
 import json
+import sys
 from pathlib import Path
 from mathutils.kdtree import KDTree
 
 root = Path(__file__).resolve().parents[2]
-path = root/'assets/characters/hound_rig/v03/hound-rig.gltf'
+version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v03'
+assert version in ('v03', 'v04')
+prefix = 'Hound'+version[1:]
+mesh_prefix = 'H'+version[1:]
+path = root/('assets/characters/hound_rig/'+version+'/hound-rig.gltf')
 gltf = json.loads(path.read_text(encoding='utf-8'))
 assert len(gltf['meshes']) == 1 and len(gltf['meshes'][0]['primitives']) == 7
 assert len(gltf['skins']) == 1 and len(gltf['skins'][0]['joints']) == 53
 assert len(gltf['animations']) == 1
-assert gltf['animations'][0]['name'] == 'Hound03_joint_check'
+assert gltf['animations'][0]['name'] == prefix+'_joint_check'
 assert not gltf.get('images') and not gltf.get('textures')
 assert all(s.get('interpolation', 'LINEAR') in ('LINEAR', 'STEP') for s in gltf['animations'][0]['samplers'])
 assert not any('matrix' in gltf['nodes'][c['target']['node']] for c in gltf['animations'][0]['channels'])
@@ -20,14 +25,14 @@ legacy = json.loads((root/'assets/characters/original/archangel.gltf').read_text
 legacy_names = {legacy['nodes'][i]['name'] for i in legacy['skins'][0]['joints']}
 export_names = {gltf['nodes'][i]['name'] for i in gltf['skins'][0]['joints']}
 assert len(legacy_names) == 43 and legacy_names <= export_names
-assert all(node.get('name', '').startswith(('Bip001', 'Hound ', 'Hound03_', 'H03_')) for node in gltf['nodes'])
+assert all(node.get('name', '').startswith(('Bip001', 'Hound ', prefix+'_', mesh_prefix+'_')) for node in gltf['nodes'])
 for buffer in gltf['buffers']:
     assert (path.parent/buffer['uri']).stat().st_size == buffer['byteLength']
-source = bpy.data.scenes['Hound_Rig_v03']
-source_rig = source.objects['Hound03_Rig']
-source_mesh = source.objects['H03_DeformMesh']
-assert source_rig.animation_data.action.name == 'Hound03_joint_check'
-roundtrip = bpy.data.scenes.new('Hound03_RoundtripValidation')
+source = bpy.data.scenes['Hound_Rig_v03' if version == 'v03' else 'Hound_Mesh_v04']
+source_rig = source.objects[prefix+'_Rig']
+source_mesh = source.objects[mesh_prefix+'_DeformMesh']
+assert source_rig.animation_data.action.name == prefix+'_joint_check'
+roundtrip = bpy.data.scenes.new(prefix+'_RoundtripValidation')
 roundtrip.render.fps = 30
 bpy.context.window.scene = roundtrip
 bpy.ops.import_scene.gltf(filepath=str(path))

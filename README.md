@@ -8,6 +8,7 @@ Producción artística: [guía y Hound aprobado](docs/DIRECCION_ARTISTICA.md) y
 [flujo local Blender → MCP → cooker → visor Vulkan](docs/BLENDER_WORKFLOW.md).
 [Hound 3D v02: diseño aprobado; rig y acabado pendientes](docs/art/hound/blockout-v02/README.md).
 [Hound v03: malla y esqueleto de prueba; topología final pendiente](docs/art/hound/rig-v03/README.md).
+[Hound v04: hombros y brazos continuos, con comparación y vídeo](docs/art/hound/mesh-v04/README.md).
 
 Milestones 59–61 restore the original Factory mesh, placed static objects,
 materials and collision in local, host/join and dedicated play. The offline
