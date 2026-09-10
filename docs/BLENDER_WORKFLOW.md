@@ -3,6 +3,8 @@
 10 de septiembre de 2026 · Hito 79. Puente técnico validado. El hito 80 entrega
 el primer volumen de Hound y el hito 81 su [revisión 02](art/hound/blockout-v02/README.md),
 aprobada por el usuario en el hito 82. Guía 0.1 y boceto 2D 01 también aprobados.
+El [hito 83](../reports/hound-rig-83/README.md) entrega una base deformable v03:
+rig diagnóstico exportado y validado. Estabilizar la malla antes del rig definitivo.
 
 ## Instalación local validada
 

@@ -1,9 +1,10 @@
 # Traspaso de Gloom
 
-Actualizado: 10 de septiembre de 2026, hito 82 de aprobación de Hound v02.
+Actualizado: 10 de septiembre de 2026, hito 83 de base deformable de Hound v03.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
-la guía 0.1 y el boceto 2D 01. Siguiente paso artístico: preparar la malla y un rig
-de prueba en una versión nueva; validar deformación y agarres antes del acabado final.
+la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
+Siguiente paso artístico acordado: estabilizar la malla, empezando por uniones
+de hombros/brazos, antes de afinar pesos, controles y animaciones. Conservar v03.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -40,7 +41,27 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 82, diseño de Hound v02 aprobado
+## Último hito cerrado: 83, malla y rig de prueba de Hound
+
+[Fuente, vistas y vídeo v03](art/hound/rig-v03/README.md). Una malla, siete
+materiales/primitivas, 17.130 triángulos y 53 huesos; cuatro extremidades con
+malla continua y 93 piezas rígidas. Máximo dos influencias por vértice.
+43 nombres Legacy conservados, pero ejes/longitudes/jerarquía adaptados: requiere
+retargeting, no copiar clips directamente. Clip diagnóstico de 6 s, no caminar/Bite.
+
+Validación de fuente en 61 muestras, reimportación glTF en 13 poses con error
+máximo de 0,000004689 m, cooker/visor estático Vulkan 7/7 piezas y siete batches;
+CTest assets/gpu_assets Release 2/2 y animation_vfx Debug 1/1. No se valida
+reproducción del clip en el juego, agarres, ausencia de penetraciones ni acabado final.
+Informe: `reports/hound-rig-83/README.md`. Cierre local, sin push del hito 83.
+
+Push anterior solicitado: hitos 80–82 publicados en `rub0/Gloom2/main`, hasta
+`d7fc1f8`, hash remoto comprobado. La aceptación posterior del usuario establece
+primero estabilizar topología; el rig actual sirve solo para detectar problemas.
+Quedan solapes deltoides/bíceps/brazo y contactos de placas. Trabajar en otra
+versión, conservando diseño v02 y prototipo v03. Sin texturas ni sustitución jugable.
+
+## Hito 82, diseño de Hound v02 aprobado
 
 El usuario acepta el diseño presentado en el hito 81 con «apruebo el diseño».
 La [v02 y sus detalles](art/hound/blockout-v02/README.md) quedan como referencia

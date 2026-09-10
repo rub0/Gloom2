@@ -143,6 +143,11 @@ El usuario lo aprueba con «apruebo el diseño», registrado el 10 de septiembre
 de 2026 en el [hito 82](../reports/hound-approval-82/README.md).
 El aspecto facetado no es acabado final.
 
+El [prototipo v03](art/hound/rig-v03/README.md) permite probar articulaciones,
+no cierra la puerta del rig: faltan caminar, apuntar y Bite con agarres reales.
+Tras consultarlo, el usuario acepta estabilizar la malla antes de pulir pesos,
+controles y animaciones. Mantener el rig de prueba como herramienta de diagnóstico.
+
 1. Conservar v02; preparar la malla y el rig de prueba en una nueva versión.
 2. Mantener hombros libres, armadura clavicular, capucha y manos aprobados.
 3. Evaluar reutilización del rig existente y comprobar caminar, apuntar y Bite,
