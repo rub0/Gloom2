@@ -1,8 +1,8 @@
 # Blender → Gloom
 
 10 de septiembre de 2026 · Hito 79. Puente técnico validado. El hito 80 entrega
-el [primer volumen de Hound](art/hound/blockout-v01/README.md), pendiente de
-revisión. Guía 0.1 y boceto 2D 01 aprobados por el usuario.
+el primer volumen de Hound y el hito 81 su [revisión 02](art/hound/blockout-v02/README.md),
+pendiente de aprobación. Guía 0.1 y boceto 2D 01 aprobados por el usuario.
 
 ## Instalación local validada
 

@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 10 de septiembre de 2026, hito 80 de volumen básico de Hound.
-Siguiente paso artístico: el usuario revisa el volumen 01 y sus vistas; no avanzar
+Actualizado: 10 de septiembre de 2026, hito 81 de correcciones de Hound v02.
+Siguiente paso artístico: el usuario revisa el volumen 02 y sus detalles; no avanzar
 a acabado o rig hasta validarlo. Guía 0.1 y boceto 2D 01 ya aprobados; conservarlos.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
@@ -39,7 +39,27 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 80, volumen básico de Hound
+## Último hito cerrado: 81, Hound v02 — clavículas, capucha y manos
+
+Fuente: `art/characters/hound/v02/hound-blockout-v02.blend`.
+[Vistas y detalles](art/hound/blockout-v02/README.md). La versión 01 se conserva
+sin cambios. El usuario pidió liberar los hombros, acercar la armadura a la
+clavícula, tapar más la cara y corregir las manos con una placa dorsal completa en pico.
+
+Copas de hombro retiradas y deltoides descubiertos; filos anclados más medialmente.
+Capucha adelantada y abertura más baja/estrecha. Palmas hacia los muslos,
+pulgares anteriores, dedos que flexionan hacia la palma y cobertura dorsal
+desde muñeca a nudillos con punta distal. Son cambios de volumen, no acabado.
+113 piezas, 7.626 triángulos y 7 materiales, con altura de 1,80 m.
+
+Validación de .blend y glTF, 67 piezas ajenas conservadas, reconstrucción del
+BIN idéntica, regresión de v01, cooker/visor Vulkan con 113/113 piezas y
+CTest **2/2**. Vistas y primeros planos inspeccionados. Sin rig, texturas finales,
+pruebas de deformación/agarres ni sustitución del personaje jugable.
+Informe: `reports/hound-blockout-81/README.md`. Hito con commit local, sin push.
+La valoración artística de v02 sigue pendiente; no avanzar a producción final.
+
+## Hito 80, volumen básico de Hound
 
 Fuente editable: `art/characters/hound/v01/hound-blockout-v01.blend`.
 [Frente/perfil/espalda y ficha](art/hound/blockout-v01/README.md), más tres cuartos.

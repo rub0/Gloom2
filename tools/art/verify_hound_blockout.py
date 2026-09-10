@@ -3,6 +3,7 @@ import json
 import math
 from pathlib import Path
 import struct
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -65,15 +66,19 @@ def inspect(path):
                     upper[axis] = max(upper[axis],position[axis])
     return scene, lower, upper, triangles
 
-scene, lower, upper, triangles = inspect(ROOT / 'assets/characters/hound_blockout/v01/hound-blockout.gltf')
-require(len(scene['meshes']) == 105 and len(scene['materials']) == 7, 'Unexpected model composition')
+version = sys.argv[1] if len(sys.argv) == 2 else 'v01'
+require(len(sys.argv) <= 2 and version in ('v01','v02'), 'Usage: verify_hound_blockout.py [v01|v02]')
+expected_parts, expected_triangles = (105,6974) if version == 'v01' else (113,7626)
+prefix = 'H'+version[1:]+'_'
+scene, lower, upper, triangles = inspect(ROOT / ('assets/characters/hound_blockout/'+version+'/hound-blockout.gltf'))
+require(len(scene['meshes']) == expected_parts and len(scene['materials']) == 7, 'Unexpected model composition')
 require(not scene.get('skins') and not scene.get('animations'), 'Blockout must not claim a rig or clips')
 require(not scene.get('images') and not scene.get('textures'), 'Blockout must use untextured material swatches')
-require(triangles == 6974, 'Unexpected triangulation')
+require(triangles == expected_triangles, 'Unexpected triangulation')
 require(abs(lower[1]) < 0.001 and abs(upper[1]-1.8) < 0.001, 'Expected grounded 1.8m Y-up character')
 names = {node.get('name') for node in scene['nodes']}
-require(all(name.startswith('H01_') for name in names), 'Review or reference objects leaked into the export')
-require({'H01_Hood_shell','H01_Eye_L','H01_Eye_R','H01_Head_planes'} <= names, 'Identity components missing')
+require(all(name.startswith(prefix) for name in names), 'Review or reference objects leaked into the export')
+require({prefix+name for name in ('Hood_shell','Eye_L','Eye_R','Head_planes')} <= names, 'Identity components missing')
 _, reference_lower, reference_upper, _ = inspect(ROOT / 'assets/characters/original/archangel.gltf')
 reference_height = reference_upper[1]-reference_lower[1]
 require(abs(reference_height-1.8) < 0.001, 'Original-character reference scale changed')

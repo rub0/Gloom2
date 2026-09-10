@@ -96,10 +96,10 @@ El nombre y Bite no justifican añadir hocico, patas caninas, cola o locomoción
 
 Rasgos a conservar:
 
-- Capucha oscura que enmarca un rostro humano severo y pálido; ojos anaranjados.
+- Capucha oscura adelantada sobre un rostro humano severo y pálido, cubriendo parte de frente y laterales; ojos anaranjados.
 - Hombros anchos, cintura relativamente estrecha y musculatura visible en brazos.
-- Coraza por placas, abdomen segmentado, hombreras con filos barridos hacia fuera.
-- Guanteletes pesados con filos, cintura de tela oscura rojiza y grebas metálicas.
+- Coraza por placas y abdomen segmentado; filos anclados en clavícula/cuello, dejando el deltoides más libre.
+- Guanteletes pesados con filos; placa dorsal que cubre la mano y termina en pico, cintura de tela oscura rojiza y grebas metálicas.
 - Manos que puedan empuñar el arsenal existente; ninguna arma nueva en esta lámina.
 
 Ajustes aceptados en el boceto 01: superficies más ordenadas, separación material
@@ -137,8 +137,9 @@ El siguiente entregable es un modelo básico de Hound, no la malla final.
 
 ## Próxima revisión: volumen básico de Hound
 
-El [volumen 01 y sus vistas](art/hound/blockout-v01/README.md) se entregan en el
-hito 80. Están pendientes de aprobación; el aspecto facetado no es acabado final.
+El [volumen 02 y sus detalles](art/hound/blockout-v02/README.md) aplica en el hito 81
+las correcciones del usuario sobre hombros, capucha y manos de la primera versión.
+Está pendiente de aprobación; el aspecto facetado no es acabado final.
 
 1. Frente, perfil y espalda: mantener el carácter y las proporciones aprobadas.
 2. Comprobar capucha, hombreras, manos y separación de articulaciones en 3D.
