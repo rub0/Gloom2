@@ -7,7 +7,7 @@ from mathutils.kdtree import KDTree
 
 root = Path(__file__).resolve().parents[2]
 version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v03'
-assert version in ('v03', 'v04')
+assert version in ('v03', 'v04', 'v05')
 prefix = 'Hound'+version[1:]
 mesh_prefix = 'H'+version[1:]
 path = root/('assets/characters/hound_rig/'+version+'/hound-rig.gltf')
@@ -28,7 +28,7 @@ assert len(legacy_names) == 43 and legacy_names <= export_names
 assert all(node.get('name', '').startswith(('Bip001', 'Hound ', prefix+'_', mesh_prefix+'_')) for node in gltf['nodes'])
 for buffer in gltf['buffers']:
     assert (path.parent/buffer['uri']).stat().st_size == buffer['byteLength']
-source = bpy.data.scenes['Hound_Rig_v03' if version == 'v03' else 'Hound_Mesh_v04']
+source = bpy.data.scenes['Hound_Rig_v03' if version == 'v03' else 'Hound_Mesh_'+version]
 source_rig = source.objects[prefix+'_Rig']
 source_mesh = source.objects[mesh_prefix+'_DeformMesh']
 assert source_rig.animation_data.action.name == prefix+'_joint_check'

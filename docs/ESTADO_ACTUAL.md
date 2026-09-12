@@ -1,11 +1,12 @@
 # Traspaso de Gloom
 
-Actualizado: 10 de septiembre de 2026, hito 84 de continuidad de brazos de Hound v04.
+Actualizado: 12 de septiembre de 2026, hito 85 de continuidad interior de manos de Hound v05.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
-La v04 unifica hombro/bíceps/brazo; quedan conexiones/anatomía de manos, cintura,
-ropa y rostro. Estabilizar la malla antes de afinar pesos, controles y animaciones.
-Conservar v02/v03/v04 y usar otra versión para el siguiente pase.
+La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
+bajo la armadura intacta. Quedan cintura/ropa, rostro y ajuste de manos/agarres.
+Estabilizar la malla antes de afinar pesos, controles y animaciones.
+Conservar v02/v03/v04/v05 y usar otra versión para el siguiente pase.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -42,7 +43,29 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 84, hombros y brazos continuos
+## Último hito cerrado: 85, superficie interior de manos continua
+
+[V05: comparación de manos, fuente y vídeo](art/hound/mesh-v05/README.md).
+Dos guantes interiores cerrados unen las palmas a los cinco dedos, bajo las
+falanges metálicas y la placa dorsal completa en pico. Se sustituyen solo las
+dos palmas; 103 componentes, 93 piezas rígidas, 53 huesos y clip conservados.
+Una malla, siete materiales, 20.386 triángulos; pesos provisionales, hasta dos
+influencias. No hay rig definitivo ni aprobación nueva del acabado.
+
+Fuente reabierta y comprobada: 61 muestras del clip, cuatro casos adicionales
+de pulgar, manos conexas/manifold y reimportación glTF en 13 poses (error máximo
+0,000002800 m). Cooker y visor estático Vulkan 7/7 piezas/siete batches;
+CTest assets/gpu_assets Release 2/2 y animation_vfx Debug 1/1. Regresión v04,
+renders y vídeo revisados. Informe: `reports/hound-mesh-85/README.md`.
+
+Push solicitado en esta sesión: hitos 83–84 publicados en `rub0/Gloom2/main`,
+hasta `a5302d16b393d1715f36c91106826c326f2a6309`, hash remoto comprobado.
+El hito 85 tiene cierre local; no se ha hecho un nuevo push después de continuarlo.
+Siguiente pase: cintura/ropa y rostro; comprobar después agarres/contactos de
+armadura. Las pruebas no certifican ausencia de penetraciones ni calidad final.
+Sin UVs/texturas finales, retargeting, caminar/Bite finales o sustitución jugable.
+
+## Hito 84, hombros y brazos continuos
 
 [V04: comparación, fuente y vídeo](art/hound/mesh-v04/README.md).
 Dos superficies continuas sustituyen seis volúmenes superpuestos; 37 anillos
@@ -54,7 +77,8 @@ Validación de fuente/topología/pesos en 61 muestras y reimportación glTF en 1
 poses (error máximo 0,000002800 m); cooker/visor estático Vulkan 7/7 piezas,
 siete batches, CTest assets/gpu_assets Release 2/2 y animation_vfx Debug 1/1.
 Regresión de v03 comprobada; renders y vídeo inspeccionados. Informe:
-`reports/hound-mesh-84/README.md`. Hitos 83–84 con commit local, sin nuevo push.
+`reports/hound-mesh-84/README.md`. Hitos 83–84 publicados el 12 de septiembre,
+antes de comenzar v05; el informe original conserva el estado de su fecha.
 
 Este pase elimina las uniones visibles de los volúmenes del brazo; NO es malla
 definitiva ni validación exhaustiva de colisiones/agarres. Continuar anatomía y

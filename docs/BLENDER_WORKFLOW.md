@@ -7,6 +7,10 @@ El [hito 83](../reports/hound-rig-83/README.md) entrega una base deformable v03:
 rig diagnóstico exportado y validado. Estabilizar la malla antes del rig definitivo.
 El [hito 84](../reports/hound-mesh-84/README.md) entrega v04 con brazos continuos;
 mantiene ese rig de prueba mientras continúa el trabajo de topología.
+El [hito 85](../reports/hound-mesh-85/README.md), 12 de septiembre, entrega v05
+con dos guantes interiores continuos, sin modificar armadura, huesos o clip.
+La exportación glTF, el cooker y el visor estático están comprobados; no hay
+animaciones finales ni validación de agarres o reproducción del clip en el juego.
 
 ## Instalación local validada
 
@@ -134,16 +138,18 @@ con escena residente y sale por la ruta normal de liberación del renderizador;
 limita la espera a 10000 frames. Sin ese argumento conserva el visor interactivo.
 La captura es un archivo del renderizador real, no una imagen generada por IA.
 
-## Hound básico aprobado; siguiente entrega: rig de prueba
+## Hound básico aprobado; continuar topología con el rig diagnóstico
 
 Entregado como volumen 01 en el hito 80, corregido en v02 en el hito 81 y
 aprobado en el hito 82. Las herramientas Blender ya se han usado de forma nativa.
-Conservar las fuentes v01/v02; preparar malla y rig de prueba en una versión nueva.
+Conservar las fuentes v01/v02. El hito 83 ya entregó el rig de prueba de 53 huesos;
+v04/v05 avanzan la malla conservándolo. Las siguientes revisiones deben usar
+otra versión y mantener intactas estas fuentes.
 
 Mantener silueta, escala y correcciones aprobadas. Revisar topología de zonas
-deformables y separación de placas rígidas; evaluar el rig existente antes de
-reutilizarlo. Entregar pruebas de caminar, apuntar y Bite, con revisión de
-penetraciones, conservación de volumen y agarres. El rig de 43 huesos es candidato
-a reutilización, no compatibilidad demostrada por las pruebas estáticas.
+deformables y separación de placas rígidas. Los 43 nombres Legacy se conservan
+en el rig diagnóstico, pero sus ejes/longitudes/jerarquía cambian: los clips
+originales necesitan retargeting, no copia directa. Todavía faltan pruebas de
+caminar, apuntar y Bite, con penetraciones, conservación de volumen y agarres.
 UVs/texturas finales y sustitución del personaje jugable quedan para sus fases
 posteriores. Esta aceptación no cambia gameplay ni autoriza un push.

@@ -14,6 +14,9 @@
 __pycache__/
 *.py[cod]
 
+# Copias automáticas de Blender; conservar solo la fuente .blend de cada versión.
+*.blend[0-9]*
+
 # Resultados generados de validaciones y capturas: los informes Markdown
 # permanecen versionados, mientras que los binarios y medios se regeneran.
 /reports/**

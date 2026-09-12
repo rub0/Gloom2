@@ -148,7 +148,9 @@ no cierra la puerta del rig: faltan caminar, apuntar y Bite con agarres reales.
 Tras consultarlo, el usuario acepta estabilizar la malla antes de pulir pesos,
 controles y animaciones. Mantener el rig de prueba como herramienta de diagnóstico.
 El [pase v04](art/hound/mesh-v04/README.md) unifica hombros/bíceps/brazos sin
-cambiar la armadura o el esqueleto. Sigue pendiente la retopología global.
+cambiar la armadura o el esqueleto. El [pase v05](art/hound/mesh-v05/README.md)
+conecta el interior de las manos y conserva las placas dorsales en pico y las
+falanges metálicas. Sigue pendiente la retopología global y el acabado de manos.
 
 1. Conservar v02; preparar la malla y el rig de prueba en una nueva versión.
 2. Mantener hombros libres, armadura clavicular, capucha y manos aprobados.
