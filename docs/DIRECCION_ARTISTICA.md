@@ -135,7 +135,7 @@ El boceto ya está aprobado. El [puente Blender–Gloom](BLENDER_WORKFLOW.md) se
 validado en el hito 79 con una escena pequeña, el cooker y el renderizador Vulkan.
 El modelo básico v02 está entregado y aprobado; todavía no es la malla final.
 
-## Volumen básico de Hound aprobado; próxima revisión: rig de prueba
+## Volumen básico de Hound aprobado; malla en revisión con rig diagnóstico
 
 El [volumen 02 y sus detalles](art/hound/blockout-v02/README.md) aplica en el hito 81
 las correcciones del usuario sobre hombros, capucha y manos de la primera versión.
@@ -150,7 +150,9 @@ controles y animaciones. Mantener el rig de prueba como herramienta de diagnóst
 El [pase v04](art/hound/mesh-v04/README.md) unifica hombros/bíceps/brazos sin
 cambiar la armadura o el esqueleto. El [pase v05](art/hound/mesh-v05/README.md)
 conecta el interior de las manos y conserva las placas dorsales en pico y las
-falanges metálicas. Sigue pendiente la retopología global y el acabado de manos.
+falanges metálicas. El [pase v06](art/hound/mesh-v06/README.md) conecta cadera y
+pantalones, refina la faja y unifica las facciones, sin cambiar capucha u ojos.
+La anatomía y topología facial final, el acabado y los agarres siguen pendientes.
 
 1. Conservar v02; preparar la malla y el rig de prueba en una nueva versión.
 2. Mantener hombros libres, armadura clavicular, capucha y manos aprobados.

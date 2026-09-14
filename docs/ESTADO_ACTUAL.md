@@ -1,12 +1,13 @@
 # Traspaso de Gloom
 
-Actualizado: 12 de septiembre de 2026, hito 85 de continuidad interior de manos de Hound v05.
+Actualizado: 14 de septiembre de 2026, cierre del hito 86 de cintura, ropa y rostro de Hound v06.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
 La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
-bajo la armadura intacta. Quedan cintura/ropa, rostro y ajuste de manos/agarres.
-Estabilizar la malla antes de afinar pesos, controles y animaciones.
-Conservar v02/v03/v04/v05 y usar otra versión para el siguiente pase.
+bajo la armadura intacta. La v06 conecta pantalones/cadera, refina la faja y une
+las facciones en una superficie neutra. No es anatomía ni topología facial final.
+Quedan capucha/cuello, contactos con placas y agarres; estabilizar la malla antes
+de afinar pesos, controles y animaciones. Conservar v02–v06 y usar otra versión.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -43,7 +44,33 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 85, superficie interior de manos continua
+## Último hito cerrado: 86, cintura, ropa y rostro continuos
+
+[V06: comparaciones de cintura/rostro, fuente y vídeo](art/hound/mesh-v06/README.md).
+Tres superficies sustituyen once componentes: pantalón con entrepierna conexa,
+faja hueca de 3 mm y cabeza neutra sin los bloques superpuestos de mandíbula,
+nariz, mejillas y cejas. Se conservan exactamente los otros 94 componentes,
+incluidos capucha, ojos, boca provisional, armadura, brazos y manos.
+
+13.752 vértices y 27.124 triángulos de autoría (+6.738), un mesh/skin y siete
+materiales. Mismos 53 huesos y claves del clip; pesos nuevos provisionales,
+hasta dos influencias. La densidad final y los LODs quedan pendientes.
+La cabeza está ligada al hueso Head: no hay rig facial ni apertura de mandíbula.
+
+Fuente reabierta: topología cerrada/conexa/orientada, 61 muestras del clip,
+cuatro poses adicionales aisladas y 13 poses reimportadas (máximo 0,000002800 m).
+Cooker y visor estático Vulkan 7/7 piezas/siete batches; CTest Release
+assets/gpu_assets 2/2 y Debug animation_vfx 1/1. Regresión v05, seis PNG,
+poses de esfuerzo y vídeo revisados. Informe: `reports/hound-mesh-86/README.md`.
+
+Sin push en esta continuación. Hitos 85 (`56d3fc3`) y 86 con cierre local;
+último remoto comprobado `a5302d1` (hitos 83–84). Consultar `git log -1` para
+el hash del cierre actual. No confundir cierre técnico con aprobación artística.
+Siguiente: capucha/cuello y ajuste de placas; después contactos/agarres y un
+pase anatómico/facial específico. Sin UVs/texturas finales, retargeting,
+caminar/Bite finales, simulación de tela o sustitución del personaje jugable.
+
+## Hito 85, superficie interior de manos continua
 
 [V05: comparación de manos, fuente y vídeo](art/hound/mesh-v05/README.md).
 Dos guantes interiores cerrados unen las palmas a los cinco dedos, bajo las
