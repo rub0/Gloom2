@@ -4,7 +4,7 @@ import sys
 from mathutils import Vector
 
 version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v03'
-assert version in ('v03', 'v04', 'v05', 'v06')
+assert version in ('v03', 'v04', 'v05', 'v06', 'v07')
 scene = bpy.data.scenes['Hound_Rig_v03' if version == 'v03' else 'Hound_Mesh_'+version]
 bpy.context.window.scene = scene
 scene.frame_start, scene.frame_end = 1, 181

@@ -1,13 +1,14 @@
 # Traspaso de Gloom
 
-Actualizado: 14 de septiembre de 2026, cierre del hito 86 de cintura, ropa y rostro de Hound v06.
+Actualizado: 14 de septiembre de 2026, cierre del hito 87 de capucha, cuello y encaje clavicular de Hound v07.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
 La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
 bajo la armadura intacta. La v06 conecta pantalones/cadera, refina la faja y une
 las facciones en una superficie neutra. No es anatomía ni topología facial final.
-Quedan capucha/cuello, contactos con placas y agarres; estabilizar la malla antes
-de afinar pesos, controles y animaciones. Conservar v02–v06 y usar otra versión.
+La v07 conecta capucha/borde/forro, refina cuello y corrige el encaje clavicular.
+Quedan contactos globales, agarres y acabado; estabilizar la malla antes de afinar
+pesos, controles y animaciones. Conservar v02–v07 y usar otra versión.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -44,7 +45,38 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 86, cintura, ropa y rostro continuos
+## Último hito cerrado: 87, capucha, cuello y encaje clavicular
+
+[V07: comparaciones, fuente y vídeo](art/hound/mesh-v07/README.md).
+Dos superficies sustituyen capucha/borde/cuello; la capucha incluye su forro
+interior y conserva exactamente las polilíneas frontales aprobadas. Se ajusta
+solo la zona medial de las dos bases claviculares. Los otros 92 componentes,
+incluidos seis filos, hombros, rostro y manos, conservan geometría y pesos.
+
+14.026 vértices y 27.672 triángulos (+548), un mesh/skin, siete materiales,
+96 componentes y 87 rígidos. Mismos 53 huesos y claves del clip. Pesos nuevos
+provisionales, máximo dos influencias; la base de la capucha acompaña al torso.
+No hay rig definitivo, simulación de tela o topología facial final.
+
+Fuente reabierta: superficies cerradas/conexas/orientadas, abertura exacta,
+61 muestras del clip, cuatro poses extra y 13 poses reimportadas (máximo
+0,000002036 m). Contactos capucha/cuello con clavículas en reposo: 80 pares
+de caras en v06, cero en v07. Giros de cabeza ±35° e inclinaciones cuello/cabeza
+±10°/±20°: sin cruces detectados capucha/clavículas ni autointersecciones entre
+caras no adyacentes de la capucha. Es una prueba local, no colisión exhaustiva.
+
+Cooker y visor estático Vulkan 7/7 piezas/siete batches; CTest Release
+assets/gpu_assets 2/2 y Debug animation_vfx 1/1. Regresión v06, renders y vídeo
+revisados. Informe: `reports/hound-mesh-87/README.md`.
+
+Cierre local, sin push en esta continuación. Hitos 85 (`56d3fc3`), 86 (`5e494ea`)
+y 87 locales; último remoto comprobado `a5302d1`. Consultar `git log -1` para
+el hash del cierre actual. No confundir cierre técnico con aprobación artística.
+Siguiente: contactos del conjunto y agarres reales, después anatomía/acabado
+y topología facial específica. Sin UVs/texturas finales, retargeting,
+caminar/Bite de producción o sustitución del personaje jugable.
+
+## Hito 86, cintura, ropa y rostro continuos
 
 [V06: comparaciones de cintura/rostro, fuente y vídeo](art/hound/mesh-v06/README.md).
 Tres superficies sustituyen once componentes: pantalón con entrepierna conexa,

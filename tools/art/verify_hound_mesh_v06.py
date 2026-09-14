@@ -1,20 +1,24 @@
-'''Validate cloth/face topology, preservation of armor/bones/clip, and sampled diagnostic deformation.'''
+'''Validate v06/v07 surfaces, preserved components/bones/clip, and sampled diagnostic deformation.'''
 import bpy
 import bmesh
 import json
 import math
 import sys
-from mathutils import Matrix, Quaternion
+from mathutils import Matrix, Quaternion, Vector
+from mathutils.bvhtree import BVHTree
 
-scene = bpy.data.scenes['Hound_Mesh_v06']
+version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v06'
+assert version in ('v06', 'v07')
+suffix, prior = version[1:], '05' if version == 'v06' else '06'
+scene = bpy.data.scenes['Hound_Mesh_'+version]
 bpy.context.window.scene = scene
-model = scene.objects['H06_DeformMesh']
-rig = scene.objects['Hound06_Rig']
-source = bpy.data.scenes['Hound_Mesh_v05']
-original = source.objects['H05_DeformMesh']
-original_rig = source.objects['Hound05_Rig']
+model = scene.objects['H'+suffix+'_DeformMesh']
+rig = scene.objects['Hound'+suffix+'_Rig']
+source = bpy.data.scenes['Hound_Mesh_v'+prior]
+original = source.objects['H'+prior+'_DeformMesh']
+original_rig = source.objects['Hound'+prior+'_Rig']
 model.data.calc_loop_triangles()
-assert len(model.data.vertices) == 13752 and len(model.data.loop_triangles) == 27124
+assert (len(model.data.vertices), len(model.data.loop_triangles)) == ((13752, 27124) if version == 'v06' else (14026, 27672))
 assert len(model.data.materials) == 7 and len(rig.data.bones) == 53
 assert len([o for o in scene.objects if o.type == 'MESH']) == 1
 assert len(model.modifiers) == 1 and model.modifiers[0].type == 'ARMATURE' and model.modifiers[0].object == rig
@@ -54,6 +58,10 @@ source_parts, target_parts = parts(original), parts(model)
 replaced = {'PART_'+name for name in ('Head_planes', 'Jaw_plane', 'Nose_plane', 'Cheek_L', 'Cheek_R', 'Brow_L', 'Brow_R',
                                      'Pelvis_cloth', 'Waist_sash', 'Leg_continuous_L', 'Leg_continuous_R')}
 added = {'PART_Trousers_continuous', 'PART_Waist_wrap', 'PART_Head_surface'}
+modified = {'PART_Collar_plate_L', 'PART_Collar_plate_R'} if version == 'v07' else set()
+if version == 'v07':
+    replaced = {'PART_Hood_shell', 'PART_Hood_opening_rim', 'PART_Neck'}
+    added = {'PART_Hood_continuous', 'PART_Neck_surface'}
 assert set(source_parts)-replaced == set(target_parts)-added
 preserved = 0
 for name, indices in source_parts.items():
@@ -62,7 +70,10 @@ for name, indices in source_parts.items():
     other = target_parts[name]
     assert len(indices) == len(other)
     for a, b in zip(indices, other):
-        assert (original.data.vertices[a].co-model.data.vertices[b].co).length < 1e-7
+        expected = original.data.vertices[a].co.copy()
+        if name in modified and abs(expected.x) < .185:
+            expected.x = (1 if expected.x >= 0 else -1)*(.146+(abs(expected.x)-.073)*(.185-.146)/(.185-.073))
+        assert (expected-model.data.vertices[b].co).length < 1e-7
         assert bone_weights(original, a) == bone_weights(model, b)
     source_remap, target_remap = {v: i for i, v in enumerate(indices)}, {v: i for i, v in enumerate(other)}
     before = [(tuple(source_remap[i] for i in p.vertices), p.material_index, p.use_smooth)
@@ -70,11 +81,13 @@ for name, indices in source_parts.items():
     after = [(tuple(target_remap[i] for i in p.vertices), p.material_index, p.use_smooth)
              for p in model.data.polygons if all(i in target_remap for i in p.vertices)]
     assert before == after, 'Changed preserved faces: '+name
-    preserved += 1
-assert preserved == 94
+    preserved += name not in modified
+assert preserved == (94 if version == 'v06' else 92)
 assert all(tuple(a.diffuse_color) == tuple(b.diffuse_color) for a, b in zip(original.data.materials, model.data.materials))
 surface_metrics = {}
-for name, count, euler in [('PART_Trousers_continuous', 1163, 2), ('PART_Waist_wrap', 1248, 0), ('PART_Head_surface', 2368, 2)]:
+surfaces = [('PART_Trousers_continuous', 1163, 2), ('PART_Waist_wrap', 1248, 0), ('PART_Head_surface', 2368, 2)] if version == 'v06' else [
+    ('PART_Hood_continuous', 1106, 2), ('PART_Neck_surface', 320, 2)]
+for name, count, euler in surfaces:
     indices = set(target_parts[name])
     assert len(indices) == count
     faces = [p for p in model.data.polygons if all(i in indices for i in p.vertices)]
@@ -97,7 +110,34 @@ for name, count, euler in [('PART_Trousers_continuous', 1163, 2), ('PART_Waist_w
         pending.extend(e.other_vert(vertex) for e in vertex.link_edges if e.other_vert(vertex) not in visited)
     assert len(visited) == len(indices), 'Disconnected surface: '+name
     bm.free()
+    if version == 'v07':
+        tree = BVHTree.FromPolygons([v.co for v in model.data.vertices], [list(p.vertices) for p in faces])
+        assert not [(a, b) for a, b in tree.overlap(tree) if a < b and not set(faces[a].vertices).intersection(faces[b].vertices)], name
     surface_metrics[name[5:]] = {'vertices': len(indices), 'faces': len(faces), 'euler': euler, 'volume_m3': volume}
+contacts = {}
+if version == 'v07':
+    opening = [(0,1.722),(.041,1.695),(.065,1.653),(.075,1.579),(.085,1.488),(.050,1.446),
+               (0,1.49),(-.050,1.446),(-.085,1.488),(-.075,1.579),(-.065,1.653),(-.041,1.695)]
+    outline = [(0,1.80),(.066,1.765),(.127,1.671),(.14,1.57),(.128,1.476),(.071,1.427),
+               (0,1.474),(-.071,1.427),(-.128,1.476),(-.14,1.57),(-.127,1.671),(-.066,1.765)]
+    for name, profile, y in [('opening', opening, -.194), ('outer_front', outline, -.170)]:
+        group = model.vertex_groups['LANDMARK_Hood_'+name].index
+        points = [v.co for v in model.data.vertices if any(g.group == group for g in v.groups)]
+        expected = [Vector((x, y, z)).lerp(Vector((profile[(i+1)%12][0], y, profile[(i+1)%12][1])), step/4)
+                    for i, (x, z) in enumerate(profile) for step in range(4)]
+        assert len(points) == 48 and max((a-b).length for a, b in zip(points, expected)) < 1e-7
+    for obj, components, hood_parts, neck_part in [(original, source_parts, ['PART_Hood_shell', 'PART_Hood_opening_rim'], 'PART_Neck'),
+                                                  (model, target_parts, ['PART_Hood_continuous'], 'PART_Neck_surface')]:
+        trees = {}
+        for name in hood_parts+[neck_part]+[n for n in components if n.startswith('PART_Collar_')]:
+            indices = set(components[name])
+            trees[name] = BVHTree.FromPolygons([v.co for v in obj.data.vertices],
+                                             [list(p.vertices) for p in obj.data.polygons if all(i in indices for i in p.vertices)])
+        contacts[obj.name] = {name[5:]: {'hood_face_pairs': sum(len(trees[name].overlap(trees[h])) for h in hood_parts),
+                                        'neck_face_pairs': len(trees[name].overlap(trees[neck_part]))}
+                              for name in components if name.startswith('PART_Collar_')}
+    print('REST_COLLAR_CONTACTS', json.dumps(contacts))
+    assert all(v['hood_face_pairs'] == 0 and v['neck_face_pairs'] == 0 for v in contacts[model.name].values())
 # Preserve waist height, keep the neutral head behind the approved hood opening and retain the body scale.
 head = [model.data.vertices[i].co for i in target_parts['PART_Head_surface']]
 assert max(abs(v.x) for v in head) <= .08401 and min(v.y for v in head) > -.150
@@ -145,7 +185,17 @@ extra_cases = [
     [('Bip001 R Thigh', (1, 0, 0), -60), ('Bip001 R Calf', (1, 0, 0), 85)],
     [('Bip001 L Thigh', (0, 1, 0), -25), ('Bip001 R Thigh', (0, 1, 0), 25)],
     [('Bip001 Spine', (1, 0, 0), 20), ('Bip001 Spine1', (0, 0, 1), 20), ('Bip001 Head', (0, 0, 1), 35)]]
+if version == 'v07':
+    extra_cases = [[('Bip001 Head', (0, 0, 1), 35)], [('Bip001 Head', (0, 0, 1), -35)],
+                   [('Bip001 Neck', (1, 0, 0), 10), ('Bip001 Head', (1, 0, 0), 20)],
+                   [('Bip001 Neck', (1, 0, 0), -10), ('Bip001 Head', (1, 0, 0), -20)]]
+camera_matrix, camera_scale = scene.camera.matrix_world.copy(), scene.camera.data.ortho_scale
+if version == 'v07' and '--render-stress' in sys.argv:
+    scene.camera.location = (1.5, -4, 1.95)
+    scene.camera.rotation_euler = (Vector((0, 0, 1.50))-scene.camera.location).to_track_quat('-Z', 'Y').to_euler()
+    scene.camera.data.ortho_scale = 1.22
 min_area = 1
+stress_contacts = []
 saved_action = rig.animation_data.action
 rig.animation_data.action = None
 for case, pose in enumerate(extra_cases):
@@ -159,18 +209,33 @@ for case, pose in enumerate(extra_cases):
     mesh = evaluated.to_mesh()
     assert all(p.area > 1e-12 for p in mesh.polygons)
     assert all(all(math.isfinite(c) for c in v.co) and v.co.length < 3 for v in mesh.vertices)
-    tested = target_parts['PART_Trousers_continuous' if case < 3 else 'PART_Head_surface']
+    tested = target_parts['PART_Hood_continuous' if version == 'v07' else 'PART_Trousers_continuous' if case < 3 else 'PART_Head_surface']
     assert max((mesh.vertices[i].co-rest[i]).length for i in tested) > .025, 'Stress pose did not actually deform the target'
     min_area = min(min_area, min(p.area for p in mesh.polygons))
+    if version == 'v07':
+        hood_indices = set(target_parts['PART_Hood_continuous'])
+        collar_indices = set().union(*(set(indices) for name, indices in target_parts.items() if name.startswith('PART_Collar_')))
+        hood_faces = [list(p.vertices) for p in mesh.polygons if all(i in hood_indices for i in p.vertices)]
+        collar_faces = [list(p.vertices) for p in mesh.polygons if all(i in collar_indices for i in p.vertices)]
+        hood_tree = BVHTree.FromPolygons([v.co for v in mesh.vertices], hood_faces)
+        collar_tree = BVHTree.FromPolygons([v.co for v in mesh.vertices], collar_faces)
+        # ponytail: diagnostic surface-pair counts only; production needs contact depth/clearance and the full motion set.
+        stress_contacts.append({'pose': case, 'hood_collar_face_pairs': len(hood_tree.overlap(collar_tree)),
+                                'hood_nonadjacent_self_pairs': sum(a < b and not set(hood_faces[a]).intersection(hood_faces[b])
+                                                                 for a, b in hood_tree.overlap(hood_tree))})
+        assert stress_contacts[-1]['hood_collar_face_pairs'] == 0 and stress_contacts[-1]['hood_nonadjacent_self_pairs'] == 0
     evaluated.to_mesh_clear()
     if '--render-stress' in sys.argv:
-        scene.render.filepath = 'D:/Projects/Gloom/.cache/hound-mesh-v06/stress-'+str(case)+'.png'
+        scene.render.filepath = 'D:/Projects/Gloom/.cache/hound-mesh-'+version+'/stress-'+str(case)+'.png'
         bpy.ops.render.render(write_still=True)
 rig.animation_data.action = saved_action
+scene.camera.matrix_world, scene.camera.data.ortho_scale = camera_matrix, camera_scale
 scene.frame_set(1)
 bpy.context.view_layer.update()
 print(json.dumps({'vertices': len(rest), 'triangles': len(model.data.loop_triangles), 'preserved_components': preserved,
+                  'modified_collar_bases': len(modified), 'rest_collar_contacts': contacts,
                   'surfaces': surface_metrics, 'unchanged_bones': 53, 'unchanged_diagnostic_clip': True,
                   'max_influences': max_influences, 'rigid_components': len(rigid_parts), 'sampled_frames': 61,
                   'extra_pose_cases': len(extra_cases), 'extra_pose_min_face_area_m2': min_area,
+                  'extra_pose_contact_diagnostics': stress_contacts,
                   'max_displacement_m': max_displacement, 'max_rigid_distance_error_m': rigid_error}, indent=2))

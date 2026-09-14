@@ -11,6 +11,7 @@ Producción artística: [guía y Hound aprobado](docs/DIRECCION_ARTISTICA.md) y
 [Hound v04: hombros y brazos continuos, con comparación y vídeo](docs/art/hound/mesh-v04/README.md).
 [Hound v05: palmas y dedos conectados bajo la armadura, con revisión de manos](docs/art/hound/mesh-v05/README.md).
 [Hound v06: cintura, tela y rostro continuos, con comparativas y vídeo](docs/art/hound/mesh-v06/README.md).
+[Hound v07: capucha/cuello continuos y encaje clavicular, con comparativas y vídeo](docs/art/hound/mesh-v07/README.md).
 
 Milestones 59–61 restore the original Factory mesh, placed static objects,
 materials and collision in local, host/join and dedicated play. The offline

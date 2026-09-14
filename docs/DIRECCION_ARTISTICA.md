@@ -152,6 +152,11 @@ cambiar la armadura o el esqueleto. El [pase v05](art/hound/mesh-v05/README.md)
 conecta el interior de las manos y conserva las placas dorsales en pico y las
 falanges metálicas. El [pase v06](art/hound/mesh-v06/README.md) conecta cadera y
 pantalones, refina la faja y unifica las facciones, sin cambiar capucha u ojos.
+El [pase v07](art/hound/mesh-v07/README.md) conecta exterior, borde y forro de la
+capucha, refina el cuello y ajusta solo el extremo interior de las dos bases
+claviculares. Se conservan la abertura frontal y los seis filos de armadura;
+el perfil posterior de tela se suaviza. Las superficies y sus pesos son todavía
+provisionales; esta entrega técnica no añade una aprobación artística del usuario.
 La anatomía y topología facial final, el acabado y los agarres siguen pendientes.
 
 1. Conservar v02; preparar la malla y el rig de prueba en una nueva versión.
