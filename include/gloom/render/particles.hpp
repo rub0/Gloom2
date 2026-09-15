@@ -31,6 +31,7 @@ public:
     void emitter(std::uint64_t id,std::uint64_t owner,std::string_view recipe,Vec3 position,Vec3 direction={0,1,0});
     void burst(std::uint64_t owner,std::string_view recipe,Vec3 position,Vec3 direction,
                std::uint64_t seed,bool view_model=false);
+    [[nodiscard]] bool translate(std::uint64_t owner,Vec3 offset) noexcept;
     void advance(double seconds);
     void cancel(std::uint64_t owner);
     void clear() noexcept;

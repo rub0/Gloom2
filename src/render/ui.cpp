@@ -56,17 +56,30 @@ void UiCanvas::image(std::string_view name,UiRect r,UiColor c){
 }
 void UiCanvas::rect(UiRect r,UiColor c){image("white",r,c);}
 void UiCanvas::ring(float x,float y,float radius,float fraction,UiColor c,float thickness){
+    arc(x,y,radius,-1.57079633F,fraction,c,thickness);
+}
+void UiCanvas::arc(float x,float y,float radius,float start,float fraction,UiColor c,float thickness){
     const auto s=sprites_.at("white");
     const float u=(s.x+.5F)/atlas_width_,v=(s.y+.5F)/atlas_height_;
     const float end=std::clamp(fraction,0.F,1.F)*64;
     for(unsigned i=0;i<static_cast<unsigned>(std::ceil(end));++i){
-        const float a=-1.57079633F+i*6.28318531F/64,b=-1.57079633F+std::min(static_cast<float>(i+1),end)*6.28318531F/64;
+        const float a=start+i*6.28318531F/64,b=start+std::min(static_cast<float>(i+1),end)*6.28318531F/64;
         auto vertex=[&](float angle,float r){return UiVertex{(left_+(x+std::cos(angle)*r)*scale_)/width_*2-1,
             1-(top_+(y+std::sin(angle)*r)*scale_)/height_*2,u,v,c[0],c[1],c[2],c[3]};};
         if(data_.vertices.size()+6>65536)return;
         const auto p=vertex(a,radius),q=vertex(b,radius),r=vertex(a,radius-thickness),t=vertex(b,radius-thickness);
         for(auto point:{p,q,r,r,q,t})data_.vertices.push_back(point);
     }
+}
+void UiCanvas::vignette(UiColor c){
+    const auto s=sprites_.at("white");const float u=(s.x+.5F)/atlas_width_,v=(s.y+.5F)/atlas_height_;
+    const auto vertex=[&](float x,float y,float alpha){return UiVertex{(left_+x*scale_)/width_*2-1,1-(top_+y*scale_)/height_*2,u,v,c[0],c[1],c[2],c[3]*alpha};};
+    const auto quad=[&](UiVertex a,UiVertex b,UiVertex d,UiVertex e){for(const auto p:{a,b,d,d,b,e})data_.vertices.push_back(p);};
+    const float x0=-left_/scale_,x1=(width_-left_)/scale_,y0=-top_/scale_,y1=(height_-top_)/scale_;
+    quad(vertex(x0,y0,1),vertex(x1,y0,1),vertex(360,200,0),vertex(920,200,0));
+    quad(vertex(x0,y1,1),vertex(360,520,0),vertex(x1,y1,1),vertex(920,520,0));
+    quad(vertex(x0,y0,1),vertex(360,200,0),vertex(x0,y1,1),vertex(360,520,0));
+    quad(vertex(920,200,0),vertex(x1,y0,1),vertex(920,520,0),vertex(x1,y1,1));
 }
 void UiCanvas::text(float x,float y,std::string_view value,float size,UiColor c,bool heading){
     const float start=x;

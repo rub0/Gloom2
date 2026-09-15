@@ -29,5 +29,7 @@ int main()try{
     ui.begin(1280,720,input);ui.field("name",{100,100,300,60},name,3);require(name.size()==3,"Complete UTF-8 character rejected");
     input={};input.backspace=true;ui.begin(1280,720,input);ui.field("name",{100,100,300,60},name);require(name=="A","Backspace split a UTF-8 character");
     input={};input.focused=false;input.menu_confirm=true;ui.begin(1280,720,input);require(!ui.button("name",{100,100,300,60},"No activar"),"Unfocused window activated UI");
+    ui.begin(1280,720,{});ui.vignette({1,0,0,.5F});require(ui.data().vertices.size()==24,"Damage vignette geometry changed");
+    ui.arc(640,360,48,0,.14F,{1,0,0,1},6);require(ui.data().vertices.size()==78,"Directional damage arc geometry changed");
     std::cout<<"UI atlas, keyboard edges/focus, text editing, mouse and DPI/ultrawide checks passed\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}

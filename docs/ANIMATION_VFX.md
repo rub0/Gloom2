@@ -60,8 +60,9 @@ emisor y partículas; no renovar un emisor lo detiene y sus partículas expiran.
 Se auditan 349 scripts/materiales y 358 fuentes con hash; se recuperan siete
 texturas. Son adaptaciones acotadas de Particle Universe, sin Ogre en runtime:
 energía cian, humo/cola y estelas rojas, fogonazo, impacto, daño, escudo,
-aterrizaje, aparición, muerte, lava y calor. Sangre y explosión se muestran
-únicamente en la revisión, porque no existe un evento jugable que las justifique.
+aterrizaje, aparición, muerte, lava y calor. IronHellGoat renueva un emisor de
+humo en cada posición replicada del cohete y su impacto usa la explosión jugable,
+reforzada a 28 partículas. La sangre continúa limitada a la revisión.
 
 El render ordena transparencias de atrás hacia delante, conserva profundidad,
 mezcla alfa/aditiva y HDR/bloom, y suaviza intersecciones de partículas con
@@ -79,6 +80,10 @@ especulativo no crea un segundo fogonazo. Esta decisión añade la latencia de
 confirmación a la respuesta visual. Snapshots repetidos/reordenados se ignoran;
 una nueva conexión establece una línea base y no reproduce eventos viejos.
 El dedicado no instancia renderer, animadores ni partículas.
+
+El fogonazo confirmado usa un propietario de partícula separado y traslada sus
+partículas mientras viven según el socket animado del arma. Al expirar deja de
+buscar ese propietario, por lo que no añade un recorrido permanente por frame.
 
 ## Reproducir
 

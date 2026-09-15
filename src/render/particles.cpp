@@ -82,6 +82,12 @@ void ParticleSystem::burst(std::uint64_t owner,std::string_view name,Vec3 p,Vec3
     const auto recipe=find(name);
     for (std::uint32_t i=0;i<recipes_[recipe].burst;++i) spawn(owner,recipe,p,d,hash(seed+i),time_,fps);
 }
+bool ParticleSystem::translate(std::uint64_t owner,Vec3 d) noexcept {
+    bool found=false;
+    for (auto& p:particles_) if (p.owner==owner) {p.position=add(p.position,d);found=true;}
+    for (auto& e:emitters_) if (e.owner==owner) {e.previous=add(e.previous,d);e.position=add(e.position,d);found=true;}
+    return found;
+}
 void ParticleSystem::advance(double seconds) {
     if (!std::isfinite(seconds)||seconds<0||seconds>10) throw std::invalid_argument{"Invalid particle timestep"};
     const double end=time_+seconds;

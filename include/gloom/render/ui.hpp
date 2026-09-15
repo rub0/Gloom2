@@ -24,6 +24,8 @@ public:
     void begin(std::uint32_t width,std::uint32_t height,const platform::InputState& input);
     void rect(UiRect r,UiColor color);
     void ring(float x,float y,float radius,float fraction,UiColor color,float thickness=3);
+    void arc(float x,float y,float radius,float start,float fraction,UiColor color,float thickness=3);
+    void vignette(UiColor color);
     void image(std::string_view name,UiRect r,UiColor color={1,1,1,1});
     void text(float x,float y,std::string_view text,float size=22,UiColor color=ui_ink,bool heading=false);
     void paragraph(float x,float y,std::string_view text,float width,float size=20,UiColor color=ui_muted);

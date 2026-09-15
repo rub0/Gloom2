@@ -14,7 +14,7 @@ public:
     void reset(render::ParticleSystem& particles) noexcept;
     [[nodiscard]] std::uint64_t events() const noexcept {return events_;}
 private:
-    struct State {CombatantView view;std::uint64_t tick{0};bool valid{false};};
+    struct State {CombatantView view;std::uint64_t tick{0};render::Vec3 muzzle;bool muzzle_valid{false},valid{false};};
     std::array<State,2> states_;
     std::uint64_t events_{0};
 };

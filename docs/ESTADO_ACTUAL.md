@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 14 de septiembre de 2026, cierre del hito 87 de capucha, cuello y encaje clavicular de Hound v07.
+Actualizado: 15 de septiembre de 2026, cierre del hito 88 de feedback de daño y VFX de armas.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
 La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
@@ -45,7 +45,25 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 87, capucha, cuello y encaje clavicular
+## Último hito cerrado: 88, feedback de daño y VFX de armas
+
+Al perder vida o escudo, el HUD presenta durante 1,5 s una viñeta roja con
+gradiente desde todos los bordes físicos y centro totalmente transparente. Un
+arco junto a la mirilla indica la dirección relativa del rival. La presentación
+se deriva de snapshots existentes, sin cambiar el protocolo 22.
+
+El fogonazo confirmado conserva su ráfaga, pero ahora acompaña al socket animado
+del arma hasta expirar. Los proyectiles de IronHellGoat dejan una estela de humo
+gris persistente; su explosión pasa de 8 a 28 partículas, con mayor expansión,
+duración y brillo. No cambia daño, radio, velocidad ni autoridad del arma.
+
+Build Debug de `gloom`, pruebas UI/VFX/red 3/3 y captura Vulkan de efectos completados
+sin partículas descartadas (489 nacidas, 377 expiradas). Galería UI ampliada a
+18 estados en 1280×720, 1920×1080 y 2560×1080; viñeta e indicador inspeccionados.
+Informe: `reports/damage-weapon-vfx-88/README.md`. Queda pendiente confirmar
+subjetivamente intensidad y duración durante una partida humana.
+
+## Hito 87, capucha, cuello y encaje clavicular
 
 [V07: comparaciones, fuente y vídeo](art/hound/mesh-v07/README.md).
 Dos superficies sustituyen capucha/borde/cuello; la capucha incluye su forro

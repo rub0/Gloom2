@@ -388,48 +388,48 @@
       "source_recipe": "Blood: review only; no new gore gameplay event"
     },
     {
-      "name": "fireball_trail",
-      "material": 6,
+      "name": "rocket_smoke",
+      "material": 1,
       "burst": 0,
-      "rate": 80,
-      "life": 0.28,
-      "speed": 0.15,
-      "spread": 0.22,
-      "gravity": 0,
-      "size_start": 0.16,
-      "size_end": 0.035,
+      "rate": 55,
+      "life": 1.1,
+      "speed": 0.08,
+      "spread": 0.1,
+      "gravity": 0.18,
+      "size_start": 0.14,
+      "size_end": 0.62,
       "color_start": [
-        2.5,
-        0.55,
-        0.04,
-        0.8
+        0.45,
+        0.42,
+        0.38,
+        0.85
       ],
       "color_end": [
-        0.35,
-        0.03,
-        0.005,
+        0.055,
+        0.05,
+        0.045,
         0
       ],
-      "trail_seconds": 0.08,
+      "trail_seconds": 0,
       "distortion": 0,
-      "source_recipe": "mp_rocket_large/mp_rocket_small fire and smoke trail"
+      "source_recipe": "mp_rocket_large/mp_rocket_small smoke trail"
     },
     {
       "name": "explosion_review",
       "material": 6,
-      "burst": 8,
+      "burst": 28,
       "rate": 0,
-      "life": 0.65,
-      "speed": 0.4,
-      "spread": 0.6,
-      "gravity": 0,
-      "size_start": 0.2,
-      "size_end": 0.6,
+      "life": 0.95,
+      "speed": 1.35,
+      "spread": 1.1,
+      "gravity": -0.45,
+      "size_start": 0.34,
+      "size_end": 1.05,
       "color_start": [
-        2,
-        0.7,
-        0.06,
-        0.65
+        3.5,
+        1.15,
+        0.08,
+        0.9
       ],
       "color_end": [
         1,

@@ -81,7 +81,7 @@ el menú, conservando el contexto de acceso en memoria.
 .\build\windows-vs\Debug\gloom.exe --ui-review .cache/ui-review
 ```
 
-`--ui-review` captura 17 estados a 1280×720, 1920×1080 y 2560×1080. Los ejemplos
+`--ui-review` captura 18 estados a 1280×720, 1920×1080 y 2560×1080. Los ejemplos
 de autenticación, lista y HUD de esa galería son fixtures de presentación;
 no acreditan acceso a una cuenta externa. El recorrido `gloom.ui_flow` abre
 dos procesos gráficos y un servidor real. Inyecta mouse/teclado en la misma
@@ -110,6 +110,15 @@ la sala mediante la entidad y bajas/muertes del snapshot autoritativo; no mantie
 una segunda copia de puntuaciones ni añade mensajes de red. La página 16 de
 `--ui-review` cubre el estado con el jugador local resaltado y el rival primero
 por tener más bajas.
+
+## Feedback de daño — hito 88
+
+Una pérdida de vida o escudo mantiene durante 1,5 s una viñeta roja que se
+degrada desde los bordes físicos hasta una zona central completamente transparente.
+Un arco alrededor de la mirilla señala la dirección relativa del rival y se
+actualiza con la orientación local. No se replica estado nuevo: la presentación
+compara snapshots ya recibidos. La página 17 de `--ui-review` cubre daño desde
+delante-derecha, incluido el encuadre ultrawide.
 
 ## Correcciones de aceptación — 5 de septiembre de 2026
 

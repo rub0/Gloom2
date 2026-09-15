@@ -2023,7 +2023,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 complete_instances.push_back({.mesh=gloom::render::builtin_cube_mesh,
                     .transform={.position={p.position_x,p.position_y,p.position_z},.scale={scale,scale,scale}},
                     .color=color,.particle=true,.soft_distance=.2F});
-                if(fireball)particles.emitter(0x100000000ULL+p.id,0x100000000ULL+p.id,"fireball_trail",{p.position_x,p.position_y,p.position_z});
+                if(fireball)particles.emitter(0x100000000ULL+p.id,0x100000000ULL+p.id,"rocket_smoke",{p.position_x,p.position_y,p.position_z});
             }
         }
         if(game_ui && complete_instances.size()>=visual_bodies.size()+18){
@@ -2118,6 +2118,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             if (animation_review && review_ready) {
                 const auto f=review_frames%static_cast<std::size_t>(animation_fps*10);
                 const gloom::render::Vec3 sample{slice.opponent.position_x+(effects_review?-.8F:.8F),.65F,slice.opponent.position_z+.4F};
+                if(effects_review && f<static_cast<std::size_t>(animation_fps*1.6F))
+                    particles.emitter(0x200000001ULL,0,"rocket_smoke",{sample.x+static_cast<float>(f)/animation_fps*1.2F,sample.y+.45F,sample.z});
                 if (f==static_cast<std::size_t>(animation_fps*(effects_review?1:6))) particles.burst(0,"blood_review",sample,{0,1,0},6301);
                 if (f==static_cast<std::size_t>(animation_fps*(effects_review?2:7))) particles.burst(0,"explosion_review",sample,{0,1,0},6302);
                 if (effects_review || (f>=static_cast<std::size_t>(animation_fps*6) && f<static_cast<std::size_t>(animation_fps*8)))

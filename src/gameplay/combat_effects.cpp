@@ -7,16 +7,20 @@ void CombatEffects::observe(render::ParticleSystem& particles,const CombatantVie
     auto& state=states_[fps?0:1];
     if (state.valid && state.view.entity==v.entity && tick<state.tick) return;
     const auto point=[&](render::Vec3 p){return render::attach_transform(parent,{.position=p}).position;};
+    const render::Vec3 muzzle=point(frame.muzzle);
+    const std::uint64_t muzzle_owner=0x8000000000000000ULL|v.entity;
     const render::Vec3 foot{v.position_x,v.position_y,v.position_z};
     const render::Vec3 chest{v.position_x,v.position_y+1.1F,v.position_z};
     const auto direction=render::Vec3{v.facing_x,0,v.facing_z};
     const bool baseline=!state.valid || state.view.entity!=v.entity;
-    if (baseline && state.valid) particles.cancel(state.view.entity);
+    if (baseline && state.valid) {particles.cancel(state.view.entity);particles.cancel(0x8000000000000000ULL|state.view.entity);}
+    if (!baseline && state.muzzle_valid)
+        state.muzzle_valid=particles.translate(muzzle_owner,{muzzle.x-state.muzzle.x,muzzle.y-state.muzzle.y,muzzle.z-state.muzzle.z});
     if (!baseline && tick>state.tick) {
         const auto burst=[&](std::string_view name,render::Vec3 position,bool view_model=false) {
             particles.burst(v.entity,name,position,{0,1,0},v.entity*1000003+tick,view_model);++events_;
         };
-        if (frame.cut || state.view.deaths!=v.deaths || state.view.character!=v.character) particles.cancel(v.entity);
+        if (frame.cut || state.view.deaths!=v.deaths || state.view.character!=v.character) {particles.cancel(v.entity);particles.cancel(muzzle_owner);}
         if (!v.alive && state.view.alive) burst("death",chest);
         if (v.alive && (!state.view.alive || state.view.deaths!=v.deaths)) burst("spawn",foot);
         if (v.alive && !state.view.grounded && v.grounded) burst("landing",foot);
@@ -25,7 +29,8 @@ void CombatEffects::observe(render::ParticleSystem& particles,const CombatantVie
         if (v.alive && v.secondary_ability_active && !state.view.secondary_ability_active &&
             v.secondary_ability==SliceSecondaryAbility::flash) burst("shield",chest);
         if (v.alive && v.shot_sequence!=state.view.shot_sequence && v.shot_tick<=tick && tick-v.shot_tick<=15) {
-            particles.burst(v.entity,"muzzle",point(frame.muzzle),direction,v.entity*1000003+v.shot_sequence,fps);++events_;
+            particles.burst(muzzle_owner,"muzzle",muzzle,direction,v.entity*1000003+v.shot_sequence,fps);++events_;
+            state.muzzle_valid=true;
             if (v.shot_contact) {
                 particles.burst(v.entity,v.shot_explosion?"explosion_review":"impact",{v.shot_impact[0],v.shot_impact[1],v.shot_impact[2]},
                     {-direction.x,.2F,-direction.z},v.entity*1000003+v.shot_sequence);++events_;
@@ -50,6 +55,6 @@ void CombatEffects::observe(render::ParticleSystem& particles,const CombatantVie
             emitter(5,"archangel_energy",right,{0,.3F,-.1F});
         }
     }
-    state={v,tick,true};
+    state.view=v;state.tick=tick;state.muzzle=muzzle;state.valid=true;
 }
 } // namespace gloom::gameplay

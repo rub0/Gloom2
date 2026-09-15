@@ -85,6 +85,14 @@ int main() try {
         std::cout<<name<<": original clips="<<rig.animations.size()<<", deformation="<<deformation<<", grip="<<frame.left_grip.x<<','<<frame.left_grip.y<<','<<frame.left_grip.z<<'\n';
     }
     const auto recipes=render::load_particle_recipes(root/"effects/recipes.json");
+    const render::ParticleRecipe* rocket_smoke=nullptr;const render::ParticleRecipe* rocket_explosion=nullptr;
+    for(const auto& recipe:recipes){if(recipe.name=="rocket_smoke")rocket_smoke=&recipe;else if(recipe.name=="explosion_review")rocket_explosion=&recipe;}
+    check(rocket_smoke && rocket_smoke->rate==55 && rocket_smoke->life==1.1F && rocket_smoke->size_end==.62F,"Rocket smoke recipe lost");
+    check(rocket_explosion && rocket_explosion->burst==28 && rocket_explosion->size_end==1.05F,"Rocket explosion emphasis lost");
+    render::ParticleSystem rocket_particles{recipes};
+    for(int i=0;i<60;++i){rocket_particles.emitter(9,9,"rocket_smoke",{static_cast<float>(i)/60,0,0});rocket_particles.advance(1.0/60);}
+    check(rocket_particles.metrics().spawned==55,"Rocket smoke emission rate changed");
+    rocket_particles.burst(9,"explosion_review",{},{0,1,0},1);check(rocket_particles.metrics().spawned==83,"Rocket explosion particle count changed");
     std::vector<render::Particle> reference;
     for (int fps:{30,60,144}) {
         render::ParticleSystem p{recipes};
@@ -123,6 +131,8 @@ int main() try {
     auto frame=animator.update(*rig,v,.01);events.observe(p,v,frame,{},100,true);
     v.shot_sequence=1;v.shot_tick=101;v.shot_contact=true;
     events.observe(p,v,frame,{},101,true);const auto count=p.metrics().spawned;
+    const auto muzzle_before=p.particles().front().position;render::Transform moved{.position={1,2,3}};
+    events.observe(p,v,frame,moved,101,true);check(distance(p.particles().front().position,muzzle_before)>3.7F,"Muzzle flash did not follow the weapon");
     for(int i=0;i<20;++i) events.observe(p,v,frame,{},102+i,true);
     check(p.metrics().spawned==count && events.events()==2,"Confirmed/replayed shot duplicated effects");
     auto stale=v;stale.shot_sequence=0;events.observe(p,stale,frame,{},90,true);events.observe(p,v,frame,{},122,true);

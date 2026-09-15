@@ -30,6 +30,8 @@ public:
     std::chrono::steady_clock::time_point fps_start{std::chrono::steady_clock::now()};
     unsigned fps_frames{};float fps{};
     bool paused{},confirm_leave{},blocked{},was_playing{};
+    network::NetworkEntityId feedback_entity{};float feedback_life{},feedback_shield{},damage_direction{};
+    std::chrono::steady_clock::time_point damage_until{};
     GameUiAction draw(unsigned width,unsigned height,const platform::InputState& input,
         const gameplay::SliceSnapshot& s,const gameplay::SliceLobbyState* lobby,bool hosting,
         bool loaded,bool connected,bool reconnecting,bool selection_confirmed,
@@ -41,8 +43,19 @@ public:
         if(playing && !was_playing)paused=false;was_playing=playing;
         blocked=!playing || !loaded || paused || confirm_leave || !input.focused;
         if(playing){
-            canvas.ornament({158,573,964,132});
             const auto now=std::chrono::steady_clock::now();
+            if(feedback_entity!=s.player.entity){feedback_entity=s.player.entity;feedback_life=s.player.life;feedback_shield=s.player.shield;damage_until={};}
+            else if(s.player.alive && (s.player.life<feedback_life || s.player.shield<feedback_shield)){
+                const float source_x=s.opponent.position_x-s.player.position_x,source_z=s.opponent.position_z-s.player.position_z;
+                const float right=-s.player.facing_z*source_x+s.player.facing_x*source_z;
+                const float forward=s.player.facing_x*source_x+s.player.facing_z*source_z;
+                if(std::abs(right)+std::abs(forward)>1e-4F)damage_direction=std::atan2(-forward,right);
+                damage_until=now+std::chrono::milliseconds{1500};
+            }
+            feedback_life=s.player.life;feedback_shield=s.player.shield;
+            const float damage_seconds=std::chrono::duration<float>(damage_until-now).count();
+            if(damage_seconds>0)canvas.vignette({.8F,.015F,.01F,.30F*std::clamp(damage_seconds/.75F,0.F,1.F)});
+            canvas.ornament({158,573,964,132});
             const float seconds=std::chrono::duration<float>(now-fps_start).count();
             if(++fps_frames && seconds>=.5F){fps=fps_frames/seconds;fps_frames=0;fps_start=now;}
             std::ostringstream stats;stats<<std::fixed<<std::setprecision(0)<<(review_fps>=0?review_fps:fps)<<" FPS\n"<<std::setprecision(2)
@@ -87,7 +100,8 @@ public:
             canvas.panel({478,22,324,59});canvas.text(506,37,std::to_string(s.hud.kills)+"  BAJAS    /    "+std::to_string(s.hud.deaths)+"  MUERTES",20);
             if(s.player.damage_modifier_ticks)canvas.text(920,90,"DAÑO x3  "+std::to_string((s.player.damage_modifier_ticks+59)/60)+" s",20);
             if(s.player.cooldown_modifier_ticks)canvas.text(920,116,"CADENCIA  "+std::to_string((s.player.cooldown_modifier_ticks+59)/60)+" s",20);
-            if(!s.hud.dead)canvas.image("crosshair",{623,343,34,34},s.hud.hit_marker?render::UiColor{1,.25F,.15F,1}:render::ui_ink);
+            if(!s.hud.dead){canvas.image("crosshair",{623,343,34,34},s.hud.hit_marker?render::UiColor{1,.25F,.15F,1}:render::ui_ink);
+                if(damage_seconds>0)canvas.arc(640,360,48,damage_direction-.44F,.14F,{1,.08F,.025F,std::clamp(damage_seconds/.35F,0.F,1.F)},6);}
             else {canvas.panel({340,264,600,170});canvas.text(486,286,"HAS CAÍDO",46,render::ui_cyan,true);
                 canvas.text(413,366,"Reaparición en "+std::to_string(static_cast<int>(std::ceil(s.player.respawn_remaining_seconds)))+" s",25);}
             if(s.player.flash_factor>1.0F)canvas.rect({0,0,static_cast<float>(width),static_cast<float>(height)},
