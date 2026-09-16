@@ -152,6 +152,9 @@ La captura es un archivo del renderizador real, no una imagen generada por IA.
 
 ## Hound básico aprobado; continuar topología con el rig diagnóstico
 
+Para continuar sin contexto del chat, usar las [fichas de tareas Hound](art/hound/tasks/README.md).
+El índice registra la entrada/salida vigente; este documento describe el flujo técnico.
+
 Entregado como volumen 01 en el hito 80, corregido en v02 en el hito 81 y
 aprobado en el hito 82. Las herramientas Blender ya se han usado de forma nativa.
 Conservar las fuentes v01/v02. El hito 83 ya entregó el rig de prueba de 53 huesos;

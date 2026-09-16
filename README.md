@@ -3,6 +3,7 @@
 Modern revival of the original Gloom project, built as a modular C++23 engine.
 
 Para continuar el desarrollo en una tarea nueva: [estado y traspaso actual](docs/ESTADO_ACTUAL.md).
+Para terminar Hound sin historial del chat: [13 tareas acotadas y contexto mínimo](docs/art/hound/tasks/README.md).
 
 Producción artística: [guía y Hound aprobado](docs/DIRECCION_ARTISTICA.md) y
 [flujo local Blender → MCP → cooker → visor Vulkan](docs/BLENDER_WORKFLOW.md).

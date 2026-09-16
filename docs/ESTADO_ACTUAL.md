@@ -1,6 +1,13 @@
 # Traspaso de Gloom
 
-Actualizado: 16 de septiembre de 2026, cierre del hito 89, primera propuesta artística global de Hound v08.
+Actualizado: 16 de septiembre de 2026, cierre del hito 90, tareas independientes de Hound.
+
+**Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
+[índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
+y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
+La fuente sigue siendo v08 (hito 89, `68e686e`); el hito 90 solo documenta.
+Siguiente trabajo de modelado: H01, manos/guanteletes. Ninguna ficha está ejecutada.
+
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
 La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
@@ -48,7 +55,22 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 89, primera propuesta artística global de Hound
+## Último hito cerrado: 90, tareas independientes de Hound
+
+[Índice, dependencias y encargo reutilizable](art/hound/tasks/README.md).
+13 fichas cubren remates artísticos, aprobación de escultura, contrato/presupuesto,
+malla/LODs, rig, UVs/horneado, materiales, locomoción, combate e integración.
+Cada ficha limita alcance, entradas, exclusiones, comprobaciones y cierre.
+Al ejecutarla, actualizar en el índice la fuente acumulada y productos concretos;
+no inferirlos por el número de versión ni releer toda la cadena de informes.
+
+Solo documentación: no se modifica modelo, exportación, scripts o gameplay.
+V08 no se aprueba por este plan. H05 exige aceptación visual antes de producción;
+H06 puede investigarse por separado. Las ediciones de .blend se encadenan.
+Enlaces, rutas y dependencias comprobados; informe `reports/hound-tasks-90/README.md`.
+Commit local, sin push; consultar `git log -1` para el hash.
+
+## Hito 89, primera propuesta artística global de Hound
 
 [V08: comparación completa, rostro, fuente y vídeo](art/hound/mesh-v08/README.md).
 Pase de formas secundarias, no escultura final. Se reconstruyen 33 placas,
@@ -68,7 +90,7 @@ Cooker y visor Vulkan estático 7/7 piezas/siete batches; CTest Release
 assets/gpu_assets 2/2 y Debug animation_vfx 1/1. Seis PNG, poses adicionales
 y vídeo revisados. Informe: `reports/hound-art-89/README.md`.
 
-Cierre local, sin push; consultar `git log -1` para el hash. El hito anterior
+Cierre local `68e686e`, sin push. El hito anterior
 88 es `1b9e537`, conservado sin cambios. Siguiente: validar visualmente la v08
 y continuar los remates artísticos pendientes; no presentar las pruebas
 técnicas como cierre de escultura, aprobación artística o rig definitivo.

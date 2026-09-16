@@ -48,6 +48,9 @@ no representa la respuesta material final dentro del juego.
 
 ## Qué falta antes de cerrar la escultura
 
+[Plan de trabajo en tareas independientes, sin historial del chat](../tasks/README.md).
+El índice mantiene la fuente acumulada y las dependencias de cada paso posterior.
+
 Revisar esta evolución contra el boceto aprobado. Quedan remates en las
 carcasas de guanteletes/grebas, botas, dedos y articulaciones; construcción
 de uniones y ropa; y un pase facial más específico. No se ha hecho microdetalle
