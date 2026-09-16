@@ -5,8 +5,8 @@ import sys
 from mathutils import Matrix, Vector
 
 revision = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v06'
-assert revision in ('v06', 'v07')
-suffix, prior = revision[1:], '05' if revision == 'v06' else '06'
+assert revision in ('v06', 'v07', 'v08')
+suffix, prior = revision[1:], {'v06':'05','v07':'06','v08':'07'}[revision]
 scene = bpy.data.scenes['Hound_Mesh_'+revision]
 bpy.context.window.scene = scene
 world = bpy.data.worlds.new('Hound'+suffix+'_ReviewWorld')
@@ -60,10 +60,10 @@ for name, frame, position in [('rest', 1, (2.8, -5, 2.2)), ('step', 91, (2.8, -5
     scene.render.filepath = output+name+'.png'
     bpy.ops.render.render(write_still=True)
 
-for kind in (('waist', 'head') if revision == 'v06' else ('head', 'collar')):
+for kind in (('waist', 'head') if revision == 'v06' else ('head', 'body') if revision == 'v08' else ('head', 'collar')):
     board = bpy.data.scenes.new('Hound'+suffix+'_'+kind+'Comparison')
-    setup(board, 2000, 1050 if kind == 'head' else 550 if kind == 'collar' else 850)
-    spacing = .34 if kind == 'head' else 1.05 if kind == 'collar' else .58
+    setup(board, 2000, 1050 if kind == 'head' else 550 if kind == 'collar' else 1200 if kind == 'body' else 850)
+    spacing = .34 if kind == 'head' else 1.05 if kind == 'collar' else 1.12 if kind == 'body' else .58
     angle = math.pi if kind == 'waist' else .62
     view = 'ESPALDA' if kind == 'waist' else '3/4'
     for column, (version, angle, view) in enumerate([(prior, 0, 'FRENTE'), (suffix, 0, 'FRENTE'),
@@ -77,6 +77,8 @@ for kind in (('waist', 'head') if revision == 'v06' else ('head', 'collar')):
             'Pelvis_', 'Waist_', 'Leg_', 'Trousers_', 'Sash_tail_', 'Hip_guard_', 'Thigh_outer_')
         if kind == 'collar':
             prefixes = ('Head_', 'Mouth_', 'Eye_', 'Hood_', 'Neck', 'Collar_')
+        if kind == 'body':
+            prefixes = ('',)
         groups = {g.index for g in original.vertex_groups if g.name.startswith('PART_') and g.name[5:].startswith(prefixes)}
         indices = [v.index for v in original.data.vertices if any(g.group in groups for g in v.groups)]
         remap = {index: i for i, index in enumerate(indices)}
@@ -92,9 +94,19 @@ for kind in (('waist', 'head') if revision == 'v06' else ('head', 'collar')):
             polygon.material_index, polygon.use_smooth = reference.material_index, reference.use_smooth
         obj = bpy.data.objects.new(data.name, data)
         board.collection.objects.link(obj)
-        label(board, 'V'+version+' / '+view, x, 1.395 if kind == 'head' else 1.25 if kind == 'collar' else .50,
+        label(board, 'V'+version+' / '+view, x, 1.395 if kind == 'head' else 1.25 if kind == 'collar' else -.10 if kind == 'body' else .50,
               .018 if kind == 'head' else .026)
     title = 'ROSTRO CONTINUO' if revision == 'v06' else 'CAPUCHA Y CUELLO CONTINUOS'
+    if revision == 'v08':
+        title = 'ROSTRO / FORMAS PRIMARIAS' if kind == 'head' else 'ARMADURA, ANATOMIA Y TELA / PASE ARTISTICO'
+    if kind == 'body':
+        label(board, 'HOUND / '+title, 0, 2.05, .041)
+        label(board, 'Malla real / misma escala y luz / sin texturas finales', 0, -.24, .023)
+        camera_for(board, (0,-4,.91), (0,0,.91), 4.65)
+        bpy.context.window.scene = board
+        board.render.filepath = output+kind+'-comparison.png'
+        bpy.ops.render.render(write_still=True)
+        continue
     label(board, 'HOUND / '+(title if kind == 'head' else 'ENCAJE CLAVICULAR' if kind == 'collar' else 'CINTURA Y TELA CONTINUAS'), 0,
           1.89 if kind == 'head' else 2.02 if kind == 'collar' else 1.19, .024 if kind == 'head' else .038)
     label(board, 'Malla real / misma escala y luz / sin texturas finales', 0, 1.335 if kind == 'head' else 1.15 if kind == 'collar' else .40,

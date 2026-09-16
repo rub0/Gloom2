@@ -19,6 +19,10 @@ capucha con borde y forro conexos, cuello refinado y bases claviculares recortad
 por dentro. Conserva la abertura frontal aprobada. Los cuatro casos específicos
 de giro/inclinación pasan la prueba de cruces capucha/clavículas; no certifican
 todos los contactos, agarres o animaciones. El rig continúa siendo diagnóstico.
+El [hito 89](../reports/hound-art-89/README.md), 15–16 de septiembre, entrega v08:
+primer pase artístico global de superficies de armadura, relieve muscular/facial
+y tela. Reconstruye 38 componentes y ajusta otros cinco; no es escultura final.
+Comparativas con v07, fuente, glTF y clip de diagnóstico disponibles para revisión.
 
 ## Instalación local validada
 
@@ -151,12 +155,13 @@ La captura es un archivo del renderizador real, no una imagen generada por IA.
 Entregado como volumen 01 en el hito 80, corregido en v02 en el hito 81 y
 aprobado en el hito 82. Las herramientas Blender ya se han usado de forma nativa.
 Conservar las fuentes v01/v02. El hito 83 ya entregó el rig de prueba de 53 huesos;
-v04–v07 avanzan la malla conservándolo. Las siguientes revisiones deben usar
+v04–v08 avanzan la malla conservándolo. Las siguientes revisiones deben usar
 otra versión y mantener intactas estas fuentes.
 
 Los scripts `review_hound_mesh_v06.py` y `verify_hound_mesh_v06.py` aceptan
-`-- v07`, manteniendo v06 como predeterminado. Los de roundtrip y vídeo v03
-también aceptan v07. Generar desde v06 con `refine_hound_mesh_v07.py`; conservar
+`-- v07` y `-- v08`, manteniendo v06 como predeterminado. Los de roundtrip y vídeo
+v03 también aceptan v08. Generar v07 desde v06 con `refine_hound_mesh_v07.py`,
+o v08 desde v07 con `refine_hound_mesh_v08.py`; conservar
 los cambios manuales posteriores y no regenerar encima sin cambiar el destino.
 
 Mantener silueta, escala y correcciones aprobadas. Revisar topología de zonas

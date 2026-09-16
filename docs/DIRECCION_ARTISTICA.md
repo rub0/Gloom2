@@ -159,6 +159,15 @@ el perfil posterior de tela se suaviza. Las superficies y sus pesos son todavía
 provisionales; esta entrega técnica no añade una aprobación artística del usuario.
 La anatomía y topología facial final, el acabado y los agarres siguen pendientes.
 
+El usuario confirma después de v07 que quiere continuar el pase artístico antes
+de dar por terminada la escultura. El [pase v08](art/hound/mesh-v08/README.md)
+reconstruye campos curvos y bordes de placas, refina el relieve de brazos/rostro
+y los pliegues grandes. Conserva capucha, clavículas y orientación de manos.
+**Propuesta pendiente de revisión, no escultura final ni aprobación nueva.**
+Quedan remates de carcasas de guanteletes/grebas, botas, dedos, formas faciales,
+uniones y construcción de la ropa, además de los contactos y agarres.
+Revisar las comparativas antes de cerrar el aspecto y avanzar al rig definitivo.
+
 1. Conservar v02; preparar la malla y el rig de prueba en una nueva versión.
 2. Mantener hombros libres, armadura clavicular, capucha y manos aprobados.
 3. Evaluar reutilización del rig existente y comprobar caminar, apuntar y Bite,

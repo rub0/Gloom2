@@ -1,4 +1,4 @@
-'''Validate v06/v07 surfaces, preserved components/bones/clip, and sampled diagnostic deformation.'''
+'''Validate v06-v08 surfaces, preserved components/bones/clip, and sampled diagnostic deformation.'''
 import bpy
 import bmesh
 import json
@@ -8,8 +8,8 @@ from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
 
 version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v06'
-assert version in ('v06', 'v07')
-suffix, prior = version[1:], '05' if version == 'v06' else '06'
+assert version in ('v06', 'v07', 'v08')
+suffix, prior = version[1:], {'v06':'05','v07':'06','v08':'07'}[version]
 scene = bpy.data.scenes['Hound_Mesh_'+version]
 bpy.context.window.scene = scene
 model = scene.objects['H'+suffix+'_DeformMesh']
@@ -18,7 +18,7 @@ source = bpy.data.scenes['Hound_Mesh_v'+prior]
 original = source.objects['H'+prior+'_DeformMesh']
 original_rig = source.objects['Hound'+prior+'_Rig']
 model.data.calc_loop_triangles()
-assert (len(model.data.vertices), len(model.data.loop_triangles)) == ((13752, 27124) if version == 'v06' else (14026, 27672))
+assert (len(model.data.vertices), len(model.data.loop_triangles)) == {'v06':(13752,27124),'v07':(14026,27672),'v08':(20130,39880)}[version]
 assert len(model.data.materials) == 7 and len(rig.data.bones) == 53
 assert len([o for o in scene.objects if o.type == 'MESH']) == 1
 assert len(model.modifiers) == 1 and model.modifiers[0].type == 'ARMATURE' and model.modifiers[0].object == rig
@@ -62,8 +62,26 @@ modified = {'PART_Collar_plate_L', 'PART_Collar_plate_R'} if version == 'v07' el
 if version == 'v07':
     replaced = {'PART_Hood_shell', 'PART_Hood_opening_rim', 'PART_Neck'}
     added = {'PART_Hood_continuous', 'PART_Neck_surface'}
+if version == 'v08':
+    prefixes = ('Breastplate_', 'Rib_flank_', 'Hip_guard_', 'Abdominal_plate_', 'Sternum', 'Scapula_', 'Back_spine_',
+                'Bracer_face_', 'Elbow_cuff_', 'Knee_shield_', 'Greave_front_', 'Shin_lower_', 'Thigh_outer_plate_',
+                'Boot_toe_', 'Ankle_guard_', 'Hand_back_full_point_', 'Sash_tail_', 'Mouth_shadow', 'Eye_')
+    replaced = {name for name in source_parts if name[5:].startswith(prefixes)}
+    added = replaced
+    modified = {'PART_'+name for name in ('Arm_surface_L','Arm_surface_R','Head_surface','Trousers_continuous','Waist_wrap')}
+    assert len(replaced) == 38 and len(source_parts) == len(target_parts) == 96
+    # Catch lost transforms in the inactive v02 reference scene, especially the rotated back plates.
+    for name in replaced-{'PART_Mouth_shadow','PART_Eye_L','PART_Eye_R'}:
+        before = [original.data.vertices[i].co for i in source_parts[name]]
+        after = [model.data.vertices[i].co for i in target_parts[name]]
+        for axis in range(3):
+            # Cloth loses the old 18 mm pyramid ridge; retain the stricter envelope on metal and other axes.
+            limit = .018 if name.startswith('PART_Sash_tail_') and axis == 1 else .016
+            assert abs(min(p[axis] for p in before)-min(p[axis] for p in after)) < limit, name+' minimum moved'
+            assert abs(max(p[axis] for p in before)-max(p[axis] for p in after)) < limit, name+' maximum moved'
 assert set(source_parts)-replaced == set(target_parts)-added
 preserved = 0
+morph_displacements = {}
 for name, indices in source_parts.items():
     if name in replaced:
         continue
@@ -71,9 +89,14 @@ for name, indices in source_parts.items():
     assert len(indices) == len(other)
     for a, b in zip(indices, other):
         expected = original.data.vertices[a].co.copy()
-        if name in modified and abs(expected.x) < .185:
+        if version == 'v07' and name in modified and abs(expected.x) < .185:
             expected.x = (1 if expected.x >= 0 else -1)*(.146+(abs(expected.x)-.073)*(.185-.146)/(.185-.073))
-        assert (expected-model.data.vertices[b].co).length < 1e-7
+        distance = (expected-model.data.vertices[b].co).length
+        if version == 'v08' and name in modified:
+            assert distance < .013, 'Art relief exceeds the approved form envelope'
+            morph_displacements[name] = max(morph_displacements.get(name,0),distance)
+        else:
+            assert distance < 1e-7
         assert bone_weights(original, a) == bone_weights(model, b)
     source_remap, target_remap = {v: i for i, v in enumerate(indices)}, {v: i for i, v in enumerate(other)}
     before = [(tuple(source_remap[i] for i in p.vertices), p.material_index, p.use_smooth)
@@ -82,11 +105,14 @@ for name, indices in source_parts.items():
              for p in model.data.polygons if all(i in target_remap for i in p.vertices)]
     assert before == after, 'Changed preserved faces: '+name
     preserved += name not in modified
-assert preserved == (94 if version == 'v06' else 92)
+assert preserved == {'v06':94,'v07':92,'v08':53}[version]
+assert all(distance > .0005 for distance in morph_displacements.values())
 assert all(tuple(a.diffuse_color) == tuple(b.diffuse_color) for a, b in zip(original.data.materials, model.data.materials))
 surface_metrics = {}
 surfaces = [('PART_Trousers_continuous', 1163, 2), ('PART_Waist_wrap', 1248, 0), ('PART_Head_surface', 2368, 2)] if version == 'v06' else [
     ('PART_Hood_continuous', 1106, 2), ('PART_Neck_surface', 320, 2)]
+if version == 'v08':
+    surfaces += [(name,len(target_parts[name]),0 if name == 'PART_Waist_wrap' else 2) for name in sorted(replaced|modified)]
 for name, count, euler in surfaces:
     indices = set(target_parts[name])
     assert len(indices) == count
@@ -110,12 +136,12 @@ for name, count, euler in surfaces:
         pending.extend(e.other_vert(vertex) for e in vertex.link_edges if e.other_vert(vertex) not in visited)
     assert len(visited) == len(indices), 'Disconnected surface: '+name
     bm.free()
-    if version == 'v07':
+    if version in ('v07','v08'):
         tree = BVHTree.FromPolygons([v.co for v in model.data.vertices], [list(p.vertices) for p in faces])
         assert not [(a, b) for a, b in tree.overlap(tree) if a < b and not set(faces[a].vertices).intersection(faces[b].vertices)], name
     surface_metrics[name[5:]] = {'vertices': len(indices), 'faces': len(faces), 'euler': euler, 'volume_m3': volume}
 contacts = {}
-if version == 'v07':
+if version in ('v07','v08'):
     opening = [(0,1.722),(.041,1.695),(.065,1.653),(.075,1.579),(.085,1.488),(.050,1.446),
                (0,1.49),(-.050,1.446),(-.085,1.488),(-.075,1.579),(-.065,1.653),(-.041,1.695)]
     outline = [(0,1.80),(.066,1.765),(.127,1.671),(.14,1.57),(.128,1.476),(.071,1.427),
@@ -126,7 +152,9 @@ if version == 'v07':
         expected = [Vector((x, y, z)).lerp(Vector((profile[(i+1)%12][0], y, profile[(i+1)%12][1])), step/4)
                     for i, (x, z) in enumerate(profile) for step in range(4)]
         assert len(points) == 48 and max((a-b).length for a, b in zip(points, expected)) < 1e-7
-    for obj, components, hood_parts, neck_part in [(original, source_parts, ['PART_Hood_shell', 'PART_Hood_opening_rim'], 'PART_Neck'),
+    previous_hood = ['PART_Hood_shell','PART_Hood_opening_rim'] if version == 'v07' else ['PART_Hood_continuous']
+    previous_neck = 'PART_Neck' if version == 'v07' else 'PART_Neck_surface'
+    for obj, components, hood_parts, neck_part in [(original, source_parts, previous_hood, previous_neck),
                                                   (model, target_parts, ['PART_Hood_continuous'], 'PART_Neck_surface')]:
         trees = {}
         for name in hood_parts+[neck_part]+[n for n in components if n.startswith('PART_Collar_')]:
@@ -185,12 +213,12 @@ extra_cases = [
     [('Bip001 R Thigh', (1, 0, 0), -60), ('Bip001 R Calf', (1, 0, 0), 85)],
     [('Bip001 L Thigh', (0, 1, 0), -25), ('Bip001 R Thigh', (0, 1, 0), 25)],
     [('Bip001 Spine', (1, 0, 0), 20), ('Bip001 Spine1', (0, 0, 1), 20), ('Bip001 Head', (0, 0, 1), 35)]]
-if version == 'v07':
+if version in ('v07','v08'):
     extra_cases = [[('Bip001 Head', (0, 0, 1), 35)], [('Bip001 Head', (0, 0, 1), -35)],
                    [('Bip001 Neck', (1, 0, 0), 10), ('Bip001 Head', (1, 0, 0), 20)],
                    [('Bip001 Neck', (1, 0, 0), -10), ('Bip001 Head', (1, 0, 0), -20)]]
 camera_matrix, camera_scale = scene.camera.matrix_world.copy(), scene.camera.data.ortho_scale
-if version == 'v07' and '--render-stress' in sys.argv:
+if version in ('v07','v08') and '--render-stress' in sys.argv:
     scene.camera.location = (1.5, -4, 1.95)
     scene.camera.rotation_euler = (Vector((0, 0, 1.50))-scene.camera.location).to_track_quat('-Z', 'Y').to_euler()
     scene.camera.data.ortho_scale = 1.22
@@ -209,10 +237,10 @@ for case, pose in enumerate(extra_cases):
     mesh = evaluated.to_mesh()
     assert all(p.area > 1e-12 for p in mesh.polygons)
     assert all(all(math.isfinite(c) for c in v.co) and v.co.length < 3 for v in mesh.vertices)
-    tested = target_parts['PART_Hood_continuous' if version == 'v07' else 'PART_Trousers_continuous' if case < 3 else 'PART_Head_surface']
+    tested = target_parts['PART_Hood_continuous' if version != 'v06' else 'PART_Trousers_continuous' if case < 3 else 'PART_Head_surface']
     assert max((mesh.vertices[i].co-rest[i]).length for i in tested) > .025, 'Stress pose did not actually deform the target'
     min_area = min(min_area, min(p.area for p in mesh.polygons))
-    if version == 'v07':
+    if version in ('v07','v08'):
         hood_indices = set(target_parts['PART_Hood_continuous'])
         collar_indices = set().union(*(set(indices) for name, indices in target_parts.items() if name.startswith('PART_Collar_')))
         hood_faces = [list(p.vertices) for p in mesh.polygons if all(i in hood_indices for i in p.vertices)]
@@ -233,7 +261,8 @@ scene.camera.matrix_world, scene.camera.data.ortho_scale = camera_matrix, camera
 scene.frame_set(1)
 bpy.context.view_layer.update()
 print(json.dumps({'vertices': len(rest), 'triangles': len(model.data.loop_triangles), 'preserved_components': preserved,
-                  'modified_collar_bases': len(modified), 'rest_collar_contacts': contacts,
+                  'modified_collar_bases': len(modified) if version == 'v07' else 0, 'rest_collar_contacts': contacts,
+                  'art_morph_displacements_m': morph_displacements,
                   'surfaces': surface_metrics, 'unchanged_bones': 53, 'unchanged_diagnostic_clip': True,
                   'max_influences': max_influences, 'rigid_components': len(rigid_parts), 'sampled_frames': 61,
                   'extra_pose_cases': len(extra_cases), 'extra_pose_min_face_area_m2': min_area,

@@ -1,14 +1,17 @@
 # Traspaso de Gloom
 
-Actualizado: 15 de septiembre de 2026, cierre del hito 88 de feedback de daño y VFX de armas.
+Actualizado: 16 de septiembre de 2026, cierre del hito 89, primera propuesta artística global de Hound v08.
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
 La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
 bajo la armadura intacta. La v06 conecta pantalones/cadera, refina la faja y une
 las facciones en una superficie neutra. No es anatomía ni topología facial final.
 La v07 conecta capucha/borde/forro, refina cuello y corrige el encaje clavicular.
-Quedan contactos globales, agarres y acabado; estabilizar la malla antes de afinar
-pesos, controles y animaciones. Conservar v02–v07 y usar otra versión.
+La v08 refina placas, brazos, rostro y tela. Es una propuesta para revisión:
+NO está terminada la escultura. El usuario pidió continuar el pase artístico
+antes de cerrar la malla. Quedan remates de carcasas/grebas/botas/dedos, rostro,
+uniones y ropa, contactos globales y agarres. No afinar aún el rig definitivo.
+Conservar v02–v08 y usar otra versión.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -45,7 +48,33 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 88, feedback de daño y VFX de armas
+## Último hito cerrado: 89, primera propuesta artística global de Hound
+
+[V08: comparación completa, rostro, fuente y vídeo](art/hound/mesh-v08/README.md).
+Pase de formas secundarias, no escultura final. Se reconstruyen 33 placas,
+dos paños y los tres elementos de ojos/boca. Se refinan brazos, cabeza,
+pantalones y faja conservando su topología y pesos; los otros 53 componentes
+permanecen exactos. Capucha/cuello, clavículas, filos y falanges no cambian.
+Las placas dorsales de manos se refinan conservando su orientación y extremo en pico.
+
+20.130 vértices y 39.880 triángulos (+12.208, 44,1 %), 96 componentes,
+87 rígidos, un mesh/skin y siete materiales. Mismos 53 huesos y clip diagnóstico;
+máximo dos influencias. Densidad de autoría: no presupuesto final de ejecución.
+
+Fuente reabierta: superficies modificadas cerradas/conexas/orientadas, posiciones
+de placas comprobadas contra v07, 61 muestras del clip y cuatro poses de cuello.
+Reimportación en 13 poses: error máximo 0,000002036 m. Regresión v07 pasa.
+Cooker y visor Vulkan estático 7/7 piezas/siete batches; CTest Release
+assets/gpu_assets 2/2 y Debug animation_vfx 1/1. Seis PNG, poses adicionales
+y vídeo revisados. Informe: `reports/hound-art-89/README.md`.
+
+Cierre local, sin push; consultar `git log -1` para el hash. El hito anterior
+88 es `1b9e537`, conservado sin cambios. Siguiente: validar visualmente la v08
+y continuar los remates artísticos pendientes; no presentar las pruebas
+técnicas como cierre de escultura, aprobación artística o rig definitivo.
+Sin UVs/texturas finales, retargeting, caminar/Bite finales o sustitución jugable.
+
+## Hito 88, feedback de daño y VFX de armas
 
 Al perder vida o escudo, el HUD presenta durante 1,5 s una viñeta roja con
 gradiente desde todos los bordes físicos y centro totalmente transparente. Un
