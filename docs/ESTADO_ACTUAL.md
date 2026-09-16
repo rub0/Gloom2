@@ -1,12 +1,13 @@
 # Traspaso de Gloom
 
-Actualizado: 16 de septiembre de 2026, cierre del hito 90, tareas independientes de Hound.
+Actualizado: 16 de septiembre de 2026, cierre del hito 91, H01 manos y guanteletes de Hound.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-La fuente sigue siendo v08 (hito 89, `68e686e`); el hito 90 solo documenta.
-Siguiente trabajo de modelado: H01, manos/guanteletes. Ninguna ficha está ejecutada.
+La fuente acumulada es v09 (hito 91, H01); el índice mantiene las rutas exactas.
+H01 hecha. H02 sigue pendiente y no se ha iniciado. No ejecutar otra ficha sin encargo.
+El ensayo Soul Reaper es apoyo en la carcasa, sin empuñadura cerrada; límites para H08.
 
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
 la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
@@ -16,9 +17,9 @@ las facciones en una superficie neutra. No es anatomía ni topología facial fin
 La v07 conecta capucha/borde/forro, refina cuello y corrige el encaje clavicular.
 La v08 refina placas, brazos, rostro y tela. Es una propuesta para revisión:
 NO está terminada la escultura. El usuario pidió continuar el pase artístico
-antes de cerrar la malla. Quedan remates de carcasas/grebas/botas/dedos, rostro,
-uniones y ropa, contactos globales y agarres. No afinar aún el rig definitivo.
-Conservar v02–v08 y usar otra versión.
+antes de cerrar la malla. H01 ya refina manos/guanteletes en v09.
+Quedan grebas/botas, rostro, uniones y ropa, contactos globales y agarres definitivos. No afinar aún el rig definitivo.
+Conservar v02–v09 y usar otra versión.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -55,7 +56,28 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 90, tareas independientes de Hound
+## Último hito cerrado: 91, H01 manos y guanteletes
+
+[V09: comparativas, poses, fuente y vídeo](art/hound/mesh-v09/README.md).
+Carcasas/aros huecos, 28 falanges dorsales, guantes ajustados y extremos de
+placas frontales liberados. Pico dorsal, resto del cuerpo y rig conservados.
+32 componentes reconstruidos, cuatro ajustados, 60 exactos; 23.522 vértices,
+46.680 triángulos (+17,1 %), siete materiales, 87 rígidos y 53 huesos.
+
+Fuente reabierta, topología/pesos y 61 muestras del clip pasan. Cinco poses por
+mano, 121 pares locales por pose sin cruces; guantes sin autointersecciones
+no adyacentes. Roundtrip en 13 poses: máximo 0,000002036 m; regresión v08 pasa.
+Cooker/visor Vulkan estático 7/7, CTest Release assets/gpu_assets 2/2 y Debug
+animation_vfx 1/1. Renders y vídeo de 151 frames inspeccionados.
+
+Soul Reaper original intacto: apoyo diagnóstico en la carcasa posterior, sin
+cruces en esa pose. No es empuñadura cerrada ni socket jugable aprobado.
+H08 debe resolver cierre palmar, oposición del pulgar, apoyo izquierdo y apuntado.
+La aceptación global sigue reservada a H05; no hay rig/texturas finales o integración.
+Informe: `reports/hound-hands-91/README.md`. Commit local del hito 91, sin push;
+resolver hash con `git log --oneline --grep='^hito 91:'`. H02 no iniciada.
+
+## Hito 90, tareas independientes de Hound
 
 [Índice, dependencias y encargo reutilizable](art/hound/tasks/README.md).
 13 fichas cubren remates artísticos, aprobación de escultura, contrato/presupuesto,
