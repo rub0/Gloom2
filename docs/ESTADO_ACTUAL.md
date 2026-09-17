@@ -1,12 +1,12 @@
 # Traspaso de Gloom
 
-Actualizado: 16 de septiembre de 2026, cierre del hito 91, H01 manos y guanteletes de Hound.
+Actualizado: 17 de septiembre de 2026, cierre del hito 92, H02 grebas y botas de Hound.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-La fuente acumulada es v09 (hito 91, H01); el índice mantiene las rutas exactas.
-H01 hecha. H02 sigue pendiente y no se ha iniciado. No ejecutar otra ficha sin encargo.
+La fuente acumulada es v10 (hito 92, H02); el índice mantiene las rutas exactas.
+H01 y H02 hechas. H03 sigue pendiente y no se ha iniciado. No ejecutar otra ficha sin encargo.
 El ensayo Soul Reaper es apoyo en la carcasa, sin empuñadura cerrada; límites para H08.
 
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
@@ -17,9 +17,9 @@ las facciones en una superficie neutra. No es anatomía ni topología facial fin
 La v07 conecta capucha/borde/forro, refina cuello y corrige el encaje clavicular.
 La v08 refina placas, brazos, rostro y tela. Es una propuesta para revisión:
 NO está terminada la escultura. El usuario pidió continuar el pase artístico
-antes de cerrar la malla. H01 ya refina manos/guanteletes en v09.
-Quedan grebas/botas, rostro, uniones y ropa, contactos globales y agarres definitivos. No afinar aún el rig definitivo.
-Conservar v02–v09 y usar otra versión.
+antes de cerrar la malla. H01 refina manos/guanteletes en v09; H02, grebas/botas en v10.
+Quedan rostro, uniones y ropa, contactos globales y agarres definitivos. No afinar aún el rig definitivo.
+Conservar v02–v10 y usar otra versión.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -56,7 +56,31 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 91, H01 manos y guanteletes
+## Último hito cerrado: 92, H02 grebas, rodillas, tobillos y botas
+
+[V10: comparativas, apoyos, fuente y vídeo](art/hound/mesh-v10/README.md).
+Grebas huecas de pared radial de 6 mm, lengüeta integrada de rodillera,
+placas de 4 mm en Y ajustadas al soporte y botas con suela/cavidad de tobillo.
+Forro ajustado solo bajo Z=0,61 m; 14 piezas reconstruidas, una ajustada,
+81 exactas, incluidas las manos. Huesos, pesos, bind pose y claves conservados.
+
+27.958 vértices, 55.560 triángulos (+19,0 %), siete materiales, 87 rígidos
+y 53 huesos. Fuente reabierta: topología, conservación y 61 muestras del clip pasan.
+17 poses adicionales, 1.785 pares locales sin cruces y plantas sin inversión.
+Cobertura hasta 70° de rodilla; flexión profunda y torsión lateral sin certificar.
+Roundtrip en 13 poses: máximo 0,000002069 m; regresión v09 pasa.
+Cooker/visor Vulkan estático 7/7, CTest Release assets/gpu_assets 2/2
+y Debug animation_vfx 1/1. 14 PNG y vídeo de 181 frames inspeccionados.
+
+Fuente: `art/characters/hound/v10/hound-mesh-v10.blend`.
+Exportación: `assets/characters/hound_rig/v10/hound-rig.gltf` y BIN.
+Escena `Hound_Mesh_v10`, malla `H10_DeformMesh`, rig `Hound10_Rig`,
+acción `Hound10_joint_check`, colección `HOUND_v10_EXPORT`.
+Informe: `reports/hound-legs-92/README.md`. Commit local del hito 92, sin push;
+resolver con `git log --oneline --grep='^hito 92:'`. H03 no iniciada.
+H05 conserva la aceptación global; H08/H11 resolverán rig y marcha finales.
+
+## Hito 91, H01 manos y guanteletes
 
 [V09: comparativas, poses, fuente y vídeo](art/hound/mesh-v09/README.md).
 Carcasas/aros huecos, 28 falanges dorsales, guantes ajustados y extremos de
@@ -75,7 +99,7 @@ cruces en esa pose. No es empuñadura cerrada ni socket jugable aprobado.
 H08 debe resolver cierre palmar, oposición del pulgar, apoyo izquierdo y apuntado.
 La aceptación global sigue reservada a H05; no hay rig/texturas finales o integración.
 Informe: `reports/hound-hands-91/README.md`. Commit local del hito 91, sin push;
-resolver hash con `git log --oneline --grep='^hito 91:'`. H02 no iniciada.
+commit `8bc8060`. Al cerrar el hito 91, H02 no estaba iniciada.
 
 ## Hito 90, tareas independientes de Hound
 
