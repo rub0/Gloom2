@@ -7,7 +7,7 @@ from mathutils.kdtree import KDTree
 
 root = Path(__file__).resolve().parents[2]
 version = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v03'
-assert version in ('v03', 'v04', 'v05', 'v06', 'v07', 'v08', 'v09', 'v10')
+assert version in ('v03', 'v04', 'v05', 'v06', 'v07', 'v08', 'v09', 'v10', 'v11')
 prefix = 'Hound'+version[1:]
 mesh_prefix = 'H'+version[1:]
 path = root/('assets/characters/hound_rig/'+version+'/hound-rig.gltf')
