@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-17 de septiembre de 2026 · Índice del hito 90, actualizado con H03/hito 93. Alcance: terminar **este Hound**,
+20 de septiembre de 2026 · Índice del hito 90, actualizado con H04/hito 94. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -22,14 +22,14 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 ## Punto de partida y traspaso vigente
 
 - Base inicial: commit `68e686e`, hito 89, Hound v08.
-- Fuente acumulada actual: [hound-mesh-v11.blend](../../../../art/characters/hound/v11/hound-mesh-v11.blend).
-- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v11/hound-rig.gltf), junto a su BIN.
-- Evidencias: [comparativas, poses y vídeo v11](../mesh-v11/README.md).
-- Estado artístico: diseño básico v02 aprobado; **v11 con H01, H02 y H03 terminadas; escultura global abierta**.
+- Fuente acumulada actual: [hound-mesh-v12.blend](../../../../art/characters/hound/v12/hound-mesh-v12.blend).
+- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v12/hound-rig.gltf), junto a su BIN.
+- Evidencias: [comparativas, poses y vídeo v12](../mesh-v12/README.md).
+- Estado artístico: diseño básico v02 aprobado; **v12 con H01–H04 terminadas; escultura global abierta**.
 - Rig: diagnóstico de 53 huesos; no rig ni animaciones finales.
 - Contrato/presupuesto H06: pendiente. Malla de producción H07: pendiente.
 - Aprobación de cierre artístico H05: pendiente, sin fecha ni aceptación registrada.
-- Integración: el juego sigue usando la presentación anterior; v11 no la sustituye.
+- Integración: el juego sigue usando la presentación anterior; v12 no la sustituye.
 
 Al cerrar una ficha, actualizar aquí la fuente acumulada, exportación y evidencia
 con **rutas exactas**, incluso cuando no cambien. Registrar en su fila el commit,
@@ -79,19 +79,41 @@ Escena `Hound_Mesh_v11`, malla `H11_DeformMesh`, rig `Hound11_Rig`,
 acción `Hound11_joint_check`, colección `HOUND_v11_EXPORT`.
 [Informe y límites de H03](../../../../reports/hound-anatomy-93/README.md).
 H06/H08 decidirán si hace falta mandíbula animada; Bite no la presupone.
-H05 conserva la aprobación global. **H04 no iniciada.**
+H05 conserva la aprobación global. Al cerrar H03, H04 aún no se había iniciado.
+
+## Traspaso H04 — hito 94
+
+Ropa y ensamblaje v12: pliegues amplios del pantalón, faja y paños de 3 mm,
+retornos de 4 mm en doce placas del torso y soporte continuo bajo las láminas.
+Dos apoyos mediales conectan pecho, clavículas y espalda. Se corrige el asiento
+de seis piezas claviculares que entraban en los brazos, conservando las puntas.
+Ocho componentes reconstruidos, quince ajustados, dos añadidos y 73 exactos;
+incluye cara, manos, capucha/abertura, cuello, brazos y armadura de piernas.
+Los 53 huesos, bind pose y claves siguen intactos.
+
+36.466 vértices / 72.568 triángulos (+2,75 %). Fuente reabierta, 61 muestras,
+37 poses y 444 pares locales por pose. Sin cruces en bordes libres de paños/
+pantalón ni brazos/asientos claviculares. Los solapes constructivos ocultos
+y los límites del rig provisional están enumerados en el informe.
+Roundtrip, regresión v11, cooker/visor y CTest 3/3 pasan.
+
+Escena `Hound_Mesh_v12`, malla `H12_DeformMesh`, rig `Hound12_Rig`,
+acción `Hound12_joint_check`, colección `HOUND_v12_EXPORT`.
+[Informe y contactos H04](../../../../reports/hound-cloth-94/README.md).
+Fuente/exportación/evidencias vigentes en el inicio y en su fila.
+**H05 pendiente y no iniciada**; H04 no implica aprobación global de escultura.
 
 ## Fichas y dependencias
 
 Los IDs H01–H13 son estables; **no son números de hito ni versiones Blender**.
-Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H02 entrega v10 y H03 entrega v11.
+Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H02 entrega v10, H03 entrega v11 y H04 entrega v12.
 
 | ID | Tarea | Requiere | Estado | Entrega / commit |
 | --- | --- | --- | --- | --- |
 | [H01](H01-manos-guanteletes.md) | Manos, dedos y guanteletes | Base v08 | Hecha | [v09: fuente, glTF/BIN y vistas](../mesh-v09/README.md); [informe 91](../../../../reports/hound-hands-91/README.md); commit `8bc8060` |
 | [H02](H02-grebas-botas.md) | Grebas, rodillas, tobillos y botas | H01 | Hecha | [v10: fuente, glTF/BIN y vistas](../mesh-v10/README.md); [informe 92](../../../../reports/hound-legs-92/README.md); commit `6c2fe7f` |
-| [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit del hito 93, resolver con git log |
-| [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Pendiente | — |
+| [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
+| [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit del hito 94, resolver con git log |
 | [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | Pendiente | — |
 | [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Pendiente | — |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |

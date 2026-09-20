@@ -1,12 +1,12 @@
 # Traspaso de Gloom
 
-Actualizado: 17 de septiembre de 2026, cierre del hito 93, H03 rostro y anatomía visible de Hound.
+Actualizado: 20 de septiembre de 2026, cierre del hito 94, H04 ropa y ensamblaje de Hound.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-La fuente acumulada es v11 (hito 93, H03); el índice mantiene las rutas exactas.
-H01, H02 y H03 hechas. H04 pendiente y no iniciada. No ejecutar otra ficha sin encargo.
+La fuente acumulada es v12 (hito 94, H04); el índice mantiene las rutas exactas.
+H01–H04 hechas. H05 pendiente y no iniciada. No ejecutar otra ficha sin encargo.
 El ensayo Soul Reaper es apoyo en la carcasa, sin empuñadura cerrada; límites para H08.
 
 El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
@@ -18,8 +18,9 @@ La v07 conecta capucha/borde/forro, refina cuello y corrige el encaje clavicular
 La v08 refina placas, brazos, rostro y tela. Es una propuesta para revisión:
 NO está terminada la escultura. El usuario pidió continuar el pase artístico
 antes de cerrar la malla. H01 refina manos/guanteletes en v09; H02, grebas/botas en v10.
-H03 refina rostro/anatomía en v11. Quedan uniones y ropa, contactos globales y agarres definitivos. No afinar aún el rig definitivo.
-Conservar v02–v11 y usar otra versión.
+H03 refina rostro/anatomía en v11. H04 resuelve ropa y ensamblaje local en v12.
+Quedan aprobación global, contactos fuera de las poses revisadas y agarres definitivos. No afinar aún el rig definitivo.
+Conservar v02–v12 y usar otra versión.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -56,7 +57,37 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 93, H03 rostro y anatomía visible
+## Último hito cerrado: 94, H04 ropa y ensamblaje
+
+[V12: comparativas, poses, fuente y vídeo](art/hound/mesh-v12/README.md).
+Pliegues amplios del pantalón, faja y paños de 3 mm; retornos de 4 mm en doce
+placas del torso, respaldo integrado y dos apoyos mediales pecho/espalda.
+Asiento local de seis piezas claviculares corregido contra los brazos.
+Capucha/abertura, cuello, rostro, brazos, manos y armadura de piernas exactos.
+Ocho componentes reconstruidos, quince ajustados, dos añadidos y 73 exactos.
+Los 53 huesos, bind pose y claves diagnósticas permanecen iguales.
+
+36.466 vértices / 72.568 triángulos (+2,75 %), 98 componentes, 87 rígidos,
+siete materiales. Densidad de autoría; presupuesto y malla final pendientes.
+Fuente reabierta, geometría/pesos y 61 muestras del clip pasan.
+37 poses y 16.428 evaluaciones de contactos: bordes libres de paños/pantalón
+y brazos/asientos claviculares sin cruces; uniones ocultas documentadas.
+No certifica colisiones globales, movimientos combinados ni rig definitivo.
+
+Roundtrip en 13 poses: máximo 0,000002069 m; regresión v11 pasa.
+Cooker/visor Vulkan estático 7/7; CTest Release assets/gpu_assets 2/2 y
+Debug animation_vfx 1/1. 22 PNG y vídeo de 361 frames inspeccionados.
+
+Fuente: `art/characters/hound/v12/hound-mesh-v12.blend`.
+Exportación: `assets/characters/hound_rig/v12/hound-rig.gltf` y BIN.
+Escena `Hound_Mesh_v12`, malla `H12_DeformMesh`, rig `Hound12_Rig`,
+acción `Hound12_joint_check`, colección `HOUND_v12_EXPORT`.
+Informe: `reports/hound-cloth-94/README.md`. Commit local del hito 94, sin push;
+resolver con `git log --oneline --grep='^hito 94:'`.
+H04 hecha como propuesta. **H05 pendiente y no iniciada**; aprobación artística
+global reservada al usuario. Se mantienen los límites H01–H03 de agarres y rig.
+
+## Hito 93, H03 rostro y anatomía visible
 
 [V11: comparativas, poses, fuente y vídeo](art/hound/mesh-v11/README.md).
 Órbitas, pómulos, nariz humana, labios y mentón; ojos pequeños ajustados a
@@ -81,7 +112,7 @@ Escena `Hound_Mesh_v11`, malla `H11_DeformMesh`, rig `Hound11_Rig`,
 acción `Hound11_joint_check`, colección `HOUND_v11_EXPORT`.
 Informe: `reports/hound-anatomy-93/README.md`. Commit local del hito 93, sin push;
 resolver con `git log --oneline --grep='^hito 93:'`.
-H03 hecha como propuesta; aprobación global pendiente de H05. **H04 no iniciada**.
+H03 hecha como propuesta; aprobación global pendiente de H05. H04 no estaba iniciada al cerrar H03.
 H06/H08 decidirán si alguna animación necesita mandíbula y resolverán el rig.
 
 ## Hito 92, H02 grebas, rodillas, tobillos y botas
