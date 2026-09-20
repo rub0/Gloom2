@@ -1,26 +1,27 @@
 # Traspaso de Gloom
 
-Actualizado: 20 de septiembre de 2026, cierre del hito 94, H04 ropa y ensamblaje de Hound.
+Actualizado: 20 de septiembre de 2026, subhito 95, entrega de revisión global H05.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-La fuente acumulada es v12 (hito 94, H04); el índice mantiene las rutas exactas.
-H01–H04 hechas. H05 pendiente y no iniciada. No ejecutar otra ficha sin encargo.
-El ensayo Soul Reaper es apoyo en la carcasa, sin empuñadura cerrada; límites para H08.
+La fuente acumulada candidata es v13, copia exacta de v12 (H04/hito 94).
+H01–H04 hechas. **H05 en revisión: falta aceptación explícita del usuario**.
+El subhito técnico 95 no cierra H05 ni habilita H07. H06 no se ha iniciado.
+No ejecutar otra ficha sin encargo.
 
-El usuario aprueba el diseño 3D v02 con «apruebo el diseño». Conservar esa fuente,
-la guía 0.1 y el boceto 2D 01. La v03 entrega un rig de prueba, no definitivo.
-La v04 unifica hombro/bíceps/brazo; la v05 conecta palma, pulgar y cuatro dedos
-bajo la armadura intacta. La v06 conecta pantalones/cadera, refina la faja y une
-las facciones en una superficie neutra. No es anatomía ni topología facial final.
-La v07 conecta capucha/borde/forro, refina cuello y corrige el encaje clavicular.
-La v08 refina placas, brazos, rostro y tela. Es una propuesta para revisión:
-NO está terminada la escultura. El usuario pidió continuar el pase artístico
-antes de cerrar la malla. H01 refina manos/guanteletes en v09; H02, grebas/botas en v10.
-H03 refina rostro/anatomía en v11. H04 resuelve ropa y ensamblaje local en v12.
-Quedan aprobación global, contactos fuera de las poses revisadas y agarres definitivos. No afinar aún el rig definitivo.
-Conservar v02–v12 y usar otra versión.
+El usuario aprobó el diseño 3D v02 con «apruebo el diseño»; no es aceptación
+de la escultura actual. Conservar v02–v13, guía 0.1 y boceto 2D 01.
+H01 refinó manos/guanteletes; H02, piernas/botas; H03, cara/brazos;
+H04, ropa/ensamblaje. H05 presenta el conjunto sin cambiar sus formas.
+La maestra candidata es `art/characters/hound/v13/hound-sculpture-v13.blend`;
+mantiene nombres internos v12. Rutas y hashes en el índice/manifiesto.
+
+La auditoría global detecta límites pendientes: codo a 85°, cabeza/torso al
+mirar abajo e inserciones bajo armadura/guantes. El apoyo Soul Reaper de H01
+falla contra brazo/guantelete/clavícula al revisar todo el cuerpo; no es un
+agarre ni socket válido. Malla/rig deberán resolverlos antes de UVs finales.
+No afinar aún el rig definitivo ni confundir aprobación de formas con esos arreglos.
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
@@ -57,7 +58,37 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 94, H04 ropa y ensamblaje
+## Último subhito cerrado: 95, entrega de revisión H05
+
+[H05: lámina global, detalles, siluetas, fuente y vídeo](art/hound/review-h05/README.md).
+Candidata v13 idéntica byte a byte a v12; tres hashes SHA-256 comprobados.
+No hay cambios de geometría, huesos, bind pose, pesos, claves o gameplay.
+36.466 vértices / 72.568 triángulos; 98 componentes, 87 rígidos, siete materiales,
+53 huesos diagnósticos, máximo dos influencias. Densidad de autoría.
+
+Fuente reabierta: 98 superficies conexas/cerradas/orientadas, pesos y
+61 muestras diagnósticas pasan. Auditoría global: 33 poses independientes,
+156.849 evaluaciones de pares del cuerpo y 196 del arma. Hay cruces medidos:
+codos a 85°, cabeza/torso al mirar abajo, inserciones bajo armadura/guantes
+y montaje global del Soul Reaper inválido. No certifica ausencia de colisiones,
+agarres, apoyos de pies ni estabilidad física.
+
+Roundtrip en 13 poses: máximo 0,000002069 m; regresión v12 pasa.
+Cooker/visor Vulkan estático 7/7; CTest Release assets/gpu_assets 2/2 y
+Debug animation_vfx 1/1. 26 PNG y vídeo de 331 frames revisados.
+
+Fuente: `art/characters/hound/v13/hound-sculpture-v13.blend`.
+Exportación: `assets/characters/hound_rig/v13/hound-rig.gltf` y BIN.
+Nombres internos preservados: `Hound_Mesh_v12`, `H12_DeformMesh`,
+`Hound12_Rig`, `Hound12_joint_check`, `HOUND_v12_EXPORT`.
+Informe y contactos: `reports/hound-review-95/README.md`.
+Commit local del subhito 95; resolver con `git log --oneline --grep='^hito 95:'`.
+
+**H05 en revisión**, falta aceptación explícita de formas; fecha/texto pendientes.
+La siguiente acción es esa decisión o feedback sobre esta candidata.
+No se habilita H07 ni se inicia H06/otra tarea. Sin push.
+
+## Hito 94, H04 ropa y ensamblaje
 
 [V12: comparativas, poses, fuente y vídeo](art/hound/mesh-v12/README.md).
 Pliegues amplios del pantalón, faja y paños de 3 mm; retornos de 4 mm en doce
@@ -84,8 +115,8 @@ Escena `Hound_Mesh_v12`, malla `H12_DeformMesh`, rig `Hound12_Rig`,
 acción `Hound12_joint_check`, colección `HOUND_v12_EXPORT`.
 Informe: `reports/hound-cloth-94/README.md`. Commit local del hito 94, sin push;
 resolver con `git log --oneline --grep='^hito 94:'`.
-H04 hecha como propuesta. **H05 pendiente y no iniciada**; aprobación artística
-global reservada al usuario. Se mantienen los límites H01–H03 de agarres y rig.
+H04 hecha como propuesta. Al cerrar H04, H05 no estaba iniciada; aprobación
+artística global reservada al usuario. Se mantienen los límites H01–H03 de agarres y rig.
 
 ## Hito 93, H03 rostro y anatomía visible
 

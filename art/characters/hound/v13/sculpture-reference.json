@@ -1,0 +1,33 @@
+{
+  "task": "H05",
+  "milestone": 95,
+  "candidate": "v13",
+  "source_commit": "0643723",
+  "geometry_changes": false,
+  "internal_scene": "Hound_Mesh_v12",
+  "mesh": "H12_DeformMesh",
+  "rig": "Hound12_Rig",
+  "action": "Hound12_joint_check",
+  "collection": "HOUND_v12_EXPORT",
+  "policy": "Immutable candidate; approval is recorded in the task index, never inferred from this snapshot.",
+  "files": [
+    {
+      "source": "art/characters/hound/v12/hound-mesh-v12.blend",
+      "path": "art/characters/hound/v13/hound-sculpture-v13.blend",
+      "sha256": "d597698fdd26922892176c48be930a005f5ad03a73f76304c25f26b1d722dcab",
+      "bytes": 12903777
+    },
+    {
+      "source": "assets/characters/hound_rig/v12/hound-rig.gltf",
+      "path": "assets/characters/hound_rig/v13/hound-rig.gltf",
+      "sha256": "256f46581c32c2d5a68639656e4231cd75217cbf92ef21bc5c55b3fbc6022eda",
+      "bytes": 85215
+    },
+    {
+      "source": "assets/characters/hound_rig/v12/hound-rig.bin",
+      "path": "assets/characters/hound_rig/v13/hound-rig.bin",
+      "sha256": "2fa5eb33c1d76eebebbad9b4c2a334c2e6e33b9e0f17a7a401a3b966d19e75ad",
+      "bytes": 2587648
+    }
+  ]
+}

@@ -11,6 +11,8 @@ assert version in ('v03', 'v04', 'v05', 'v06', 'v07', 'v08', 'v09', 'v10', 'v11'
 prefix = 'Hound'+version[1:]
 mesh_prefix = 'H'+version[1:]
 path = root/('assets/characters/hound_rig/'+version+'/hound-rig.gltf')
+if '--gltf' in sys.argv:
+    path = root/sys.argv[sys.argv.index('--gltf')+1]
 gltf = json.loads(path.read_text(encoding='utf-8'))
 assert len(gltf['meshes']) == 1 and len(gltf['meshes'][0]['primitives']) == 7
 assert len(gltf['skins']) == 1 and len(gltf['skins'][0]['joints']) == 53
