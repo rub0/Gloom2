@@ -1,30 +1,38 @@
 # Traspaso de Gloom
 
-Actualizado: 21 de septiembre de 2026, hito 96, preparación del feedback artístico de H05.
+Actualizado: 21 de septiembre de 2026, hito 97, feedback artístico H05 aplicado en v14.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-La fuente acumulada candidata es v13, copia exacta de v12 (H04/hito 94).
-H01–H04 hechas. **H05 en revisión, con seis correcciones artísticas pendientes**.
-Leer la [especificación F01–F06](art/hound/tasks/H05-feedback-2026-09-21.md)
-antes de modificar: reúne todo el feedback y el encargo reutilizable, sin necesitar el chat.
-Los hitos 95–96 no cierran H05 ni habilitan H07. H06 no se ha iniciado.
-No ejecutar otra ficha sin encargo.
+H01–H04 hechas. **H05 en revisión: F01–F06 modelados en v14, falta aceptación visual explícita**.
+[Galería y comparativas](art/hound/mesh-v14/README.md) ·
+[Informe 97](../reports/hound-feedback-97/README.md).
+H06 no se ha iniciado. No ejecutar otra ficha sin encargo.
 
-El usuario aprobó el diseño 3D v02 con «apruebo el diseño»; no es aceptación
-de la escultura actual. Conservar v02–v13, guía 0.1 y boceto 2D 01.
-H01 refinó manos/guanteletes; H02, piernas/botas; H03, cara/brazos;
-H04, ropa/ensamblaje. La entrega H05/95 mostró el conjunto; el feedback posterior
-preparado en el hito 96 aún no se ha modelado. V13 sigue sin aprobación.
-La maestra candidata es `art/characters/hound/v13/hound-sculpture-v13.blend`;
-mantiene nombres internos v12. Rutas y hashes en el índice/manifiesto.
+Fuente acumulada: `art/characters/hound/v14/hound-mesh-v14.blend`.
+Escena `Hound_Mesh_v14`, malla `H14_DeformMesh`, rig `Hound14_Rig`,
+acción `Hound14_joint_check`, colección `HOUND_v14_EXPORT`.
+Exportación: `assets/characters/hound_rig/v14/hound-rig.gltf` y BIN.
+V13 y su manifiesto permanecen exactos; conservar también v02–v12 y las referencias 2D.
+La aprobación de diseño v02 no aprueba la escultura actual.
 
-La auditoría global detecta límites pendientes: codo a 85°, cabeza/torso al
-mirar abajo e inserciones bajo armadura/guantes. El apoyo Soul Reaper de H01
-falla contra brazo/guantelete/clavícula al revisar todo el cuerpo; no es un
-agarre ni socket válido. Malla/rig deberán resolverlos antes de UVs finales.
-No afinar aún el rig definitivo ni confundir aprobación de formas con esos arreglos.
+Cambios H05/97: tres pinchos por antebrazo, garras puntiagudas, protección visualmente
+continua de pie a sobre rodilla, un filo posterior por lado, asiento clavicular
+bajo/medial y peto achatado, abdomen curvo enlazado con flancos. Los 53 huesos,
+bind pose, claves y 62 componentes ajenos siguen exactos.
+38.162 vértices / 75.928 triángulos; son cifras de autoría, sin presupuesto H06.
+
+Validación: topología/pesos, 61 muestras, 33 poses globales, roundtrip en 13 poses,
+regresiones de herramientas v13, cooker/visor estático y CTest 3/3 pasan.
+Persisten límites diagnósticos: codo a 85°, cabeza/torso al mirar abajo,
+inserciones bajo armadura/guantes y solapes de láminas al girar.
+El apoyo Soul Reaper heredado sigue atravesando brazo/guantelete; las nuevas
+garras alcanzan además la carcasa. No es agarre ni socket válido.
+[Contactos y evolución](../reports/hound-feedback-97/contact-changes.md).
+Resolver holguras, pesos y agarre antes de UVs finales; no se ha iniciado rig definitivo.
+Commit local del hito 97; resolver con `git log --oneline --grep='^hito 97:'`.
+
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.

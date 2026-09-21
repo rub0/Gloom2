@@ -1,5 +1,7 @@
 # Hound — H05, revisión global de escultura
 
+**Revisión histórica v13.** El feedback posterior se aplica en [v14 / hito 97](../mesh-v14/README.md), candidata vigente aún sin aceptación.
+
 20 de septiembre de 2026 · Subhito 95 · **En revisión; falta aceptación explícita del usuario.**
 Candidata v13: copia exacta de v12/H04, conservada como referencia inmutable.
 No se ha cambiado la geometría ni se ha aprobado el cierre artístico.

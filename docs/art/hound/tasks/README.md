@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-21 de septiembre de 2026 · Índice del hito 90, actualizado con feedback H05/hito 96. Alcance: terminar **este Hound**,
+21 de septiembre de 2026 · Índice del hito 90, actualizado con feedback modelado H05/hito 97. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -22,15 +22,15 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 ## Punto de partida y traspaso vigente
 
 - Base inicial: commit `68e686e`, hito 89, Hound v08.
-- Fuente acumulada actual: [hound-sculpture-v13.blend](../../../../art/characters/hound/v13/hound-sculpture-v13.blend).
-- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v13/hound-rig.gltf), junto a su BIN.
-- Evidencias: [revisión global, siluetas, contactos y vídeo H05](../review-h05/README.md).
-- Estado artístico: diseño básico v02 aprobado; **v13, copia exacta de v12 con H01–H04 terminadas; H05 en revisión**.
-- Rig: diagnóstico de 53 huesos; no rig ni animaciones finales.
+- Fuente acumulada actual: [hound-mesh-v14.blend](../../../../art/characters/hound/v14/hound-mesh-v14.blend).
+- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v14/hound-rig.gltf), junto a su BIN.
+- Evidencias: [v14, comparativas F01–F06, siluetas y vídeo](../mesh-v14/README.md).
+- Estado artístico: diseño básico v02 aprobado; **H05 en revisión, feedback F01–F06 aplicado en v14**.
+- Rig: diagnóstico de 53 huesos, bind pose y claves conservados; no rig ni animaciones finales.
 - Contrato/presupuesto H06: pendiente. Malla de producción H07: pendiente.
-- Aprobación de cierre artístico H05: **en revisión, con correcciones pendientes**; sin aceptación registrada.
-- Dirección vigente: [feedback F01–F06 del 21 de septiembre](H05-feedback-2026-09-21.md), preparado en el hito 96; aún sin modelar.
-- Integración: el juego sigue usando la presentación anterior; v13 no la sustituye.
+- Aprobación de cierre artístico H05: **pendiente de aceptación visual explícita de v14**.
+- Dirección aplicada: [feedback F01–F06](H05-feedback-2026-09-21.md), preparado en 96 y modelado en 97.
+- Integración: el juego sigue usando la presentación anterior; v14 no la sustituye.
 
 Al cerrar una ficha, actualizar aquí la fuente acumulada, exportación y evidencia
 con **rutas exactas**, incluso cuando no cambien. Registrar en su fila el commit,
@@ -131,7 +131,7 @@ falla contra brazo/guantelete/clavícula al revisar el cuerpo entero, aunque
 guante/dedos estén libres; no es agarre ni socket válido. No garantiza
 apoyos de pies, estabilidad física ni todas las poses/contactos.
 
-**Falta aceptación explícita de las formas v13 por el usuario**.
+**V13 no recibió aceptación; fue sustituida por la candidata v14 del hito 97**.
 Fecha y texto: pendientes. H05 no está hecha ni habilita H07.
 Subhito de revisión con commit local `3e8bfd8`.
 No se inicia H06 ni otra ficha; no se hace push.
@@ -142,19 +142,46 @@ No se inicia H06 ni otra ficha; no se hace push.
 Feedback del usuario: tres pinchos por antebrazo; garras; armadura continua
 pie/rodilla con remate algo superior; un pincho posterior por lado; arranque
 clavicular/peto más achatado; abdominales más naturales e integrados.
-Documento preparado, **ningún cambio de geometría realizado**.
+En el hito 96 se preparó el documento sin cambiar geometría. Su ejecución posterior está registrada en el hito 97.
 
-Se conservan la fuente, exportación y evidencias v13 indicadas al inicio,
-con sus nombres internos v12 y hashes. V14 es una salida prevista todavía
-inexistente, no una fuente vigente. Comprobar disponibilidad antes de modelar.
+Al cerrar el hito 96 se conservaban fuente/exportación/evidencias v13, con nombres
+internos v12. V14 aún no existía entonces; el hito 97 la crea y la registra como fuente vigente.
 Resolver conjuntamente pecho/abdomen/espalda, después antebrazos/garras y piernas.
 Los detalles de interpretación, comprobación y alcance están en la especificación.
 
-H05 sigue en revisión y no habilita H07. La próxima acción es ejecutar el
-feedback cuando se encargue; no volver a solicitar aprobación de la v13 sin
-atender esas correcciones. No se inicia H06 ni otra ficha.
+El encargo posterior ejecuta el feedback en el hito 97. H05 sigue en revisión
+y no habilita H07. No se inicia H06 ni otra ficha.
 [Informe 96](../../../../reports/hound-feedback-96/README.md).
-Commit local del hito 96; resolver con `git log --oneline --grep='^hito 96:'`.
+Commit local `ece90a7`.
+
+## Correcciones H05 — hito 97, candidata v14
+
+F01–F06 aplicados: tres pinchos por antebrazo, garras, continuidad pie/rodilla,
+dos filos posteriores, asiento clavicular bajo con peto achatado, abdomen
+curvo y flancos articulados. [Galería v14](../mesh-v14/README.md) e
+[informe autocontenido](../../../../reports/hound-feedback-97/README.md).
+
+Fuente, glTF y BIN vigentes: rutas exactas al inicio.
+Escena `Hound_Mesh_v14`, malla `H14_DeformMesh`, rig `Hound14_Rig`,
+acción `Hound14_joint_check`, colección `HOUND_v14_EXPORT`.
+[Manifiesto SHA-256](../../../../art/characters/hound/v14/sculpture-reference.json).
+38.162 vértices / 75.928 triángulos (+4,63 %), 106 componentes, 95 rígidos.
+32 reconstruidos, cuatro ajustados, ocho añadidos y 62 ajenos exactos.
+V13 intacta; mismos 53 huesos, bind pose y claves.
+
+Topología/pesos, 61 muestras, 33 poses/183.645 pares evaluados, roundtrip,
+regresión v13, cooker/visor y CTest 3/3 pasan. Vídeo de 331 frames y 37 PNG.
+Sin nuevas autointersecciones; siguen codos a 85°, cabeza/torso al bajar,
+inserciones ocultas y contactos entre láminas al girar el torso.
+El apoyo Soul Reaper sigue inválido; las garras nuevas añaden contacto con
+la carcasa. H08 deberá resolver holguras, pesos y agarre antes de UVs.
+[Inventario](../../../../reports/hound-feedback-97/contacts.md) y
+[evolución frente a v13](../../../../reports/hound-feedback-97/contact-changes.md).
+
+**Falta aceptación artística explícita de v14**; fecha/texto pendientes.
+H05 no está hecha ni habilita H07. H06 no se ha iniciado.
+Commit local del hito 97; resolver con `git log --oneline --grep='^hito 97:'`.
+No hay push ni trabajo de otra ficha.
 
 ## Fichas y dependencias
 
@@ -167,7 +194,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H02](H02-grebas-botas.md) | Grebas, rodillas, tobillos y botas | H01 | Hecha | [v10: fuente, glTF/BIN y vistas](../mesh-v10/README.md); [informe 92](../../../../reports/hound-legs-92/README.md); commit `6c2fe7f` |
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
-| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión; correcciones pendientes | [v13 y evidencias](../review-h05/README.md), commit `3e8bfd8`; [feedback F01–F06](H05-feedback-2026-09-21.md); [informe 96](../../../../reports/hound-feedback-96/README.md); commit del hito 96, resolver con git log; sin nueva geometría ni aprobación |
+| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión; F01–F06 aplicados, falta aceptación | [v14 y evidencias](../mesh-v14/README.md); [informe 97](../../../../reports/hound-feedback-97/README.md); commit del hito 97, resolver con git log; v13 preservada |
 | [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Pendiente | — |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |

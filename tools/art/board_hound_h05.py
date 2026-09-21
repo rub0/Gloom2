@@ -1,4 +1,5 @@
 '''Compose H05 evidence from actual renders; decode every video frame and verify frozen files.'''
+import sys
 import json
 import hashlib
 from pathlib import Path
@@ -6,8 +7,9 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 import av
 
 root = Path(__file__).resolve().parents[2]
-output = root/'docs/art/hound/review-h05'
-cache = root/'.cache/hound-h05'
+v14 = '--v14' in sys.argv
+output = root/('docs/art/hound/mesh-v14' if v14 else 'docs/art/hound/review-h05')
+cache = root/('.cache/hound-mesh-v14' if v14 else '.cache/hound-h05')
 font_path = 'C:/Windows/Fonts/arial.ttf'
 
 def board(items,columns,cell=(450,540)):
@@ -26,6 +28,11 @@ def board(items,columns,cell=(450,540)):
 
 board([('face','Rostro'),('collar','Claviculas / hombros'),('hands','Mano / guantelete'),
        ('boots','Grebas / botas'),('waist','Cintura / tela'),('back-assembly','Ensamblaje posterior')],3).save(output/'details.png')
+if v14:
+    board([('bracer-side','F01 / tres pinchos'),('claws-palm','F02 / garra palmar'),
+           ('boots','F03 / pie-rodilla'),('rear-blades','F04 / pinchos posteriores'),
+           ('collar','F05 / clavicula-peto'),('torso','F06 / abdomen envolvente')],3).save(output/'feedback-details.png')
+    board([('claws-dorsal','Dorsal'),('claws-palm','Palmar'),('claws-side','Lateral')],3,cell=(450,540)).save(output/'claws.png')
 board([('pose-reach','Alcance'),('pose-combined','Paso + giro'),('pose-elbow','Codo 85 grados / limite'),
        ('pose-fist','Dedos'),('pose-look-up','Cabeza arriba'),('pose-look-down','Cabeza abajo')],3).save(output/'poses.png')
 board([('weapon-full','Soul Reaper / apoyo diagnostico'),('weapon-contact','Apoyo local: no agarre final')],2).save(output/'weapon.png')
@@ -83,10 +90,10 @@ print('INTRODUCED_CONTACTS',json.dumps(introduced,sort_keys=True))
 print('TOPOLOGY',len(audit['topology']),'closed connected oriented positive volumes')
 print('IMAGES',len(list(output.glob('*.png'))))
 
-report = root/'reports/hound-review-95'
+report = root/('reports/hound-feedback-97' if v14 else 'reports/hound-review-95')
 report.mkdir(parents=True,exist_ok=True)
 rows = ['# H05 — inventario de contactos medidos','',
-        '33 poses independientes; 98 componentes, 4.753 pares por pose, 156.849 evaluaciones.',
+        f"{audit['poses']} poses independientes; {audit['parts']} componentes, {audit['pairs_per_pose']} pares por pose, {audit['pair_evaluations']} evaluaciones.",
         'Cruces de superficies BVH: el conteo depende de la teselación y no mide profundidad.',
         'No certifica contención, distancia mínima continua ni todos los movimientos.',
         'La tabla incluye cada par con algún cruce; los restantes dan cero en estas muestras.','',
@@ -101,18 +108,19 @@ rows += ['', '## Autointersecciones no adyacentes', '',
 for pose,row in audit['self_crossings'].items():
     for name,count in row.items():
         rows.append('| '+pose+' | '+name+' | '+str(count)+' |')
-rows += ['', 'Cero en los demás componentes/muestras. Los 98 componentes son conexos, cerrados,',
+rows += ['', f"Cero en los demás componentes/muestras. Los {audit['parts']} componentes son conexos, cerrados,",
          'con aristas orientadas consistentemente y volumen positivo en reposo.', '',
          '## Soul Reaper original', '',
          'Escala 0,43; apoyo diagnóstico de H01 sobre carcasa posterior. Se comprueban',
-         'los 98 componentes en reposo con dedos curvados y durante el alcance.',
+         f"los {audit['parts']} componentes en reposo con dedos curvados y durante el alcance.",
          'El arma sigue la transformación de la mano; no se modifica la malla ni el rig.', '',
          '| Componente | Apoyo | Alcance con apoyo |','| --- | ---: | ---: |']
 for name in sorted(audit['weapon_crossings']['grip']):
     a,b = audit['weapon_crossings']['grip'][name],audit['weapon_crossings']['reach'][name]
     if a or b:
         rows.append('| '+name+' | '+str(a)+' | '+str(b)+' |')
-rows += ['', 'Cero cruces en los demás componentes, incluidos guantes y dedos.',
+rows += ['', ('Cero cruces en los demás componentes; los dedos y el pulgar afectados constan en la tabla.' if v14
+         else 'Cero cruces en los demás componentes, incluidos guantes y dedos.'),
          '**El apoyo falla globalmente; no es un agarre válido ni un socket final.**', '']
 (report/'contacts.md').write_text('\n'.join(rows),encoding='utf-8')
 print('CONTACT_INVENTORY',len(rest),'rest pairs',len(all_pairs),'pairs hit in any pose')

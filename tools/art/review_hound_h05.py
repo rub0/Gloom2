@@ -10,13 +10,15 @@ import shutil
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-output = root/'docs/art/hound/review-h05'
-cache = root/'.cache/hound-h05'
+v14 = '--v14' in sys.argv
+output = root/('docs/art/hound/mesh-v14' if v14 else 'docs/art/hound/review-h05')
+cache = root/('.cache/hound-mesh-v14' if v14 else '.cache/hound-h05')
 output.mkdir(parents=True,exist_ok=True)
 cache.mkdir(parents=True,exist_ok=True)
 manifest_path = root/'art/characters/hound/v13/sculpture-reference.json'
 
 if '--freeze' in sys.argv:
+    assert not v14, 'v14 is modeled, never frozen from v12'
     pairs = [
         ('art/characters/hound/v12/hound-mesh-v12.blend','art/characters/hound/v13/hound-sculpture-v13.blend'),
         ('assets/characters/hound_rig/v12/hound-rig.gltf','assets/characters/hound_rig/v13/hound-rig.gltf'),
@@ -49,8 +51,8 @@ import hound_h04_review as assembly
 manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 for item in manifest['files']:
     assert hashlib.sha256((root/item['path']).read_bytes()).hexdigest()==item['sha256'],item['path']
-scene = bpy.data.scenes['Hound_Mesh_v12']
-model,rig = scene.objects['H12_DeformMesh'],scene.objects['Hound12_Rig']
+scene = bpy.data.scenes['Hound_Mesh_v14' if v14 else 'Hound_Mesh_v12']
+model,rig = (scene.objects['H14_DeformMesh'],scene.objects['Hound14_Rig']) if v14 else (scene.objects['H12_DeformMesh'],scene.objects['Hound12_Rig'])
 bpy.context.window.scene = scene
 scene.frame_set(1)
 rig.animation_data.action = None
@@ -156,6 +158,19 @@ if '--audit' in sys.argv:
         points,trees = points_and_trees()
         tree = BVHTree.FromPolygons([gun.matrix_world@v.co for v in gun.data.vertices],[list(p.vertices) for p in gun.data.polygons])
         weapon[kind] = {n:len(tree.overlap(trees[n])) for n in names}
+    if v14:
+        for tag,row in self_crossings.items():
+            assert row==({'Arm_surface_L':37,'Arm_surface_R':37} if tag=='elbow' else {}), (tag,row)
+        clear_pairs = []
+        for suffix in ('L','R'):
+            clear_pairs += [('Arm_surface_'+suffix,'Collar_plate_'+suffix),
+                            ('Arm_surface_'+suffix,'Collar_blade_middle_'+suffix),
+                            ('Arm_surface_'+suffix,'Rib_flank_'+suffix),
+                            ('Back_blade_'+suffix,'Hood_continuous'),
+                            ('Bracer_blade_distal_'+suffix,'Hand_back_full_point_'+suffix)]
+        for tag,row in contacts.items():
+            for pair in clear_pairs:
+                assert row.get('/'.join(sorted(pair)),0)==0, (tag,pair)
     result = {'poses':len(cases),'parts':len(parts),'pairs_per_pose':len(pairs),'pair_evaluations':len(cases)*len(pairs),
         'max_influences':maximum,'topology':topology,'surface_crossings':contacts,'self_crossings':self_crossings,
         'weapon_crossings':weapon,'scope':'Discrete surface crossings, not containment, clearance or continuous collision certification.'}
@@ -182,7 +197,7 @@ if '--stills' in sys.argv:
         x = (i-1.5)*1.23
         hands.snapshot(scene,model,board,Matrix.Translation((x,0,0))@Matrix.Rotation(angle,4,'Z'))
         hands.label(board,title,x,-.12,.047)
-    hands.label(board,'H05 / ESCULTURA V13 / CANDIDATA A APROBACION',0,2.00,.063)
+    hands.label(board,'H05 / ESCULTURA '+('V14' if v14 else 'V13')+' / CANDIDATA A APROBACION',0,2.00,.063)
     hands.camera(board,(0,-6,.96),(0,0,.96),5.15)
     hands.render(board,output/'turnaround.png')
     for name,position,target,scale in [
@@ -207,9 +222,28 @@ if '--stills' in sys.argv:
             board.collection.objects.link(copy)
     hands.snapshot(scene,model,board,Matrix.Translation((.64,0,0)))
     hands.label(board,'V02 / DISENO APROBADO',-.64,-.12,.044)
-    hands.label(board,'V13 / ESCULTURA EN REVISION',.64,-.12,.044)
+    hands.label(board,('V14' if v14 else 'V13')+' / ESCULTURA EN REVISION',.64,-.12,.044)
     hands.camera(board,(0,-5,.93),(0,0,.93),2.9)
     hands.render(board,output/'approved-comparison.png')
+    if v14:
+        old_scene = bpy.data.scenes['Hound_Mesh_v12']
+        old_model,old_rig = old_scene.objects['H12_DeformMesh'],old_scene.objects['Hound12_Rig']
+        old_rig.animation_data.action = None
+        assembly.pose(old_scene,old_rig,'rest')
+        board = bpy.data.scenes.new('H05_BeforeAfter')
+        hands.setup(board,2600,2200)
+        for row,(src,obj,version) in enumerate(((old_scene,old_model,'V13'),(scene,model,'V14'))):
+            for i,(angle,title) in enumerate(((0,'FRENTE'),(math.pi/2,'PERFIL'),(math.pi,'ESPALDA'),(.65,'TRES CUARTOS'))):
+                x,z = (i-1.5)*1.23,(1-row)*2.1
+                hands.snapshot(src,obj,board,Matrix.Translation((x,0,z))@Matrix.Rotation(angle,4,'Z'))
+                hands.label(board,version+' / '+title,x,z-.1,.048)
+        hands.camera(board,(0,-6,1.95),(0,0,1.95),5.15)
+        hands.render(board,output/'before-after.png')
+        for name,position,target,scale in [
+            ('torso',(1,-5,1.4),(0,0,1.34),.88),('claws-palm',( -3,-2,1.08),(.455,-.03,.856),.34),
+            ('claws-dorsal',(3,1,1),(.455,-.03,.856),.34),('claws-side',(0,-5,.95),(.455,-.03,.856),.34),
+            ('bracer-side',(3,-3,1.3),(.445,0,1.12),.49),('rear-blades',(1,4,1.9),(0,.10,1.58),.9)]:
+            view(name,position,target,scale)
     for kind in ('reach','combined','elbow','fist','look-up','look-down'):
         pose(kind)
         view('pose-'+kind,(2,-4,1.8),(0,0,.95),2.15)

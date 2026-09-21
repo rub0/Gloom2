@@ -11,12 +11,12 @@ sustancial, documentarlo y pedir dirección antes de cambiarlo.
 
 ## Feedback vigente para la siguiente revisión
 
-El usuario indicó correcciones de formas el 21 de septiembre de 2026.
-Aplicar como dirección artística la [especificación F01–F06](H05-feedback-2026-09-21.md)
-al encargar la siguiente modificación. Incluye antebrazos, garras, piernas,
-espalda, clavícula/peto y abdomen; distingue requisitos de interpretaciones.
-La preparación del hito 96 no ha modificado v13 ni aprobado la escultura.
-H05 sigue en revisión con correcciones pendientes.
+El feedback del 21 de septiembre está en la [especificación F01–F06](H05-feedback-2026-09-21.md).
+El hito 96 lo preparó y el hito 97 lo aplica en **v14**: antebrazos, garras,
+piernas, espalda, clavícula/peto y abdomen. V13 queda conservada.
+[Entrega v14](../mesh-v14/README.md) e [informe 97](../../../../reports/hound-feedback-97/README.md).
+**H05 sigue en revisión: falta aceptación visual explícita de v14.**
+Las pruebas técnicas no aprueban la escultura. H06 no se ha iniciado.
 
 ## Evidencias y criterios
 - Lámina frontal/perfil/espalda/tres cuartos a igual escala; silueta a tamaño
