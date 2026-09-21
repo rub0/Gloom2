@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-20 de septiembre de 2026 · Índice del hito 90, actualizado con H05/subhito 95. Alcance: terminar **este Hound**,
+21 de septiembre de 2026 · Índice del hito 90, actualizado con feedback H05/hito 96. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -28,7 +28,8 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 - Estado artístico: diseño básico v02 aprobado; **v13, copia exacta de v12 con H01–H04 terminadas; H05 en revisión**.
 - Rig: diagnóstico de 53 huesos; no rig ni animaciones finales.
 - Contrato/presupuesto H06: pendiente. Malla de producción H07: pendiente.
-- Aprobación de cierre artístico H05: **en revisión**, entrega preparada; falta aceptación explícita, sin fecha ni texto registrado.
+- Aprobación de cierre artístico H05: **en revisión, con correcciones pendientes**; sin aceptación registrada.
+- Dirección vigente: [feedback F01–F06 del 21 de septiembre](H05-feedback-2026-09-21.md), preparado en el hito 96; aún sin modelar.
 - Integración: el juego sigue usando la presentación anterior; v13 no la sustituye.
 
 Al cerrar una ficha, actualizar aquí la fuente acumulada, exportación y evidencia
@@ -132,8 +133,28 @@ apoyos de pies, estabilidad física ni todas las poses/contactos.
 
 **Falta aceptación explícita de las formas v13 por el usuario**.
 Fecha y texto: pendientes. H05 no está hecha ni habilita H07.
-Subhito de revisión con commit local; resolver con `git log --oneline --grep='^hito 95:'`.
+Subhito de revisión con commit local `3e8bfd8`.
 No se inicia H06 ni otra ficha; no se hace push.
+
+## Preparación de correcciones H05 — hito 96
+
+[Especificación F01–F06 y encargo reutilizable](H05-feedback-2026-09-21.md).
+Feedback del usuario: tres pinchos por antebrazo; garras; armadura continua
+pie/rodilla con remate algo superior; un pincho posterior por lado; arranque
+clavicular/peto más achatado; abdominales más naturales e integrados.
+Documento preparado, **ningún cambio de geometría realizado**.
+
+Se conservan la fuente, exportación y evidencias v13 indicadas al inicio,
+con sus nombres internos v12 y hashes. V14 es una salida prevista todavía
+inexistente, no una fuente vigente. Comprobar disponibilidad antes de modelar.
+Resolver conjuntamente pecho/abdomen/espalda, después antebrazos/garras y piernas.
+Los detalles de interpretación, comprobación y alcance están en la especificación.
+
+H05 sigue en revisión y no habilita H07. La próxima acción es ejecutar el
+feedback cuando se encargue; no volver a solicitar aprobación de la v13 sin
+atender esas correcciones. No se inicia H06 ni otra ficha.
+[Informe 96](../../../../reports/hound-feedback-96/README.md).
+Commit local del hito 96; resolver con `git log --oneline --grep='^hito 96:'`.
 
 ## Fichas y dependencias
 
@@ -146,7 +167,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H02](H02-grebas-botas.md) | Grebas, rodillas, tobillos y botas | H01 | Hecha | [v10: fuente, glTF/BIN y vistas](../mesh-v10/README.md); [informe 92](../../../../reports/hound-legs-92/README.md); commit `6c2fe7f` |
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
-| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión | [v13: maestra, exportación y evidencias](../review-h05/README.md); [informe 95](../../../../reports/hound-review-95/README.md); commit del subhito 95, resolver con git log; aceptación pendiente |
+| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión; correcciones pendientes | [v13 y evidencias](../review-h05/README.md), commit `3e8bfd8`; [feedback F01–F06](H05-feedback-2026-09-21.md); [informe 96](../../../../reports/hound-feedback-96/README.md); commit del hito 96, resolver con git log; sin nueva geometría ni aprobación |
 | [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Pendiente | — |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |

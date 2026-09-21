@@ -1,19 +1,22 @@
 # Traspaso de Gloom
 
-Actualizado: 20 de septiembre de 2026, subhito 95, entrega de revisión global H05.
+Actualizado: 21 de septiembre de 2026, hito 96, preparación del feedback artístico de H05.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
 La fuente acumulada candidata es v13, copia exacta de v12 (H04/hito 94).
-H01–H04 hechas. **H05 en revisión: falta aceptación explícita del usuario**.
-El subhito técnico 95 no cierra H05 ni habilita H07. H06 no se ha iniciado.
+H01–H04 hechas. **H05 en revisión, con seis correcciones artísticas pendientes**.
+Leer la [especificación F01–F06](art/hound/tasks/H05-feedback-2026-09-21.md)
+antes de modificar: reúne todo el feedback y el encargo reutilizable, sin necesitar el chat.
+Los hitos 95–96 no cierran H05 ni habilitan H07. H06 no se ha iniciado.
 No ejecutar otra ficha sin encargo.
 
 El usuario aprobó el diseño 3D v02 con «apruebo el diseño»; no es aceptación
 de la escultura actual. Conservar v02–v13, guía 0.1 y boceto 2D 01.
 H01 refinó manos/guanteletes; H02, piernas/botas; H03, cara/brazos;
-H04, ropa/ensamblaje. H05 presenta el conjunto sin cambiar sus formas.
+H04, ropa/ensamblaje. La entrega H05/95 mostró el conjunto; el feedback posterior
+preparado en el hito 96 aún no se ha modelado. V13 sigue sin aprobación.
 La maestra candidata es `art/characters/hound/v13/hound-sculpture-v13.blend`;
 mantiene nombres internos v12. Rutas y hashes en el índice/manifiesto.
 
@@ -58,7 +61,28 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último subhito cerrado: 95, entrega de revisión H05
+## Último hito cerrado: 96, preparación del feedback H05
+
+[Especificación lista para ejecutar F01–F06](art/hound/tasks/H05-feedback-2026-09-21.md).
+Tres pinchos por antebrazo, lectura de garras, continuidad de armadura de pie
+hasta algo por encima de rodilla, un pincho posterior por lado, corrección
+clavícula/peto y abdominales más naturales.
+Distingue indicaciones del usuario de interpretaciones de modelado y fija
+criterios visuales, orden, conservación, evidencias y comprobaciones.
+
+Solo documentación: fuente/exportación v13 y sus hashes intactos, sin v14 creada.
+Nombres internos siguen siendo v12. Entrada exacta y rutas al inicio/índice.
+V14 estaba libre, pero debe comprobarse de nuevo al comenzar la modificación.
+Enlaces, consistencia, integridad y diff verificados; sin Blender/build/tests del motor.
+Informe: `reports/hound-feedback-96/README.md`.
+Commit local del hito 96; resolver con `git log --oneline --grep='^hito 96:'`.
+
+H05 continúa en revisión con correcciones pendientes; no se solicita aprobación
+de v13 ignorando el feedback. Siguiente: ejecutar F01–F06 cuando se encargue,
+presentar una nueva candidata y solicitar aceptación explícita de esas formas.
+Sin push y sin inicio de H06/otra ficha.
+
+## Subhito 95, entrega de revisión H05
 
 [H05: lámina global, detalles, siluetas, fuente y vídeo](art/hound/review-h05/README.md).
 Candidata v13 idéntica byte a byte a v12; tres hashes SHA-256 comprobados.
@@ -82,10 +106,10 @@ Exportación: `assets/characters/hound_rig/v13/hound-rig.gltf` y BIN.
 Nombres internos preservados: `Hound_Mesh_v12`, `H12_DeformMesh`,
 `Hound12_Rig`, `Hound12_joint_check`, `HOUND_v12_EXPORT`.
 Informe y contactos: `reports/hound-review-95/README.md`.
-Commit local del subhito 95; resolver con `git log --oneline --grep='^hito 95:'`.
+Commit local del subhito 95: `3e8bfd8`.
 
 **H05 en revisión**, falta aceptación explícita de formas; fecha/texto pendientes.
-La siguiente acción es esa decisión o feedback sobre esta candidata.
+El feedback posterior está preparado en el hito 96; la nueva candidata sigue pendiente.
 No se habilita H07 ni se inicia H06/otra tarea. Sin push.
 
 ## Hito 94, H04 ropa y ensamblaje

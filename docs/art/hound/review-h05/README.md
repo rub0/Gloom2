@@ -4,6 +4,10 @@
 Candidata v13: copia exacta de v12/H04, conservada como referencia inmutable.
 No se ha cambiado la geometría ni se ha aprobado el cierre artístico.
 
+**Actualización del 21 de septiembre:** el usuario pidió seis correcciones.
+[Feedback F01–F06 preparado para modelar](../tasks/H05-feedback-2026-09-21.md).
+Esta galería conserva la propuesta anterior v13; las modificaciones aún no se han aplicado.
+
 ![Frente, perfil, espalda y tres cuartos a igual escala](turnaround.png)
 
 ## Comparación y decisión artística
@@ -83,6 +87,7 @@ Roundtrip en 13 poses: máximo 0,000002069 m; regresión v12 pasa.
 Cooker/visor estático Vulkan 7/7; CTest acotado 3/3.
 26 PNG y fotogramas clave inspeccionados; vídeo completo decodificado.
 
-La aceptación solicitada corresponde a **las formas de esta candidata v13**.
-Fecha y texto de aceptación: **pendientes**. H05 no está hecha ni habilita H07.
+V13 continúa sin aprobación. El siguiente pase debe atender F01–F06 y presentar
+una candidata nueva para aceptación explícita de sus formas. H05 no está hecha
+ni habilita H07; este feedback no es una aprobación del modelo actual.
 H06 y las siguientes tareas no se han iniciado.

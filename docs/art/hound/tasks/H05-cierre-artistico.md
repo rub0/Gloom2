@@ -9,6 +9,15 @@ Revisar silueta, proporciones, jerarquía de detalle, anatomía, construcción y
 coherencia de espalda/perfil. Corregir remates pequeños; si aparece un rediseño
 sustancial, documentarlo y pedir dirección antes de cambiarlo.
 
+## Feedback vigente para la siguiente revisión
+
+El usuario indicó correcciones de formas el 21 de septiembre de 2026.
+Aplicar como dirección artística la [especificación F01–F06](H05-feedback-2026-09-21.md)
+al encargar la siguiente modificación. Incluye antebrazos, garras, piernas,
+espalda, clavícula/peto y abdomen; distingue requisitos de interpretaciones.
+La preparación del hito 96 no ha modificado v13 ni aprobado la escultura.
+H05 sigue en revisión con correcciones pendientes.
+
 ## Evidencias y criterios
 - Lámina frontal/perfil/espalda/tres cuartos a igual escala; silueta a tamaño
   de combate; detalles de cara, clavículas, manos, botas y uniones.
