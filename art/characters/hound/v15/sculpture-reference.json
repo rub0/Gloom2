@@ -1,0 +1,32 @@
+{
+  "task": "H05",
+  "milestone": 98,
+  "candidate": "v15",
+  "source": "v14",
+  "artistic_approval": false,
+  "scene": "Hound_Mesh_v15",
+  "mesh": "H15_DeformMesh",
+  "rig": "Hound15_Rig",
+  "action": "Hound15_joint_check",
+  "collection": "HOUND_v15_EXPORT",
+  "modified_parts": [
+    "Hood_continuous"
+  ],
+  "files": [
+    {
+      "path": "art/characters/hound/v15/hound-mesh-v15.blend",
+      "sha256": "fcd23120b207321fcd4b5cbde6366ee499c6c6c7b2706fd6460961b3b5fd9236",
+      "bytes": 15447867
+    },
+    {
+      "path": "assets/characters/hound_rig/v15/hound-rig.gltf",
+      "sha256": "4ca34ac51da84a72cb7d1530dec08d54dc06ff5214e4335014790b778200553a",
+      "bytes": 86583
+    },
+    {
+      "path": "assets/characters/hound_rig/v15/hound-rig.bin",
+      "sha256": "db8d429ca7c663d63b61e4d3ef5f6cccf42a781d25d6bcfebf500899da178bcd",
+      "bytes": 2615376
+    }
+  ]
+}

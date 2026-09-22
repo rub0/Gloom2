@@ -1,5 +1,10 @@
 # Hound v14 — feedback H05 aplicado
 
+> Galería histórica del hito 97. La [candidata vigente v15](../mesh-v15/README.md)
+> conserva F01–F06 y ajusta únicamente la caída de capucha (hito 98).
+> H05 sigue pendiente de aceptación visual explícita.
+
+
 21 de septiembre de 2026 · Hito 97. **Candidata en revisión; falta aceptación artística explícita.**
 H06 no se ha iniciado. V13 y las referencias anteriores permanecen intactas.
 

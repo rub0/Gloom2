@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-21 de septiembre de 2026 · Índice del hito 90, actualizado con feedback modelado H05/hito 97. Alcance: terminar **este Hound**,
+22 de septiembre de 2026 · Índice del hito 90, actualizado con caída de capucha H05/hito 98. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -22,15 +22,15 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 ## Punto de partida y traspaso vigente
 
 - Base inicial: commit `68e686e`, hito 89, Hound v08.
-- Fuente acumulada actual: [hound-mesh-v14.blend](../../../../art/characters/hound/v14/hound-mesh-v14.blend).
-- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v14/hound-rig.gltf), junto a su BIN.
-- Evidencias: [v14, comparativas F01–F06, siluetas y vídeo](../mesh-v14/README.md).
-- Estado artístico: diseño básico v02 aprobado; **H05 en revisión, feedback F01–F06 aplicado en v14**.
+- Fuente acumulada actual: [hound-mesh-v15.blend](../../../../art/characters/hound/v15/hound-mesh-v15.blend).
+- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v15/hound-rig.gltf), junto a su BIN.
+- Evidencias: [v15, comparativa de capucha y vídeo](../mesh-v15/README.md).
+- Estado artístico: diseño básico v02 aprobado; **H05 en revisión, F01–F06 conservados y capucha ajustada en v15**.
 - Rig: diagnóstico de 53 huesos, bind pose y claves conservados; no rig ni animaciones finales.
 - Contrato/presupuesto H06: pendiente. Malla de producción H07: pendiente.
-- Aprobación de cierre artístico H05: **pendiente de aceptación visual explícita de v14**.
-- Dirección aplicada: [feedback F01–F06](H05-feedback-2026-09-21.md), preparado en 96 y modelado en 97.
-- Integración: el juego sigue usando la presentación anterior; v14 no la sustituye.
+- Aprobación de cierre artístico H05: **pendiente de aceptación visual explícita de v15**.
+- Dirección aplicada: [feedback F01–F06](H05-feedback-2026-09-21.md), hito 97, y caída de capucha solicitada el 22 de septiembre, hito 98.
+- Integración: el juego sigue usando la presentación anterior; v15 no la sustituye.
 
 Al cerrar una ficha, actualizar aquí la fuente acumulada, exportación y evidencia
 con **rutas exactas**, incluso cuando no cambien. Registrar en su fila el commit,
@@ -161,7 +161,7 @@ dos filos posteriores, asiento clavicular bajo con peto achatado, abdomen
 curvo y flancos articulados. [Galería v14](../mesh-v14/README.md) e
 [informe autocontenido](../../../../reports/hound-feedback-97/README.md).
 
-Fuente, glTF y BIN vigentes: rutas exactas al inicio.
+Fuente/glTF/BIN de esta revisión histórica: [v14](../mesh-v14/README.md). Rutas vigentes al inicio.
 Escena `Hound_Mesh_v14`, malla `H14_DeformMesh`, rig `Hound14_Rig`,
 acción `Hound14_joint_check`, colección `HOUND_v14_EXPORT`.
 [Manifiesto SHA-256](../../../../art/characters/hound/v14/sculpture-reference.json).
@@ -178,10 +178,30 @@ la carcasa. H08 deberá resolver holguras, pesos y agarre antes de UVs.
 [Inventario](../../../../reports/hound-feedback-97/contacts.md) y
 [evolución frente a v13](../../../../reports/hound-feedback-97/contact-changes.md).
 
-**Falta aceptación artística explícita de v14**; fecha/texto pendientes.
+**V14 se entregó sin aceptación artística**; la candidata vigente es v15, también pendiente.
 H05 no está hecha ni habilita H07. H06 no se ha iniciado.
-Commit local del hito 97; resolver con `git log --oneline --grep='^hito 97:'`.
+Commit local `4c1f86c`.
 No hay push ni trabajo de otra ficha.
+
+## Ajuste H05 — hito 98, candidata v15
+
+Capucha abierta sobre el centro del pecho, con dos bordes descendentes.
+Nuca y marco superior conservados; 105 piezas ajenas, rig y claves exactos.
+[Galería v15](../mesh-v15/README.md) e [informe 98](../../../../reports/hound-hood-98/README.md).
+Fuente/glTF/BIN vigentes en el inicio; [manifiesto](../../../../art/characters/hound/v15/sculpture-reference.json).
+Escena `Hound_Mesh_v15`, malla `H15_DeformMesh`, rig `Hound15_Rig`,
+acción `Hound15_joint_check`, colección `HOUND_v15_EXPORT`.
+38.085 vértices / 75.774 triángulos, 106 componentes y 95 rígidos.
+V13/v14 intactas. 61 muestras, 33 poses × 105 pares de capucha, roundtrip,
+regresión v14, cooker/visor y CTest 3/3 pasan. Vídeo de 211 frames y 16 PNG.
+Sin autointersecciones de capucha ni contactos nuevos con piezas antes libres;
+persisten inserciones del forro y los límites de codo, torso, láminas y arma de v14.
+[Contactos de capucha](../../../../reports/hound-hood-98/contacts.md).
+El rig provisional aún dobla la tela con fuerza al bajar la cabeza.
+**Falta aceptación artística explícita de v15**; fecha/texto pendientes.
+H05 no está hecha ni habilita H07. H06 no iniciado.
+Commit local del hito 98; resolver con `git log --oneline --grep='^hito 98:'`.
+Sin push ni trabajo de otra ficha.
 
 ## Fichas y dependencias
 
@@ -194,7 +214,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H02](H02-grebas-botas.md) | Grebas, rodillas, tobillos y botas | H01 | Hecha | [v10: fuente, glTF/BIN y vistas](../mesh-v10/README.md); [informe 92](../../../../reports/hound-legs-92/README.md); commit `6c2fe7f` |
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
-| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión; F01–F06 aplicados, falta aceptación | [v14 y evidencias](../mesh-v14/README.md); [informe 97](../../../../reports/hound-feedback-97/README.md); commit del hito 97, resolver con git log; v13 preservada |
+| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión; F01–F06 y capucha aplicados, falta aceptación | [v15 y evidencias](../mesh-v15/README.md); [informe 98](../../../../reports/hound-hood-98/README.md); commit del hito 98, resolver con git log; v13/v14 preservadas |
 | [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Pendiente | — |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |

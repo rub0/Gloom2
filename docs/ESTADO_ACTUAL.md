@@ -1,37 +1,42 @@
 # Traspaso de Gloom
 
-Actualizado: 21 de septiembre de 2026, hito 97, feedback artístico H05 aplicado en v14.
+Actualizado: 22 de septiembre de 2026, hito 98, caída de capucha H05/v15.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-H01–H04 hechas. **H05 en revisión: F01–F06 modelados en v14, falta aceptación visual explícita**.
-[Galería y comparativas](art/hound/mesh-v14/README.md) ·
-[Informe 97](../reports/hound-feedback-97/README.md).
+H01–H04 hechas. **H05 en revisión: F01–F06 conservados y capucha ajustada en v15;
+falta aceptación visual explícita**.
+[Galería y comparativas](art/hound/mesh-v15/README.md) ·
+[Informe 98](../reports/hound-hood-98/README.md).
 H06 no se ha iniciado. No ejecutar otra ficha sin encargo.
 
-Fuente acumulada: `art/characters/hound/v14/hound-mesh-v14.blend`.
-Escena `Hound_Mesh_v14`, malla `H14_DeformMesh`, rig `Hound14_Rig`,
-acción `Hound14_joint_check`, colección `HOUND_v14_EXPORT`.
-Exportación: `assets/characters/hound_rig/v14/hound-rig.gltf` y BIN.
-V13 y su manifiesto permanecen exactos; conservar también v02–v12 y las referencias 2D.
-La aprobación de diseño v02 no aprueba la escultura actual.
+Fuente acumulada: `art/characters/hound/v15/hound-mesh-v15.blend`.
+Escena `Hound_Mesh_v15`, malla `H15_DeformMesh`, rig `Hound15_Rig`,
+acción `Hound15_joint_check`, colección `HOUND_v15_EXPORT`.
+Exportación: `assets/characters/hound_rig/v15/hound-rig.gltf` y BIN.
+V13/v14 y sus manifiestos permanecen exactos; conservar también las fuentes
+anteriores y referencias 2D. La aprobación de diseño v02 no aprueba la escultura actual.
 
-Cambios H05/97: tres pinchos por antebrazo, garras puntiagudas, protección visualmente
-continua de pie a sobre rodilla, un filo posterior por lado, asiento clavicular
-bajo/medial y peto achatado, abdomen curvo enlazado con flancos. Los 53 huesos,
-bind pose, claves y 62 componentes ajenos siguen exactos.
-38.162 vértices / 75.928 triángulos; son cifras de autoría, sin presupuesto H06.
+Cambio H05/98: se elimina el cierre en W de la capucha sobre el esternón;
+dos extremos caen a los lados. Se conserva la nuca cubierta y el marco superior.
+Solo cambia `Hood_continuous`; las otras 105 piezas, 53 huesos, bind pose,
+pesos conservados y claves son exactos respecto a v14.
+Siguen F01–F06: tres pinchos por antebrazo, garras, continuidad pie/sobre rodilla,
+filo posterior por lado, clavícula/peto achatado y abdomen/flancos curvos.
+38.085 vértices / 75.774 triángulos; cifras de autoría, sin presupuesto H06.
 
-Validación: topología/pesos, 61 muestras, 33 poses globales, roundtrip en 13 poses,
-regresiones de herramientas v13, cooker/visor estático y CTest 3/3 pasan.
-Persisten límites diagnósticos: codo a 85°, cabeza/torso al mirar abajo,
-inserciones bajo armadura/guantes y solapes de láminas al girar.
-El apoyo Soul Reaper heredado sigue atravesando brazo/guantelete; las nuevas
-garras alcanzan además la carcasa. No es agarre ni socket válido.
-[Contactos y evolución](../reports/hound-feedback-97/contact-changes.md).
-Resolver holguras, pesos y agarre antes de UVs finales; no se ha iniciado rig definitivo.
-Commit local del hito 97; resolver con `git log --oneline --grep='^hito 97:'`.
+Validación: topología/pesos, 61 muestras, 33 poses de capucha contra 105 piezas,
+roundtrip en 13 poses, regresión v14, cooker/visor estático y CTest 3/3 pasan.
+Sin autointersecciones de capucha ni nuevos contactos con piezas antes libres;
+persisten inserciones del forro en cuello, torso y peto.
+[Contactos de capucha](../reports/hound-hood-98/contacts.md).
+El rig provisional aún dobla con fuerza la tela al mirar abajo.
+Siguen límites de codos a 85°, cabeza/torso, inserciones bajo armadura/guantes
+y solapes de láminas al girar; el apoyo Soul Reaper sigue inválido contra brazo,
+guantelete, clavícula y garras. [Detalle global v14](../reports/hound-feedback-97/README.md).
+Resolver holguras, pesos y agarre antes de UVs finales; rig definitivo no iniciado.
+Commit local del hito 98; resolver con `git log --oneline --grep='^hito 98:'`.
 
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
@@ -69,7 +74,20 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 96, preparación del feedback H05
+## Último subhito entregado: 98, caída de capucha H05
+
+V15 abre el frente en dos extremos descendentes; conserva nuca, rostro y
+las otras 105 piezas. [Informe 98](../reports/hound-hood-98/README.md).
+Fuente, validación y límites resumidos al inicio. H05 sigue en revisión,
+sin aceptación artística ni inicio de H06. Commit local del hito 98.
+
+## Subhito 97, feedback artístico H05 aplicado
+
+F01–F06 modelados en v14; [informe 97](../reports/hound-feedback-97/README.md).
+Commit `4c1f86c`. La fuente vigente v15 conserva esas seis correcciones
+y cambia únicamente la caída de capucha.
+
+## Subhito 96, preparación del feedback H05
 
 [Especificación lista para ejecutar F01–F06](art/hound/tasks/H05-feedback-2026-09-21.md).
 Tres pinchos por antebrazo, lectura de garras, continuidad de armadura de pie

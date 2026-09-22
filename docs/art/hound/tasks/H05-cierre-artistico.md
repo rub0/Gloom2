@@ -15,7 +15,12 @@ El feedback del 21 de septiembre está en la [especificación F01–F06](H05-fee
 El hito 96 lo preparó y el hito 97 lo aplica en **v14**: antebrazos, garras,
 piernas, espalda, clavícula/peto y abdomen. V13 queda conservada.
 [Entrega v14](../mesh-v14/README.md) e [informe 97](../../../../reports/hound-feedback-97/README.md).
-**H05 sigue en revisión: falta aceptación visual explícita de v14.**
+El feedback adicional del 22 de septiembre pide que la capucha caiga como en el
+concept, sin cerrar sobre el pecho. El hito 98 lo aplica en **v15**: dos bordes
+descendentes, centro abierto y nuca cubierta. Las otras 105 piezas y rig se conservan.
+[Entrega v15](../mesh-v15/README.md) e [informe 98](../../../../reports/hound-hood-98/README.md).
+Esta indicación posterior autoriza modificar la capucha conservada por F01–F06.
+**H05 sigue en revisión: falta aceptación visual explícita de v15.**
 Las pruebas técnicas no aprueban la escultura. H06 no se ha iniciado.
 
 ## Evidencias y criterios
