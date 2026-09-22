@@ -1,5 +1,10 @@
 # Hound v15 — caída de capucha, H05 en revisión
 
+> Galería histórica del hito 98. El usuario acepta esta caída de capucha con
+> «mucho mejor!»; la [candidata vigente v16](../mesh-v16/README.md) la conserva
+> y amplía la armadura de espalda/costados. H05 sigue en revisión.
+
+
 22 de septiembre de 2026 · Hito 98 · **Pendiente de aceptación visual explícita**.
 
 Dos extremos caen junto al cuello sobre el pecho, siguiendo la lectura del concept.

@@ -1,7 +1,7 @@
 # Hound v14 — feedback H05 aplicado
 
 > Galería histórica del hito 97. La [candidata vigente v15](../mesh-v15/README.md)
-> conserva F01–F06 y ajusta únicamente la caída de capucha (hito 98).
+> conserva las formas centrales F01–F06, ajusta la capucha (hito 98) y amplía la cobertura de armadura (hito 99).
 > H05 sigue pendiente de aceptación visual explícita.
 
 

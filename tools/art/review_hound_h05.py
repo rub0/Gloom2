@@ -10,9 +10,10 @@ import shutil
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-v14 = '--v14' in sys.argv
-output = root/('docs/art/hound/mesh-v14' if v14 else 'docs/art/hound/review-h05')
-cache = root/('.cache/hound-mesh-v14' if v14 else '.cache/hound-h05')
+version = next((v for v in ('v16','v15','v14') if '--'+v in sys.argv),'v13')
+v14 = version!='v13'
+output = root/('docs/art/hound/mesh-'+version if v14 else 'docs/art/hound/review-h05')
+cache = root/({'v16':'.cache/hound-armor-v16','v15':'.cache/hound-hood-v15','v14':'.cache/hound-mesh-v14'}.get(version,'.cache/hound-h05'))
 output.mkdir(parents=True,exist_ok=True)
 cache.mkdir(parents=True,exist_ok=True)
 manifest_path = root/'art/characters/hound/v13/sculpture-reference.json'
@@ -51,8 +52,9 @@ import hound_h04_review as assembly
 manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 for item in manifest['files']:
     assert hashlib.sha256((root/item['path']).read_bytes()).hexdigest()==item['sha256'],item['path']
-scene = bpy.data.scenes['Hound_Mesh_v14' if v14 else 'Hound_Mesh_v12']
-model,rig = (scene.objects['H14_DeformMesh'],scene.objects['Hound14_Rig']) if v14 else (scene.objects['H12_DeformMesh'],scene.objects['Hound12_Rig'])
+internal = version[1:] if v14 else '12'
+scene = bpy.data.scenes['Hound_Mesh_v'+internal]
+model,rig = scene.objects['H'+internal+'_DeformMesh'],scene.objects['Hound'+internal+'_Rig']
 bpy.context.window.scene = scene
 scene.frame_set(1)
 rig.animation_data.action = None
@@ -158,6 +160,10 @@ if '--audit' in sys.argv:
         points,trees = points_and_trees()
         tree = BVHTree.FromPolygons([gun.matrix_world@v.co for v in gun.data.vertices],[list(p.vertices) for p in gun.data.polygons])
         weapon[kind] = {n:len(tree.overlap(trees[n])) for n in names}
+    result = {'poses':len(cases),'parts':len(parts),'pairs_per_pose':len(pairs),'pair_evaluations':len(cases)*len(pairs),
+        'max_influences':maximum,'topology':topology,'surface_crossings':contacts,'self_crossings':self_crossings,
+        'weapon_crossings':weapon,'scope':'Discrete surface crossings, not containment, clearance or continuous collision certification.'}
+    (cache/'audit.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     if v14:
         for tag,row in self_crossings.items():
             assert row==({'Arm_surface_L':37,'Arm_surface_R':37} if tag=='elbow' else {}), (tag,row)
@@ -171,10 +177,6 @@ if '--audit' in sys.argv:
         for tag,row in contacts.items():
             for pair in clear_pairs:
                 assert row.get('/'.join(sorted(pair)),0)==0, (tag,pair)
-    result = {'poses':len(cases),'parts':len(parts),'pairs_per_pose':len(pairs),'pair_evaluations':len(cases)*len(pairs),
-        'max_influences':maximum,'topology':topology,'surface_crossings':contacts,'self_crossings':self_crossings,
-        'weapon_crossings':weapon,'scope':'Discrete surface crossings, not containment, clearance or continuous collision certification.'}
-    (cache/'audit.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
     print('H05_AUDIT',len(cases),len(pairs),len(cases)*len(pairs),maximum)
     print('SELF_CROSSINGS',json.dumps(self_crossings))
     print('WEAPON_CROSSINGS',json.dumps({k:{n:v for n,v in row.items() if v} for k,row in weapon.items()}))
@@ -197,7 +199,7 @@ if '--stills' in sys.argv:
         x = (i-1.5)*1.23
         hands.snapshot(scene,model,board,Matrix.Translation((x,0,0))@Matrix.Rotation(angle,4,'Z'))
         hands.label(board,title,x,-.12,.047)
-    hands.label(board,'H05 / ESCULTURA '+('V14' if v14 else 'V13')+' / CANDIDATA A APROBACION',0,2.00,.063)
+    hands.label(board,'H05 / ESCULTURA '+version.upper()+' / CANDIDATA A APROBACION',0,2.00,.063)
     hands.camera(board,(0,-6,.96),(0,0,.96),5.15)
     hands.render(board,output/'turnaround.png')
     for name,position,target,scale in [
@@ -222,21 +224,22 @@ if '--stills' in sys.argv:
             board.collection.objects.link(copy)
     hands.snapshot(scene,model,board,Matrix.Translation((.64,0,0)))
     hands.label(board,'V02 / DISENO APROBADO',-.64,-.12,.044)
-    hands.label(board,('V14' if v14 else 'V13')+' / ESCULTURA EN REVISION',.64,-.12,.044)
+    hands.label(board,version.upper()+' / ESCULTURA EN REVISION',.64,-.12,.044)
     hands.camera(board,(0,-5,.93),(0,0,.93),2.9)
     hands.render(board,output/'approved-comparison.png')
     if v14:
-        old_scene = bpy.data.scenes['Hound_Mesh_v12']
-        old_model,old_rig = old_scene.objects['H12_DeformMesh'],old_scene.objects['Hound12_Rig']
+        previous = {'v16':'15','v15':'14','v14':'12'}[version]
+        old_scene = bpy.data.scenes['Hound_Mesh_v'+previous]
+        old_model,old_rig = old_scene.objects['H'+previous+'_DeformMesh'],old_scene.objects['Hound'+previous+'_Rig']
         old_rig.animation_data.action = None
         assembly.pose(old_scene,old_rig,'rest')
         board = bpy.data.scenes.new('H05_BeforeAfter')
         hands.setup(board,2600,2200)
-        for row,(src,obj,version) in enumerate(((old_scene,old_model,'V13'),(scene,model,'V14'))):
+        for row,(src,obj,caption) in enumerate(((old_scene,old_model,'V13' if previous=='12' else 'V'+previous),(scene,model,version.upper()))):
             for i,(angle,title) in enumerate(((0,'FRENTE'),(math.pi/2,'PERFIL'),(math.pi,'ESPALDA'),(.65,'TRES CUARTOS'))):
                 x,z = (i-1.5)*1.23,(1-row)*2.1
                 hands.snapshot(src,obj,board,Matrix.Translation((x,0,z))@Matrix.Rotation(angle,4,'Z'))
-                hands.label(board,version+' / '+title,x,z-.1,.048)
+                hands.label(board,caption+' / '+title,x,z-.1,.048)
         hands.camera(board,(0,-6,1.95),(0,0,1.95),5.15)
         hands.render(board,output/'before-after.png')
         for name,position,target,scale in [
@@ -244,6 +247,20 @@ if '--stills' in sys.argv:
             ('claws-dorsal',(3,1,1),(.455,-.03,.856),.34),('claws-side',(0,-5,.95),(.455,-.03,.856),.34),
             ('bracer-side',(3,-3,1.3),(.445,0,1.12),.49),('rear-blades',(1,4,1.9),(0,.10,1.58),.9)]:
             view(name,position,target,scale)
+    if version=='v16':
+        board = bpy.data.scenes.new('H16_WrappingArmorComparison')
+        hands.setup(board,2400,1350)
+        for row,(src,obj,caption) in enumerate(((old_scene,old_model,'V15'),(scene,model,'V16'))):
+            names = {n for n in assembly.parts(obj) if n.startswith(('Torso_','Breastplate_','Sternum','Abdominal_','Rib_','Scapula_','Back_spine_','Waist_'))}
+            for col,(angle,title) in enumerate(((0,'FRENTE'),(math.pi/2,'COSTADO'),(math.pi,'ESPALDA'))):
+                x,z = (col-1)*.64,(1-row)*.59
+                hands.snapshot(src,obj,board,Matrix.Translation((x,0,z))@Matrix.Rotation(angle,4,'Z'),names)
+                hands.label(board,caption+' / '+title,x,z+.948,.023)
+        hands.camera(board,(0,-5,1.525),(0,0,1.525),2.07)
+        hands.render(board,output/'armor-wrap-comparison.png')
+        for name,position in (('armor-front',(0,-5,1.32)),('armor-side',(5,0,1.32)),
+                              ('armor-back',(0,5,1.32)),('armor-rear-quarter',(2,4,1.4))):
+            view(name,position,(0,0,1.30),.85)
     for kind in ('reach','combined','elbow','fist','look-up','look-down'):
         pose(kind)
         view('pose-'+kind,(2,-4,1.8),(0,0,.95),2.15)

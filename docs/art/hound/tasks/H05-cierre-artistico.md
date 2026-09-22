@@ -20,7 +20,12 @@ concept, sin cerrar sobre el pecho. El hito 98 lo aplica en **v15**: dos bordes
 descendentes, centro abierto y nuca cubierta. Las otras 105 piezas y rig se conservan.
 [Entrega v15](../mesh-v15/README.md) e [informe 98](../../../../reports/hound-hood-98/README.md).
 Esta indicación posterior autoriza modificar la capucha conservada por F01–F06.
-**H05 sigue en revisión: falta aceptación visual explícita de v15.**
+El usuario acepta la caída de capucha («mucho mejor!») y pide armadura exterior
+delante, detrás y en los laterales, con malla visible en algunas zonas.
+El hito 99 aplica esa cobertura en **v16**, conservando la capucha y 95 piezas
+ajenas; [entrega](../mesh-v16/README.md) e [informe](../../../../reports/hound-armor-99/README.md).
+Esta nueva dirección autoriza ampliar la coraza de espalda y costados.
+**H05 sigue en revisión: falta aceptación visual explícita de v16.**
 Las pruebas técnicas no aprueban la escultura. H06 no se ha iniciado.
 
 ## Evidencias y criterios

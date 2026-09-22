@@ -1,0 +1,42 @@
+{
+  "task": "H05",
+  "milestone": 99,
+  "candidate": "v16",
+  "source": "v15",
+  "artistic_approval": false,
+  "scene": "Hound_Mesh_v16",
+  "mesh": "H16_DeformMesh",
+  "rig": "Hound16_Rig",
+  "action": "Hound16_joint_check",
+  "collection": "HOUND_v16_EXPORT",
+  "modified_parts": [
+    "Back_spine_0",
+    "Back_spine_1",
+    "Back_spine_2",
+    "Rib_flank_L",
+    "Rib_flank_R",
+    "Rib_lamella_2_L",
+    "Rib_lamella_2_R",
+    "Rib_lamella_3_L",
+    "Rib_lamella_3_R",
+    "Scapula_L",
+    "Scapula_R"
+  ],
+  "files": [
+    {
+      "path": "art/characters/hound/v16/hound-mesh-v16.blend",
+      "sha256": "e0692f36a7edd0d5546ce1f67b40857f9641d02f998fffae6de60d946c3a0911",
+      "bytes": 17119939
+    },
+    {
+      "path": "assets/characters/hound_rig/v16/hound-rig.gltf",
+      "sha256": "754d4b93a8141e05f8fccf67332fe1df1c4ac1ed76804547852b4c5f7668c1ab",
+      "bytes": 86930
+    },
+    {
+      "path": "assets/characters/hound_rig/v16/hound-rig.bin",
+      "sha256": "d0f805dd6978bd07ff93b142780b729d2ee9a916e407ffa5f22e4712fc3eb4d7",
+      "bytes": 2803212
+    }
+  ]
+}
