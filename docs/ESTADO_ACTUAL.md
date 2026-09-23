@@ -1,12 +1,13 @@
 # Traspaso de Gloom
 
-Actualizado: 22 de septiembre de 2026, hito 99, armadura envolvente H05/v16.
+Actualizado: 23 de septiembre de 2026, hito 100, aceptación artística de H05/v16.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-H01–H04 hechas. **H05 en revisión: armadura de espalda y costados ampliada en v16,
-pendiente de aceptación visual explícita**.
+H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre:
+«si, ahora esta bien», tras la entrega de la última corrección de armadura.
+[Registro de aceptación y cierre H05](../reports/hound-approval-100/README.md).
 [Galería y comparativas](art/hound/mesh-v16/README.md) ·
 [Informe 99](../reports/hound-armor-99/README.md).
 H06 no se ha iniciado. No ejecutar otra ficha sin encargo.
@@ -17,7 +18,8 @@ acción `Hound16_joint_check`, colección `HOUND_v16_EXPORT`.
 Exportación: `assets/characters/hound_rig/v16/hound-rig.gltf` y BIN.
 V13/v14/v15 y sus manifiestos permanecen exactos; conservar las fuentes anteriores.
 La caída de capucha v15 se acepta con «mucho mejor!» y queda exacta en v16.
-Es aprobación específica de la capucha, no cierre artístico de H05.
+La aceptación posterior de v16 cierra ahora la revisión artística H05.
+La aprobación es de formas: no certifica rig, holguras, agarre o malla de producción.
 
 Cambio H05/99: dos placas escapulares y tres lumbares más amplias, seis bandas
 laterales que envuelven el torso. Once piezas reconstruidas; 95 ajenas exactas,
@@ -35,7 +37,7 @@ cabeza, cuello, capucha o manos. Se mantienen inserciones constructivas entre pl
 Siguen los límites heredados de codos, cabeza/torso, abdomen, guantes y apoyo
 Soul Reaper inválido; las holguras/pesos y agarre deben resolverse antes de UVs.
 El rig provisional aún dobla la capucha con fuerza al bajar la cabeza.
-Commit local del hito 99; resolver con `git log --oneline --grep='^hito 99:'`.
+Modelado v16: commit `0c28f79`. Aceptación: commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
 
 Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
@@ -73,7 +75,16 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último subhito entregado: 99, armadura envolvente H05
+## Último hito cerrado: 100, aceptación artística H05
+
+El usuario acepta v16 el 23 de septiembre con «si, ahora esta bien».
+Queda como escultura de referencia para la futura H07/H09, conservando todas
+las correcciones acumuladas. [Informe 100](../reports/hound-approval-100/README.md).
+Solo documentación: fuente/exportación/manifiesto exactos, sin nueva versión,
+sin trabajo de producción, sin push y sin iniciar H06.
+H07 sigue pendiente de H06. Commit local del hito 100.
+
+## Subhito 99, armadura envolvente H05
 
 V16 reconstruye once placas de espalda y costados; conserva 95 piezas ajenas,
 incluida la capucha aceptada. Peso provisional lumbar corregido; rig y claves

@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-22 de septiembre de 2026 · Índice del hito 90, actualizado con armadura envolvente H05/hito 99. Alcance: terminar **este Hound**,
+23 de septiembre de 2026 · Índice del hito 90, actualizado con aceptación artística H05/hito 100. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -25,10 +25,10 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 - Fuente acumulada actual: [hound-mesh-v16.blend](../../../../art/characters/hound/v16/hound-mesh-v16.blend).
 - Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v16/hound-rig.gltf), junto a su BIN.
 - Evidencias: [v16, cobertura de armadura y vídeo](../mesh-v16/README.md).
-- Estado artístico: diseño básico v02 aprobado; capucha v15 aceptada; **H05 en revisión con coraza envolvente v16**.
+- Estado artístico: **H05 hecha; escultura v16 aprobada**, con capucha y armadura envolvente aceptadas.
 - Rig: 53 huesos, bind pose y claves conservados; ajuste provisional de una placa lumbar al hueso de su banda lateral.
 - Contrato/presupuesto H06 y malla de producción H07: pendientes.
-- Aprobación de cierre artístico H05: **pendiente de aceptación visual explícita de v16**.
+- Aprobación de cierre artístico H05: **23 de septiembre de 2026**, «si, ahora esta bien», tras la entrega v16. [Registro](../../../../reports/hound-approval-100/README.md).
 - Dirección aplicada: F01–F06, caída de capucha y cobertura de armadura delantera/posterior/lateral.
 - Integración: el juego sigue usando la presentación anterior; v16 no la sustituye.
 
@@ -223,10 +223,25 @@ cooker/visor y CTest 3/3 pasan. Vídeo de 331 frames y comparativa de cobertura.
 Sin autointersecciones nuevas ni cruces de placas reconstruidas con cabeza,
 cuello, capucha, brazos o manos. Persisten inserciones y límites heredados
 de codo, torso, abdomen y arma; [contactos](../../../../reports/hound-armor-99/contacts.md).
-**H05 sigue en revisión: falta aceptación artística explícita de v16**.
-La aceptación de la capucha no cierra H05. H06 no iniciado; no habilita H07.
-Commit local del hito 99; resolver con `git log --oneline --grep='^hito 99:'`.
+V16 se entregó en revisión en el hito 99 y queda aprobada en el hito 100.
+H06 no iniciado; H07 sigue pendiente de H06.
+Commit local `0c28f79`.
 Sin push ni trabajo de otra ficha.
+
+## Aceptación H05 — hito 100
+
+23 de septiembre de 2026: el usuario responde **«si, ahora esta bien»** a la
+entrega de la armadura v16, última corrección de la revisión artística.
+Se registra la aceptación del resultado acumulado y se cierra H05.
+[Informe de cierre](../../../../reports/hound-approval-100/README.md).
+La fuente, glTF/BIN y evidencias v16 del inicio son la referencia aprobada para
+H07/H09. No se genera otra versión ni se modifica su manifiesto histórico.
+Nombres internos: `Hound_Mesh_v16`, `H16_DeformMesh`, `Hound16_Rig`,
+`Hound16_joint_check`, `HOUND_v16_EXPORT`.
+Los límites técnicos del hito 99 siguen vigentes para malla/rig, holguras y agarre;
+la aceptación de formas no los resuelve ni aprueba animación o texturas finales.
+H06 no se ha iniciado; H07 requiere también H06. Sin push ni otra ficha.
+Commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
 
 ## Fichas y dependencias
 
@@ -239,7 +254,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H02](H02-grebas-botas.md) | Grebas, rodillas, tobillos y botas | H01 | Hecha | [v10: fuente, glTF/BIN y vistas](../mesh-v10/README.md); [informe 92](../../../../reports/hound-legs-92/README.md); commit `6c2fe7f` |
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
-| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | En revisión; capucha aceptada, coraza envolvente pendiente | [v16 y evidencias](../mesh-v16/README.md); [informe 99](../../../../reports/hound-armor-99/README.md); commit del hito 99, resolver con git log; v13–v15 preservadas |
+| [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | Hecha; v16 aprobada el 23/09/2026 | [v16: referencia y evidencias](../mesh-v16/README.md); [aceptación 100](../../../../reports/hound-approval-100/README.md); modelado `0c28f79`; commit de cierre del hito 100, resolver con git log |
 | [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Pendiente | — |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |

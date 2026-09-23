@@ -1,6 +1,8 @@
-# Hound v16 — armadura envolvente, H05 en revisión
+# Hound v16 — escultura de referencia aprobada
 
-22 de septiembre de 2026 · Hito 99 · **Pendiente de aceptación visual**.
+Modelado: 22 de septiembre de 2026, hito 99.
+**Aceptación artística: 23 de septiembre de 2026**, «si, ahora esta bien».
+[Registro de cierre H05, hito 100](../../../../reports/hound-approval-100/README.md).
 
 La coraza cubre ahora la espalda con placas más amplias y rodea los costados
 con bandas articuladas. La malla interior queda visible en las axilas,
@@ -56,4 +58,4 @@ se describen en el informe. [Captura del visor](gloom-preview.png).
 
 [Capucha v15 conservada](../mesh-v15/README.md).
 Commit local del hito 99; resolver con git log.
-H05 sigue en revisión; H06 no se ha iniciado. Sin push.
+H05 cerrada artísticamente; H06 no se ha iniciado. Sin push.

@@ -25,8 +25,10 @@ delante, detrás y en los laterales, con malla visible en algunas zonas.
 El hito 99 aplica esa cobertura en **v16**, conservando la capucha y 95 piezas
 ajenas; [entrega](../mesh-v16/README.md) e [informe](../../../../reports/hound-armor-99/README.md).
 Esta nueva dirección autoriza ampliar la coraza de espalda y costados.
-**H05 sigue en revisión: falta aceptación visual explícita de v16.**
-Las pruebas técnicas no aprueban la escultura. H06 no se ha iniciado.
+**H05 hecha: v16 aprobada el 23 de septiembre de 2026** con «si, ahora esta bien»,
+tras la entrega de la última corrección de armadura. [Registro y cierre, hito 100](../../../../reports/hound-approval-100/README.md).
+V16 queda como escultura de referencia. La aceptación es artística; se conservan
+los límites técnicos documentados. H06 no se ha iniciado.
 
 ## Evidencias y criterios
 - Lámina frontal/perfil/espalda/tres cuartos a igual escala; silueta a tamaño
