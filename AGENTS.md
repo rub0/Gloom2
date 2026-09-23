@@ -25,13 +25,12 @@
 - Avoid `auto` for local variables. Do not use it for ordinary value or structure types.
 - Disable C++ exceptions and RTTI across the entire codebase. Do not use either.
 - Perform error checks as early as possible. Check application initialization, resource loading, and Vulkan object creation immediately. Avoid error checking after initialization; normal code should not fail.
-- Treat the library as a low-level, thin wrapper, not as a validation layer. Validate only inputs and state whose misuse could make the wrapper itself crash.
+- Validate only inputs and state whose misuse could make the wrapper itself crash.
   Document those preconditions and enforce programmer errors with asserts.
 - Data and parameters passed directly from the user to Vulkan are the user's responsibility. Do not duplicate Vulkan validation or maintain shadow state
   solely to validate them; users should enable the Vulkan validation layer during development.
-- NoGraphicsAPI resource destruction is immediate. In applications, examples, and tests, destroy resources only after no recorded or executing GPU frame
+- Resource destruction is immediate. In applications, examples, and tests, destroy resources only after no recorded or executing GPU frame
   uses them. Wait for the submission timeline value covering the final use, or use the optional NoGraphicsAPIUtility `DeleteQueue` to defer destruction.
-- At shutdown, call `wait_idle`, drain every NoGraphicsAPIUtility `DeleteQueue`, and then destroy resources and the device.
 - Wait for every submitted frame to drain before calling `destroy_device`.
 - Keep each public resource creation function next to its matching destruction function. Keep the shared lifetime policy in one place rather than repeating it
   for individual resource types.
@@ -48,9 +47,6 @@
 - Do not use PIMPL interfaces.
 - Avoid standard-library algorithms; prefer straightforward loops.
 - Do not use hash maps or ordered maps.
-- Do not use mutexes or atomics in the graphics API. The API is intentionally single-threaded and is not thread-safe yet. The utility
-  `BumpAllocator::allocate_atomic()` is the sole exception: it supports relaxed-atomic reservation of disjoint mapped ranges while allocation
-  lifetime and GPU submission remain caller-synchronized.
 - Avoid copying large user data structures. Prefer references to structures, and use spans for array data in structures and function parameters.
 - Use a custom span type represented by a pointer and size. It must support construction from an initializer list so variable-length arguments remain concise. An initializer list passed as a function argument remains alive through that function call; do not retain a span backed by it after the call returns.
 - Always pass `Span`, `ByteSpan`, and `GpuRange` function parameters by value. This allows the compiler to pass their pointer-and-size fields in registers instead of forcing a memory store/load round trip. Review all code against this rule after every change.
