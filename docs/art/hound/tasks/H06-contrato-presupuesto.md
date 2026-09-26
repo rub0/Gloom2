@@ -1,5 +1,11 @@
 # H06 — contrato de ejecución y presupuesto
 
+Estado al 26/09/2026: **iniciada y bloqueada**, subhito 101.
+[Contrato, objetivo confirmado y decisiones pendientes](../H06-contrato-presupuesto.md) ·
+[Informe y reproducción](../../../../reports/hound-contract-101/README.md).
+La fuente de medida es v16 aprobada en H05; no se ha fijado un presupuesto de
+producción ni se habilita H07. El alcance original de esta ficha sigue vigente.
+
 ## Entrada y alcance
 Leer [contexto](CONTEXTO.md) e [índice](README.md), después las secciones relevantes de:
 - [BLENDER_WORKFLOW](../../../BLENDER_WORKFLOW.md): contrato y reproducción.

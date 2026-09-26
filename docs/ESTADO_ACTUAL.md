@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 23 de septiembre de 2026, hito 100, aceptación artística de H05/v16.
+Actualizado: 26 de septiembre de 2026, hito 101, diagnóstico y contrato H06.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -10,7 +10,14 @@ H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre
 [Registro de aceptación y cierre H05](../reports/hound-approval-100/README.md).
 [Galería y comparativas](art/hound/mesh-v16/README.md) ·
 [Informe 99](../reports/hound-armor-99/README.md).
-H06 no se ha iniciado. No ejecutar otra ficha sin encargo.
+**H06 iniciada y bloqueada; no habilita H07.** Objetivo confirmado: 200 FPS,
+1920×1080 y hasta ocho combatientes en Ryzen 7 3700X/GTX 1070.
+[Contrato vigente](art/hound/H06-contrato-presupuesto.md) ·
+[Informe 101 y reproducción](../reports/hound-contract-101/README.md).
+Bloqueos: canal verde de normal perdido entre compresión y render; Factory
+actual se queda en ~144 FPS a 1080p y falta medir ocho presentaciones animadas.
+Hace falta un trabajo técnico separado para resolver ambos antes de fijar
+presupuesto. No cambiar motor/modelo bajo H06 ni iniciar H07 por anticipado.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,
@@ -75,7 +82,25 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Último hito cerrado: 100, aceptación artística H05
+## Último subhito cerrado: 101, diagnóstico H06
+
+Contrato, 14 fixtures Blender/materiales, límites de importación, matriz de
+clips/estados y las cinco armas documentados. Diez controles GPU pasan y dos
+detectan el defecto de normales. Siete rechazos de formatos comprobados;
+constraint horneada de dos huesos cocinada. Pruebas existentes 6/6.
+V16 cocinada: 80.152 triángulos, 50.392 vértices, siete materiales, 53 huesos,
+cero imágenes; buffers de geometría con LODs/brazos calculados en 21,305 MiB.
+No es un presupuesto aprobado ni certifica reproducción animada GPU.
+
+H06 queda bloqueada con propuesta concreta de corrección y medición; H07
+no iniciada. Fuente/exportación/manifiesto v16 exactos. Sin cambios de motor,
+gameplay o modelo. Evidencias y comandos en el informe 101; PNG/JSON regenerables
+ignorados, resultados conservados en Markdown.
+Push del hito 100 realizado hasta `2027548`. Al retomar, `db1d98e` ya actualiza
+AGENTS en main/origin; se conserva. Commit local del subhito 101, resolver con
+`git log --oneline --grep='^hito 101:'`; sin nuevo push.
+
+## Hito 100, aceptación artística H05
 
 El usuario acepta v16 el 23 de septiembre con «si, ahora esta bien».
 Queda como escultura de referencia para la futura H07/H09, conservando todas

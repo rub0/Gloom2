@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-23 de septiembre de 2026 · Índice del hito 90, actualizado con aceptación artística H05/hito 100. Alcance: terminar **este Hound**,
+26 de septiembre de 2026 · Índice del hito 90, actualizado con diagnóstico H06/hito 101. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -27,7 +27,8 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 - Evidencias: [v16, cobertura de armadura y vídeo](../mesh-v16/README.md).
 - Estado artístico: **H05 hecha; escultura v16 aprobada**, con capucha y armadura envolvente aceptadas.
 - Rig: 53 huesos, bind pose y claves conservados; ajuste provisional de una placa lumbar al hueso de su banda lateral.
-- Contrato/presupuesto H06 y malla de producción H07: pendientes.
+- Contrato H06: [documento vigente](../H06-contrato-presupuesto.md), **bloqueada** por normales y medición de rendimiento; presupuesto sin aprobar.
+- Objetivo H06 confirmado: 200 FPS, 1920×1080, hasta ocho combatientes en Ryzen 7 3700X/GTX 1070. H07 no iniciada.
 - Aprobación de cierre artístico H05: **23 de septiembre de 2026**, «si, ahora esta bien», tras la entrega v16. [Registro](../../../../reports/hound-approval-100/README.md).
 - Dirección aplicada: F01–F06, caída de capucha y cobertura de armadura delantera/posterior/lateral.
 - Integración: el juego sigue usando la presentación anterior; v16 no la sustituye.
@@ -243,6 +244,27 @@ la aceptación de formas no los resuelve ni aprueba animación o texturas finale
 H06 no se ha iniciado; H07 requiere también H06. Sin push ni otra ficha.
 Commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
 
+## Traspaso H06 — subhito 101, bloqueada
+
+Entrada acumulada v16 y su aprobación H05 intactas. [Contrato para H07–H13](../H06-contrato-presupuesto.md)
+e [informe y reproducción](../../../../reports/hound-contract-101/README.md).
+Los límites, convenciones de mapas y matriz clips/estados/sockets incluyen
+las cinco armas. Catorce fixtures Blender llegan a GPU; diez comparaciones
+pasan y dos detectan pérdida del canal verde de normales al comprimir/renderizar.
+Siete rechazos comprobados, constraint horneada cocinada y pruebas existentes 6/6.
+
+V16: 80.152 triángulos, siete materiales, 53 huesos y cero imágenes finales.
+Buffers geométricos con LODs/brazos calculados: 21,305 MiB. Factory actual,
+con presentación original y dos combatientes, mide ~144 FPS a 1080p.
+No se valida el objetivo de 200 FPS/1080p/ocho ni se inventa un presupuesto.
+El contrato propone trabajo técnico separado para normales y perfil animado;
+no se cambia motor, gameplay o modelo, ni se inicia H07.
+
+Fuente/escena/malla/rig/acción/exportación vigentes: las rutas y nombres de v16
+del inicio. Los PNG/JSON son regenerables; resultados persistidos en Markdown.
+Push previo solicitado completado hasta `2027548`; se conserva `db1d98e` de AGENTS.
+Commit local del subhito 101; resolver con `git log --oneline --grep='^hito 101:'`.
+
 ## Fichas y dependencias
 
 Los IDs H01–H13 son estables; **no son números de hito ni versiones Blender**.
@@ -255,7 +277,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
 | [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | Hecha; v16 aprobada el 23/09/2026 | [v16: referencia y evidencias](../mesh-v16/README.md); [aceptación 100](../../../../reports/hound-approval-100/README.md); modelado `0c28f79`; commit de cierre del hito 100, resolver con git log |
-| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Pendiente | — |
+| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Bloqueada: normales y perfil 200 FPS/1080p/8 | [Contrato vigente](../H06-contrato-presupuesto.md); [informe 101](../../../../reports/hound-contract-101/README.md); commit del subhito 101, resolver con git log |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |
 | [H09](H09-uv-horneado.md) | UVs y horneado | H08 + H06 | Pendiente | — |
