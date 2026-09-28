@@ -56,6 +56,7 @@ int main(const int argument_count, const char* const* arguments) try {
     jobs.start();
     window.start();
     renderer.start();
+    printf("Texture path: %s.\n", renderer.capabilities().texture_compression_bc ? "BC5/BC7" : "RGBA8");
     bool review_complete = false;
     {
         gloom::assets::AsyncAssetLoader loader{jobs, filesystem, discovered->catalog};

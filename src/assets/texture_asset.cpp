@@ -1,4 +1,5 @@
 #include <gloom/assets/texture_asset.hpp>
+#include <gloom/core/types.hpp>
 
 #include <ktx.h>
 #if defined(GLOOM_TEXTURE_COOKER)
@@ -212,6 +213,11 @@ decode_texture_ktx2(const render::RenderAssetId id,
         return std::unexpected{"Only non-array 2D KTX2 textures are supported"};
     }
     const bool srgb = ktxTexture2_GetOETF_e(texture.get()) == KHR_DF_TRANSFER_SRGB;
+    // UASTC normal maps store XY as RRRG. BC5 consumes RA, but RGBA8 expands
+    // those channels literally; restore G for the material shader's XY sample.
+    const bool unpack_normal_rg = target == TextureTranscodeTarget::rgba8 &&
+        KHR_DFDVAL(texture->pDfd + 1, MODEL) == KHR_DF_MODEL_UASTC &&
+        KHR_DFDSVAL(texture->pDfd + 1, 0, CHANNELID) == KHR_DF_CHANNEL_UASTC_RRRG;
     const auto transcode_format = [&] {
         switch (target) {
         case TextureTranscodeTarget::bc5:
@@ -253,6 +259,9 @@ decode_texture_ktx2(const render::RenderAssetId id,
             ktxTexture_GetImageSize(ktxTexture(texture.get()), level));
         if (offset > texture->dataSize || size > texture->dataSize - offset) {
             return std::unexpected{"KTX2 mip data exceeds its decoded storage"};
+        }
+        if (unpack_normal_rg) {
+            for (uint64 pixel = 0; pixel < size; pixel += 4) texture->pData[offset + pixel + 1] = texture->pData[offset + pixel + 3];
         }
         const auto* begin = reinterpret_cast<const std::byte*>(texture->pData + offset);
         upload.mip_levels.push_back(

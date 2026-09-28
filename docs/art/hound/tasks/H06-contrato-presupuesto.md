@@ -1,12 +1,15 @@
 # H06 — contrato de ejecución y presupuesto
 
-Estado al 28/09/2026: **iniciada y bloqueada**, diagnóstico en el subhito 101.
+Estado al 28/09/2026: **iniciada; presupuesto pendiente del hito 102 externo**.
+El fallo de normales del diagnóstico 101 está corregido y comprobado en el
+[hito técnico 103](../../../../reports/normal-maps-103/README.md).
 [Contrato, objetivo confirmado y decisiones pendientes](../H06-contrato-presupuesto.md) ·
 [Informe y reproducción](../../../../reports/hound-contract-101/README.md).
 La fuente de medida es v16 aprobada en H05; no se ha fijado un presupuesto de
 producción ni se habilita H07. Por encargo del usuario del 28/09, la tarea técnica
 de rendimiento con ocho combatientes pasa al [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md),
-pendiente y fuera de esta tarea por el momento. El fallo de normales sigue separado.
+pendiente y fuera de esta tarea por el momento. La corrección de normales
+se realizó bajo encargo técnico separado; no amplía las exclusiones de H06.
 
 ## Entrada y alcance
 Leer [contexto](CONTEXTO.md) e [índice](README.md), después las secciones relevantes de:

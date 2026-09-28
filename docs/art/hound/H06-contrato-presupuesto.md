@@ -1,7 +1,8 @@
 # Hound H06 — contrato comprobado y presupuesto pendiente
 
-28 de septiembre de 2026 · Diagnóstico del subhito 101 · **H06 bloqueada; no habilita H07**.
-Mediciones realizadas el 23 de septiembre sobre el código vigente del hito 100.
+28 de septiembre de 2026 · Diagnóstico 101 y corrección 103 · **Presupuesto pendiente; no habilita H07**.
+Medidas de rendimiento del 23/09; materiales y normales verificados de nuevo el
+28/09 tras el [hito técnico 103](../../../reports/normal-maps-103/README.md).
 
 Entrada inmutable: [escultura v16](../../../art/characters/hound/v16/hound-mesh-v16.blend)
 y [glTF/BIN v16](../../../assets/characters/hound_rig/v16/hound-rig.gltf).
@@ -29,18 +30,20 @@ hornear procedimientos y constraints, sin luces/cámaras de revisión.
 | Metallic/roughness | PNG de datos lineales; G = roughness, B = metallic. Factores multiplicativos. ORM (32,64,255) frente a roughness 64/255 y metallic 1 comprobado en GPU. |
 | AO | R lineal del mismo ORM, enlazado también a occlusionTexture. Nodo Blender `glTF Material Output`/entrada `Occlusion`. Efecto GPU comprobado; no hornear iluminación direccional al albedo. |
 | Emisión | PNG sRGB, factor/intensidad lineales, extensión emissive_strength. Textura gris ×2 y factor equivalente comprobados en GPU. |
-| Normal | **Bloqueada.** El mapa es lineal, tangente, XY en RG y Z positivo reconstruido por shader. La ruta actual desplaza G a A durante la compresión; el relieve Y no llega correctamente a GPU. No producir bakes finales antes de corregir y repetir pruebas X/Y y costuras. |
+| Normal | **Corregida y comprobada (103).** Mapa lineal tangente, XY en RG y Z positivo reconstruido por shader. UASTC almacena RRRG; el decoder restituye G desde A para RGBA8. BC5 ya recuperaba XY. Pruebas X/Y, costuras y UV reflejadas pasan. Los bakes finales siguen sujetos a H08/H09 y al presupuesto. |
 | Tangentes | El importador ignora TANGENT de glTF y regenera MikkTSpace desde UV0/normales. Invertir las tangentes exportadas deja el payload cocinado idéntico. Normal maps en UV0; usar UV1 para una normal no recalcula su base tangente. |
 | UVs | Solo UV0/UV1. Dos distribuciones distintas comprobadas en GPU. UV2 o textura que referencia UV ausente se rechazan. Sin UDIM/tiles automáticos. |
 | Imágenes | PNG externo comprobado; imágenes embebidas rechazadas. No compartir una imagen entre color, datos y normal. Sí compartir R/G/B de ORM como datos; no empaquetar normal con ORM. |
-| Compresión/mips | Cooker KTX2 UASTC con cadena completa. Runtime BC7 sRGB para color/emisión, BC7 lineal para ORM y BC5 para normal si hay soporte, RGBA8 de respaldo. El respaldo de normales tampoco está certificado. |
+| Compresión/mips | Cooker KTX2 UASTC con cadena completa. Runtime BC7 sRGB para color/emisión, BC7 lineal para ORM y BC5 para normal si hay soporte, RGBA8 de respaldo. XY/mips BC5 comprobados numéricamente; RGBA8 comprobado en decoder y GPU. El visor ensayado selecciona RGBA8; no se afirma captura GPU BC5. |
 | Alpha | OPAQUE por defecto para cuerpo/placas. MASK y BLEND exportados de Blender y visibles en GPU; cutoff 0,5 en muestra. Transparencia es un coste adicional; no usarla para simular huecos de armadura. El visor no certifica sombras/orden en todas las escenas. |
 | Materiales Blender | Principled y enlaces exportables. Los nodos de viewport no son contrato de runtime. Factores glTF lineales, sRGB solo en color/emisión. |
 
-La prueba de normal **detecta y deja visible el defecto vigente**;
-no se cambió la referencia para convertirlo en aprobado. Los otros diez
-controles de imagen pasan; que X produzca un cambio tampoco certifica su dirección
-correcta. [Resultados versionados](../../../reports/hound-contract-101/results.md).
+La regresión del decoder falla sin la corrección y pasa con ella, conservando
+el formato cocinado. Las **12 comparaciones H06 pasan**, junto con nueve
+controles GPU de X/Y, reflexión U/V y costuras entre islas UV. Los controles
+numéricos comprueban los canales, no solo que la imagen cambie.
+[Resultados actuales](../../../reports/normal-maps-103/README.md) y
+[diagnóstico histórico](../../../reports/hound-contract-101/results.md).
 Las imágenes y JSON enlazados son artefactos locales regenerables; se excluyen
 de Git según las pautas del proyecto.
 
@@ -153,9 +156,9 @@ la validación de ocho combatientes como **hito 102 independiente de Gloom**,
 pendiente y fuera de la tarea actual H06 por el momento. [Alcance y aceptación](../../../reports/eight-combatants-102/README.md).
 Este documento no inicia esa implementación ni aprueba el presupuesto.
 
-1. **Normales:** corregir el contrato UASTC → BC5/RGBA para conservar X/Y
-   independientes; repetir controles X+, Y+ y costuras/UV reflejadas. Alternativa
-   compatible actual: materiales sin normal map, que sacrifica el bake previsto.
+1. **Normales, resuelto en el hito 103:** decoder RGBA8 compatible con UASTC RRRG;
+   controles de canales/mips, X/Y y costuras/UV reflejadas comprobados. Se mantiene
+   el cooker y la ruta BC5; los recursos existentes no necesitan recocción.
 2. **Medición, aplazada al hito 102:** aislar la regulación de Draw/Present a 1080p y habilitar una
    muestra de ocho presentaciones animadas, con cámara/distancias registradas,
    sin ampliar todavía la autoridad/red de dos jugadores. Medir CPU de poses/
@@ -167,8 +170,8 @@ Este documento no inicia esa implementación ni aprueba el presupuesto.
    de autoría. No iniciar retopología/texturas con cifras inventadas.
 
 La [ficha H06](tasks/H06-contrato-presupuesto.md) excluye modificar motor,
-gameplay o modelo. La corrección de normales sigue siendo un frente separado
-del hito 102. H06 conserva sus medidas actuales y recibirá la validación de
+gameplay o modelo. La corrección de normales se autorizó y realizó como hito
+técnico 103, separado del 102. H06 conserva sus medidas y recibirá la validación de
 rendimiento cuando se ejecute ese hito; no debe iniciar su trabajo ahora.
 El presupuesto sigue pendiente y H07 no se inicia. No falta una respuesta
 sobre FPS/equipo/cantidad: esos datos ya están resueltos.

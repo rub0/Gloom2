@@ -1,5 +1,9 @@
 # Hito 101 — diagnóstico y contrato Hound H06
 
+Actualización 28/09: el [hito 103](../normal-maps-103/README.md) corrige la carga
+RGBA8 y las 12 comparaciones pasan. Este informe conserva el diagnóstico y los
+resultados históricos previos; el presupuesto sigue pendiente del hito 102.
+
 26 de septiembre de 2026. Pruebas y medidas del 23 de septiembre.
 **H06 iniciada y bloqueada; H07 no iniciada.** Este es un subhito de diagnóstico,
 no el cierre satisfactorio del presupuesto de producción.

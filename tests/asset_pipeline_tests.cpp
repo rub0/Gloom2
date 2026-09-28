@@ -5,6 +5,7 @@
 #include <gloom/assets/residency_coordinator.hpp>
 #include <gloom/assets/scene_catalog.hpp>
 #include <gloom/assets/texture_asset.hpp>
+#include <gloom/core/types.hpp>
 
 #include <array>
 #include <chrono>
@@ -181,7 +182,7 @@ void write_fixture(const std::filesystem::path &root) {
   append(bitmap, std::uint32_t{0});
   append(bitmap, std::uint32_t{0});
   const std::array<std::uint8_t, 16> pixels{
-      0, 0, 255, 255, 0, 255, 0, 255, 255, 0, 0, 255, 255, 255, 255, 255};
+      0, 0, 255, 255, 0, 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 255};
   bitmap.insert(bitmap.end(), reinterpret_cast<const std::byte*>(pixels.data()),
                 reinterpret_cast<const std::byte*>(pixels.data() + pixels.size()));
   std::ofstream image{root / "source/models/albedo.bmp", std::ios::binary};
@@ -448,6 +449,25 @@ void test_gltf_cooking_and_async_loading() {
              bc5_upload->format == gloom::render::TextureFormat::bc5 &&
              !bc5_upload->srgb && bc5_upload->mip_levels.front().data.size() == 16,
          "KTX2 did not transcode directly to native BC7/BC5 GPU blocks");
+  // Bottom-up BMP: cyan/white, then red/green. R != G in the 1x1 mip too.
+  const gloom::uint8 expected_xy[5][2]{{0, 255}, {255, 255}, {255, 0}, {0, 255}, {128, 191}};
+  for (gloom::uint32 mip = 0; mip < 2; ++mip) {
+    for (gloom::uint32 pixel = 0; pixel < (mip == 0 ? 4U : 1U); ++pixel) {
+      for (gloom::uint32 channel = 0; channel < 2; ++channel) {
+        const int expected = expected_xy[mip == 0 ? pixel : 4][channel];
+        const int rgba = static_cast<gloom::uint8>(normal_upload->mip_levels[mip].data[pixel * 4 + channel]);
+        expect(rgba >= expected - 4 && rgba <= expected + 4, "Normal XY changed in RGBA8 fallback or its mip chain");
+        const gloom::uint8* block = reinterpret_cast<const gloom::uint8*>(bc5_upload->mip_levels[mip].data.data()) + channel * 8;
+        gloom::uint64 selectors = 0;
+        for (gloom::uint32 byte = 0; byte < 6; ++byte) selectors |= static_cast<gloom::uint64>(block[byte + 2]) << (byte * 8);
+        const gloom::uint32 selector = (selectors >> (((pixel / 2) * 4 + pixel % 2) * 3)) & 7U;
+        const int bc5 = selector < 2 ? block[selector]
+            : block[0] > block[1] ? ((8 - selector) * block[0] + (selector - 1) * block[1]) / 7
+            : selector < 6 ? ((6 - selector) * block[0] + (selector - 1) * block[1]) / 5 : selector == 6 ? 0 : 255;
+        expect(bc5 >= expected - 4 && bc5 <= expected + 4, "Normal XY changed in BC5 or its mip chain");
+      }
+    }
+  }
   expect(!gloom::assets::decode_texture_ktx2({.value = 0x45}, {}),
          "Empty KTX2 payload was accepted");
 

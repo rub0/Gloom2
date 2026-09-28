@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 28 de septiembre de 2026, planificación del hito 102; implementación pendiente.
+Actualizado: 28 de septiembre de 2026, hito 103, normales RGBA8 corregidas; hito 102 pendiente.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -14,7 +14,9 @@ H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre
 1920×1080 y hasta ocho combatientes en Ryzen 7 3700X/GTX 1070.
 [Contrato vigente](art/hound/H06-contrato-presupuesto.md) ·
 [Informe 101 y reproducción](../reports/hound-contract-101/README.md).
-Bloqueo técnico de normales: canal verde perdido entre compresión y render.
+Fallo de normales corregido en el **hito 103**: la carga RGBA8 recupera el verde
+desde alfa en los KTX UASTC RRRG. BC5 ya lo conservaba; se mantiene esa ruta.
+[Corrección, pruebas y reproducción](../reports/normal-maps-103/README.md).
 Por encargo del usuario del 28/09, la validación de rendimiento con ocho
 combatientes se aplaza al **hito 102 de Gloom**, fuera de la tarea actual H06.
 [Alcance y aceptación del hito 102](../reports/eight-combatants-102/README.md).
@@ -107,7 +109,28 @@ presupuesto; su aplazamiento no aprueba los 200 FPS ni habilita H07.
 No se han ejecutado pruebas nuevas de rendimiento ni modificado código.
 Commit local de planificación; no es cierre técnico del hito 102 ni implica push.
 
-## Último subhito cerrado: 101, diagnóstico H06
+## Último hito cerrado: 103, normales RGBA8
+
+Trabajo técnico autorizado por el usuario el 28/09, independiente de H06.
+El decoder común reconoce UASTC RRRG antes de transcodificar y restituye G
+desde A en cada mip RGBA8. Cooker, shader y formato de archivo conservados;
+los recursos existentes no requieren nueva cocción. Sin coste por fotograma
+ni asignaciones adicionales: conversión en el buffer de carga existente.
+
+La regresión añadida a `gloom.assets` falla antes de la corrección y pasa
+después; comprueba RGBA8 y BC5, incluido un mip 1×1 con R/G distintos.
+Release: assets/gpu_assets/material_render 3/3; Debug: assets 1/1.
+Las 12 comparaciones de H06 pasan ahora. Otras nueve comparaciones GPU
+comprueban X/Y, UV reflejadas y costuras de islas; 144 controles de canales/mips
+KTX RA y BC5 pasan. Capturas inspeccionadas; visor confirma ruta GPU RGBA8.
+BC5 comprobado numéricamente, sin afirmar una captura GPU BC5 en este equipo.
+
+Juego Debug/Release recompilado. Fuente, glTF y BIN v16 conservan sus tres
+SHA-256. [Informe 103](../reports/normal-maps-103/README.md). Commit local, sin push.
+H06 conserva pendiente su presupuesto y la prueba animada del hito 102,
+aplazado fuera de esta tarea. H07 no iniciada; no se han medido ocho combatientes.
+
+## Subhito 101, diagnóstico H06
 
 Contrato, 14 fixtures Blender/materiales, límites de importación, matriz de
 clips/estados y las cinco armas documentados. Diez controles GPU pasan y dos
