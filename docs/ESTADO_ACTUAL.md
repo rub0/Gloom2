@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 26 de septiembre de 2026, hito 101, diagnóstico y contrato H06.
+Actualizado: 28 de septiembre de 2026, planificación del hito 102; implementación pendiente.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -14,10 +14,13 @@ H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre
 1920×1080 y hasta ocho combatientes en Ryzen 7 3700X/GTX 1070.
 [Contrato vigente](art/hound/H06-contrato-presupuesto.md) ·
 [Informe 101 y reproducción](../reports/hound-contract-101/README.md).
-Bloqueos: canal verde de normal perdido entre compresión y render; Factory
-actual se queda en ~144 FPS a 1080p y falta medir ocho presentaciones animadas.
-Hace falta un trabajo técnico separado para resolver ambos antes de fijar
-presupuesto. No cambiar motor/modelo bajo H06 ni iniciar H07 por anticipado.
+Bloqueo técnico de normales: canal verde perdido entre compresión y render.
+Por encargo del usuario del 28/09, la validación de rendimiento con ocho
+combatientes se aplaza al **hito 102 de Gloom**, fuera de la tarea actual H06.
+[Alcance y aceptación del hito 102](../reports/eight-combatants-102/README.md).
+Está pendiente, no iniciado. Factory actual mide ~144 FPS a 1080p; el objetivo
+200 FPS/1080p/ocho y el presupuesto de producción siguen sin validar.
+No cambiar motor/modelo bajo H06 ni iniciar H07 por este aplazamiento.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,
@@ -81,6 +84,28 @@ y crear el commit de cierre según `AGENTS.md`.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 102 pendiente: rendimiento con ocho combatientes
+
+Registrado el 28/09/2026 por encargo del usuario; **solo planificación**.
+Trabajo técnico independiente de Hound H06, aplazado hasta un nuevo encargo.
+Objetivo: comprobar 200 FPS (5 ms por fotograma completo) a 1920×1080 nativo
+en Ryzen 7 3700X/GTX 1070 con hasta ocho combatientes animados en Factory.
+
+Reutilizar el benchmark existente y aislar primero la cadencia de ~144 FPS
+en Draw/Present. Añadir una muestra reproducible de ocho presentaciones con
+cámara/distancias registradas, animación, armas, sombras, combate, HUD y audio.
+Medir coste CPU/GPU, distribución de tiempos, draws y memoria; documentar
+contenido/calidad y lo que quede fuera. No certificar ocho mediante copias
+estáticas ni extrapolar las medidas actuales de dos combatientes.
+
+El alcance es la prueba de carga y rendimiento; no ampliar la autoridad/red
+de dos jugadores a ocho ni modificar la escultura Hound. El fallo de normales
+es un frente separado. [Ficha e informe de planificación](../reports/eight-combatants-102/README.md).
+Al ejecutar este hito, devolver medidas y límites a H06 para fundamentar el
+presupuesto; su aplazamiento no aprueba los 200 FPS ni habilita H07.
+No se han ejecutado pruebas nuevas de rendimiento ni modificado código.
+Commit local de planificación; no es cierre técnico del hito 102 ni implica push.
 
 ## Último subhito cerrado: 101, diagnóstico H06
 

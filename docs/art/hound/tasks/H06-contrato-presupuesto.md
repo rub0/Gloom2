@@ -1,10 +1,12 @@
 # H06 — contrato de ejecución y presupuesto
 
-Estado al 26/09/2026: **iniciada y bloqueada**, subhito 101.
+Estado al 28/09/2026: **iniciada y bloqueada**, diagnóstico en el subhito 101.
 [Contrato, objetivo confirmado y decisiones pendientes](../H06-contrato-presupuesto.md) ·
 [Informe y reproducción](../../../../reports/hound-contract-101/README.md).
 La fuente de medida es v16 aprobada en H05; no se ha fijado un presupuesto de
-producción ni se habilita H07. El alcance original de esta ficha sigue vigente.
+producción ni se habilita H07. Por encargo del usuario del 28/09, la tarea técnica
+de rendimiento con ocho combatientes pasa al [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md),
+pendiente y fuera de esta tarea por el momento. El fallo de normales sigue separado.
 
 ## Entrada y alcance
 Leer [contexto](CONTEXTO.md) e [índice](README.md), después las secciones relevantes de:
@@ -25,11 +27,13 @@ color lineal/sRGB y empaquetado de canales. Precisar límites de UVs, imágenes,
 alpha, huesos/influencias, interpolación, constraints horneadas y morph targets.
 No basta que una propiedad exista en el importador.
 
-Medir el asset en el escenario de uso acordado: triángulos, materiales/draws,
-texturas/residencia, skinning y tamaño en pantalla. Registrar equipo, resolución,
-número de personajes y método; fijar presupuesto LOD0/LODs/materiales/mapas
-con esos datos. No inventar un objetivo de FPS, número de rivales o resolución
-de texturas: usar los del proyecto, o pedir ese dato si no están definidos.
+Conservar las medidas del asset: triángulos, materiales/draws, texturas/residencia,
+skinning y tamaño en pantalla, con equipo, resolución, personajes y método.
+La implementación y medición del escenario de ocho combatientes corresponden
+al hito 102; no ejecutarlas como parte de H06 mientras sigan aplazadas.
+Incorporar sus resultados cuando estén disponibles para fijar el presupuesto
+LODs/materiales/mapas. Hasta entonces, marcarlo pendiente, sin certificar los
+200 FPS/1080p/ocho ni inventar límites o resolución de texturas.
 
 ## Entrega y límites
 Documento corto de contrato/presupuesto con valores, convenciones, pruebas y

@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-26 de septiembre de 2026 · Índice del hito 90, actualizado con diagnóstico H06/hito 101. Alcance: terminar **este Hound**,
+28 de septiembre de 2026 · Índice del hito 90, actualizado con separación del hito 102. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -27,7 +27,9 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 - Evidencias: [v16, cobertura de armadura y vídeo](../mesh-v16/README.md).
 - Estado artístico: **H05 hecha; escultura v16 aprobada**, con capucha y armadura envolvente aceptadas.
 - Rig: 53 huesos, bind pose y claves conservados; ajuste provisional de una placa lumbar al hueso de su banda lateral.
-- Contrato H06: [documento vigente](../H06-contrato-presupuesto.md), **bloqueada** por normales y medición de rendimiento; presupuesto sin aprobar.
+- Contrato H06: [documento vigente](../H06-contrato-presupuesto.md), **bloqueada** por normales; presupuesto pendiente de medición externa.
+- Rendimiento con ocho combatientes: [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md),
+  pendiente y fuera de la tarea actual H06 por encargo del 28/09. No iniciarlo desde esta ficha.
 - Objetivo H06 confirmado: 200 FPS, 1920×1080, hasta ocho combatientes en Ryzen 7 3700X/GTX 1070. H07 no iniciada.
 - Aprobación de cierre artístico H05: **23 de septiembre de 2026**, «si, ahora esta bien», tras la entrega v16. [Registro](../../../../reports/hound-approval-100/README.md).
 - Dirección aplicada: F01–F06, caída de capucha y cobertura de armadura delantera/posterior/lateral.
@@ -257,8 +259,10 @@ V16: 80.152 triángulos, siete materiales, 53 huesos y cero imágenes finales.
 Buffers geométricos con LODs/brazos calculados: 21,305 MiB. Factory actual,
 con presentación original y dos combatientes, mide ~144 FPS a 1080p.
 No se valida el objetivo de 200 FPS/1080p/ocho ni se inventa un presupuesto.
-El contrato propone trabajo técnico separado para normales y perfil animado;
-no se cambia motor, gameplay o modelo, ni se inicia H07.
+El perfil animado de ocho combatientes queda aplazado al
+[hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md), fuera de
+la tarea actual H06 por encargo del 28/09. El defecto de normales sigue separado.
+No se cambia motor, gameplay o modelo, ni se inicia H07.
 
 Fuente/escena/malla/rig/acción/exportación vigentes: las rutas y nombres de v16
 del inicio. Los PNG/JSON son regenerables; resultados persistidos en Markdown.
@@ -277,7 +281,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
 | [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | Hecha; v16 aprobada el 23/09/2026 | [v16: referencia y evidencias](../mesh-v16/README.md); [aceptación 100](../../../../reports/hound-approval-100/README.md); modelado `0c28f79`; commit de cierre del hito 100, resolver con git log |
-| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Bloqueada: normales y perfil 200 FPS/1080p/8 | [Contrato vigente](../H06-contrato-presupuesto.md); [informe 101](../../../../reports/hound-contract-101/README.md); commit del subhito 101, resolver con git log |
+| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Bloqueada: normales; presupuesto pendiente del hito 102 externo | [Contrato vigente](../H06-contrato-presupuesto.md); [informe 101](../../../../reports/hound-contract-101/README.md); commit `87703fa` |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |
 | [H09](H09-uv-horneado.md) | UVs y horneado | H08 + H06 | Pendiente | — |

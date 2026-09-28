@@ -1,5 +1,19 @@
 # Gloom roadmap
 
+## Pending technical work
+
+102. **Eight-combatant performance validation — planned, not started.**
+     Target: 200 FPS at native 1920×1080 on the current Ryzen 7 3700X / GTX 1070.
+     Isolate the apparent 144 FPS presentation limit and extend the existing
+     Factory benchmark to eight animated combatant presentations, with recorded
+     camera/content, combat, shadows, HUD/audio, CPU/GPU timing and residency.
+     This is a separate load/performance milestone, deferred outside Hound H06
+     by the user on 2026-09-28. It does not expand two-player authority/networking,
+     fix normal maps or change the Hound sculpture. Feed measured budgets back
+     into H06; no 200 FPS acceptance or H07 start is implied by scheduling it.
+     See [scope and acceptance](../reports/eight-combatants-102/README.md) and
+     [current handoff](ESTADO_ACTUAL.md).
+
 ## Completed
 
 1. C++23 project foundation, SDL3 window and subsystem lifecycle.

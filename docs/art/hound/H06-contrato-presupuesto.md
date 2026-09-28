@@ -1,6 +1,6 @@
 # Hound H06 — contrato comprobado y presupuesto pendiente
 
-26 de septiembre de 2026 · Subhito 101 · **H06 bloqueada; no habilita H07**.
+28 de septiembre de 2026 · Diagnóstico del subhito 101 · **H06 bloqueada; no habilita H07**.
 Mediciones realizadas el 23 de septiembre sobre el código vigente del hito 100.
 
 Entrada inmutable: [escultura v16](../../../art/characters/hound/v16/hound-mesh-v16.blend)
@@ -146,24 +146,29 @@ la GTX 1070. Las últimas consultas GPU (2,345 / 3,116 ms) no son una media comp
 Control 720p: 530,77 FPS; no sustituye el objetivo. [Medidas](../../../reports/hound-contract-101/benchmark.json).
 HUD/audio, poll_events y arranque quedan fuera del intervalo del benchmark.
 
-## Decisión necesaria para desbloquear H06
+## Trabajo pendiente y separación del hito 102
 
-Mantener 200 FPS/1080p/8 en este equipo. Proponer trabajo técnico separado,
-antes de continuar H06 o H07:
+Mantener 200 FPS/1080p/8 en este equipo. El usuario encarga el 28/09 registrar
+la validación de ocho combatientes como **hito 102 independiente de Gloom**,
+pendiente y fuera de la tarea actual H06 por el momento. [Alcance y aceptación](../../../reports/eight-combatants-102/README.md).
+Este documento no inicia esa implementación ni aprueba el presupuesto.
 
 1. **Normales:** corregir el contrato UASTC → BC5/RGBA para conservar X/Y
    independientes; repetir controles X+, Y+ y costuras/UV reflejadas. Alternativa
    compatible actual: materiales sin normal map, que sacrifica el bake previsto.
-2. **Medición:** aislar la regulación de Draw/Present a 1080p y habilitar una
+2. **Medición, aplazada al hito 102:** aislar la regulación de Draw/Present a 1080p y habilitar una
    muestra de ocho presentaciones animadas, con cámara/distancias registradas,
    sin ampliar todavía la autoridad/red de dos jugadores. Medir CPU de poses/
    bounds, GPU, draws/sombras, residencia, HUD/audio y margen dentro de 5 ms.
-   Incluir la fixture horneada y el clip diagnóstico v16 en reproducción GPU.
+   Incluir la fixture horneada y el clip diagnóstico v16 en reproducción GPU;
+   distinguir estas comprobaciones del coste de clips jugables completos.
 3. Con esos resultados, fijar los límites de geometría/materiales/mapas y
    decidir si bastan LODs compatibles actuales o hace falta consumo de LODs
    de autoría. No iniciar retopología/texturas con cifras inventadas.
 
 La [ficha H06](tasks/H06-contrato-presupuesto.md) excluye modificar motor,
-gameplay o modelo. Este subhito entrega diagnóstico y propuesta; no ejecuta
-esas correcciones ni inicia H07. No falta una respuesta sobre FPS/equipo/cantidad:
-esos datos ya están resueltos.
+gameplay o modelo. La corrección de normales sigue siendo un frente separado
+del hito 102. H06 conserva sus medidas actuales y recibirá la validación de
+rendimiento cuando se ejecute ese hito; no debe iniciar su trabajo ahora.
+El presupuesto sigue pendiente y H07 no se inicia. No falta una respuesta
+sobre FPS/equipo/cantidad: esos datos ya están resueltos.
