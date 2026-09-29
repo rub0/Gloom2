@@ -4,6 +4,7 @@
 #include <gloom/render/temporal.hpp>
 #include <gloom/render/ui.hpp>
 #include <gloom/render/shadow_visibility.hpp>
+#include <gloom/backends/vulkan_present.hpp>
 
 #include <BasicMath.hpp>
 #include <BasicPlatformDebug.hpp>
@@ -12,6 +13,8 @@
 #include <MapHelper.hpp>
 #include <Query.h>
 #include <RefCntAutoPtr.hpp>
+#include <assert.h>
+#include <string.h>
 
 #include <algorithm>
 #include <array>
@@ -713,7 +716,14 @@ struct DiligentRenderer::Impl {
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> scene_pipeline;
     std::array<Diligent::RefCntAutoPtr<Diligent::IPipelineState>,8> surface_pipelines;
     Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> scene_resources;
-    Diligent::RefCntAutoPtr<Diligent::IBuffer> draw_constants,skin_constants;
+    Diligent::RefCntAutoPtr<Diligent::IBuffer> draw_constants;
+    // Static slot, 64 cached pose pairs, and a streaming overflow slot.
+    Diligent::RefCntAutoPtr<Diligent::IBuffer> skin_constants[66];
+    const render::SkinPose* skin_current[64]{};
+    const render::SkinPose* skin_previous[64]{};
+    uint32 skin_count{0};
+    uint32 bound_skin[2]{};
+    void bind_skin(const render::RenderInstance& instance, Diligent::IShaderResourceBinding* resources);
     Diligent::RefCntAutoPtr<Diligent::ITexture> hdr_texture;
     Diligent::RefCntAutoPtr<Diligent::ITexture> particle_color_copy,particle_depth_copy;
     Diligent::RefCntAutoPtr<Diligent::ITextureView> hdr_render_target;
@@ -789,7 +799,45 @@ struct DiligentRenderer::Impl {
     float exposure{1.0F};
     std::uint64_t frame_index{0};
     std::uint64_t submitted_fence_value{0};
+    uint64 submission_ticks[16]{};
+    uint64 observed_fence{0};
 };
+
+void DiligentRenderer::Impl::bind_skin(const render::RenderInstance& instance, Diligent::IShaderResourceBinding* resources) {
+    uint32 slot = 0;
+    if (instance.pose) {
+        const render::SkinPose& pose = *instance.pose;
+        assert(pose.matrices.size() <= 256 && pose.normal_matrices.size() == pose.matrices.size());
+        const render::SkinPose* previous = instance.previous_pose && instance.has_previous_transform &&
+            instance.previous_pose->matrices.size() == pose.matrices.size() ? instance.previous_pose.get() : &pose;
+        uint32 cached = 0;
+        // ponytail: linear cache for small scenes; excess poses stream without imposing a scene limit.
+        while (cached < skin_count && (skin_current[cached] != &pose || skin_previous[cached] != previous)) ++cached;
+        slot = cached + 1;
+        if (cached == skin_count) {
+            if (skin_count < 64) {
+                skin_current[skin_count] = &pose;
+                skin_previous[skin_count++] = previous;
+            }
+            Diligent::MapHelper<SkinConstants> constants{immediate_context, skin_constants[slot], Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD};
+            assert(static_cast<SkinConstants*>(constants));
+            for (uint32 j = 0; j < pose.matrices.size(); ++j) {
+                memcpy(&constants->bones[j], pose.matrices[j].data(), 64);
+                memcpy(&constants->previous_bones[j], previous->matrices[j].data(), 64);
+                memcpy(&constants->bone_normals[j], pose.normal_matrices[j].data(), 64);
+            }
+            ++frame_metrics.skin_maps;
+            frame_metrics.skin_reserved_bytes += sizeof(SkinConstants);
+            frame_metrics.skin_copied_bytes += pose.matrices.size() * 192;
+        }
+    }
+    const uint32 pass = resources == shadow_resources.RawPtr() ? 1 : 0;
+    if (bound_skin[pass] != slot) {
+        resources->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, "SkinConstants")->Set(skin_constants[slot]);
+        immediate_context->CommitShaderResources(resources, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        bound_skin[pass] = slot;
+    }
+}
 
 DiligentRenderer::DiligentRenderer(platform::Window& window, const render::RendererSettings settings)
     : window_{window}, settings_{settings}, impl_{std::make_unique<Impl>()} {
@@ -936,7 +984,7 @@ void DiligentRenderer::create_scene_resources() {
     impl_->device->CreateBuffer(constants_description, nullptr, &impl_->draw_constants);
     constants_description.Name="Gloom animated skin constants";
     constants_description.Size=sizeof(SkinConstants);
-    impl_->device->CreateBuffer(constants_description,nullptr,&impl_->skin_constants);
+    for (uint32 i = 0; i < 66; ++i) impl_->device->CreateBuffer(constants_description, nullptr, &impl_->skin_constants[i]);
 
     Diligent::ShaderCreateInfo shader_create_info;
     shader_create_info.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
@@ -956,7 +1004,7 @@ void DiligentRenderer::create_scene_resources() {
     shader_create_info.Source = pixel_shader_source;
     impl_->device->CreateShader(shader_create_info, &pixel_shader);
 
-    if (!impl_->draw_constants || !impl_->skin_constants || !vertex_shader || !pixel_shader) {
+    if (!impl_->draw_constants || !impl_->skin_constants[65] || !vertex_shader || !pixel_shader) {
         throw std::runtime_error{"Diligent failed to create scene GPU resources"};
     }
     constexpr std::array input_layout{
@@ -976,6 +1024,7 @@ void DiligentRenderer::create_scene_resources() {
     pipeline_create_info.PSODesc.ResourceLayout.DefaultVariableType =
         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
     constexpr Diligent::ShaderResourceVariableDesc resource_variables[]{
+        {Diligent::SHADER_TYPE_VERTEX, "SkinConstants", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
         {Diligent::SHADER_TYPE_PIXEL,
          "BaseColorTexture",
          Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
@@ -1059,7 +1108,6 @@ void DiligentRenderer::create_scene_resources() {
         throw std::runtime_error{"Diligent could not bind pixel material constants"};
     }
     constants->Set(impl_->draw_constants);
-    impl_->scene_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX,"SkinConstants")->Set(impl_->skin_constants);
     impl_->surface_pipelines[0]=impl_->scene_pipeline;
     for (std::uint32_t variant=1;variant<8;++variant) {
         auto& graphics=pipeline_create_info.GraphicsPipeline;
@@ -1078,7 +1126,6 @@ void DiligentRenderer::create_scene_resources() {
         impl_->device->CreateGraphicsPipelineState(pipeline_create_info,&impl_->surface_pipelines[variant]);
         auto* pipeline=impl_->surface_pipelines[variant].RawPtr();
         if (!pipeline) throw std::runtime_error{"Failed to create surface pipeline"};
-        pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX,"SkinConstants")->Set(impl_->skin_constants);
         for (auto stage : {Diligent::SHADER_TYPE_VERTEX,Diligent::SHADER_TYPE_PIXEL})
             pipeline->GetStaticVariableByName(stage,"Constants")->Set(impl_->draw_constants);
     }
@@ -1228,10 +1275,12 @@ void DiligentRenderer::create_scene_resources() {
         Diligent::LayoutElement{6,0,4,Diligent::VT_UINT16,false,offsetof(render::GpuVertex,joints)+8,sizeof(render::GpuVertex)},
         Diligent::LayoutElement{7,0,4,Diligent::VT_FLOAT32,false,offsetof(render::GpuVertex,weights),sizeof(render::GpuVertex)},
         Diligent::LayoutElement{8,0,4,Diligent::VT_FLOAT32,false,offsetof(render::GpuVertex,weights)+16,sizeof(render::GpuVertex)}};
-    const Diligent::ShaderResourceVariableDesc shadow_texture{Diligent::SHADER_TYPE_PIXEL,"ShadowBaseColor",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC};
+    const Diligent::ShaderResourceVariableDesc shadow_variables[]{
+        {Diligent::SHADER_TYPE_PIXEL, "ShadowBaseColor", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_VERTEX, "SkinConstants", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC}};
     const Diligent::ImmutableSamplerDesc shadow_sampler{Diligent::SHADER_TYPE_PIXEL,"ShadowBaseColor_sampler",surface_sampler};
-    shadow_pipeline_description.PSODesc.ResourceLayout.Variables=&shadow_texture;
-    shadow_pipeline_description.PSODesc.ResourceLayout.NumVariables=1;
+    shadow_pipeline_description.PSODesc.ResourceLayout.Variables=shadow_variables;
+    shadow_pipeline_description.PSODesc.ResourceLayout.NumVariables=2;
     shadow_pipeline_description.PSODesc.ResourceLayout.ImmutableSamplers=&shadow_sampler;
     shadow_pipeline_description.PSODesc.ResourceLayout.NumImmutableSamplers=1;
     shadow_pipeline_description.GraphicsPipeline.NumRenderTargets = 0;
@@ -1258,13 +1307,11 @@ void DiligentRenderer::create_scene_resources() {
         throw std::runtime_error{"Diligent could not bind shadow constants"};
     }
     shadow_constants->Set(impl_->shadow_constants);
-    impl_->shadow_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX,"SkinConstants")->Set(impl_->skin_constants);
     impl_->shadow_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL,"ShadowConstants")->Set(impl_->shadow_constants);
     shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.CullMode=Diligent::CULL_MODE_NONE;
     shadow_pipeline_description.PSODesc.Name="Gloom double-sided shadow pipeline";
     impl_->device->CreateGraphicsPipelineState(shadow_pipeline_description,&impl_->double_sided_shadow_pipeline);
     if (!impl_->double_sided_shadow_pipeline) throw std::runtime_error{"Double sided shadow pipeline failed"};
-    impl_->double_sided_shadow_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX,"SkinConstants")->Set(impl_->skin_constants);
     for (const auto stage:{Diligent::SHADER_TYPE_VERTEX,Diligent::SHADER_TYPE_PIXEL})
         impl_->double_sided_shadow_pipeline->GetStaticVariableByName(stage,"ShadowConstants")->Set(impl_->shadow_constants);
     impl_->shadow_pipeline->CreateShaderResourceBinding(&impl_->shadow_resources, true);
@@ -1874,7 +1921,7 @@ void DiligentRenderer::stop() noexcept {
     for (auto& pipeline : impl_->surface_pipelines) pipeline.Release();
     impl_->scene_pipeline.Release();
     impl_->draw_constants.Release();
-    impl_->skin_constants.Release();
+    for (uint32 i = 0; i < 66; ++i) impl_->skin_constants[i].Release();
     for (auto& resources : impl_->tone_map_resources) {
         resources.Release();
     }
@@ -1966,9 +2013,23 @@ void DiligentRenderer::resize(const std::uint32_t width, const std::uint32_t hei
 void DiligentRenderer::begin_frame() {
     impl_->ui.vertices.clear();
     impl_->frame_metrics.draw_calls = 0;
+    impl_->frame_metrics.skin_maps = 0;
+    impl_->frame_metrics.shadow_draws = 0;
+    impl_->frame_metrics.skin_reserved_bytes = 0;
+    impl_->frame_metrics.skin_copied_bytes = 0;
+    impl_->frame_metrics.frames_in_flight = 0;
+    impl_->frame_metrics.submission_observed_ticks = 0;
     impl_->frame_metrics.gpu_sample_ready = false;
     if (state_ != core::SubsystemState::running) {
         throw std::logic_error{"Diligent renderer must be running before begin_frame"};
+    }
+    if (vulkan_present.enabled) {
+        const uint64 completed = impl_->residency_fence->GetCompletedValue();
+        impl_->frame_metrics.frames_in_flight = impl_->submitted_fence_value - completed;
+        if (completed > impl_->observed_fence && impl_->submitted_fence_value - completed < 16) {
+            impl_->frame_metrics.submission_observed_ticks = present_clock() - impl_->submission_ticks[completed % 16];
+            impl_->observed_fence = completed;
+        }
     }
     process_uploads();
     impl_->shadow_rendered = false;
@@ -2201,27 +2262,18 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             impl_->full_timing_active=true;
         }
     }
-    // A frame-local allocation is required even for static draws sharing the shader.
+    // DISCARD preserves earlier frames until Diligent retires their allocations by fence.
+    // Cached pose pointers only live for this draw; every slot is renamed before its next use.
+    impl_->skin_count = 0;
+    impl_->bound_skin[0] = impl_->bound_skin[1] = 0;
     {
-        Diligent::MapHelper<SkinConstants> constants{impl_->immediate_context,impl_->skin_constants,Diligent::MAP_WRITE,Diligent::MAP_FLAG_DISCARD};
-        if (static_cast<SkinConstants*>(constants)==nullptr) throw std::runtime_error{"Skin constant mapping failed"};
+        Diligent::MapHelper<SkinConstants> constants{impl_->immediate_context, impl_->skin_constants[0], Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD};
+        assert(static_cast<SkinConstants*>(constants));
+        ++impl_->frame_metrics.skin_maps;
+        impl_->frame_metrics.skin_reserved_bytes += sizeof(SkinConstants);
     }
-    const auto upload_skin=[&](const render::RenderInstance& instance) {
-        if (instance.pose) {
-            Diligent::MapHelper<SkinConstants> constants{impl_->immediate_context,impl_->skin_constants,Diligent::MAP_WRITE,Diligent::MAP_FLAG_DISCARD};
-            if (static_cast<SkinConstants*>(constants)==nullptr) throw std::runtime_error{"Skin constant mapping failed"};
-                const auto& pose=*instance.pose;
-                if (pose.matrices.size()>256 || pose.normal_matrices.size()!=pose.matrices.size())
-                    throw std::runtime_error{"Invalid GPU skin palette"};
-                const auto& previous=instance.previous_pose && instance.has_previous_transform &&
-                    instance.previous_pose->matrices.size()==pose.matrices.size()?*instance.previous_pose:pose;
-                for (std::size_t j=0;j<pose.matrices.size();++j) {
-                    std::memcpy(&constants->bones[j],pose.matrices[j].data(),64);
-                    std::memcpy(&constants->previous_bones[j],previous.matrices[j].data(),64);
-                    std::memcpy(&constants->bone_normals[j],pose.normal_matrices[j].data(),64);
-                }
-            }
-    };
+    impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, "SkinConstants")->Set(impl_->skin_constants[0]);
+    impl_->shadow_resources->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, "SkinConstants")->Set(impl_->skin_constants[0]);
     const auto instance_alpha_mode = [&](const render::RenderInstance& instance) {
         if (instance.alpha_mode_override != 0xff) return static_cast<std::uint32_t>(instance.alpha_mode_override);
         const auto material = impl_->materials.find(instance.material);
@@ -2420,7 +2472,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                     mesh->second.indices,
                     0,
                     Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-                upload_skin(instance);
+                impl_->bind_skin(instance, impl_->shadow_resources);
                 {
                     Diligent::MapHelper<ShadowConstants> constants{
                         impl_->immediate_context,
@@ -2440,6 +2492,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 draw_attributes.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
                 impl_->immediate_context->DrawIndexed(draw_attributes);
                 ++impl_->frame_metrics.draw_calls;
+                ++impl_->frame_metrics.shadow_draws;
             }
         }
         Diligent::ITextureView* render_targets[]{impl_->hdr_render_target,
@@ -2545,7 +2598,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             const auto previous_world = world_matrix(instance.has_previous_transform
                                                           ? instance.previous_transform
                                                           : instance.transform);
-            upload_skin(instance);
+            impl_->bind_skin(instance, impl_->scene_resources);
             Diligent::MapHelper<DrawConstants> constants{impl_->immediate_context,
                                                          impl_->draw_constants,
                                                          Diligent::MAP_WRITE,
@@ -2890,6 +2943,7 @@ float4 main(float4 position:SV_POSITION,float2 uv:TEX_COORD,float4 color:COLOR):
     }
     impl_->immediate_context->EnqueueSignal(impl_->residency_fence,
                                             ++impl_->submitted_fence_value);
+    impl_->submission_ticks[impl_->submitted_fence_value % 16] = present_clock();
     impl_->swap_chain->Present(settings_.vertical_sync ? 1 : 0);
     impl_->previous_jitter = impl_->jitter;
     ++impl_->frame_index;

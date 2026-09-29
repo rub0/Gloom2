@@ -2,15 +2,23 @@
 
 ## Pending technical work
 
-104. **Presentation and skinning with eight combatants — prepared, not started.**
-     Resolve the findings of 102: repair skin constant mapping with seven Hound
-     v16 plus FPS, control MAILBOX/Present pacing, then measure bounds and repeat
-     at native 1080p. Use existing content; final Hound maps/clips are not an
-     entry requirement for this engine repair. Keep production-budget limits
-     explicit. The 200 FPS target remains unvalidated and H07 stays blocked.
-     [Self-contained handoff](../reports/hound-runtime-104/README.md).
+H06 production budget remains pending: measure final Hound maps/clips/weapons
+and resolve asset residency before choosing geometry/material/texture limits.
+H07 is not started; no new implementation milestone is authorized here.
 
 ## Recent executed milestone
+
+104. **Presentation and skinning with eight combatants — executed 2026-09-29.**
+     Shared current/previous palettes fix the 8 MiB dynamic-heap exhaustion;
+     nine maps per frame for seven Hound plus FPS, without enlarging the heap.
+     MAILBOX pacing is isolated to image acquisition; VSync off now prefers
+     IMMEDIATE. Conservative joint bounds replace per-vertex frame work.
+     Sixteen native-1080p Release runs, null and real audio: 0/5,760 frames over
+     5 ms. Seven Hound: 281–284 FPS, worst p99 3.854 ms, maximum 3.974 ms.
+     Release 7/7 and Debug 4/4, including Vulkan validation and a regression
+     that fails on the original executable. V16 unchanged; H06 production
+     budget blocked, H07 not started. Local commit only, no push.
+     [Results, limits and reproduction](../reports/hound-runtime-104/README.md).
 
 102. Eight-combatant performance investigation — executed 2026-09-29.
      Reproducible local Factory load with seven animated TPS bodies plus FPS

@@ -2,6 +2,7 @@
 
 #include <gloom/assets/rig.hpp>
 #include <gloom/render/scene.hpp>
+#include <gloom/core/types.hpp>
 #include <string_view>
 
 namespace gloom::assets {
@@ -21,4 +22,18 @@ using LocalPose = std::vector<render::Transform>;
 [[nodiscard]] render::BoundingSphere skinned_bounds(const ImportedPrimitive& primitive,
                                                     const render::SkinPose& pose);
 [[nodiscard]] render::Vec3 skinned_position(const ImportedVertex& vertex, const render::SkinPose& pose);
+// Precompute from immutable geometry, then transform joint boxes instead of every vertex.
+// The convex hull of transformed boxes covers linear skinning with nonnegative weights.
+struct SkinBounds {
+    struct Joint {
+        render::Vec3 minimum{1e30F, 1e30F, 1e30F};
+        render::Vec3 maximum{-1e30F, -1e30F, -1e30F};
+    } joints[256];
+    uint32 joint_count{0};
+    float minimum_weight_sum{1.0F};
+    float maximum_weight_sum{1.0F};
+};
+// Preconditions: finite vertices, nonnegative weights, joints < 256 and covered by the pose.
+void prepare_skin_bounds(const ImportedPrimitive& primitive, SkinBounds& bounds);
+[[nodiscard]] render::BoundingSphere skinned_bounds(const SkinBounds& bounds, const render::SkinPose& pose);
 } // namespace gloom::assets

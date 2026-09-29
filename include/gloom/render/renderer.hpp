@@ -4,6 +4,7 @@
 #include <gloom/render/gpu_assets.hpp>
 #include <gloom/render/scene.hpp>
 #include <gloom/render/temporal.hpp>
+#include <gloom/core/types.hpp>
 
 #include <cstdint>
 
@@ -27,6 +28,12 @@ struct RenderCapabilities {
 };
 
 struct FrameRenderMetrics {
+    uint32 skin_maps{0};
+    uint32 shadow_draws{0};
+    uint64 skin_reserved_bytes{0};
+    uint64 skin_copied_bytes{0};
+    uint64 frames_in_flight{0};
+    uint64 submission_observed_ticks{0};
     bool gpu_timing_supported{false};
     bool gpu_sample_ready{false};
     std::uint64_t gpu_sample_nanoseconds{0};

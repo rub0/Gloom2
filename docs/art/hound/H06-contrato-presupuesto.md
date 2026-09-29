@@ -1,6 +1,6 @@
 # Hound H06 — contrato comprobado y presupuesto pendiente
 
-29 de septiembre de 2026 · Diagnóstico 101, corrección 103 y medición 102 · **Presupuesto pendiente; no habilita H07**.
+29 de septiembre de 2026 · Diagnóstico 101, correcciones 103/104 y medidas 102/104 · **Presupuesto pendiente; no habilita H07**.
 Medidas de rendimiento del 23/09; materiales y normales verificados de nuevo el
 28/09 tras el [hito técnico 103](../../../reports/normal-maps-103/README.md).
 
@@ -124,7 +124,7 @@ El cálculo de buffers aplica el layout real de 104 bytes/vértice y uint32 en
 No es lectura de VRAM del driver ni incluye alineación, texturas, paletas o
 buffers de frame. Ocho copias del mismo recurso comparten geometría/texturas;
 skins diferentes pueden multiplicar materiales/mapas. Paleta de 53 huesos:
-6784 bytes de matrices+normales por pose CPU; su coste por frame aún no medido.
+6784 bytes de matrices+normales por pose CPU; el 104 mide ocho cargas de 10.176 bytes GPU (actual/anterior/normales), más reserva estática: 432 KiB reservados por frame.
 
 El visor estático a 1280×720 envía 56 primitivas de ocho copias: 54 visibles,
 9 batches, LODs 35/12/7; tamaños completos proyectados de 94–232 px de alto.
@@ -167,12 +167,38 @@ jugable final aún carece de mapas y clips. La muestra de ocho usa geometría
 original compartida, por lo que no fija presupuesto LOD0/LODs/materiales/mapas
 para Hound ni decide si son necesarios LODs de autoría.
 
-Siguiente trabajo técnico: [hito 104 preparado, no iniciado](../../../reports/hound-runtime-104/README.md).
-Controlar la cadencia de MAILBOX/Present, medir
-latencia de cola, resolver el mapeo de constantes y perfilar/optimizar bounds
-para siete Hound. Repetir 1080p con v16 y el contenido disponible, declarando
-el dispositivo de audio utilizado. Los mapas/clips finales no bloquean ese
-arreglo del motor; sus costes pendientes deben quedar explícitos antes de
-aprobar límites definitivos de geometría, texturas y memoria. Normales RGBA8 ya están resueltas en
-el hito 103. La [ficha H06](tasks/H06-contrato-presupuesto.md) sigue bloqueada;
-H07 no se inicia. No faltan datos del usuario sobre FPS/equipo/cantidad.
+## Resultado del hito 104 y presupuesto aún pendiente
+
+El [104 ejecutado](../../../reports/hound-runtime-104/README.md) resuelve los
+bloqueos de mapeo y presentación del 102. Siete Hound v16 más FPS completan
+el benchmark con sombras y animación; 53 skins pasan el frustum en todos los
+frames medidos. Paletas por actor/nodo y pareja actual/anterior: 9 mapeos,
+442.368 bytes reservados y 81.408 copiados por frame, heap original de 8 MiB.
+Bounds conservadores por hueso: 0,106–0,124 ms de skin/bounds, frente a 3,203 ms.
+
+MAILBOX reproduce 144 FPS esperando ~5,4 ms al adquirir imagen; IMMEDIATE es
+ahora la prioridad con VSync off. VSync on conserva sincronización. Dos imágenes;
+finalización de cola medida como cota superior observada por fence en CPU,
+no latencia de pantalla. Modo efectivo, CPU/GPU y límites en el informe.
+
+Dieciséis pasadas Release/1080p, 120 frames de calentamiento y 360 medidos por
+pasada: dos/ocho originales, un/siete Hound más FPS; dos repeticiones con salida
+nula y dos con SDL3 Headphones (High Definition Audio Device), HUD y disparo.
+**0/5.760 frames >5 ms**. Siete Hound: **281,29–283,98 FPS**, p99 máximo
+**3,854 ms**, máximo **3,974 ms**. [Todas las medidas](../../../reports/hound-runtime-104/mediciones.md).
+El control antiguo de dos solo tiene una skin dentro del frustum al final;
+no usarlo para atribuir un coste exacto por personaje. Ocho originales: 8/8;
+siete Hound más FPS: 53/53, 46 batches, 527 draws, 406 de sombras al final.
+
+El objetivo de 200 FPS se comprueba **para este escenario diagnóstico** por
+distribuciones y repeticiones, no por una media aislada. **H06 sigue bloqueada**:
+v16 carece de mapas y clips jugables finales, falta coste de las cinco armas y
+combate autoritativo de ocho, y residencia de assets alcanza **511,73/512 MiB**.
+Cero evicciones durante medidas, 30 en carga/calentamiento; no es VRAM total.
+No fijar aún LOD0/LODs, materiales o mapas a partir de ese margen.
+
+Siguiente entrada para un encargo posterior: mantener v16 y la regresión del
+104 como control, medir contenido de producción cuando exista y resolver
+residencia antes de aprobar límites H06. No requiere reabrir normales ni
+modificar escultura. Release 7/7, Debug 4/4 y hashes exactos. **H07 no se inicia**.
+Commit local de ejecución del 104, sin push.

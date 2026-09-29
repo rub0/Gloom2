@@ -42,6 +42,7 @@ FetchContent_Declare(
     GIT_SUBMODULES_RECURSE TRUE
 )
 FetchContent_MakeAvailable(DiligentCore)
+include(cmake/PatchDiligent.cmake)
 
 foreach(unused_target IN ITEMS
     Diligent-GraphicsEngineVk-shared
@@ -558,6 +559,15 @@ if(BUILD_TESTING)
     target_link_libraries(gloom_animation_vfx_tests PRIVATE gloom_asset_pipeline)
     target_compile_definitions(gloom_animation_vfx_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
     add_test(NAME gloom.animation_vfx COMMAND gloom_animation_vfx_tests)
+    add_executable(gloom_skin_bounds_tests tests/skin_bounds_tests.cpp)
+    target_link_libraries(gloom_skin_bounds_tests PRIVATE gloom_asset_pipeline)
+    target_compile_definitions(gloom_skin_bounds_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    if(MSVC)
+        target_compile_options(gloom_skin_bounds_tests PRIVATE /UNDEBUG)
+    else()
+        target_compile_options(gloom_skin_bounds_tests PRIVATE -UNDEBUG)
+    endif()
+    add_test(NAME gloom.skin_bounds COMMAND gloom_skin_bounds_tests)
     add_executable(gloom_animation_network_tests tests/animation_network_tests.cpp)
     target_link_libraries(gloom_animation_network_tests PRIVATE gloom_asset_pipeline)
     target_compile_definitions(gloom_animation_network_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
@@ -648,4 +658,9 @@ if(BUILD_TESTING)
             -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunGraphicsValidation.cmake"
     )
     set_tests_properties(gloom.vulkan_sync PROPERTIES LABELS graphics TIMEOUT 35)
+    add_test(NAME gloom.hound_runtime COMMAND "${CMAKE_COMMAND}"
+        "-DGLOOM_EXECUTABLE=$<TARGET_FILE:gloom>" "-DGLOOM_COOKER=$<TARGET_FILE:gloom_asset_cooker>"
+        "-DGLOOM_SOURCE=${CMAKE_CURRENT_SOURCE_DIR}" "-DGLOOM_BINARY=${CMAKE_CURRENT_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunHoundRuntime.cmake")
+    set_tests_properties(gloom.hound_runtime PROPERTIES LABELS graphics TIMEOUT 190 RUN_SERIAL TRUE)
 endif()

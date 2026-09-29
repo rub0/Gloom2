@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-29 de septiembre de 2026 · Índice del hito 90, actualizado con normales 103 y rendimiento 102. Alcance: terminar **este Hound**,
+29 de septiembre de 2026 · Índice del hito 90, actualizado con normales 103 y runtime/medidas 104. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -29,10 +29,11 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 - Rig: 53 huesos, bind pose y claves conservados; ajuste provisional de una placa lumbar al hueso de su banda lateral.
 - Contrato H06: [documento vigente](../H06-contrato-presupuesto.md), presupuesto pendiente de medición externa.
 - Normales: [corregidas y comprobadas en el hito técnico 103](../../../../reports/normal-maps-103/README.md); 12/12 comparaciones H06 pasan.
-- Rendimiento con ocho combatientes: [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md)
-  ejecutado; 5 ms incumplidos en p95/p99 y siete Hound v16 fallan al mapear constantes. H06 sigue bloqueada.
-- Siguiente trabajo externo: [hito 104, presentación y skinning](../../../../reports/hound-runtime-104/README.md),
-  preparado para otra tarea; no iniciado. Resolver los bloqueos del 102 antes de aprobar H06 o iniciar H07.
+- Runtime y rendimiento: [104 ejecutado](../../../../reports/hound-runtime-104/README.md).
+  Mapeo y Present corregidos; siete Hound + FPS a 281–284 FPS/1080p, p99 ≤3,854 ms.
+  16 pasadas con audio nulo/real: 0/5.760 frames >5 ms; animación, sombras y 53 skins visibles.
+  H06 sigue bloqueada por contenido/presupuesto de producción y residencia 511,73/512 MiB.
+  Release 7/7, Debug 4/4; fuente/exportación v16 exactas. Commit local del 104, sin push.
 - Objetivo H06 confirmado: 200 FPS, 1920×1080, hasta ocho combatientes en Ryzen 7 3700X/GTX 1070. H07 no iniciada.
 - Aprobación de cierre artístico H05: **23 de septiembre de 2026**, «si, ahora esta bien», tras la entrega v16. [Registro](../../../../reports/hound-approval-100/README.md).
 - Dirección aplicada: F01–F06, caída de capucha y cobertura de armadura delantera/posterior/lateral.
@@ -272,16 +273,27 @@ del inicio. Los PNG/JSON son regenerables; resultados persistidos en Markdown.
 Push previo solicitado completado hasta `2027548`; se conserva `db1d98e` de AGENTS.
 Commit local del subhito 101; resolver con `git log --oneline --grep='^hito 101:'`.
 
+## Traspaso técnico 104 — H06 continúa bloqueada
+
+Mismos fuente/glTF/BIN v16 y clip diagnóstico. El motor ya reproduce siete
+Hound más FPS sin agotar el heap; prioriza IMMEDIATE con VSync off y calcula
+bounds conservadores por hueso. 0/5.760 frames >5 ms en 16 pasadas a 1080p,
+incluido audio real. [Resultados y reproducción](../../../../reports/hound-runtime-104/README.md).
+No fija LODs/materiales/mapas: faltan costes finales y margen de residencia.
+Siguiente entrada solo por nuevo encargo: v16 y regresión 104 como control;
+cerrar presupuesto H06 antes de habilitar H07. Commit del hito 104; resolver
+con git log. Sin push ni otro hito iniciado.
+
 ## Fichas y dependencias
 
 Actualización del 28/09, hito 103: resuelto el fallo de normales en la carga
 RGBA8; nueve controles GPU adicionales cubren X/Y, UV reflejadas y costuras.
 BC5 conserva sus canales y pasa la comprobación numérica. Fuente v16 intacta.
 [Informe y reproducción](../../../../reports/normal-maps-103/README.md).
-El hito 102 se ejecutó después: ocho presentaciones jugables medidas y un
-Hound v16 con clip diagnóstico reproducido en GPU. Siete Hound v16 fallan al
-mapear constantes; 5 ms no se cumple en p95/p99. H06 no se da por cerrada ni
-se inicia H07. [Informe 102](../../../../reports/eight-combatants-102/README.md).
+El hito 102 detectó el fallo de mapeo y el incumplimiento de 5 ms.
+El 104 resuelve ambos en el escenario diagnóstico y repite las mediciones,
+incluido audio real. H06 sigue sin presupuesto de producción y H07 no se inicia.
+[Informe 104](../../../../reports/hound-runtime-104/README.md).
 
 Los IDs H01–H13 son estables; **no son números de hito ni versiones Blender**.
 Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H02 entrega v10, H03 entrega v11 y H04 entrega v12.
@@ -293,7 +305,7 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
 | [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | Hecha; v16 aprobada el 23/09/2026 | [v16: referencia y evidencias](../mesh-v16/README.md); [aceptación 100](../../../../reports/hound-approval-100/README.md); modelado `0c28f79`; commit de cierre del hito 100, resolver con git log |
-| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Bloqueada: 102 mide incumplimiento y fallo con siete Hound | [Contrato vigente](../H06-contrato-presupuesto.md); [diagnóstico 101](../../../../reports/hound-contract-101/README.md); [medición 102](../../../../reports/eight-combatants-102/README.md); [normales 103](../../../../reports/normal-maps-103/README.md) |
+| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Bloqueada: 104 valida escenario diagnóstico; presupuesto de producción pendiente | [Contrato vigente](../H06-contrato-presupuesto.md); [diagnóstico 101](../../../../reports/hound-contract-101/README.md); [medición 102](../../../../reports/eight-combatants-102/README.md); [runtime 104](../../../../reports/hound-runtime-104/README.md); [normales 103](../../../../reports/normal-maps-103/README.md) |
 | [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Pendiente | — |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |
 | [H09](H09-uv-horneado.md) | UVs y horneado | H08 + H06 | Pendiente | — |

@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 29 de septiembre de 2026, hito 104 preparado; objetivo de 200 FPS sin validar.
+Actualizado: 29 de septiembre de 2026, hito 104 ejecutado; 200 FPS comprobados en el escenario diagnóstico, presupuesto de producción pendiente.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -17,21 +17,21 @@ H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre
 Fallo de normales corregido en el **hito 103**: la carga RGBA8 recupera el verde
 desde alfa en los KTX UASTC RRRG. BC5 ya lo conservaba; se mantiene esa ruta.
 [Corrección, pruebas y reproducción](../reports/normal-maps-103/README.md).
-El **hito 102 de Gloom** ya midió siete TPS animados más FPS local en Factory,
-con HUD/audio/disparo y render GPU completo a 1080p. Ocho skins pasan el frustum;
-la cadencia de ~144 FPS reaparece por espera en Present mientras GPU tarda ~2–3 ms.
-En otra ejecución, la media supera 200 FPS pero p95/p99 exceden 5 ms. Siete
-Hound v16 fallan con `Skin constant mapping failed`; un Hound y su clip
-diagnóstico sí se reproducen en GPU. [Medidas y reproducción](../reports/eight-combatants-102/README.md).
-El objetivo 200 FPS/1080p/ocho y el presupuesto de producción siguen sin validar.
-H06 continúa bloqueada y H07 no se inicia.
-
-**Siguiente encargo preparado: hito 104**, corregir el mapeo de skinning y
-aislar/corregir la cadencia de presentación; después repetir las medidas.
-[Ficha autocontenida para otra tarea](../reports/hound-runtime-104/README.md).
-Solo preparado, no iniciado. Usar v16 y contenido disponible; los mapas y clips
-finales no son un requisito para comenzar el arreglo del motor. Su ausencia
-sigue limitando la aceptación de un presupuesto de producción definitivo.
+El **hito 104** corrige el agotamiento de constantes y la cadencia de Present:
+9 mapeos por frame para siete Hound más FPS, heap sin ampliar, y VSync off
+prioriza IMMEDIATE. MAILBOX espera ~5,4 ms al adquirir la siguiente imagen.
+Bounds conservadores por hueso reducen skin/bounds de 3,203 a 0,106–0,124 ms.
+Release/1080p: cuatro pasadas de siete Hound, con audio nulo y dispositivo real,
+281,29–283,98 FPS; p99 máximo 3,854 ms y máximo 3,974 ms. Los cuatro casos
+repetidos suman 16 pasadas / 5.760 frames, ninguno >5 ms. Animación/sombras y
+53 skins visibles comprobadas. Release 7/7 y Debug 4/4, incluida Vulkan.
+[Informe 104 y reproducción](../reports/hound-runtime-104/README.md) ·
+[Distribuciones y memoria](../reports/hound-runtime-104/mediciones.md).
+La escultura v16 permanece exacta. **H06 sigue bloqueada; H07 no se inicia**:
+faltan costes de mapas/clips/armas de producción y margen de residencia,
+actualmente 511,73/512 MiB (cero evicciones durante la medida; 30 al cargar).
+No certificar presupuesto final ni una partida autoritativa de ocho jugadores.
+Hito 104 terminado con commit local de ejecución; sin push ni siguiente hito.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,
@@ -60,8 +60,8 @@ Soul Reaper inválido; las holguras/pesos y agarre deben resolverse antes de UVs
 El rig provisional aún dobla la capucha con fuerza al bajar la cabeza.
 Modelado v16: commit `0c28f79`. Aceptación: commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
 
-Sigue pendiente revisar una partida humana en Release, medir audio con dispositivo
-real, resolver la presentación/skin de ocho Hound y reducir memoria residente.
+Sigue pendiente revisar una partida humana en Release, medir contenido Hound de
+producción y reducir memoria residente. Audio con dispositivo real medido en 104.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -96,6 +96,27 @@ y crear el commit de cierre según `AGENTS.md`.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 104 ejecutado: skinning, Present y medidas repetidas
+
+El fallo original se reproduce en frame 4/mapeo 140, con 6,56 MiB reservados
+por skinning dentro del heap dinámico compartido de 8 MiB. Paletas compartidas
+por nodo/actor y caché actual/anterior entre pasadas: 9 mapeos / 432 KiB por
+frame, sin ampliar heap. DISCARD y fences preservan la vida de los datos.
+IMMEDIATE elimina en este equipo la regulación observada de MAILBOX al adquirir
+imagen; VSync activado conserva su política. Bounds por hueso comprobados contra
+671 combinaciones primitiva/pose y un caso sintético de ocho influencias.
+
+Dieciséis pasadas Release/1080p: dos, ocho originales, un Hound y siete Hound
+más FPS, dos repeticiones con salida nula y dos con Headphones (High Definition
+Audio Device). 0/5.760 frames >5 ms; siete Hound dan 281–284 FPS y p99 ≤3,854 ms.
+El control antiguo de dos solo tiene una skin en el frustum al final; ocho
+originales y siete Hound conservan todas sus skins visibles durante la medida.
+Release 7/7, Debug 4/4 con validación Vulkan; regresión nueva falla con el
+ejecutable original y pasa tras el arreglo. Capturas comparadas y v16 exacta.
+[Informe y límites](../reports/hound-runtime-104/README.md). Commit local del
+hito 104; resolver con git log. H06 bloqueada por presupuesto de producción;
+H07 no iniciada. Sin push ni inicio de otra tarea.
 
 ## Hito 102 ejecutado: rendimiento con ocho combatientes, objetivo incumplido
 

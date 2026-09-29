@@ -1,4 +1,6 @@
 #include <gloom/assets/animation.hpp>
+#include <assert.h>
+#include <math.h>
 #include <set>
 #include <stdexcept>
 
@@ -155,6 +157,56 @@ render::Vec3 skinned_position(const ImportedVertex& v,const render::SkinPose& po
         p.z+=w*(m[2]*v.position[0]+m[6]*v.position[1]+m[10]*v.position[2]+m[14]);
     }
     return p;
+}
+
+void prepare_skin_bounds(const ImportedPrimitive& primitive, SkinBounds& bounds) {
+    bounds = {};
+    for (const ImportedVertex& vertex : primitive.vertices) {
+        float weight_sum = 0;
+        for (uint32 i = 0; i < 8; ++i) {
+            assert(vertex.weights[i] >= 0);
+            if (vertex.weights[i] == 0) continue;
+            assert(vertex.joints[i] < 256);
+            SkinBounds::Joint& joint = bounds.joints[vertex.joints[i]];
+            joint.minimum = {fminf(joint.minimum.x, vertex.position[0]), fminf(joint.minimum.y, vertex.position[1]),
+                fminf(joint.minimum.z, vertex.position[2])};
+            joint.maximum = {fmaxf(joint.maximum.x, vertex.position[0]), fmaxf(joint.maximum.y, vertex.position[1]),
+                fmaxf(joint.maximum.z, vertex.position[2])};
+            if (bounds.joint_count <= vertex.joints[i]) bounds.joint_count = vertex.joints[i] + 1;
+            weight_sum += vertex.weights[i];
+        }
+        bounds.minimum_weight_sum = fminf(bounds.minimum_weight_sum, weight_sum);
+        bounds.maximum_weight_sum = fmaxf(bounds.maximum_weight_sum, weight_sum);
+    }
+}
+
+render::BoundingSphere skinned_bounds(const SkinBounds& bounds, const render::SkinPose& pose) {
+    assert(bounds.joint_count <= pose.matrices.size());
+    if (!bounds.joint_count) return {.radius = .001F};
+    render::Vec3 lo{1e30F, 1e30F, 1e30F}, hi{-1e30F, -1e30F, -1e30F};
+    for (uint32 i = 0; i < bounds.joint_count; ++i) {
+        const SkinBounds::Joint& joint = bounds.joints[i];
+        if (joint.minimum.x > joint.maximum.x) continue;
+        const render::Vec3 center{(joint.minimum.x + joint.maximum.x) * .5F, (joint.minimum.y + joint.maximum.y) * .5F,
+            (joint.minimum.z + joint.maximum.z) * .5F};
+        const render::Vec3 extent{(joint.maximum.x - joint.minimum.x) * .5F, (joint.maximum.y - joint.minimum.y) * .5F,
+            (joint.maximum.z - joint.minimum.z) * .5F};
+        const RigMatrix& m = pose.matrices[i];
+        const render::Vec3 transformed{m[0]*center.x + m[4]*center.y + m[8]*center.z + m[12],
+            m[1]*center.x + m[5]*center.y + m[9]*center.z + m[13], m[2]*center.x + m[6]*center.y + m[10]*center.z + m[14]};
+        const render::Vec3 radius{fabsf(m[0])*extent.x + fabsf(m[4])*extent.y + fabsf(m[8])*extent.z,
+            fabsf(m[1])*extent.x + fabsf(m[5])*extent.y + fabsf(m[9])*extent.z,
+            fabsf(m[2])*extent.x + fabsf(m[6])*extent.y + fabsf(m[10])*extent.z};
+        lo = {fminf(lo.x, transformed.x-radius.x), fminf(lo.y, transformed.y-radius.y), fminf(lo.z, transformed.z-radius.z)};
+        hi = {fmaxf(hi.x, transformed.x+radius.x), fmaxf(hi.y, transformed.y+radius.y), fmaxf(hi.z, transformed.z+radius.z)};
+    }
+    // Account for imported sums that differ from one, including unweighted vertices at the origin.
+    lo = {fminf(lo.x*bounds.minimum_weight_sum, lo.x*bounds.maximum_weight_sum),
+        fminf(lo.y*bounds.minimum_weight_sum, lo.y*bounds.maximum_weight_sum), fminf(lo.z*bounds.minimum_weight_sum, lo.z*bounds.maximum_weight_sum)};
+    hi = {fmaxf(hi.x*bounds.minimum_weight_sum, hi.x*bounds.maximum_weight_sum),
+        fmaxf(hi.y*bounds.minimum_weight_sum, hi.y*bounds.maximum_weight_sum), fmaxf(hi.z*bounds.minimum_weight_sum, hi.z*bounds.maximum_weight_sum)};
+    return {.center = {(lo.x+hi.x)*.5F, (lo.y+hi.y)*.5F, (lo.z+hi.z)*.5F},
+        .radius = sqrtf((hi.x-lo.x)*(hi.x-lo.x) + (hi.y-lo.y)*(hi.y-lo.y) + (hi.z-lo.z)*(hi.z-lo.z)) * .5F + .001F};
 }
 
 render::BoundingSphere skinned_bounds(const ImportedPrimitive& primitive,const render::SkinPose& pose) {

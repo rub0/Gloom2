@@ -1,0 +1,75 @@
+diff --git a/Graphics/GraphicsEngineVulkan/src/SwapChainVkImpl.cpp b/Graphics/GraphicsEngineVulkan/src/SwapChainVkImpl.cpp
+index c76e2bee..e9ff03c8 100644
+--- a/Graphics/GraphicsEngineVulkan/src/SwapChainVkImpl.cpp
++++ b/Graphics/GraphicsEngineVulkan/src/SwapChainVkImpl.cpp
+@@ -33,6 +33,8 @@
+ #include "VulkanTypeConversions.hpp"
+ #include "EngineMemory.h"
+ #include "GraphicsAccessories.hpp"
++#include <gloom/backends/vulkan_present.hpp>
++namespace gloom { namespace backends { VulkanPresentProfile vulkan_present; } }
+ 
+ namespace Diligent
+ {
+@@ -341,6 +343,7 @@ void SwapChainVkImpl::CreateVulkanSwapChain()
+         else
+         {
+             // Mailbox is the lowest latency non-tearing presentation mode.
++            PreferredPresentModes.push_back(static_cast<VkPresentModeKHR>(gloom::backends::vulkan_present.unsynced_mode));
+             PreferredPresentModes.push_back(VK_PRESENT_MODE_MAILBOX_KHR);
+             PreferredPresentModes.push_back(VK_PRESENT_MODE_IMMEDIATE_KHR);
+             PreferredPresentModes.push_back(VK_PRESENT_MODE_FIFO_KHR);
+@@ -429,6 +432,7 @@ void SwapChainVkImpl::CreateVulkanSwapChain()
+     swapchain_ci.compositeAlpha     = compositeAlpha;
+     swapchain_ci.imageArrayLayers   = 1;
+     swapchain_ci.presentMode        = PresentMode;
++    gloom::backends::vulkan_present.effective_mode = static_cast<gloom::uint32>(PresentMode);
+     swapchain_ci.oldSwapchain       = oldSwapchain;
+     swapchain_ci.clipped            = VK_TRUE;
+     swapchain_ci.imageColorSpace    = ColorSpace;
+@@ -612,14 +616,19 @@ VkResult SwapChainVkImpl::AcquireNextImage(DeviceContextVkImpl* pDeviceCtxVk)
+     // vkAcquireNextImageKHR requires that the semaphore is not in use, so we must wait
+     // for the frame (FrameIndex - BufferCount) to complete.
+     // This also ensures that there are no more than BufferCount frames in flight at any time.
++    const gloom::uint64 fence_started = gloom::backends::present_clock();
++    gloom::backends::vulkan_present.image_count = m_SwapChainDesc.BufferCount;
+     if (m_FrameIndex > m_SwapChainDesc.BufferCount)
+     {
+         m_FrameCompleteFence->Wait(m_FrameIndex - m_SwapChainDesc.BufferCount);
+     }
++    gloom::backends::vulkan_present.fence_wait = gloom::backends::present_clock() - fence_started;
+ 
+     RefCntAutoPtr<ManagedSemaphore>& ImageAcquiredSemaphore = m_ImageAcquiredSemaphores[m_SemaphoreIndex];
+ 
++    const gloom::uint64 acquire_started = gloom::backends::present_clock();
+     VkResult res = vkAcquireNextImageKHR(LogicalDevice.GetVkDevice(), m_VkSwapChain, UINT64_MAX, ImageAcquiredSemaphore->Get(), VK_NULL_HANDLE, &m_BackBufferIndex);
++    gloom::backends::vulkan_present.acquire = gloom::backends::present_clock() - acquire_started;
+     if (res == VK_SUCCESS)
+     {
+         // Next command in the device context must wait for the next image to be acquired.
+@@ -675,7 +684,9 @@ void SwapChainVkImpl::Present(Uint32 SyncInterval)
+         pImmediateCtxVk->EnqueueSignal(m_FrameCompleteFence, m_FrameIndex++);
+     }
+ 
++    const gloom::uint64 flush_started = gloom::backends::present_clock();
+     pImmediateCtxVk->Flush();
++    gloom::backends::vulkan_present.flush = gloom::backends::present_clock() - flush_started;
+ 
+     if (!m_IsMinimized)
+     {
+@@ -692,6 +703,7 @@ void SwapChainVkImpl::Present(Uint32 SyncInterval)
+         PresentInfo.pImageIndices   = &m_BackBufferIndex;
+         VkResult Result             = VK_SUCCESS;
+         PresentInfo.pResults        = &Result;
++        const gloom::uint64 present_started = gloom::backends::present_clock();
+         pDeviceVk->LockCmdQueueAndRun(
+             pImmediateCtxVk->GetCommandQueueId(),
+             [&PresentInfo](ICommandQueueVk* pCmdQueueVk) //
+@@ -699,6 +711,7 @@ void SwapChainVkImpl::Present(Uint32 SyncInterval)
+                 pCmdQueueVk->Present(PresentInfo);
+             } //
+         );
++        gloom::backends::vulkan_present.queue_present = gloom::backends::present_clock() - present_started;
+ 
+         if (Result == VK_SUBOPTIMAL_KHR || Result == VK_ERROR_OUT_OF_DATE_KHR)
+         {

@@ -321,6 +321,17 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-1080p") == 0);
     const bool performance_test = performance_1080p || performance_eight_720p ||
         (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-720p") == 0);
+    bool performance_audio_device = false;
+    if (performance_test) {
+        gloom::backends::vulkan_present.enabled = true;
+        for (int i = 2; i < argument_count; ++i) {
+            if (strcmp(arguments[i], "--present=immediate") == 0) gloom::backends::vulkan_present.unsynced_mode = 0;
+            else if (strcmp(arguments[i], "--present=mailbox") == 0) gloom::backends::vulkan_present.unsynced_mode = 1;
+            else if (strcmp(arguments[i], "--present=fifo") == 0) gloom::backends::vulkan_present.unsynced_mode = 2;
+            else if (strcmp(arguments[i], "--audio-device") == 0) performance_audio_device = true;
+            else { fprintf(stderr, "Unknown benchmark option: %s\n", arguments[i]); return 1; }
+        }
+    }
     const bool vertical_slice = argument_count > 1 &&
                                 (visual_review || std::string_view{arguments[1]} == "--vertical-slice" ||
                                  std::string_view{arguments[1]} == "--vertical-slice-smoke" ||
@@ -984,6 +995,16 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     std::size_t benchmark_visible_skinned = 0;
     gloom::uint64 performance_pose_ticks = 0;
     gloom::uint64 performance_skin_bounds_ticks = 0;
+    gloom::uint32 benchmark_animated_tps = 0;
+    struct BoundsCacheEntry {
+        gloom::assets::AssetId asset{};
+        gloom::uint64 generation{0};
+        gloom::uint32 primitive{0};
+        gloom::assets::SkinBounds bounds;
+    };
+    // Fixed cache avoids frame allocations; larger scenes retain the exact vertex path.
+    static BoundsCacheEntry bounds_cache[64];
+    gloom::uint32 bounds_cache_count = 0;
     double slice_accumulator = 0.0;
     bool slice_saw_kill = false;
     bool slice_saw_respawn = false;
@@ -1021,7 +1042,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         game_audio=desktop_session?desktop_session->audio:nullptr;
         if(!game_audio){
             gloom::assets::VirtualFileSystem fs;fs.mount("game",std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets");fs.mount("cache",std::filesystem::path{GLOOM_BINARY_ROOT}/"content");
-            game_audio=std::make_shared<gloom::gameplay::AudioPresentation>(fs,!performance_full);
+            game_audio=std::make_shared<gloom::gameplay::AudioPresentation>(fs,!performance_full || performance_audio_device);
             if(desktop_session)desktop_session->audio=game_audio;
         }
         game_audio->scene_reset();std::cout<<game_audio->diagnostic()<<'\n';
@@ -2080,6 +2101,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             performance_skin_bounds_ticks=0;
             const auto append=[&](const gloom::assets::ResidentScene& scene,const gloom::render::Transform& parent,
                                   bool fps,const gloom::gameplay::CharacterAnimationFrame* frame,bool cut) {
+                const gloom::uint64 first_instance = current.size();
                 for (auto instance:scene.instances) {
                     if (frame && scene.bind_rig) {
                         const gloom::uint64 skin_started=performance_test?gloom::performance_clock():0;
@@ -2089,8 +2111,23 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         }
                         const auto& rig=*scene.bind_rig;
                         instance.transform=gloom::assets::rig_transform(frame->worlds[instance.source_node]);
-                        instance.pose=gloom::assets::skin_pose(rig,instance.source_node,frame->worlds);
-                        instance.local_bounds=gloom::assets::skinned_bounds(rig.primitives[instance.source_primitive],*instance.pose);
+                        gloom::uint64 sibling = first_instance;
+                        while (sibling < current.size() && current[sibling].source_node != instance.source_node) ++sibling;
+                        instance.pose = sibling < current.size() ? current[sibling].pose :
+                            gloom::assets::skin_pose(rig,instance.source_node,frame->worlds);
+                        gloom::uint32 bound = 0;
+                        while (bound < bounds_cache_count && (bounds_cache[bound].asset != scene.asset ||
+                            bounds_cache[bound].primitive != instance.source_primitive)) ++bound;
+                        if (bound < 64) {
+                            if (bound == bounds_cache_count || bounds_cache[bound].generation != scene.generation) {
+                                bounds_cache[bound].asset = scene.asset;
+                                bounds_cache[bound].generation = scene.generation;
+                                bounds_cache[bound].primitive = instance.source_primitive;
+                                gloom::assets::prepare_skin_bounds(rig.primitives[instance.source_primitive], bounds_cache[bound].bounds);
+                                if (bound == bounds_cache_count) ++bounds_cache_count;
+                            }
+                            instance.local_bounds = gloom::assets::skinned_bounds(bounds_cache[bound].bounds, *instance.pose);
+                        } else instance.local_bounds = gloom::assets::skinned_bounds(rig.primitives[instance.source_primitive], *instance.pose);
                         if(performance_test) performance_skin_bounds_ticks+=gloom::performance_clock()-skin_started;
                         ++benchmark_skinned_instances;
                     }
@@ -2139,7 +2176,14 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                     const gloom::render::Transform parent{
                         .position={combatant.position_x,combatant.position_y,combatant.position_z},
                         .rotation={0,sinf(yaw*.5F),0,cosf(yaw*.5F)}};
+                    const gloom::uint64 first_tps = current.size();
                     append(*opponent_scene,parent,false,&frame,frame.cut);
+                    if (performance_full && profile_ready && profile.warmup >= 120 && current.size() > first_tps &&
+                        current[first_tps].pose && current[first_tps].previous_pose &&
+                        current[first_tps].pose->matrices.size() == current[first_tps].previous_pose->matrices.size() &&
+                        memcmp(current[first_tps].pose->matrices.data(), current[first_tps].previous_pose->matrices.data(),
+                            current[first_tps].pose->matrices.size() * sizeof(gloom::assets::RigMatrix)) != 0)
+                        benchmark_animated_tps |= 1U << i;
                     if(!performance_eight) combat_effects.observe(particles,combatant,frame,parent,slice.simulation_tick,false);
                     if(opponent_weapon_scene && combatant.alive && !performance_hound)
                         append(*opponent_weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
@@ -2326,10 +2370,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         const auto performance_visibility_started = std::chrono::steady_clock::now();
         const auto visible = visibility.build(camera, render_aspect, source_instances);
         benchmark_visible_skinned=0;
-        if(performance_eight) for(const gloom::render::RenderInstance& instance:visible.instances)
+        if(performance_full) for(const gloom::render::RenderInstance& instance:visible.instances)
             if(instance.pose) ++benchmark_visible_skinned;
-        if(performance_eight && !performance_hound && profile_ready && profile.warmup>120 &&
-            (benchmark_skinned_instances!=8 || benchmark_visible_skinned!=8))
+        if(performance_eight && profile_ready && profile.warmup>=120 &&
+            (benchmark_skinned_instances != (performance_hound_eight ? 53 : performance_hound ? 11 : 8) ||
+             benchmark_visible_skinned != benchmark_skinned_instances))
             throw std::runtime_error{"Eight-combatant benchmark lost a skinned presentation"};
         performance_submitted_instances = visible.metrics.submitted_instances;
         performance_visible_instances = visible.metrics.visible_instances;
@@ -2375,6 +2420,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             renderer_view->capture_next_frame(review_output / (std::string{review_view.name} + ".ppm"));
         renderer_view->end_frame();
         if (performance_test) {
+            if (profile_ready && profile.warmup == 119) {
+                profile.initial_evictions = renderer_view->residency_metrics().evictions;
+                profile.initial_budget_frames = renderer_view->residency_metrics().budget_limited_frames;
+            }
             if (profile_ready && ++profile.warmup > 120) {
                 const gloom::uint64 profile_frame_end=gloom::performance_clock();
                 profile.samples[profile.count++] = profile_frame_end - profile_start;
@@ -2388,6 +2437,15 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 profile.present_samples[profile.count-1] = profile_frame_end - profile_end;
                 profile.pose_ticks+=performance_pose_ticks;
                 profile.skin_bounds_ticks+=performance_skin_bounds_ticks;
+                const gloom::render::FrameRenderMetrics measured = renderer_view->frame_metrics();
+                if (measured.submission_observed_ticks && profile.queue_count < 360)
+                    profile.queue_samples[profile.queue_count++] = measured.submission_observed_ticks;
+                if (measured.frames_in_flight > profile.peak_in_flight) profile.peak_in_flight = measured.frames_in_flight;
+                if (measured.skin_maps > profile.peak_skin_maps) profile.peak_skin_maps = measured.skin_maps;
+                profile.swap_stages[0] += gloom::backends::vulkan_present.flush;
+                profile.swap_stages[1] += gloom::backends::vulkan_present.queue_present;
+                profile.swap_stages[2] += gloom::backends::vulkan_present.acquire;
+                profile.swap_stages[3] += gloom::backends::vulkan_present.fence_wait;
                 if (profile.count == 360) break;
             }
             if (gloom::performance_clock() - profile.started > profile.frequency * 120) {
@@ -2485,8 +2543,15 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             performance_hound?"Hound v16 diagnostic (1 TPS + 1 FPS)":performance_eight?"7 TPS + 1 FPS":
             performance_two_full?"1 TPS + 1 FPS with HUD/audio/fire":"1 TPS + 1 FPS legacy benchmark");
         gloom::report_performance(profile);
+        printf("Audio output: %s; drawable=%ux%u; windowed\n",
+            performance_audio_device && game_audio && game_audio->device_available() ? "SDL device" : "null",
+            window_view->drawable_size().first, window_view->drawable_size().second);
         const gloom::render::FrameRenderMetrics metrics = renderer_view->frame_metrics();
         const gloom::render::GpuResidencyMetrics residency = renderer_view->residency_metrics();
+        printf("Skin uploads: maps=%u peak_maps=%llu reserved=%llu copied=%llu bytes/frame; shadow_draws=%u\n",
+            metrics.skin_maps, profile.peak_skin_maps, metrics.skin_reserved_bytes, metrics.skin_copied_bytes, metrics.shadow_draws);
+        printf("Animated TPS mask: %u; measured evictions=%llu budget_limited_frames=%llu\n", benchmark_animated_tps,
+            residency.evictions - profile.initial_evictions, residency.budget_limited_frames - profile.initial_budget_frames);
         printf("Factory render: %ux%u output=%ux%u instances=%llu visible=%llu batches=%llu draws=%u skinned=%llu visible_skinned=%llu "
                "GPU_last_passes=%.3f ms\n",
             metrics.render_width, metrics.render_height, metrics.output_width, metrics.output_height,
