@@ -28,6 +28,9 @@ struct RenderCapabilities {
 
 struct FrameRenderMetrics {
     bool gpu_timing_supported{false};
+    bool gpu_sample_ready{false};
+    std::uint64_t gpu_sample_nanoseconds{0};
+    std::uint32_t draw_calls{0};
     std::uint64_t frame_index{0};
     std::uint64_t shadow_nanoseconds{0};
     std::uint64_t opaque_nanoseconds{0};

@@ -28,8 +28,13 @@ inline uint64 performance_clock() {
 
 struct PerformanceProfile {
     uint64 samples[360]{};
-    uint64 stages[6]{};
+    uint64 gpu_samples[360]{};
+    uint64 present_samples[360]{};
+    uint64 stages[7]{};
+    uint64 pose_ticks{0};
+    uint64 skin_bounds_ticks{0};
     uint32 count{0};
+    uint32 gpu_count{0};
     uint32 warmup{0};
     uint64 started{performance_clock()};
     uint64 frequency{1000000000ULL};
@@ -56,10 +61,31 @@ inline void report_performance(PerformanceProfile& profile) {
         profile.count, total * milliseconds / profile.count, profile.count * 1000.0 / (total * milliseconds),
         profile.samples[profile.count / 2] * milliseconds, profile.samples[(profile.count * 95 - 1) / 100] * milliseconds,
         profile.samples[(profile.count * 99 - 1) / 100] * milliseconds, profile.samples[profile.count - 1] * milliseconds);
-    printf("CPU stages ms: update=%.3f begin=%.3f presentation=%.3f visibility=%.3f lighting=%.3f draw_present=%.3f\n",
+    printf("CPU stages ms: update=%.3f begin=%.3f presentation=%.3f visibility=%.3f lighting=%.3f draw=%.3f end_present=%.3f\n",
         profile.stages[0] * milliseconds / profile.count, profile.stages[1] * milliseconds / profile.count,
         profile.stages[2] * milliseconds / profile.count, profile.stages[3] * milliseconds / profile.count,
-        profile.stages[4] * milliseconds / profile.count, profile.stages[5] * milliseconds / profile.count);
+        profile.stages[4] * milliseconds / profile.count, profile.stages[5] * milliseconds / profile.count,
+        profile.stages[6] * milliseconds / profile.count);
+    qsort(profile.present_samples, profile.count, sizeof(uint64), compare_performance_samples);
+    printf("CPU end_present: p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n",
+        profile.present_samples[profile.count / 2] * milliseconds,
+        profile.present_samples[(profile.count * 95 - 1) / 100] * milliseconds,
+        profile.present_samples[(profile.count * 99 - 1) / 100] * milliseconds,
+        profile.present_samples[profile.count - 1] * milliseconds);
+    printf("CPU animation ms: poses=%.3f skin_bounds=%.3f\n",
+        profile.pose_ticks * milliseconds / profile.count,
+        profile.skin_bounds_ticks * milliseconds / profile.count);
+    if (profile.gpu_count) {
+        double gpu_total = 0;
+        for (uint32 i = 0; i < profile.gpu_count; ++i) gpu_total += static_cast<double>(profile.gpu_samples[i]);
+        qsort(profile.gpu_samples, profile.gpu_count, sizeof(uint64), compare_performance_samples);
+        printf("GPU full render: samples=%u mean=%.3f p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n",
+            profile.gpu_count, gpu_total / profile.gpu_count / 1000000.0,
+            profile.gpu_samples[profile.gpu_count / 2] / 1000000.0,
+            profile.gpu_samples[(profile.gpu_count * 95 - 1) / 100] / 1000000.0,
+            profile.gpu_samples[(profile.gpu_count * 99 - 1) / 100] / 1000000.0,
+            profile.gpu_samples[profile.gpu_count - 1] / 1000000.0);
+    }
 #ifdef _WIN32
     PROCESS_MEMORY_COUNTERS_EX memory{};
     if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memory), sizeof(memory)))

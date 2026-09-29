@@ -2,17 +2,23 @@
 
 ## Pending technical work
 
-102. **Eight-combatant performance validation — planned, not started.**
-     Target: 200 FPS at native 1920×1080 on the current Ryzen 7 3700X / GTX 1070.
-     Isolate the apparent 144 FPS presentation limit and extend the existing
-     Factory benchmark to eight animated combatant presentations, with recorded
-     camera/content, combat, shadows, HUD/audio, CPU/GPU timing and residency.
-     This is a separate load/performance milestone, deferred outside Hound H06
-     by the user on 2026-09-28. It does not expand two-player authority/networking,
-     fix normal maps or change the Hound sculpture. Feed measured budgets back
-     into H06; no 200 FPS acceptance or H07 start is implied by scheduling it.
-     See [scope and acceptance](../reports/eight-combatants-102/README.md) and
-     [current handoff](ESTADO_ACTUAL.md).
+- Resolve the findings of milestone 102 before approving Hound H06: control
+  MAILBOX/Present pacing, repair skin constant mapping with seven Hound v16,
+  and repeat at native 1080p with production clips/maps. The 200 FPS target
+  and LOD/material/texture budgets remain unvalidated. H07 stays blocked.
+
+## Recent executed milestone
+
+102. Eight-combatant performance investigation — executed 2026-09-29.
+     Reproducible local Factory load with seven animated TPS bodies plus FPS
+     arms, HUD, audio presentation and firing. Eight skins visible. CPU and
+     full GPU render distributions, draw counts and residency measured at 1080p;
+     720p is a control. The ~144 FPS regime recurs with two and eight bodies
+     while GPU rendering remains under 3 ms; fast runs still exceed 5 ms at
+     p95/p99. One Hound v16 diagnostic clip renders on GPU; seven Hound v16
+     fail to map skin constants. Investigation closed with unmet performance
+     goal and concrete follow-up; no H06 budget or H07 start.
+     See [results and reproduction](../reports/eight-combatants-102/README.md).
 
 ## Completed
 

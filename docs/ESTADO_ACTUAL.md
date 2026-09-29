@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 28 de septiembre de 2026, hito 103, normales RGBA8 corregidas; hito 102 pendiente.
+Actualizado: 29 de septiembre de 2026, hito 102 ejecutado; objetivo de 200 FPS sin validar.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -17,12 +17,14 @@ H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre
 Fallo de normales corregido en el **hito 103**: la carga RGBA8 recupera el verde
 desde alfa en los KTX UASTC RRRG. BC5 ya lo conservaba; se mantiene esa ruta.
 [Corrección, pruebas y reproducción](../reports/normal-maps-103/README.md).
-Por encargo del usuario del 28/09, la validación de rendimiento con ocho
-combatientes se aplaza al **hito 102 de Gloom**, fuera de la tarea actual H06.
-[Alcance y aceptación del hito 102](../reports/eight-combatants-102/README.md).
-Está pendiente, no iniciado. Factory actual mide ~144 FPS a 1080p; el objetivo
-200 FPS/1080p/ocho y el presupuesto de producción siguen sin validar.
-No cambiar motor/modelo bajo H06 ni iniciar H07 por este aplazamiento.
+El **hito 102 de Gloom** ya midió siete TPS animados más FPS local en Factory,
+con HUD/audio/disparo y render GPU completo a 1080p. Ocho skins pasan el frustum;
+la cadencia de ~144 FPS reaparece por espera en Present mientras GPU tarda ~2–3 ms.
+En otra ejecución, la media supera 200 FPS pero p95/p99 exceden 5 ms. Siete
+Hound v16 fallan con `Skin constant mapping failed`; un Hound y su clip
+diagnóstico sí se reproducen en GPU. [Medidas y reproducción](../reports/eight-combatants-102/README.md).
+El objetivo 200 FPS/1080p/ocho y el presupuesto de producción siguen sin validar.
+H06 continúa bloqueada y H07 no se inicia.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,
@@ -51,7 +53,8 @@ Soul Reaper inválido; las holguras/pesos y agarre deben resolverse antes de UVs
 El rig provisional aún dobla la capucha con fuerza al bajar la cabeza.
 Modelado v16: commit `0c28f79`. Aceptación: commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
 
-Sigue pendiente revisar la partida en Release, medir combate/HUD/audio y reducir memoria residente.
+Sigue pendiente revisar una partida humana en Release, medir audio con dispositivo
+real, resolver la presentación/skin de ocho Hound y reducir memoria residente.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -87,29 +90,34 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
-## Hito 102 pendiente: rendimiento con ocho combatientes
+## Hito 102 ejecutado: rendimiento con ocho combatientes, objetivo incumplido
 
-Registrado el 28/09/2026 por encargo del usuario; **solo planificación**.
-Trabajo técnico independiente de Hound H06, aplazado hasta un nuevo encargo.
-Objetivo: comprobar 200 FPS (5 ms por fotograma completo) a 1920×1080 nativo
-en Ryzen 7 3700X/GTX 1070 con hasta ocho combatientes animados en Factory.
+El encargo técnico del 29/09 ejecutó el alcance planificado el 28/09 en el
+commit documental `bf96797`. Nuevo benchmark local: siete Archangel TPS con
+animación, skinning, bounds, movimiento, armas y sombras, más FPS local con
+disparo, HUD y presentación de audio con salida nula. Ocho skins visibles pasan
+el frustum. No se amplía la red/autoridad de dos jugadores.
 
-Reutilizar el benchmark existente y aislar primero la cadencia de ~144 FPS
-en Draw/Present. Añadir una muestra reproducible de ocho presentaciones con
-cámara/distancias registradas, animación, armas, sombras, combate, HUD y audio.
-Medir coste CPU/GPU, distribución de tiempos, draws y memoria; documentar
-contenido/calidad y lo que quede fuera. No certificar ocho mediante copias
-estáticas ni extrapolar las medidas actuales de dos combatientes.
+Release, Ryzen 7 3700X/GTX 1070, 1080p nativo, VSync off/Mailbox: dos pasadas
+de ocho dieron 283,65 FPS de media con p95 5,259 ms, y 144,15 FPS de media con
+p95 6,993 ms. Dos combatientes con el mismo HUD/audio/disparo también dieron
+144,16 FPS en una pasada; GPU completa de ocho ~2,3 ms de media, frente a
+~5,0 ms de CPU en `end_frame/Present` durante la cadencia de 144. No atribuir
+esa regulación a saturación GPU ni aprobar 200 FPS usando la media rápida.
 
-El alcance es la prueba de carga y rendimiento; no ampliar la autoridad/red
-de dos jugadores a ocho ni modificar la escultura Hound. El fallo de normales
-es un frente separado. [Ficha e informe de planificación](../reports/eight-combatants-102/README.md).
-Al ejecutar este hito, devolver medidas y límites a H06 para fundamentar el
-presupuesto; su aplazamiento no aprueba los 200 FPS ni habilita H07.
-No se han ejecutado pruebas nuevas de rendimiento ni modificado código.
-Commit local de planificación; no es cierre técnico del hito 102 ni implica push.
+Un Hound v16 con `Hound16_joint_check` se reproduce en GPU; siete Hound v16
+fallan antes del calentamiento: `Skin constant mapping failed`. La prueba de
+ocho con contenido jugable actual no presupone mapas/clips finales de Hound.
+Residencia GPU ~504 MiB sobre límite de 512 MiB; memoria privada ~2,2 GiB.
+Release compilado, capturas inspeccionadas y cuatro regresiones focalizadas
+pasan. [Resultados, límites y comandos](../reports/eight-combatants-102/README.md).
 
-## Último hito cerrado: 103, normales RGBA8
+Hito 102 cierra la investigación con incumplimiento medido. H06 sigue
+bloqueada: controlar la cadencia de Present, resolver mapeo de skinning y
+repetir con contenido Hound de producción antes de fijar LODs/materiales/mapas.
+H07 no se inicia. Commit local de ejecución; sin push.
+
+## Hito 103 cerrado: normales RGBA8
 
 Trabajo técnico autorizado por el usuario el 28/09, independiente de H06.
 El decoder común reconoce UASTC RRRG antes de transcodificar y restituye G
@@ -127,8 +135,9 @@ BC5 comprobado numéricamente, sin afirmar una captura GPU BC5 en este equipo.
 
 Juego Debug/Release recompilado. Fuente, glTF y BIN v16 conservan sus tres
 SHA-256. [Informe 103](../reports/normal-maps-103/README.md). Commit local, sin push.
-H06 conserva pendiente su presupuesto y la prueba animada del hito 102,
-aplazado fuera de esta tarea. H07 no iniciada; no se han medido ocho combatientes.
+En el cierre de 103, H06 conservaba pendiente la prueba animada del 102.
+El hito 102 se ejecutó después y documenta el incumplimiento y el fallo de
+skinning con siete Hound v16. H06 sigue sin presupuesto; H07 no iniciada.
 
 ## Subhito 101, diagnóstico H06
 

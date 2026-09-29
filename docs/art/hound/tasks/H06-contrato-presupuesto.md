@@ -1,15 +1,15 @@
 # H06 — contrato de ejecución y presupuesto
 
-Estado al 28/09/2026: **iniciada; presupuesto pendiente del hito 102 externo**.
+Estado al 29/09/2026: **bloqueada; hito 102 ejecutado sin validar el presupuesto**.
 El fallo de normales del diagnóstico 101 está corregido y comprobado en el
 [hito técnico 103](../../../../reports/normal-maps-103/README.md).
 [Contrato, objetivo confirmado y decisiones pendientes](../H06-contrato-presupuesto.md) ·
 [Informe y reproducción](../../../../reports/hound-contract-101/README.md).
 La fuente de medida es v16 aprobada en H05; no se ha fijado un presupuesto de
-producción ni se habilita H07. Por encargo del usuario del 28/09, la tarea técnica
-de rendimiento con ocho combatientes pasa al [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md),
-pendiente y fuera de esta tarea por el momento. La corrección de normales
-se realizó bajo encargo técnico separado; no amplía las exclusiones de H06.
+producción ni se habilita H07. El [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md)
+midió ocho presentaciones jugables, pero incumplió 5 ms en p95/p99; siete
+Hound v16 fallan al mapear constantes. La corrección de normales se realizó
+en el hito técnico 103; no amplía las exclusiones de H06.
 
 ## Entrada y alcance
 Leer [contexto](CONTEXTO.md) e [índice](README.md), después las secciones relevantes de:
@@ -32,11 +32,10 @@ No basta que una propiedad exista en el importador.
 
 Conservar las medidas del asset: triángulos, materiales/draws, texturas/residencia,
 skinning y tamaño en pantalla, con equipo, resolución, personajes y método.
-La implementación y medición del escenario de ocho combatientes corresponden
-al hito 102; no ejecutarlas como parte de H06 mientras sigan aplazadas.
-Incorporar sus resultados cuando estén disponibles para fijar el presupuesto
-LODs/materiales/mapas. Hasta entonces, marcarlo pendiente, sin certificar los
-200 FPS/1080p/ocho ni inventar límites o resolución de texturas.
+La primera medición del escenario de ocho combatientes corresponde al hito 102.
+Sus resultados detectan regulación de Present y fallo del skinning con siete
+Hound v16; no permiten fijar todavía LODs/materiales/mapas. Mantener H06
+bloqueada sin certificar 200 FPS/1080p/ocho ni inventar resolución de texturas.
 
 ## Entrega y límites
 Documento corto de contrato/presupuesto con valores, convenciones, pruebas y

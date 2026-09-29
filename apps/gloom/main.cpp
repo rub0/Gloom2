@@ -310,8 +310,16 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                      std::string_view{arguments[1]} == "--network-scene-smoke";
     const bool vulkan_sync_stress =
         argument_count > 1 && std::string_view{arguments[1]} == "--vulkan-sync-stress";
-    const bool performance_1080p = argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-1080p") == 0;
-    const bool performance_test = performance_1080p ||
+    const bool performance_hound_eight = argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-hound-eight-1080p") == 0;
+    const bool performance_hound = performance_hound_eight || (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-hound-1080p") == 0);
+    const bool performance_two_full = argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-two-full-1080p") == 0;
+    const bool performance_eight_720p = argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-eight-720p") == 0;
+    const bool performance_eight = performance_hound || performance_eight_720p ||
+        (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-eight-1080p") == 0);
+    const bool performance_full = performance_eight || performance_two_full;
+    const bool performance_1080p = (performance_full && !performance_eight_720p) ||
+        (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-1080p") == 0);
+    const bool performance_test = performance_1080p || performance_eight_720p ||
         (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-720p") == 0);
     const bool vertical_slice = argument_count > 1 &&
                                 (visual_review || std::string_view{arguments[1]} == "--vertical-slice" ||
@@ -586,7 +594,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                      gloom::gameplay::SliceCharacter::shadow}) {
             if (!original_characters && static_cast<unsigned>(character)>1) continue;
             const auto index = static_cast<std::size_t>(character);
-            const auto recipe = gloom::gameplay::character_presentation_recipe(character, original_characters);
+            const gloom::gameplay::CharacterPresentationRecipe recipe=performance_hound && character==gloom::gameplay::SliceCharacter::hound
+                ? gloom::gameplay::CharacterPresentationRecipe{.character=character,
+                    .authored_scene_uri="game:/characters/hound_rig/v16/hound-rig.gltf",
+                    .cooked_scene_uri="cache:/characters/hound_rig/v16/hound-rig.gasset"}
+                : gloom::gameplay::character_presentation_recipe(character, original_characters);
             const auto character_source =
                 gloom::assets::VirtualPath::parse(recipe.authored_scene_uri);
             const auto character_cooked =
@@ -597,6 +609,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             auto discovered = gloom::assets::discover_cooked_scene(
                 *factory_filesystem, *character_source, *character_cooked);
             if (!discovered) {
+                if (performance_hound && character==gloom::gameplay::SliceCharacter::hound)
+                    throw std::runtime_error{"Hound v16 diagnostic content unavailable: "+discovered.error()};
                 std::cerr << "Authored character unavailable; using recipe fallback: "
                           << discovered.error() << '\n';
                 continue;
@@ -966,6 +980,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     std::size_t performance_submitted_instances = 0;
     std::size_t performance_visible_instances = 0;
     std::size_t performance_batches = 0;
+    std::size_t benchmark_skinned_instances = 0;
+    std::size_t benchmark_visible_skinned = 0;
+    gloom::uint64 performance_pose_ticks = 0;
+    gloom::uint64 performance_skin_bounds_ticks = 0;
     double slice_accumulator = 0.0;
     bool slice_saw_kill = false;
     bool slice_saw_respawn = false;
@@ -986,6 +1004,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     auto previous_original_character=gloom::gameplay::SliceCharacter::hound;
     double presentation_seconds=0;
     gloom::gameplay::CharacterAnimator opponent_animator,local_animator;
+    gloom::gameplay::CharacterAnimator benchmark_animators[7];
     gloom::gameplay::PickupPresentation pickup_presentation;
     std::vector<gloom::render::RenderInstance> previous_animated_instances;
     decltype(previous_animated_instances) current_animated_instances;
@@ -996,13 +1015,13 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     gloom::render::ParticleSystem particles{gloom::render::load_particle_recipes(
         std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets/effects/recipes.json")};
     gloom::gameplay::CombatEffects combat_effects;
-    const bool graphical_ui=vertical_slice && !automated_graphics;
+    const bool graphical_ui=vertical_slice && (!automated_graphics || performance_full);
     std::shared_ptr<gloom::gameplay::AudioPresentation> game_audio;
     if(graphical_ui){
         game_audio=desktop_session?desktop_session->audio:nullptr;
         if(!game_audio){
             gloom::assets::VirtualFileSystem fs;fs.mount("game",std::filesystem::path{GLOOM_SOURCE_ROOT}/"assets");fs.mount("cache",std::filesystem::path{GLOOM_BINARY_ROOT}/"content");
-            game_audio=std::make_shared<gloom::gameplay::AudioPresentation>(fs,true);
+            game_audio=std::make_shared<gloom::gameplay::AudioPresentation>(fs,!performance_full);
             if(desktop_session)desktop_session->audio=game_audio;
         }
         game_audio->scene_reset();std::cout<<game_audio->diagnostic()<<'\n';
@@ -1024,14 +1043,16 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         window_view->set_relative_mouse_mode(false);
     }
     gloom::PerformanceProfile profile;
-    while (window_view->poll_events()) {
+    while (true) {
         const gloom::uint64 profile_start = gloom::performance_clock();
+        if (!window_view->poll_events()) break;
         const auto performance_iteration_started = std::chrono::steady_clock::now();
         if(game_ui){
             const auto size=window_view->drawable_size();
             const auto* lobby=vertical_slice_host?&slice_remote_host->lobby():vertical_slice_join?&slice_remote_client->lobby():nullptr;
             const bool connected=!vertical_slice_join || (slice_remote_connection!=gloom::network::invalid_connection && slice_remote_client->active() && !slice_reconnect_pending);
             auto ui_input=window_view->input_state();
+            if (performance_full) { ui_input={}; ui_input.focused=true; }
             if(ui_flow){
                 ui_input={};const auto now=std::chrono::steady_clock::now();
                 if(now-ui_flow_start>std::chrono::seconds{100})throw std::runtime_error{"Graphical two-client flow timed out at stage "+std::to_string(ui_flow_stage)};
@@ -1067,7 +1088,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 local_animator.reset();opponent_animator.reset();combat_effects.reset(particles);previous_animated_instances.clear();
             }
             const bool capture=!game_ui->blocked;
-            if(capture!=ui_mouse_captured){window_view->set_relative_mouse_mode(capture);ui_mouse_captured=capture;ui_suppress_game_input=true;}
+            if(!performance_full && capture!=ui_mouse_captured){
+                window_view->set_relative_mouse_mode(capture);ui_mouse_captured=capture;ui_suppress_game_input=true;
+            }
         }
         if (effects_residency) {
             effects_residency->update();
@@ -1146,6 +1169,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             const auto* scene = residency.scene(*character_tickets[index]);
             if (original_characters) {
                 if (scene && !scene->instances.empty() && scene->bind_rig) character_generations[index]=scene->generation;
+                continue;
+            }
+            if (performance_hound && index==0 && scene && scene->bind_rig && !scene->instances.empty()) {
+                character_generations[index]=scene->generation;
                 continue;
             }
             if (scene == nullptr || scene->instances.size() != character_meshes[index].size() ||
@@ -1291,10 +1318,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         if (vertical_slice) {
             slice_accumulator = std::min(slice_accumulator + elapsed, 0.25);
             auto input_state = window_view->input_state();
-            if (performance_test) input_state = {};
+            if (performance_test) { input_state = {}; if (performance_full) input_state.fire_primary = true; }
             if(game_ui && !input_state.fire_primary && !input_state.fire_secondary && !input_state.menu_confirm && !input_state.jump &&
                 !input_state.use_primary_ability && !input_state.use_secondary_ability)ui_suppress_game_input=false;
-            if(game_ui && (game_ui->blocked || ui_suppress_game_input)){input_state.move_left=input_state.move_right=input_state.move_forward=input_state.move_backward=false;
+            if(game_ui && !performance_full && (game_ui->blocked || ui_suppress_game_input)){
+                input_state.move_left=input_state.move_right=input_state.move_forward=input_state.move_backward=false;
                 input_state.dodge=input_state.jump=input_state.fire_primary=input_state.fire_secondary=false;
                 input_state.use_primary_ability=input_state.use_secondary_ability=false;input_state.look_delta_x=input_state.look_delta_y=0;}
             if (vertical_slice_browse && !slice_match_selected) {
@@ -1998,6 +2026,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         const gloom::uint64 profile_begin = gloom::performance_clock();
         const auto performance_frame_started = std::chrono::steady_clock::now();
         renderer_view->begin_frame();
+        if (performance_test && profile_ready && profile.warmup > 120 && profile.gpu_count < 360) {
+            const gloom::render::FrameRenderMetrics gpu_metrics=renderer_view->frame_metrics();
+            if (gpu_metrics.gpu_sample_ready) profile.gpu_samples[profile.gpu_count++]=gpu_metrics.gpu_sample_nanoseconds;
+        }
         const gloom::uint64 profile_presentation = gloom::performance_clock();
         if (frame_count == 0 &&
             (renderer_view->asset_state(gloom::render::builtin_cube_mesh) !=
@@ -2043,10 +2075,14 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             const auto* opponent_weapon_scene=resident_weapon(slice.opponent.weapon);
             decltype(current_animated_instances)& current = current_animated_instances;
             current.clear();
+            benchmark_skinned_instances=0;
+            performance_pose_ticks=0;
+            performance_skin_bounds_ticks=0;
             const auto append=[&](const gloom::assets::ResidentScene& scene,const gloom::render::Transform& parent,
                                   bool fps,const gloom::gameplay::CharacterAnimationFrame* frame,bool cut) {
                 for (auto instance:scene.instances) {
                     if (frame && scene.bind_rig) {
+                        const gloom::uint64 skin_started=performance_test?gloom::performance_clock():0;
                         if (fps) {
                             if (!instance.arms_mesh.value) continue;
                             instance.mesh=instance.arms_mesh;instance.lod_count=1;instance.lod_meshes={};
@@ -2055,6 +2091,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         instance.transform=gloom::assets::rig_transform(frame->worlds[instance.source_node]);
                         instance.pose=gloom::assets::skin_pose(rig,instance.source_node,frame->worlds);
                         instance.local_bounds=gloom::assets::skinned_bounds(rig.primitives[instance.source_primitive],*instance.pose);
+                        if(performance_test) performance_skin_bounds_ticks+=gloom::performance_clock()-skin_started;
+                        ++benchmark_skinned_instances;
                     }
                     instance.transform=gloom::render::attach_transform(parent,instance.transform);
                     instance.view_model=fps;instance.casts_shadow=!fps;
@@ -2070,18 +2108,47 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             };
             if (opponent_scene && opponent_scene->bind_rig) {
                 for (std::size_t i=0;i<9;++i) complete_instances[base+i].transform.scale={};
-                const auto frame=opponent_animator.update(*opponent_scene->bind_rig,slice.opponent,elapsed);
-                const float yaw=std::atan2(slice.opponent.facing_x,slice.opponent.facing_z);
-                const gloom::render::Transform parent{
-                    .position={slice.opponent.position_x,slice.opponent.position_y,slice.opponent.position_z},
-                    .rotation={0,std::sin(yaw*.5F),0,std::cos(yaw*.5F)}};
-                append(*opponent_scene,parent,false,&frame,frame.cut);
-                combat_effects.observe(particles,slice.opponent,frame,parent,slice.simulation_tick,false);
-                if (opponent_weapon_scene && slice.opponent.alive)
-                    append(*opponent_weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
+                const unsigned count=performance_eight && (!performance_hound || performance_hound_eight)?7U:1U;
+                for(unsigned i=0;i<count;++i) {
+                    gloom::gameplay::CombatantView combatant=slice.opponent;
+                    if(performance_eight) {
+                        const gloom::gameplay::FirstPersonDirection forward=slice_first_person.forward();
+                        const float side=performance_hound && !performance_hound_eight?0.0F:
+                            static_cast<float>(i)*0.8F-4.0F+0.25F*sinf(static_cast<float>(presentation_seconds)*1.7F+i);
+                        const float distance=4.5F+static_cast<float>(i%2)*2.5F;
+                        combatant.entity=100+i;
+                        combatant.position_x=slice.player.position_x+forward.x*distance-forward.z*side;
+                        combatant.position_z=slice.player.position_z+forward.z*distance+forward.x*side;
+                        combatant.position_y=slice.player.position_y;
+                        combatant.velocity_x=-forward.z*0.595F*cosf(static_cast<float>(presentation_seconds)*1.7F+i);
+                        combatant.velocity_z=forward.x*0.595F*cosf(static_cast<float>(presentation_seconds)*1.7F+i);
+                        combatant.facing_x=-forward.x;combatant.facing_z=-forward.z;
+                        combatant.alive=true;
+                    }
+                    gloom::gameplay::CharacterAnimationFrame frame;
+                    const gloom::uint64 pose_started=performance_test?gloom::performance_clock():0;
+                    if(performance_hound) {
+                        frame.local=gloom::assets::sample_animation(*opponent_scene->bind_rig,"Hound16_joint_check",presentation_seconds+i*.1);
+                        frame.worlds=gloom::assets::pose_worlds(*opponent_scene->bind_rig,frame.local);
+                        frame.cut=false;
+                    } else frame=performance_eight
+                        ? benchmark_animators[i].update(*opponent_scene->bind_rig,combatant,elapsed)
+                        : opponent_animator.update(*opponent_scene->bind_rig,combatant,elapsed);
+                    if(performance_test) performance_pose_ticks+=gloom::performance_clock()-pose_started;
+                    const float yaw=atan2f(combatant.facing_x,combatant.facing_z);
+                    const gloom::render::Transform parent{
+                        .position={combatant.position_x,combatant.position_y,combatant.position_z},
+                        .rotation={0,sinf(yaw*.5F),0,cosf(yaw*.5F)}};
+                    append(*opponent_scene,parent,false,&frame,frame.cut);
+                    if(!performance_eight) combat_effects.observe(particles,combatant,frame,parent,slice.simulation_tick,false);
+                    if(opponent_weapon_scene && combatant.alive && !performance_hound)
+                        append(*opponent_weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
+                }
             }
             if (local_weapon_scene && local_scene && local_scene->bind_rig) {
+                const gloom::uint64 pose_started=performance_test?gloom::performance_clock():0;
                 const auto frame=local_animator.update(*local_scene->bind_rig,slice.player,elapsed,false,false,true);
+                if(performance_test) performance_pose_ticks+=gloom::performance_clock()-pose_started;
                 const auto parent=gloom::render::camera_relative_transform(camera,{.039F,-1.106F,.355F},{.70F,.70F,.70F});
                 combat_effects.observe(particles,slice.player,frame,parent,slice.simulation_tick,true);
                 if (!slice.hud.dead && !(slice.hud.primary_ability_active &&
@@ -2258,6 +2325,12 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         const gloom::uint64 profile_visibility = gloom::performance_clock();
         const auto performance_visibility_started = std::chrono::steady_clock::now();
         const auto visible = visibility.build(camera, render_aspect, source_instances);
+        benchmark_visible_skinned=0;
+        if(performance_eight) for(const gloom::render::RenderInstance& instance:visible.instances)
+            if(instance.pose) ++benchmark_visible_skinned;
+        if(performance_eight && !performance_hound && profile_ready && profile.warmup>120 &&
+            (benchmark_skinned_instances!=8 || benchmark_visible_skinned!=8))
+            throw std::runtime_error{"Eight-combatant benchmark lost a skinned presentation"};
         performance_submitted_instances = visible.metrics.submitted_instances;
         performance_visible_instances = visible.metrics.visible_instances;
         performance_batches = visible.metrics.batches;
@@ -2283,6 +2356,12 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         snapshot.shadow_instances = source_instances;
         if(game_ui)snapshot.ui=&game_ui->canvas.data();
         renderer_view->draw(snapshot);
+        const gloom::uint64 profile_end = gloom::performance_clock();
+        if (performance_eight && profile_ready && profile.warmup == 60)
+            renderer_view->capture_next_frame(std::filesystem::path{GLOOM_SOURCE_ROOT}/
+                (performance_hound?".cache/hito102-hound-a.ppm":".cache/hito102-eight.ppm"));
+        if (performance_hound && profile_ready && profile.warmup == 90)
+            renderer_view->capture_next_frame(std::filesystem::path{GLOOM_SOURCE_ROOT}/".cache/hito102-hound-b.ppm");
         if(ui_flow && frame_count>15 && frame_count%8==5 && !ui_flow_captured[ui_flow_stage]){
             renderer_view->capture_next_frame(desktop_session->flow_output/("game-stage-"+std::to_string(ui_flow_stage)+".ppm"));ui_flow_captured[ui_flow_stage]=true;
         }
@@ -2297,13 +2376,18 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         renderer_view->end_frame();
         if (performance_test) {
             if (profile_ready && ++profile.warmup > 120) {
-                profile.samples[profile.count++] = gloom::performance_clock() - profile_start;
+                const gloom::uint64 profile_frame_end=gloom::performance_clock();
+                profile.samples[profile.count++] = profile_frame_end - profile_start;
                 profile.stages[0] += profile_begin - profile_start;
                 profile.stages[1] += profile_presentation - profile_begin;
                 profile.stages[2] += profile_visibility - profile_presentation;
                 profile.stages[3] += profile_lighting - profile_visibility;
                 profile.stages[4] += profile_draw - profile_lighting;
-                profile.stages[5] += gloom::performance_clock() - profile_draw;
+                profile.stages[5] += profile_end - profile_draw;
+                profile.stages[6] += profile_frame_end - profile_end;
+                profile.present_samples[profile.count-1] = profile_frame_end - profile_end;
+                profile.pose_ticks+=performance_pose_ticks;
+                profile.skin_bounds_ticks+=performance_skin_bounds_ticks;
                 if (profile.count == 360) break;
             }
             if (gloom::performance_clock() - profile.started > profile.frequency * 120) {
@@ -2396,13 +2480,23 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     }
 
     if (performance_test && profile.count == 360) {
+        printf("Benchmark case: %s; VSync=off; fixed_simulation=60 Hz; warmup=120 frames\n",
+            performance_hound_eight?"Hound v16 diagnostic (7 TPS + 1 FPS)":
+            performance_hound?"Hound v16 diagnostic (1 TPS + 1 FPS)":performance_eight?"7 TPS + 1 FPS":
+            performance_two_full?"1 TPS + 1 FPS with HUD/audio/fire":"1 TPS + 1 FPS legacy benchmark");
         gloom::report_performance(profile);
         const gloom::render::FrameRenderMetrics metrics = renderer_view->frame_metrics();
-        printf("Factory render: %ux%u output=%ux%u instances=%llu visible=%llu batches=%llu GPU_last_passes=%.3f ms\n",
+        const gloom::render::GpuResidencyMetrics residency = renderer_view->residency_metrics();
+        printf("Factory render: %ux%u output=%ux%u instances=%llu visible=%llu batches=%llu draws=%u skinned=%llu visible_skinned=%llu "
+               "GPU_last_passes=%.3f ms\n",
             metrics.render_width, metrics.render_height, metrics.output_width, metrics.output_height,
             static_cast<gloom::uint64>(performance_submitted_instances), static_cast<gloom::uint64>(performance_visible_instances),
-            static_cast<gloom::uint64>(performance_batches),
+            static_cast<gloom::uint64>(performance_batches), metrics.draw_calls, static_cast<gloom::uint64>(benchmark_skinned_instances),
+            static_cast<gloom::uint64>(benchmark_visible_skinned),
             (metrics.shadow_nanoseconds + metrics.opaque_nanoseconds + metrics.tone_map_nanoseconds + metrics.temporal_resolve_nanoseconds) / 1000000.0);
+        printf("GPU asset residency: %.2f MiB; evictions=%llu budget_limited_frames=%llu\n",
+            residency.resident_bytes / 1048576.0, static_cast<gloom::uint64>(residency.evictions),
+            static_cast<gloom::uint64>(residency.budget_limited_frames));
     }
     const auto job_metrics = jobs_view->metrics();
     if(ui_flow){

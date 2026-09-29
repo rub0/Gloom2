@@ -674,10 +674,12 @@ struct DiligentRenderer::Impl {
     std::filesystem::path capture_path;
     static constexpr std::size_t timing_frame_count = 4;
     struct TimingFrame {
+        Diligent::RefCntAutoPtr<Diligent::IQuery> full;
         Diligent::RefCntAutoPtr<Diligent::IQuery> shadow;
         Diligent::RefCntAutoPtr<Diligent::IQuery> opaque;
         Diligent::RefCntAutoPtr<Diligent::IQuery> tone_map;
         Diligent::RefCntAutoPtr<Diligent::IQuery> temporal;
+        bool full_pending{false};
         bool shadow_pending{false};
         bool opaque_pending{false};
         bool tone_map_pending{false};
@@ -770,6 +772,7 @@ struct DiligentRenderer::Impl {
     render::GpuResidencyMetrics residency_metrics;
     render::FrameRenderMetrics frame_metrics;
     std::array<TimingFrame, timing_frame_count> timing_frames;
+    bool full_timing_active{false};
     bool opaque_timing_active{false};
     bool shadow_rendered{false};
     bool history_valid{false};
@@ -887,6 +890,8 @@ void DiligentRenderer::start() {
     if (capabilities().gpu_timestamps) {
         for (auto& timing : impl_->timing_frames) {
             Diligent::QueryDesc query_description{Diligent::QUERY_TYPE_DURATION};
+            query_description.Name = "Gloom full render GPU duration";
+            impl_->device->CreateQuery(query_description, &timing.full);
             query_description.Name = "Gloom shadow GPU duration";
             impl_->device->CreateQuery(query_description, &timing.shadow);
             query_description.Name = "Gloom opaque GPU duration";
@@ -895,7 +900,7 @@ void DiligentRenderer::start() {
             impl_->device->CreateQuery(query_description, &timing.tone_map);
             query_description.Name = "Gloom temporal resolve GPU duration";
             impl_->device->CreateQuery(query_description, &timing.temporal);
-            if (!timing.shadow || !timing.opaque || !timing.tone_map || !timing.temporal) {
+            if (!timing.full || !timing.shadow || !timing.opaque || !timing.tone_map || !timing.temporal) {
                 throw std::runtime_error{"Diligent failed to create GPU duration queries"};
             }
         }
@@ -1960,6 +1965,8 @@ void DiligentRenderer::resize(const std::uint32_t width, const std::uint32_t hei
 
 void DiligentRenderer::begin_frame() {
     impl_->ui.vertices.clear();
+    impl_->frame_metrics.draw_calls = 0;
+    impl_->frame_metrics.gpu_sample_ready = false;
     if (state_ != core::SubsystemState::running) {
         throw std::logic_error{"Diligent renderer must be running before begin_frame"};
     }
@@ -1973,6 +1980,7 @@ void DiligentRenderer::begin_frame() {
     impl_->frame_metrics.gpu_timing_supported = capabilities().gpu_timestamps;
     if (impl_->frame_metrics.gpu_timing_supported) {
         auto& timing = impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count];
+        const bool full_sample_pending = timing.full_pending;
         const auto collect = [](Diligent::IQuery* query,
                                 bool& pending,
                                 std::uint64_t& nanoseconds) {
@@ -1990,6 +1998,8 @@ void DiligentRenderer::begin_frame() {
                 pending = false;
             }
         };
+        collect(timing.full, timing.full_pending, impl_->frame_metrics.gpu_sample_nanoseconds);
+        impl_->frame_metrics.gpu_sample_ready = full_sample_pending && !timing.full_pending;
         collect(timing.opaque, timing.opaque_pending, impl_->frame_metrics.opaque_nanoseconds);
         collect(timing.shadow, timing.shadow_pending, impl_->frame_metrics.shadow_nanoseconds);
         collect(timing.tone_map,
@@ -2183,6 +2193,13 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
     if (swap_chain_description.Width == 0 || swap_chain_description.Height == 0 ||
         !impl_->hdr_render_target || snapshot.instances.empty()) {
         return;
+    }
+    if (impl_->frame_metrics.gpu_timing_supported) {
+        auto& timing=impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count];
+        if (!timing.full_pending) {
+            impl_->immediate_context->BeginQuery(timing.full);
+            impl_->full_timing_active=true;
+        }
     }
     // A frame-local allocation is required even for static draws sharing the shader.
     {
@@ -2422,6 +2439,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 draw_attributes.IndexType = Diligent::VT_UINT32;
                 draw_attributes.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
                 impl_->immediate_context->DrawIndexed(draw_attributes);
+                ++impl_->frame_metrics.draw_calls;
             }
         }
         Diligent::ITextureView* render_targets[]{impl_->hdr_render_target,
@@ -2608,6 +2626,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             draw_attributes.IndexType = Diligent::VT_UINT32;
             draw_attributes.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
             impl_->immediate_context->DrawIndexed(draw_attributes);
+            ++impl_->frame_metrics.draw_calls;
         }
     };
     for (const bool view_models : {false, true}) {
@@ -2712,6 +2731,7 @@ void DiligentRenderer::end_frame() {
         resolve_draw.NumVertices = 3;
         resolve_draw.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
         impl_->immediate_context->Draw(resolve_draw);
+        ++impl_->frame_metrics.draw_calls;
         if (measure_temporal) {
             impl_->immediate_context->EndQuery(timing->temporal);
             timing->temporal_pending = true;
@@ -2752,6 +2772,7 @@ void DiligentRenderer::end_frame() {
         draw.NumVertices = 3;
         draw.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
         impl_->immediate_context->Draw(draw);
+        ++impl_->frame_metrics.draw_calls;
         if (measure_tone_map) {
             impl_->immediate_context->EndQuery(timing->tone_map);
             timing->tone_map_pending = true;
@@ -2821,7 +2842,13 @@ float4 main(float4 position:SV_POSITION,float2 uv:TEX_COORD,float4 color:COLOR):
             impl_->immediate_context->CommitShaderResources(impl_->ui_resources,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
             Diligent::DrawAttribs draw;draw.NumVertices=static_cast<Diligent::Uint32>(impl_->ui.vertices.size());draw.Flags=Diligent::DRAW_FLAG_VERIFY_ALL;
             impl_->immediate_context->Draw(draw);
+            ++impl_->frame_metrics.draw_calls;
         }
+    }
+    if (impl_->full_timing_active && timing != nullptr) {
+        impl_->immediate_context->EndQuery(timing->full);
+        timing->full_pending=true;
+        impl_->full_timing_active=false;
     }
     if (!impl_->capture_path.empty() && swap_chain_description.Width && swap_chain_description.Height) {
         auto* source = impl_->swap_chain->GetCurrentBackBufferRTV()->GetTexture();

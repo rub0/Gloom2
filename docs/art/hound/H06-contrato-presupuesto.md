@@ -1,6 +1,6 @@
 # Hound H06 — contrato comprobado y presupuesto pendiente
 
-28 de septiembre de 2026 · Diagnóstico 101 y corrección 103 · **Presupuesto pendiente; no habilita H07**.
+29 de septiembre de 2026 · Diagnóstico 101, corrección 103 y medición 102 · **Presupuesto pendiente; no habilita H07**.
 Medidas de rendimiento del 23/09; materiales y normales verificados de nuevo el
 28/09 tras el [hito técnico 103](../../../reports/normal-maps-103/README.md).
 
@@ -59,9 +59,10 @@ TRS LINEAR/STEP; CUBICSPLINE, morph targets, Draco y animación de weights se
 rechazan. Nodos animados en TRS, tiempos estrictamente crecientes, valores
 finitos y cuaterniones unitarios. Constraints/IK/controladores se hornean:
 fixture de dos huesos/dos pesos y rotación horneada de 31 claves LINEAR cocinada.
-Eso prueba transporte; **no valida reproducción animada GPU ni equivalencia de
-todas las poses**. La evaluación CPU existente y los rigs originales pasan sus
-tests; la reproducción GPU del nuevo rig queda pendiente.
+Eso prueba transporte. El hito 102 reproduce `Hound16_joint_check` en GPU en un
+cuerpo TPS y muestra dos poses distintas; **no valida clips jugables ni
+equivalencia de todas las poses**. La evaluación CPU existente y los rigs
+originales pasan sus tests. Siete Hound v16 fallan al mapear constantes de skin.
 
 | Estado / evento | Entrada que exige hoy el runtime | Consecuencia para H08/H11/H12 |
 | --- | --- | --- |
@@ -149,29 +150,27 @@ la GTX 1070. Las últimas consultas GPU (2,345 / 3,116 ms) no son una media comp
 Control 720p: 530,77 FPS; no sustituye el objetivo. [Medidas](../../../reports/hound-contract-101/benchmark.json).
 HUD/audio, poll_events y arranque quedan fuera del intervalo del benchmark.
 
-## Trabajo pendiente y separación del hito 102
+## Resultado del hito 102 y trabajo pendiente
 
-Mantener 200 FPS/1080p/8 en este equipo. El usuario encarga el 28/09 registrar
-la validación de ocho combatientes como **hito 102 independiente de Gloom**,
-pendiente y fuera de la tarea actual H06 por el momento. [Alcance y aceptación](../../../reports/eight-combatants-102/README.md).
-Este documento no inicia esa implementación ni aprueba el presupuesto.
+Mantener 200 FPS/1080p/8 en este equipo. El [hito técnico 102](../../../reports/eight-combatants-102/README.md)
+midió siete Archangel TPS animados más FPS local en Factory, con HUD, salida de
+audio nula y disparo. Ocho instancias skinned son visibles en el frustum. Una
+pasada rápida obtuvo 283,65 FPS de media, pero p95 5,259 ms y p99 5,441 ms;
+otra reprodujo ~144,15 FPS con p95 6,993 ms. La espera de `end_frame/Present`
+domina en la cadencia de 144; GPU completa ~2,3–2,4 ms. La misma cadencia aparece
+con dos combatientes. No se aprueba el objetivo por la media rápida.
 
-1. **Normales, resuelto en el hito 103:** decoder RGBA8 compatible con UASTC RRRG;
-   controles de canales/mips, X/Y y costuras/UV reflejadas comprobados. Se mantiene
-   el cooker y la ruta BC5; los recursos existentes no necesitan recocción.
-2. **Medición, aplazada al hito 102:** aislar la regulación de Draw/Present a 1080p y habilitar una
-   muestra de ocho presentaciones animadas, con cámara/distancias registradas,
-   sin ampliar todavía la autoridad/red de dos jugadores. Medir CPU de poses/
-   bounds, GPU, draws/sombras, residencia, HUD/audio y margen dentro de 5 ms.
-   Incluir la fixture horneada y el clip diagnóstico v16 en reproducción GPU;
-   distinguir estas comprobaciones del coste de clips jugables completos.
-3. Con esos resultados, fijar los límites de geometría/materiales/mapas y
-   decidir si bastan LODs compatibles actuales o hace falta consumo de LODs
-   de autoría. No iniciar retopología/texturas con cifras inventadas.
+Un Hound v16 y su clip diagnóstico se reprodujeron en GPU. Su skin/bounds CPU
+costó 0,982 ms de media. Siete Hound v16 fallaron antes de medir por
+`Skin constant mapping failed`; el contenido
+jugable final aún carece de mapas y clips. La muestra de ocho usa geometría
+original compartida, por lo que no fija presupuesto LOD0/LODs/materiales/mapas
+para Hound ni decide si son necesarios LODs de autoría.
 
-La [ficha H06](tasks/H06-contrato-presupuesto.md) excluye modificar motor,
-gameplay o modelo. La corrección de normales se autorizó y realizó como hito
-técnico 103, separado del 102. H06 conserva sus medidas y recibirá la validación de
-rendimiento cuando se ejecute ese hito; no debe iniciar su trabajo ahora.
-El presupuesto sigue pendiente y H07 no se inicia. No falta una respuesta
-sobre FPS/equipo/cantidad: esos datos ya están resueltos.
+Siguiente trabajo técnico: controlar la cadencia de MAILBOX/Present, medir
+latencia de cola, resolver el mapeo de constantes y perfilar/optimizar bounds
+para siete Hound. Repetir
+1080p con contenido de producción y dispositivo de audio real antes de fijar
+límites de geometría, texturas y memoria. Normales RGBA8 ya están resueltas en
+el hito 103. La [ficha H06](tasks/H06-contrato-presupuesto.md) sigue bloqueada;
+H07 no se inicia. No faltan datos del usuario sobre FPS/equipo/cantidad.
