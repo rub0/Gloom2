@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 29 de septiembre de 2026, hito 104 ejecutado; 200 FPS comprobados en el escenario diagnóstico, presupuesto de producción pendiente.
+Actualizado: 29 de septiembre de 2026, H07 preparada documentalmente en el hito 105; producción pendiente de H06. Hito 104 ejecutado.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -32,6 +32,14 @@ faltan costes de mapas/clips/armas de producción y margen de residencia,
 actualmente 511,73/512 MiB (cero evicciones durante la medida; 30 al cargar).
 No certificar presupuesto final ni una partida autoritativa de ocho jugadores.
 Hito 104 terminado con commit local de ejecución; sin push ni siguiente hito.
+
+**H07 preparada para una tarea nueva, sin ejecutar**, por encargo posterior al 104.
+[Ficha autocontenida](art/hound/tasks/H07-malla-produccion.md) ·
+[Texto de inicio](art/hound/tasks/README.md#encargo-preparado-para-h07) ·
+[Preparación 105](../reports/hound-h07-preparation-105/README.md).
+La nueva tarea debe verificar el presupuesto H06 antes de editar geometría;
+si sigue pendiente, limitarse a auditoría y plan con dependencias concretas.
+No se han cambiado v16, motor o presupuesto ni se ha creado otra tarea.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,

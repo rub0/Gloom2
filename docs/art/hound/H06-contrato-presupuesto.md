@@ -62,7 +62,8 @@ fixture de dos huesos/dos pesos y rotación horneada de 31 claves LINEAR cocinad
 Eso prueba transporte. El hito 102 reproduce `Hound16_joint_check` en GPU en un
 cuerpo TPS y muestra dos poses distintas; **no valida clips jugables ni
 equivalencia de todas las poses**. La evaluación CPU existente y los rigs
-originales pasan sus tests. Siete Hound v16 fallan al mapear constantes de skin.
+originales pasan sus tests. El fallo con siete Hound se corrigió en el 104;
+su prueba mantiene animación diagnóstica y sombras, sin certificar clips finales.
 
 | Estado / evento | Entrada que exige hoy el runtime | Consecuencia para H08/H11/H12 |
 | --- | --- | --- |
@@ -202,3 +203,8 @@ Siguiente entrada para un encargo posterior: mantener v16 y la regresión del
 residencia antes de aprobar límites H06. No requiere reabrir normales ni
 modificar escultura. Release 7/7, Debug 4/4 y hashes exactos. **H07 no se inicia**.
 Commit local de ejecución del 104, sin push.
+
+H07 queda [preparada documentalmente](tasks/H07-malla-produccion.md) en el 105,
+sin iniciar producción. Su entrada debe comprobar las decisiones de presupuesto
+anteriores; si faltan, limitar la nueva tarea a auditoría y plan. Esta preparación
+no fija cifras, no aprueba H06 y conserva v16 exacta.

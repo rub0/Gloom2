@@ -5,8 +5,15 @@
 H06 production budget remains pending: measure final Hound maps/clips/weapons
 and resolve asset residency before choosing geometry/material/texture limits.
 H07 is not started; no new implementation milestone is authorized here.
+Its [self-contained handoff](art/hound/tasks/H07-malla-produccion.md) is prepared:
+check H06 first; if still pending, deliver an entry audit and plan without asset edits.
 
 ## Recent executed milestone
+
+105. **H07 handoff preparation — documentation only, 2026-09-29.**
+     Exact v16 input, H06 budget dependency, topology/LOD scope, validation and
+     delivery recorded for a new task. H07 production remains unstarted;
+     v16 and runtime unchanged. [Preparation report](../reports/hound-h07-preparation-105/README.md).
 
 104. **Presentation and skinning with eight combatants — executed 2026-09-29.**
      Shared current/previous palettes fix the 8 MiB dynamic-heap exhaustion;
