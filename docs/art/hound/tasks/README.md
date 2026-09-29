@@ -31,6 +31,8 @@ inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 - Normales: [corregidas y comprobadas en el hito técnico 103](../../../../reports/normal-maps-103/README.md); 12/12 comparaciones H06 pasan.
 - Rendimiento con ocho combatientes: [hito 102 de Gloom](../../../../reports/eight-combatants-102/README.md)
   ejecutado; 5 ms incumplidos en p95/p99 y siete Hound v16 fallan al mapear constantes. H06 sigue bloqueada.
+- Siguiente trabajo externo: [hito 104, presentación y skinning](../../../../reports/hound-runtime-104/README.md),
+  preparado para otra tarea; no iniciado. Resolver los bloqueos del 102 antes de aprobar H06 o iniciar H07.
 - Objetivo H06 confirmado: 200 FPS, 1920×1080, hasta ocho combatientes en Ryzen 7 3700X/GTX 1070. H07 no iniciada.
 - Aprobación de cierre artístico H05: **23 de septiembre de 2026**, «si, ahora esta bien», tras la entrega v16. [Registro](../../../../reports/hound-approval-100/README.md).
 - Dirección aplicada: F01–F06, caída de capucha y cobertura de armadura delantera/posterior/lateral.

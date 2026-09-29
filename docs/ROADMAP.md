@@ -2,10 +2,13 @@
 
 ## Pending technical work
 
-- Resolve the findings of milestone 102 before approving Hound H06: control
-  MAILBOX/Present pacing, repair skin constant mapping with seven Hound v16,
-  and repeat at native 1080p with production clips/maps. The 200 FPS target
-  and LOD/material/texture budgets remain unvalidated. H07 stays blocked.
+104. **Presentation and skinning with eight combatants — prepared, not started.**
+     Resolve the findings of 102: repair skin constant mapping with seven Hound
+     v16 plus FPS, control MAILBOX/Present pacing, then measure bounds and repeat
+     at native 1080p. Use existing content; final Hound maps/clips are not an
+     entry requirement for this engine repair. Keep production-budget limits
+     explicit. The 200 FPS target remains unvalidated and H07 stays blocked.
+     [Self-contained handoff](../reports/hound-runtime-104/README.md).
 
 ## Recent executed milestone
 

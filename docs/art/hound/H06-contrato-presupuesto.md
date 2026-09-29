@@ -167,10 +167,12 @@ jugable final aún carece de mapas y clips. La muestra de ocho usa geometría
 original compartida, por lo que no fija presupuesto LOD0/LODs/materiales/mapas
 para Hound ni decide si son necesarios LODs de autoría.
 
-Siguiente trabajo técnico: controlar la cadencia de MAILBOX/Present, medir
+Siguiente trabajo técnico: [hito 104 preparado, no iniciado](../../../reports/hound-runtime-104/README.md).
+Controlar la cadencia de MAILBOX/Present, medir
 latencia de cola, resolver el mapeo de constantes y perfilar/optimizar bounds
-para siete Hound. Repetir
-1080p con contenido de producción y dispositivo de audio real antes de fijar
-límites de geometría, texturas y memoria. Normales RGBA8 ya están resueltas en
+para siete Hound. Repetir 1080p con v16 y el contenido disponible, declarando
+el dispositivo de audio utilizado. Los mapas/clips finales no bloquean ese
+arreglo del motor; sus costes pendientes deben quedar explícitos antes de
+aprobar límites definitivos de geometría, texturas y memoria. Normales RGBA8 ya están resueltas en
 el hito 103. La [ficha H06](tasks/H06-contrato-presupuesto.md) sigue bloqueada;
 H07 no se inicia. No faltan datos del usuario sobre FPS/equipo/cantidad.

@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 29 de septiembre de 2026, hito 102 ejecutado; objetivo de 200 FPS sin validar.
+Actualizado: 29 de septiembre de 2026, hito 104 preparado; objetivo de 200 FPS sin validar.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -25,6 +25,13 @@ Hound v16 fallan con `Skin constant mapping failed`; un Hound y su clip
 diagnóstico sí se reproducen en GPU. [Medidas y reproducción](../reports/eight-combatants-102/README.md).
 El objetivo 200 FPS/1080p/ocho y el presupuesto de producción siguen sin validar.
 H06 continúa bloqueada y H07 no se inicia.
+
+**Siguiente encargo preparado: hito 104**, corregir el mapeo de skinning y
+aislar/corregir la cadencia de presentación; después repetir las medidas.
+[Ficha autocontenida para otra tarea](../reports/hound-runtime-104/README.md).
+Solo preparado, no iniciado. Usar v16 y contenido disponible; los mapas y clips
+finales no son un requisito para comenzar el arreglo del motor. Su ausencia
+sigue limitando la aceptación de un presupuesto de producción definitivo.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,

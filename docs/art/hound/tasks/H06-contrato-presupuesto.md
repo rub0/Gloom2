@@ -10,6 +10,8 @@ producción ni se habilita H07. El [hito 102 de Gloom](../../../../reports/eight
 midió ocho presentaciones jugables, pero incumplió 5 ms en p95/p99; siete
 Hound v16 fallan al mapear constantes. La corrección de normales se realizó
 en el hito técnico 103; no amplía las exclusiones de H06.
+La continuación técnica está preparada en el [hito 104](../../../../reports/hound-runtime-104/README.md),
+pendiente de ejecución en otra tarea; H07 sigue sin habilitarse.
 
 ## Entrada y alcance
 Leer [contexto](CONTEXTO.md) e [índice](README.md), después las secciones relevantes de:
