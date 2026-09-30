@@ -30,6 +30,8 @@ struct RenderCapabilities {
 struct FrameRenderMetrics {
     uint32 skin_maps{0};
     uint32 shadow_draws{0};
+    uint32 missing_meshes{0};
+    uint32 missing_textures{0};
     uint64 skin_reserved_bytes{0};
     uint64 skin_copied_bytes{0};
     uint64 frames_in_flight{0};
@@ -57,6 +59,7 @@ struct FrameRenderMetrics {
 
 struct RendererSettings {
     bool vertical_sync{true};
+    bool texture_compression_bc{true}; // Disable only to exercise the portable RGBA8 path.
     std::uint64_t upload_budget_bytes_per_frame{16U * 1024U * 1024U};
     std::uint64_t resident_budget_bytes{512U * 1024U * 1024U};
     TemporalSettings temporal;

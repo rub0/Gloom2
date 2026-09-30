@@ -11,7 +11,7 @@ if(NOT result EQUAL 0 OR "${output}\n${error}" MATCHES "Diligent Engine: ERROR|V
     message(FATAL_ERROR "Hound runtime failed (${result}): ${output}\n${error}")
 endif()
 foreach(required IN ITEMS "samples=360" "render: 1920x1080 output=1920x1080" "skinned=53 visible_skinned=53"
-    "shadow_draws=[1-9][0-9]*" "Animated TPS mask: 127")
+    "shadow_draws=[1-9][0-9]*" "Animated TPS mask: 127" "measured missing meshes=0 textures=0")
     if(NOT output MATCHES "${required}")
         message(FATAL_ERROR "Missing Hound runtime evidence: ${required}\n${output}")
     endif()

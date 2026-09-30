@@ -1,6 +1,16 @@
 # Hito 104 — presentación y skinning de ocho combatientes
 
-29 de septiembre de 2026 · **Ejecutado y validado. H06 sigue sin presupuesto de producción; H07 no se inicia.**
+29 de septiembre de 2026 · **Ejecutado; registro histórico del cierre.**
+
+**Rectificación, 30/09, [hito 106](../hound-budget-106/README.md):** las 30
+evicciones iniciales de esta medición dejaban mallas de Factory sin dibujar.
+Las 53 skins visibles y cero evicciones durante la medida no probaban la
+integridad de la escena. El control RGBA8 posterior reproduce 21.276 intentos
+de dibujar mallas ausentes en 360 frames. Se conservan estas cifras históricas
+y el arreglo de skinning/Present, pero no certifican Factory completo ni el
+presupuesto actual. El 106 activa BC5/BC7, restaura 584 draws/436 de sombras
+(antes 527/406), añade la comprobación de recursos ausentes y fija H06 con
+nuevas medidas. H07 sigue sin iniciar. El resto describe el estado al cerrar 104.
 
 Siete Hound v16 TPS más FPS completan carga, calentamiento y medida. Cuatro
 pasadas finales a 1080p, dos con audio nulo y dos con dispositivo real, dan

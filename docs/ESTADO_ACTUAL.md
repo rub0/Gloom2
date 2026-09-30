@@ -1,45 +1,48 @@
 # Traspaso de Gloom
 
-Actualizado: 29 de septiembre de 2026, H07 preparada documentalmente en el hito 105; producción pendiente de H06. Hito 104 ejecutado.
+Actualizado: 30 de septiembre de 2026, hito 106: residencia corregida y presupuesto H06 fijado. H07 preparada, sin iniciar.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
 H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre:
 «si, ahora esta bien», tras la entrega de la última corrección de armadura.
-[Registro de aceptación y cierre H05](../reports/hound-approval-100/README.md).
-[Galería y comparativas](art/hound/mesh-v16/README.md) ·
-[Informe 99](../reports/hound-armor-99/README.md).
-**H06 iniciada y bloqueada; no habilita H07.** Objetivo confirmado: 200 FPS,
-1920×1080 y hasta ocho combatientes en Ryzen 7 3700X/GTX 1070.
-[Contrato vigente](art/hound/H06-contrato-presupuesto.md) ·
-[Informe 101 y reproducción](../reports/hound-contract-101/README.md).
-Fallo de normales corregido en el **hito 103**: la carga RGBA8 recupera el verde
-desde alfa en los KTX UASTC RRRG. BC5 ya lo conservaba; se mantiene esa ruta.
-[Corrección, pruebas y reproducción](../reports/normal-maps-103/README.md).
-El **hito 104** corrige el agotamiento de constantes y la cadencia de Present:
-9 mapeos por frame para siete Hound más FPS, heap sin ampliar, y VSync off
-prioriza IMMEDIATE. MAILBOX espera ~5,4 ms al adquirir la siguiente imagen.
-Bounds conservadores por hueso reducen skin/bounds de 3,203 a 0,106–0,124 ms.
-Release/1080p: cuatro pasadas de siete Hound, con audio nulo y dispositivo real,
-281,29–283,98 FPS; p99 máximo 3,854 ms y máximo 3,974 ms. Los cuatro casos
-repetidos suman 16 pasadas / 5.760 frames, ninguno >5 ms. Animación/sombras y
-53 skins visibles comprobadas. Release 7/7 y Debug 4/4, incluida Vulkan.
-[Informe 104 y reproducción](../reports/hound-runtime-104/README.md) ·
-[Distribuciones y memoria](../reports/hound-runtime-104/mediciones.md).
-La escultura v16 permanece exacta. **H06 sigue bloqueada; H07 no se inicia**:
-faltan costes de mapas/clips/armas de producción y margen de residencia,
-actualmente 511,73/512 MiB (cero evicciones durante la medida; 30 al cargar).
-No certificar presupuesto final ni una partida autoritativa de ocho jugadores.
-Hito 104 terminado con commit local de ejecución; sin push ni siguiente hito.
+[Registro H05](../reports/hound-approval-100/README.md) ·
+[Galería](art/hound/mesh-v16/README.md) · [Informe 99](../reports/hound-armor-99/README.md).
 
-**H07 preparada para una tarea nueva, sin ejecutar**, por encargo posterior al 104.
+**H06 cerrada como entrada técnica de H07**, con objetivo conservado de
+**200 FPS /5 ms, 1920×1080 nativo, hasta ocho combatientes, Ryzen 7 3700X/GTX 1070**.
+[Contrato vigente](art/hound/H06-contrato-presupuesto.md) ·
+[Informe 106](../reports/hound-budget-106/README.md) ·
+[Distribuciones](../reports/hound-budget-106/mediciones.md).
+Límites: **≤40.000 triángulos TPS /≤18.000 FPS**, siete materiales TPS/cuatro FPS,
+≤54.000 vértices cocinados TPS y ≤24 MiB geométricos contando LODs/FPS.
+Hasta cuatro mapas 2K por skin, ocho conjuntos con geometría compartida y pool
+≤192 MiB; residencia objetivo ≤384 MiB sobre techo existente de 512 MiB.
+LODs automáticos del cooker sujetos a revisión de silueta/deformación en H07.
+El contrato detalla rig/clips, márgenes, método y validaciones posteriores.
+
+El **106 activa BC5/BC7**: la capacidad estaba deshabilitada al crear el
+dispositivo, aunque el cargador ya la soportaba. V16 pasa de 511,73 a 183,54 MiB.
+Prueba con mapas/clips/cinco armas: **355,43 MiB**, cero evicciones y recursos
+ausentes; cuatro pasadas del perfil elegido: **296,77–298,76 FPS**, p99 máximo
+**3,914 ms**, máximo **4,503 ms**, **0/1.440 frames >5 ms**, audio nulo/real.
+Las 16 pasadas completas conservan dos picos >5 ms en perfiles de 80.152 TPS;
+no se aprueba v16 por su media. Release 10/10, Debug 5/5, materiales/normales pasan.
+**Corrección del informe 104:** sus 30 evicciones iniciales ocultaban mallas
+del escenario; las 53 skins en el frustum no garantizaban integridad. Las nuevas
+medidas lo sustituyen para presupuestar. Skinning/Present y normales 103 siguen
+corregidos; no se amplía heap ni se cambia la escultura.
+
+**H07 preparada con presupuesto disponible, sin ejecutar.**
 [Ficha autocontenida](art/hound/tasks/H07-malla-produccion.md) ·
-[Texto de inicio](art/hound/tasks/README.md#encargo-preparado-para-h07) ·
-[Preparación 105](../reports/hound-h07-preparation-105/README.md).
-La nueva tarea debe verificar el presupuesto H06 antes de editar geometría;
-si sigue pendiente, limitarse a auditoría y plan con dependencias concretas.
-No se han cambiado v16, motor o presupuesto ni se ha creado otra tarea.
+[Texto de inicio](art/hound/tasks/README.md#encargo-preparado-para-h07).
+Producir después en una versión nueva, conservando la maestra v16 exacta.
+Los mapas/UVs y clips del 106 son diagnósticos en caché, no entregas de H07–H12.
+Rig/agarres, mapas y clips finales se validarán en sus etapas; una partida
+humana/autoritativa de ocho sigue pendiente de integración. No son requisitos
+circulares para iniciar retopología. Commit local del 106, resolver con git log;
+sin push ni inicio de H07 u otra ficha.
 
 Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
 Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,
@@ -56,7 +59,7 @@ incluidos capucha, peto, abdominales centrales, garras, carcasas de antebrazos y
 Los hombros/axilas siguen libres; quedan separaciones entre placas.
 53 huesos, bind pose y claves intactos. Solo la nueva placa `Back_spine_1`
 pasa a `Bip001 Spine1` para acompañar su banda lateral sin cruzarla al girar.
-40.274 vértices / 80.152 triángulos; cifras de autoría, sin presupuesto H06.
+40.274 vértices / 80.152 triángulos: escultura de autoría, no la futura malla H07 presupuestada.
 
 Topología/pesos, 61 muestras, 33 poses globales/183.645 pares evaluados,
 roundtrip en 13 poses, regresiones v15, cooker/visor y CTest 3/3 pasan.
@@ -68,8 +71,8 @@ Soul Reaper inválido; las holguras/pesos y agarre deben resolverse antes de UVs
 El rig provisional aún dobla la capucha con fuerza al bajar la cabeza.
 Modelado v16: commit `0c28f79`. Aceptación: commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
 
-Sigue pendiente revisar una partida humana en Release, medir contenido Hound de
-producción y reducir memoria residente. Audio con dispositivo real medido en 104.
+Sigue pendiente revisar una partida humana en Release y validar los assets Hound
+de producción cuando existan. Residencia resuelta y audio real repetido en 106.
 Actualizar este documento al cerrar cada hito; guardar el detalle en informes
 y crear el commit de cierre según `AGENTS.md`.
 
@@ -105,7 +108,24 @@ y crear el commit de cierre según `AGENTS.md`.
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
 
+## Hito 106 ejecutado: presupuesto H06 y residencia
+
+La capacidad opcional BC recupera geometría de Factory que se había descartado
+por presión de memoria. El benchmark y la regresión cuentan recursos ausentes.
+Carga diagnóstica regenerable: ocho conjuntos de cuatro mapas 2K, cuatro clips
+con 115.116 claves, 53 huesos/dos influencias y las cinco armas en siete TPS.
+La selección del perfil de 40.073 TPS y 18.108 FPS justifica los límites H06
+del inicio. Dieciséis pasadas conservan todas sus distribuciones y los dos
+picos de los perfiles de 80.152 TPS. La configuración elegida cumple las cuatro
+repeticiones sin superar 5 ms. [Informe y límites](../reports/hound-budget-106/README.md).
+V16 exacta; sin retopología, rig, mapas o clips finales. H07 lista para un nuevo
+encargo; no iniciada. Commit local del 106, sin push.
+
 ## Hito 104 ejecutado: skinning, Present y medidas repetidas
+
+Registro histórico: el 106 detectó mallas ausentes por las evicciones del 104.
+Sus cifras siguientes no certifican la integridad de Factory; presupuesto y
+medidas vigentes en el inicio y en el informe 106.
 
 El fallo original se reproduce en frame 4/mapeo 140, con 6,56 MiB reservados
 por skinning dentro del heap dinámico compartido de 8 MiB. Paletas compartidas

@@ -41,6 +41,8 @@ struct PerformanceProfile {
     uint64 peak_skin_maps{0};
     uint64 initial_evictions{0};
     uint64 initial_budget_frames{0};
+    uint64 missing_meshes{0};
+    uint64 missing_textures{0};
     uint32 count{0};
     uint32 gpu_count{0};
     uint32 warmup{0};

@@ -2,13 +2,27 @@
 
 ## Pending technical work
 
-H06 production budget remains pending: measure final Hound maps/clips/weapons
-and resolve asset residency before choosing geometry/material/texture limits.
-H07 is not started; no new implementation milestone is authorized here.
-Its [self-contained handoff](art/hound/tasks/H07-malla-produccion.md) is prepared:
-check H06 first; if still pending, deliver an entry audit and plan without asset edits.
+H06 now provides the measured production-entry budget: ≤40,000 TPS /≤18,000 FPS
+triangles, maps up to 2K and explicit geometry/texture/residency limits.
+[Current contract](art/hound/H06-contrato-presupuesto.md).
+H07 is prepared but not started; its [handoff](art/hound/tasks/H07-malla-produccion.md)
+uses this budget. Final rig/grips, maps, clips, effects and authoritative eight-player
+validation remain in H08–H13; they are not circular prerequisites for retopology.
 
 ## Recent executed milestone
+
+106. **H06 budget and complete asset residency — 2026-09-30.**
+     Request optional BC compression at device creation, activating the existing
+     BC5/BC7 route. V16 scene residency falls from 511.73 to 183.54 MiB and all
+     scene meshes remain available. Correct the 104 report: initial evictions
+     had hidden environment meshes despite 53 visible Hound primitives.
+     Diagnostic maps/clips/five-weapon load: 355.43 MiB, zero missing resources
+     or evictions. Selected 40,073 TPS/18,108 FPS profile: 296.77–298.76 FPS,
+     worst p99 3.914 ms, maximum 4.503 ms, 0/1,440 frames over 5 ms, native 1080p
+     with null/real audio. Preserve the two >5 ms outliers in the 80,152 TPS controls.
+     Release 10/10, Debug 5/5; materials/normals verified in BC and RGBA8.
+     V16 unchanged, H07 not started, local commit only.
+     [Results and reproduction](../reports/hound-budget-106/README.md).
 
 105. **H07 handoff preparation — documentation only, 2026-09-29.**
      Exact v16 input, H06 budget dependency, topology/LOD scope, validation and
@@ -16,6 +30,8 @@ check H06 first; if still pending, deliver an entry audit and plan without asset
      v16 and runtime unchanged. [Preparation report](../reports/hound-h07-preparation-105/README.md).
 
 104. **Presentation and skinning with eight combatants — executed 2026-09-29.**
+     Historical timings below omit environment meshes evicted at load time;
+     milestone 106 restores them and supersedes these numbers for budgeting.
      Shared current/previous palettes fix the 8 MiB dynamic-heap exhaustion;
      nine maps per frame for seven Hound plus FPS, without enlarging the heap.
      MAILBOX pacing is isolated to image acquisition; VSync off now prefers

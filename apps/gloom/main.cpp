@@ -322,6 +322,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     const bool performance_test = performance_1080p || performance_eight_720p ||
         (argument_count > 1 && strcmp(arguments[1], "--vertical-slice-performance-720p") == 0);
     bool performance_audio_device = false;
+    bool performance_rgba8 = false;
+    bool hound_budget = false;
+    gloom::uint32 hound_budget_lod = 0;
     if (performance_test) {
         gloom::backends::vulkan_present.enabled = true;
         for (int i = 2; i < argument_count; ++i) {
@@ -329,6 +332,12 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             else if (strcmp(arguments[i], "--present=mailbox") == 0) gloom::backends::vulkan_present.unsynced_mode = 1;
             else if (strcmp(arguments[i], "--present=fifo") == 0) gloom::backends::vulkan_present.unsynced_mode = 2;
             else if (strcmp(arguments[i], "--audio-device") == 0) performance_audio_device = true;
+            else if (strcmp(arguments[i], "--rgba8") == 0) performance_rgba8 = true;
+            else if (strncmp(arguments[i], "--hound-budget-lod=", 19) == 0 && arguments[i][19] >= '0' &&
+                arguments[i][19] <= '2' && arguments[i][20] == 0 && performance_hound_eight) {
+                hound_budget = true;
+                hound_budget_lod = static_cast<gloom::uint32>(arguments[i][19] - '0');
+            }
             else { fprintf(stderr, "Unknown benchmark option: %s\n", arguments[i]); return 1; }
         }
     }
@@ -451,6 +460,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         *window_view,
         gloom::render::RendererSettings{
             .vertical_sync = !automated_graphics && vertical_sync_setting && strcmp(vertical_sync_setting, "1") == 0,
+            .texture_compression_bc = !performance_rgba8,
             // One cube plus tiny textures on the first smoke frame; defer the
             // quad. Derive the budget from the vertex layout (now eight weights).
             .upload_budget_bytes_per_frame = smoke_test ? 24U*sizeof(gloom::render::GpuVertex)+36U*sizeof(std::uint32_t)+48U : 16U * 1024U * 1024U,
@@ -607,8 +617,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             const auto index = static_cast<std::size_t>(character);
             const gloom::gameplay::CharacterPresentationRecipe recipe=performance_hound && character==gloom::gameplay::SliceCharacter::hound
                 ? gloom::gameplay::CharacterPresentationRecipe{.character=character,
-                    .authored_scene_uri="game:/characters/hound_rig/v16/hound-rig.gltf",
-                    .cooked_scene_uri="cache:/characters/hound_rig/v16/hound-rig.gasset"}
+                    .authored_scene_uri=hound_budget ? "game:/h06-budget/hound.gltf" : "game:/characters/hound_rig/v16/hound-rig.gltf",
+                    .cooked_scene_uri=hound_budget ? "cache:/h06-budget/hound.gasset" : "cache:/characters/hound_rig/v16/hound-rig.gasset"}
                 : gloom::gameplay::character_presentation_recipe(character, original_characters);
             const auto character_source =
                 gloom::assets::VirtualPath::parse(recipe.authored_scene_uri);
@@ -996,6 +1006,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     gloom::uint64 performance_pose_ticks = 0;
     gloom::uint64 performance_skin_bounds_ticks = 0;
     gloom::uint32 benchmark_animated_tps = 0;
+    gloom::uint32 benchmark_weapon_mask = 0;
     struct BoundsCacheEntry {
         gloom::assets::AssetId asset{};
         gloom::uint64 generation{0};
@@ -2109,6 +2120,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                             if (!instance.arms_mesh.value) continue;
                             instance.mesh=instance.arms_mesh;instance.lod_count=1;instance.lod_meshes={};
                         }
+                        if (hound_budget && !fps) {
+                            instance.mesh = instance.lod_meshes[hound_budget_lod];
+                            instance.lod_count = 1;
+                            instance.lod_meshes = {};
+                        }
                         const auto& rig=*scene.bind_rig;
                         instance.transform=gloom::assets::rig_transform(frame->worlds[instance.source_node]);
                         gloom::uint64 sibling = first_instance;
@@ -2148,6 +2164,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 const unsigned count=performance_eight && (!performance_hound || performance_hound_eight)?7U:1U;
                 for(unsigned i=0;i<count;++i) {
                     gloom::gameplay::CombatantView combatant=slice.opponent;
+                    if (hound_budget) combatant.weapon = static_cast<gloom::gameplay::SliceWeapon>(i % gloom::gameplay::slice_weapon_count);
                     if(performance_eight) {
                         const gloom::gameplay::FirstPersonDirection forward=slice_first_person.forward();
                         const float side=performance_hound && !performance_hound_eight?0.0F:
@@ -2164,7 +2181,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                     }
                     gloom::gameplay::CharacterAnimationFrame frame;
                     const gloom::uint64 pose_started=performance_test?gloom::performance_clock():0;
-                    if(performance_hound) {
+                    if(performance_hound && !hound_budget) {
                         frame.local=gloom::assets::sample_animation(*opponent_scene->bind_rig,"Hound16_joint_check",presentation_seconds+i*.1);
                         frame.worlds=gloom::assets::pose_worlds(*opponent_scene->bind_rig,frame.local);
                         frame.cut=false;
@@ -2185,8 +2202,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                             current[first_tps].pose->matrices.size() * sizeof(gloom::assets::RigMatrix)) != 0)
                         benchmark_animated_tps |= 1U << i;
                     if(!performance_eight) combat_effects.observe(particles,combatant,frame,parent,slice.simulation_tick,false);
-                    if(opponent_weapon_scene && combatant.alive && !performance_hound)
-                        append(*opponent_weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
+                    const gloom::assets::ResidentScene* weapon_scene = hound_budget ? resident_weapon(combatant.weapon) : opponent_weapon_scene;
+                    if (weapon_scene && combatant.alive && (!performance_hound || hound_budget)) {
+                        append(*weapon_scene,gloom::render::attach_transform(parent,frame.weapon),false,nullptr,frame.cut);
+                        if (profile_ready && profile.warmup >= 120) benchmark_weapon_mask |= 1U << static_cast<gloom::uint32>(combatant.weapon);
+                    }
                 }
             }
             if (local_weapon_scene && local_scene && local_scene->bind_rig) {
@@ -2438,6 +2458,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 profile.pose_ticks+=performance_pose_ticks;
                 profile.skin_bounds_ticks+=performance_skin_bounds_ticks;
                 const gloom::render::FrameRenderMetrics measured = renderer_view->frame_metrics();
+                profile.missing_meshes += measured.missing_meshes;
+                profile.missing_textures += measured.missing_textures;
                 if (measured.submission_observed_ticks && profile.queue_count < 360)
                     profile.queue_samples[profile.queue_count++] = measured.submission_observed_ticks;
                 if (measured.frames_in_flight > profile.peak_in_flight) profile.peak_in_flight = measured.frames_in_flight;
@@ -2562,6 +2584,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         printf("GPU asset residency: %.2f MiB; evictions=%llu budget_limited_frames=%llu\n",
             residency.resident_bytes / 1048576.0, static_cast<gloom::uint64>(residency.evictions),
             static_cast<gloom::uint64>(residency.budget_limited_frames));
+        printf("Texture compression: %s; measured missing meshes=%llu textures=%llu\n",
+            renderer_view->capabilities().texture_compression_bc ? "BC5/BC7" : "RGBA8", profile.missing_meshes, profile.missing_textures);
+        if (hound_budget) printf("H06 budget probe: game:/h06-budget/hound.gltf; forced TPS LOD=%u; weapon_mask=%u\n",
+            hound_budget_lod, benchmark_weapon_mask);
     }
     const auto job_metrics = jobs_view->metrics();
     if(ui_flow){

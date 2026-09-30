@@ -18,11 +18,12 @@
 #include <thread>
 #include <vector>
 #include <stdio.h>
+#include <string.h>
 
 int main(const int argument_count, const char* const* arguments) try {
-    if (argument_count < 5 || argument_count > 7) {
+    if (argument_count < 5 || argument_count > 8 || (argument_count == 8 && strcmp(arguments[7], "--rgba8") != 0)) {
         std::cerr << "Usage: gloom_scene_viewer <source-root> <cache-root> "
-                     "<game:/source.gltf> <cache:/output.gasset> [scene-copies] [review-output.ppm]\n";
+                     "<game:/source.gltf> <cache:/output.gasset> [scene-copies] [review-output.ppm] [--rgba8]\n";
         return 2;
     }
     std::uint32_t scene_copies = 1;
@@ -52,7 +53,7 @@ int main(const int argument_count, const char* const* arguments) try {
                                        .width = 1280,
                                        .height = 720,
                                        .resizable = true}};
-    gloom::backends::DiligentRenderer renderer{window};
+    gloom::backends::DiligentRenderer renderer{window, {.texture_compression_bc = argument_count != 8}};
     jobs.start();
     window.start();
     renderer.start();
@@ -128,12 +129,12 @@ int main(const int argument_count, const char* const* arguments) try {
             const auto lighting_view = lighting.view();
             auto snapshot = visible.snapshot();
             snapshot.lighting = &lighting_view;
-            if (argument_count == 7 && scene != nullptr && ++review_ready_frames == 32) {
+            if (argument_count >= 7 && scene != nullptr && ++review_ready_frames == 32) {
                 renderer.capture_next_frame(arguments[6]);
             }
             renderer.draw(snapshot);
             renderer.end_frame();
-            if (argument_count == 7 && (++review_total_frames == 10000 || review_ready_frames == 32)) {
+            if (argument_count >= 7 && (++review_total_frames == 10000 || review_ready_frames == 32)) {
                 review_complete = review_ready_frames == 32;
                 break;
             }
@@ -150,7 +151,7 @@ int main(const int argument_count, const char* const* arguments) try {
     renderer.stop();
     window.stop();
     jobs.stop();
-    if (argument_count == 7 && !review_complete) {
+    if (argument_count >= 7 && !review_complete) {
         fprintf(stderr, "Scene review ended before the asset became ready.\n");
         return 1;
     }

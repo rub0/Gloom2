@@ -15,6 +15,7 @@
 #include <RefCntAutoPtr.hpp>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <algorithm>
 #include <array>
@@ -897,6 +898,8 @@ void DiligentRenderer::start() {
     }
     Diligent::EngineVkCreateInfo engine_create_info;
     engine_create_info.Features.IndependentBlend = Diligent::DEVICE_FEATURE_STATE_ENABLED;
+    engine_create_info.Features.TextureCompressionBC = settings_.texture_compression_bc
+        ? Diligent::DEVICE_FEATURE_STATE_OPTIONAL : Diligent::DEVICE_FEATURE_STATE_DISABLED;
 #if defined(_DEBUG)
     Diligent::BasicPlatformDebug::SetBreakOnError(false);
     engine_create_info.SetValidationLevel(Diligent::VALIDATION_LEVEL_1);
@@ -1737,6 +1740,8 @@ void DiligentRenderer::process_uploads() {
             ++deferred;
         }
         impl_->materials.erase(id);
+        if (vulkan_present.enabled && removed_bytes) printf("GPU release: id=%llu bytes=%llu eviction=%u\n",
+            static_cast<uint64>(id.value), static_cast<uint64>(removed_bytes), eviction ? 1U : 0U);
         {
             std::scoped_lock lock{impl_->upload_mutex};
             impl_->residency_metrics.resident_bytes -=
@@ -1795,6 +1800,8 @@ void DiligentRenderer::process_uploads() {
             impl_->residency_metrics.resident_bytes += upload_size(upload);
         }
         set_state(upload.id, render::GpuAssetState::resident);
+        if (vulkan_present.enabled) printf("GPU upload: mesh id=%llu bytes=%llu\n",
+            static_cast<uint64>(upload.id.value), static_cast<uint64>(upload_size(upload)));
     }
 
     for (auto& upload : textures) {
@@ -1867,6 +1874,9 @@ void DiligentRenderer::process_uploads() {
             impl_->residency_metrics.resident_bytes += upload_size(upload);
         }
         set_state(upload.id, render::GpuAssetState::resident);
+        if (vulkan_present.enabled) printf("GPU upload: texture id=%llu bytes=%llu format=%u width=%u height=%u\n",
+            static_cast<uint64>(upload.id.value), static_cast<uint64>(upload_size(upload)),
+            static_cast<uint32>(upload.format), description.Width, description.Height);
     }
 
     for (auto& upload : materials) {
@@ -2015,6 +2025,8 @@ void DiligentRenderer::begin_frame() {
     impl_->frame_metrics.draw_calls = 0;
     impl_->frame_metrics.skin_maps = 0;
     impl_->frame_metrics.shadow_draws = 0;
+    impl_->frame_metrics.missing_meshes = 0;
+    impl_->frame_metrics.missing_textures = 0;
     impl_->frame_metrics.skin_reserved_bytes = 0;
     impl_->frame_metrics.skin_copied_bytes = 0;
     impl_->frame_metrics.frames_in_flight = 0;
@@ -2452,11 +2464,13 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 if (shadow_material.surface.alpha_mode>=2 || (instance.alpha_mode_override>=2 && instance.alpha_mode_override!=0xff)) continue;
                 impl_->immediate_context->SetPipelineState(shadow_material.surface.double_sided ? impl_->double_sided_shadow_pipeline : impl_->shadow_pipeline);
                 auto texture=impl_->textures.find(shadow_material.base_color_texture);
+                if (texture == impl_->textures.end()) ++impl_->frame_metrics.missing_textures;
                 if (texture==impl_->textures.end()) texture=impl_->textures.find(render::builtin_white_texture);
                 impl_->shadow_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL,"ShadowBaseColor")->Set(texture->second.view,Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
                 impl_->immediate_context->CommitShaderResources(impl_->shadow_resources,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
                 const auto mesh = impl_->meshes.find(instance.mesh);
                 if (mesh == impl_->meshes.end()) {
+                    ++impl_->frame_metrics.missing_meshes;
                     continue;
                 }
                 Diligent::IBuffer* vertex_buffers[] = {mesh->second.vertices};
@@ -2527,6 +2541,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                                 const std::uint32_t forced_alpha_mode = 0xff) {
         const auto mesh = impl_->meshes.find(mesh_id);
         if (mesh == impl_->meshes.end()) {
+            ++impl_->frame_metrics.missing_meshes;
             return;
         }
         const auto material = impl_->materials.find(material_id);
@@ -2539,6 +2554,7 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         const auto find_texture = [&](const render::RenderAssetId requested,
                                       const render::RenderAssetId fallback) {
             auto found = impl_->textures.find(requested);
+            if (found == impl_->textures.end()) ++impl_->frame_metrics.missing_textures;
             return found == impl_->textures.end() ? impl_->textures.find(fallback) : found;
         };
         auto base_color_texture =

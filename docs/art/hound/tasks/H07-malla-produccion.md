@@ -1,9 +1,8 @@
 # H07 — malla de producción y LODs
 
-29 de septiembre de 2026 · **Encargo preparado; producción no iniciada.**
-H05 está aprobada. H06 tiene contrato técnico comprobado, pero su presupuesto
-de producción sigue pendiente. Preparar esta ficha no aprueba H06 ni autoriza
-a elegir cifras arbitrarias para empezar a reducir la malla.
+30 de septiembre de 2026 · **Encargo preparado con presupuesto H06; producción no iniciada.**
+H05 aprobada y H06 cerrada como entrada técnica en el 106. Esta ficha ya dispone
+de límites medidos; ejecutarla requiere el encargo de H07 en una tarea posterior.
 
 ## Lectura mínima y entrada exacta
 
@@ -11,8 +10,8 @@ Leer primero `docs/ESTADO_ACTUAL.md` y `AGENTS.md`; después el inicio del
 [índice](README.md), [CONTEXTO.md](CONTEXTO.md) y esta ficha. No reconstruir el chat.
 Referencias necesarias:
 
-- [Contrato H06](../H06-contrato-presupuesto.md): convenciones, rig, medidas y resultado 104.
-- [Informe 104](../../../../reports/hound-runtime-104/README.md): método de medida, regresiones y límites.
+- [Contrato H06](../H06-contrato-presupuesto.md): presupuesto vigente 106, convenciones y rig.
+- [Informe 106](../../../../reports/hound-budget-106/README.md): método, pruebas, límites y reproducción.
 - [V16 aprobada](../mesh-v16/README.md) y [contactos conocidos](../../../../reports/hound-armor-99/contacts.md).
 - [Fuente maestra](../../../../art/characters/hound/v16/hound-mesh-v16.blend),
   [glTF](../../../../assets/characters/hound_rig/v16/hound-rig.gltf),
@@ -28,33 +27,37 @@ es la del [hito 100](../../../../reports/hound-approval-100/README.md).
 
 ## Requisito de entrada: presupuesto H06
 
-El 104 (`3b5925c`) corrige skinning/Present y valida el escenario diagnóstico:
-siete Hound más FPS, 281–284 FPS a 1080p, p99 ≤3,854 ms, con audio nulo/real.
+El 104 (`3b5925c`) corrige skinning/Present; el 106 recupera residencia y mallas
+del escenario activando BC5/BC7. Sus medidas sustituyen la referencia incompleta del 104.
 La referencia tiene 80.152 triángulos de autoría, siete materiales, 53 huesos,
 máximo dos influencias actuales y ninguna imagen propia. Son medidas, no límites.
-Residencia: 511,73/512 MiB, sin margen validado para mapas finales/skins distintas.
+Prueba 106 con mapas/clips/cinco armas: 355,43/512 MiB, sin evicciones o recursos
+ausentes; perfil de 40.073 TPS/18.108 FPS a 296,77–298,76 FPS, p99 máximo
+3,914 ms, máximo 4,503 ms, 0/1.440 frames >5 ms con audio nulo/real.
 Se mantiene el objetivo de **200 FPS / 5 ms, 1920×1080 nativo, hasta ocho
 combatientes, Ryzen 7 3700X y GTX 1070**.
 
-Antes de editar geometría, comprobar que H06 deja por escrito decisiones
-suficientes para producir, con evidencia y limitaciones:
+Antes de editar geometría, leer los límites completos de H06 y verificar que
+siguen vigentes. Resumen de entrada:
 
 | Decisión de H06 | Qué necesita H07 |
 | --- | --- |
-| Geometría TPS/FPS | Presupuesto de LOD0 y brazos, incluyendo coste de sombras y copias de buffers. |
-| Materiales y memoria | Límites de primitivas/draws y margen reservado a mapas, armas y contenido pendiente. |
-| LODs y distancia | Si bastan los automáticos del cooker o hacen falta LODs de autoría; criterios de silueta/deformación y ruta de consumo comprobada. |
-| Alcance de la medida | Contenido medido frente al pendiente, condiciones de comparación y criterio de aceptación del candidato. |
+| Geometría TPS/FPS | LOD0 ≤40.000 triángulos TPS; brazos ≤18.000. ≤54.000 vértices cocinados TPS y ≤24 MiB geométricos contando copias de LODs/FPS. |
+| Materiales y memoria | ≤7 primitivas/materiales TPS y ≤4 FPS. Atlas de hasta cuatro mapas 2K por skin, pool de hasta ocho conjuntos ≤192 MiB; residencia de escena objetivo ≤384 MiB. No crear mapas finales en H07. |
+| Rig provisional | 53 huesos y máximo dos influencias en la carga medida. Conservar rig/acción para comparar; cualquier aumento necesita nueva medida en H08. |
+| LODs y distancia | Ruta automática del cooker: objetivos 50 %/20 %, error 0,01; distancia/radio por primitiva 30/80. H07 debe comprobar silueta/deformación y transiciones, no solo recuentos. |
+| Alcance de la medida | Siete TPS + FPS, geometría compartida, mapas/UVs y clips diagnósticos, cinco armas. Cuatro pasadas 1080p/120+360 frames, audio nulo/real; p99 ≤4 ms, máximo ≤5 ms, cero evicciones/recursos ausentes. |
 
 El importador no tiene una convención comprobada para consumir LODs glTF de
 autoría. No exportar varios objetos superpuestos y afirmar que son LODs activos.
-Los LODs automáticos actuales (40.073 / 16.023 triángulos) tampoco certifican
-calidad de deformación. No fijar porcentajes de reducción por costumbre.
+Los LODs automáticos de v16 tampoco certifican calidad de deformación. Los
+porcentajes anteriores son la ruta existente: puede conservar más caras para
+respetar el error. Si su calidad no basta, dejar la alternativa pendiente antes de H08.
 
-Si H06 sigue pendiente al abrir la nueva tarea, completar solo la auditoría
-de entrada y el plan de zonas, con las decisiones concretas que faltan;
-registrar H07 bloqueada antes de modificar assets. No ampliar ese encargo a
-resolver memoria del motor, crear mapas/clips finales o cerrar H06 por inferencia.
+El presupuesto permite producir; no hace falta esperar a UVs/bakes/clips finales
+para iniciar retopología. Si aparece una regresión que invalida esta entrada,
+documentarla y resolver su alcance antes de modificar assets. No ampliar H07
+a memoria del motor, mapas/clips finales o integración autoritativa.
 
 ## Trabajo una vez satisfecha la entrada
 
@@ -62,7 +65,7 @@ Preparar retopología solo donde haga falta, loops de articulación, densidad ú
 normales y fronteras rígido/deformable. Retirar geometría oculta solo tras
 comprobar que no aparece en ninguna pose/encuadre previsto; no soldar armadura
 articulada al cuerpo por reducir objetos. Respetar el presupuesto acordado.
-Producir los LODs que H06 justifique, sin imponer cantidades o porcentajes arbitrarios.
+Validar los LODs automáticos definidos en H06 con el candidato nuevo.
 
 Conservar rostro, manos/garras, hombros libres, caída de capucha y cobertura
 delantera/posterior/lateral de v16. Inventariar los 106 componentes y distinguir
@@ -97,11 +100,13 @@ gameplay/red. No reabrir normales o el arreglo 104 sin una regresión concreta.
 - Entregar tabla por componente/material/LOD: vértices de autoría y cocinados,
   triángulos TPS/FPS, primitivas, huesos/influencias y memoria de geometría;
   diferencias frente a v16 y al presupuesto. Justificar LODs y separaciones.
-- Si se mide el candidato en runtime, demostrar que se carga esa nueva ruta.
+- Medir el candidato en runtime y demostrar que se carga esa nueva ruta.
   La regresión 104 carga v16 y exige 53 primitivas: pasarla conserva el control,
   pero no mide una malla nueva. No relajar sus aserciones para ocultar una pérdida.
-  Aplicar el protocolo 104 en serie/Release/1080p y registrar distribuciones,
-  visibilidad, animación, sombras y residencia; documentar cualquier adaptación necesaria.
+  Aplicar el protocolo y carga diagnóstica del 106 en serie/Release/1080p y
+  registrar distribuciones, visibilidad, animación, sombras, cinco armas y residencia.
+  Adaptar solo la entrada de la prueba a la nueva ruta y su número justificado
+  de primitivas; no confundir el LOD1 forzado de v16 con el LOD0 de producción.
 
 Reutilizar `tools/art/verify_hound_armor_v16.py` y
 `tools/art/review_hound_h05.py -- --v16 --audit` para el control v16;
