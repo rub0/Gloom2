@@ -19,14 +19,17 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--size', type=int, choices=(1024, 2048), default=2048)
+    parser.add_argument('--v17', action='store_true', help='Measure the H07 candidate, retaining the H06 diagnostic load')
     args = parser.parse_args()
     manifest = json.loads((ROOT/'art/characters/hound/v16/sculpture-reference.json').read_text(encoding='utf-8'))
     for entry in manifest['files']:
         assert hashlib.sha256((ROOT/entry['path']).read_bytes()).hexdigest() == entry['sha256']
-    folder = ROOT/'.cache/hound-budget-106/source/h06-budget'
+    version = 'v17' if args.v17 else 'v16'
+    folder = ROOT/('.cache/hound-production-v17/source/h07-v17' if args.v17 else '.cache/hound-budget-106/source/h06-budget')
     folder.mkdir(parents=True, exist_ok=True)
-    scene = json.loads((ROOT/'assets/characters/hound_rig/v16/hound-rig.gltf').read_text(encoding='utf-8'))
-    binary = bytearray((ROOT/'assets/characters/hound_rig/v16/hound-rig.bin').read_bytes())
+    scene = json.loads((ROOT/f'assets/characters/hound_rig/{version}/hound-rig.gltf').read_text(encoding='utf-8'))
+    binary = bytearray((ROOT/f'assets/characters/hound_rig/{version}/hound-rig.bin').read_bytes())
+    source_sha256 = hashlib.sha256(binary).hexdigest()
 
     def accessor(index):
         a = scene['accessors'][index]
@@ -100,9 +103,11 @@ def main():
     scene['buffers'] = [{'uri': 'hound.bin', 'byteLength': len(binary)}]
     (folder/'hound.bin').write_bytes(binary)
     (folder/'hound.gltf').write_text(json.dumps(scene), encoding='utf-8')
-    print(f'Probe: {args.size}px, 32 images, 4 diagnostic clips / 115116 channel keys; v16 preserved', flush=True)
+    (folder/'provenance.json').write_text(json.dumps({'geometry': version, 'source_bin_sha256': source_sha256,
+        'source_gltf_sha256': hashlib.sha256((ROOT/f'assets/characters/hound_rig/{version}/hound-rig.gltf').read_bytes()).hexdigest()}, indent=2)+'\n')
+    print(f'Probe: {version}, {args.size}px, 32 images, 4 diagnostic clips / 115116 channel keys; v16 preserved', flush=True)
     subprocess.run(['rtk', 'proxy', str(ROOT/'build/windows-vs/Release/gloom_asset_cooker.exe'), str(folder.parent),
-                    str(ROOT/'build/windows-vs/content'), 'game:/h06-budget/hound.gltf', 'cache:/h06-budget/hound.gasset'], check=True)
+                    str(ROOT/'build/windows-vs/content'), f'game:/{folder.name}/hound.gltf', f'cache:/{folder.name}/hound.gasset'], check=True)
 
 
 if __name__ == '__main__':

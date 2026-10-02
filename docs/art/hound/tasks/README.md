@@ -1,6 +1,6 @@
 # Hound — tareas pendientes sin historial de conversación
 
-30 de septiembre de 2026 · Índice del hito 90, actualizado con presupuesto H06/106 y entrada H07. Alcance: terminar **este Hound**,
+2 de octubre de 2026 · Índice del hito 90, actualizado con H07/v17, hito 107. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
 
 ## Cómo abrir una tarea nueva
@@ -19,30 +19,25 @@ Abrir solo las referencias que la ficha necesita: no leer todas las fichas,
 todos los informes ni todas las versiones anteriores. Las imágenes sí deben
 inspeccionarse cuando se trabaja el aspecto. No crear tareas automáticamente.
 
-### Encargo preparado para H07
+### H07 ejecutada — hito 107
 
-Preparación documental del [hito 105](../../../../reports/hound-h07-preparation-105/README.md).
-Presupuesto completado en el [106](../../../../reports/hound-budget-106/README.md).
-H07 lista para un nuevo encargo, sin iniciar. Copiar en la nueva tarea:
-
-> En D:/Projects/Gloom, trabaja únicamente en H07 según
-> docs/art/hound/tasks/H07-malla-produccion.md. Lee primero docs/ESTADO_ACTUAL.md
-> y AGENTS.md; después el inicio del índice, CONTEXTO.md, la ficha H07 y sus
-> referencias concretas. Conserva la escultura v16 y sus exportaciones exactas.
-> Aplica el presupuesto H06 del hito 106: ≤40.000 triángulos TPS /≤18.000 FPS,
-> materiales, memoria y LODs según el contrato. Ejecuta el alcance y las pruebas
-> de H07 en una versión nueva, incluidas silueta/deformación y medida del candidato.
-> No confundas los mapas/clips diagnósticos del 106 con recursos finales.
-> Mantén 200 FPS a 1080p con hasta ocho combatientes en Ryzen 7 3700X/GTX 1070.
-> Actualiza informe, estado e índice; crea y verifica el commit local.
-> No hagas push ni inicies H08 u otra tarea.
+El encargo preparado en el 105 y presupuestado en el 106 queda ejecutado en
+[v17](../mesh-v17/README.md). [Informe autocontenido](../../../../reports/hound-production-107/README.md),
+[inventario](../../../../reports/hound-production-107/inventario.md) y
+[medidas](../../../../reports/hound-production-107/mediciones.md).
+V16 queda exacta como maestra. H08 y las demás fichas no se han iniciado.
+Commit local del hito 107; resolver con `git log -1 --oneline --grep='^hito 107:'`.
+Sin push; no abrir la siguiente tarea automáticamente.
 
 ## Punto de partida y traspaso vigente
 
 - Base inicial: commit `68e686e`, hito 89, Hound v08.
-- Fuente acumulada actual: [hound-mesh-v16.blend](../../../../art/characters/hound/v16/hound-mesh-v16.blend).
-- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v16/hound-rig.gltf), junto a su BIN.
-- Evidencias: [v16, cobertura de armadura y vídeo](../mesh-v16/README.md).
+- Fuente acumulada actual: [hound-production-v17.blend](../../../../art/characters/hound/v17/hound-production-v17.blend).
+- Maestra aprobada para referencia/bake: [v16 exacta](../../../../art/characters/hound/v16/hound-mesh-v16.blend).
+- Exportación actual: [hound-rig.gltf](../../../../assets/characters/hound_rig/v17/hound-rig.gltf),
+  [BIN](../../../../assets/characters/hound_rig/v17/hound-rig.bin) y
+  [manifiesto](../../../../art/characters/hound/v17/production-reference.json).
+- Evidencias actuales: [v17, comparación, LODs, vídeo y runtime](../mesh-v17/README.md).
 - Estado artístico: **H05 hecha; escultura v16 aprobada**, con capucha y armadura envolvente aceptadas.
 - Rig: 53 huesos, bind pose y claves conservados; ajuste provisional de una placa lumbar al hueso de su banda lateral.
 - Contrato H06: [presupuesto vigente](../H06-contrato-presupuesto.md), cerrado como entrada técnica para H07 en el 106.
@@ -54,12 +49,16 @@ H07 lista para un nuevo encargo, sin iniciar. Copiar en la nueva tarea:
   296,77–298,76 FPS a 1080p, p99 máximo 3,914 ms, máximo 4,503 ms, 0/1.440 >5 ms.
   Release 10/10 y Debug 5/5, materiales/normales pasan. [Informe 106](../../../../reports/hound-budget-106/README.md).
 - Objetivo conservado: 200 FPS/5 ms, 1920×1080, hasta ocho combatientes en Ryzen 7 3700X/GTX 1070.
-- H07: [encargo preparado con presupuesto](H07-malla-produccion.md), **sin iniciar**.
-  H08–H13 validarán rig/agarres, mapas/clips/efectos finales y partida autoritativa;
-  no hace falta producirlos antes de la retopología. Fuente/exportación v16 exactas.
+- H07: [hecha en v17](H07-malla-produccion.md): 39.504 TPS/13.834 FPS,
+  LOD1/2 19.747/8.247; 29.745 vértices cocinados, 12,346 MiB geométricos.
+  Serie completa: 305,90–309,88 FPS, p99 máximo 3,528 ms, máximo 3,554 ms,
+  0/1.440 frames >5 ms; 345,26 MiB sin ausencias/evicciones. Se conserva la previa
+  con p99 de 4,242 ms y máximo 4,580 ms; no se oculta ni se atribuye al lector.
+  H08–H13 pendientes; rig/agarres, mapas/clips/efectos finales y partida autoritativa
+  requieren sus encargos. Fuente/exportación v16 exactas.
 - Aprobación de cierre artístico H05: **23 de septiembre de 2026**, «si, ahora esta bien», tras la entrega v16. [Registro](../../../../reports/hound-approval-100/README.md).
 - Dirección aplicada: F01–F06, caída de capucha y cobertura de armadura delantera/posterior/lateral.
-- Integración: el juego sigue usando la presentación anterior; v16 no la sustituye.
+- Integración: el juego sigue usando la presentación anterior; v17 no la sustituye.
 
 Al cerrar una ficha, actualizar aquí la fuente acumulada, exportación y evidencia
 con **rutas exactas**, incluso cuando no cambien. Registrar en su fila el commit,
@@ -310,19 +309,34 @@ con git log. Sin push ni otro hito iniciado.
 
 ## Traspaso H06 — hito 106, presupuesto disponible
 
-Fuentes, escena, malla, rig, acción y exportación v16 del inicio intactos.
+Fuentes, escena, malla, rig, acción y exportación v16 descritos en el informe 106 intactos.
 [Contrato canónico](../H06-contrato-presupuesto.md) e
 [informe reproducible](../../../../reports/hound-budget-106/README.md).
 La corrección BC recupera residencia y geometría; prueba con mapas/clips/cinco
 armas para escoger un límite de producción y reservar margen. Los assets de
 la prueba están solo en caché, no son una nueva versión artística.
-H06 hecha como entrada técnica. H07 preparada con cifras, sin iniciar; el resto
-mantiene sus dependencias. Commit local del hito 106, resolver con git log. Sin push.
+H06 hecha como entrada técnica, commit `ffc2d99`. En ese cierre H07 quedó
+preparada; su ejecución se registra a continuación. Sin push.
+
+## Traspaso H07 — hito 107, hecha
+
+Fuente/exportación/manifiesto v17 en las rutas del inicio. Escena `Hound_Mesh_v17`,
+malla `H17_DeformMesh`, rig `Hound17_Rig`, acción `Hound17_joint_check`,
+colección `HOUND_v17_EXPORT`. V16 conservada para bake; 44 archivos anteriores exactos.
+106 piezas, sin soldaduras o retirada de superficies ocultas. Diez superficies
+deformables exactas; faja con trece anillos y 24 columnas. Rig/bind/claves exactos.
+Silueta comparada, 181 frames, 33 poses/183.645 pares, roundtrip en 13 poses,
+LOD0/1/2/FPS reales del cooker y transiciones por material comprobados.
+Los mismos contactos de v16 permanecen: H08 resolverá codos, cabeza/torso,
+capucha, abdomen/guantes y los agarres/sockets de las cinco armas; Soul Reaper
+sigue inválido. No se ha iniciado H08 ni se entregan UVs, mapas o clips finales.
+[Informe y reproducción](../../../../reports/hound-production-107/README.md).
+Commit local del hito 107; resolver con git log. Sin push.
 
 ## Fichas y dependencias
 
-Estado vigente al 30/09: contrato y presupuesto del 106. Las verificaciones
-de contenido final en H08–H13 no bloquean circularmente la producción de H07.
+Estado vigente al 02/10: H07 terminada en v17, contrato H06/106 conservado.
+H08–H13 pendientes; no se inician al cerrar este hito.
 
 Los IDs H01–H13 son estables; **no son números de hito ni versiones Blender**.
 Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H02 entrega v10, H03 entrega v11 y H04 entrega v12.
@@ -334,8 +348,8 @@ Los resultados y enlaces se registran al realizar cada tarea; H01 entrega v09, H
 | [H03](H03-rostro-brazos.md) | Rostro y anatomía visible | H02 | Hecha | [v11: fuente, glTF/BIN y vistas](../mesh-v11/README.md); [informe 93](../../../../reports/hound-anatomy-93/README.md); commit `de11e03` |
 | [H04](H04-ropa-uniones.md) | Ropa y ensamblaje del conjunto | H03 | Hecha | [v12: fuente, glTF/BIN y vistas](../mesh-v12/README.md); [informe 94](../../../../reports/hound-cloth-94/README.md); commit `0643723` |
 | [H05](H05-cierre-artistico.md) | Revisión global y aprobación de escultura | H04 | Hecha; v16 aprobada el 23/09/2026 | [v16: referencia y evidencias](../mesh-v16/README.md); [aceptación 100](../../../../reports/hound-approval-100/README.md); modelado `0c28f79`; commit de cierre del hito 100, resolver con git log |
-| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Hecha como entrada técnica para H07 | [Contrato vigente](../H06-contrato-presupuesto.md); [informe 106](../../../../reports/hound-budget-106/README.md); commit del hito 106, resolver con git log |
-| [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Preparada con presupuesto; producción no iniciada | [Preparación 105](../../../../reports/hound-h07-preparation-105/README.md), commit `3dcb36d`; entrada actualizada en el 106 |
+| [H06](H06-contrato-presupuesto.md) | Contrato del motor y presupuesto medido | Base v08; actualizar con H05 | Hecha como entrada técnica para H07 | [Contrato vigente](../H06-contrato-presupuesto.md); [informe 106](../../../../reports/hound-budget-106/README.md); commit `ffc2d99` |
+| [H07](H07-malla-produccion.md) | Retopología, densidad y LODs | H05 aprobada + H06 | Hecha en v17 | [v17: fuente, glTF/BIN y evidencias](../mesh-v17/README.md); [informe 107](../../../../reports/hound-production-107/README.md); commit del hito 107, resolver con git log |
 | [H08](H08-rig-pesos.md) | Rig, pesos, sockets y agarres definitivos | H07 + H06 | Pendiente | — |
 | [H09](H09-uv-horneado.md) | UVs y horneado | H08 + H06 | Pendiente | — |
 | [H10](H10-materiales.md) | Texturas y materiales finales | H09 | Pendiente | — |

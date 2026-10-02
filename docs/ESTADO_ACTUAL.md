@@ -1,80 +1,68 @@
 # Traspaso de Gloom
 
-Actualizado: 30 de septiembre de 2026, hito 106: residencia corregida y presupuesto H06 fijado. H07 preparada, sin iniciar.
+Actualizado: 2 de octubre de 2026, hito 107: H07 terminada en v17. H08 no iniciada.
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
 y la ficha elegida. No cargar el historial del chat ni todos los hitos de abajo.
-H01–H05 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre:
-«si, ahora esta bien», tras la entrega de la última corrección de armadura.
+H01–H07 hechas. **Escultura v16 aprobada artísticamente** el 23 de septiembre:
+«si, ahora esta bien». Se conserva como maestra para referencia y futuro bake.
 [Registro H05](../reports/hound-approval-100/README.md) ·
-[Galería](art/hound/mesh-v16/README.md) · [Informe 99](../reports/hound-armor-99/README.md).
+[Galería v16](art/hound/mesh-v16/README.md).
 
-**H06 cerrada como entrada técnica de H07**, con objetivo conservado de
-**200 FPS /5 ms, 1920×1080 nativo, hasta ocho combatientes, Ryzen 7 3700X/GTX 1070**.
-[Contrato vigente](art/hound/H06-contrato-presupuesto.md) ·
-[Informe 106](../reports/hound-budget-106/README.md) ·
-[Distribuciones](../reports/hound-budget-106/mediciones.md).
-Límites: **≤40.000 triángulos TPS /≤18.000 FPS**, siete materiales TPS/cuatro FPS,
+**H07: malla de producción v17**, 19.950 vértices de autoría, **39.504 triángulos
+TPS /13.834 FPS**. LOD1/2 del cooker: **19.747 /8.247**. 106 componentes,
+95 rígidos, siete materiales TPS/cuatro FPS, 53 huesos/máximo dos influencias.
+29.745 vértices cocinados TPS; 12,346 MiB geométricos incluyendo copias LOD/FPS.
+Rig, bind pose y acción conservados; pesos, UV0 y materiales provisionales.
+[Informe 107](../reports/hound-production-107/README.md) ·
+[Inventario](../reports/hound-production-107/inventario.md) ·
+[Galería v17](art/hound/mesh-v17/README.md) ·
+[Medidas completas](../reports/hound-production-107/mediciones.md).
+
+Fuente acumulada: `art/characters/hound/v17/hound-production-v17.blend`.
+Escena `Hound_Mesh_v17`, malla `H17_DeformMesh`, rig `Hound17_Rig`,
+acción `Hound17_joint_check`, colección `HOUND_v17_EXPORT`.
+Exportación: `assets/characters/hound_rig/v17/hound-rig.gltf` y `hound-rig.bin`.
+Integridad: `art/characters/hound/v17/production-reference.json`.
+Maestra aprobada: `art/characters/hound/v16/hound-mesh-v16.blend` y sus
+exportaciones v16 **exactas**; 44 fuentes/exportaciones anteriores comprobadas
+contra sus blobs Git. Conservarlas; no regenerar encima de las versiones previas.
+
+Silueta v16/LOD0 coincidente en >99,87 % de píxeles en frente/perfil/espalda;
+error superficial muestreado máximo 2,917 mm. Diez superficies deformables
+exactas; faja con todos sus trece anillos de altura. Sin piezas eliminadas o soldadas.
+Fuente reabierta, clip completo (181 frames), 33 poses/183.645 pares, glTF
+reimportado en 13 poses, LODs/FPS y transiciones inspeccionados. Mismos conjuntos
+de contactos heredados; cero degenerados en los LODs cocinados. Detalle en el informe.
+
+**H06 vigente**, hito 106, commit `ffc2d99`: objetivo **200 FPS /5 ms,
+1920×1080 nativo, hasta ocho combatientes, Ryzen 7 3700X/GTX 1070**.
+[Contrato](art/hound/H06-contrato-presupuesto.md) ·
+[Informe 106](../reports/hound-budget-106/README.md).
+Límites: ≤40.000 triángulos TPS /≤18.000 FPS; siete materiales TPS/cuatro FPS;
 ≤54.000 vértices cocinados TPS y ≤24 MiB geométricos contando LODs/FPS.
 Hasta cuatro mapas 2K por skin, ocho conjuntos con geometría compartida y pool
 ≤192 MiB; residencia objetivo ≤384 MiB sobre techo existente de 512 MiB.
-LODs automáticos del cooker sujetos a revisión de silueta/deformación en H07.
-El contrato detalla rig/clips, márgenes, método y validaciones posteriores.
+LODs automáticos 50 %/20 %, error 0,01 y umbrales distancia/radio por primitiva 30/80.
+Se conservan skinning/Present del 104, normales del 103 y BC5/BC7 del 106.
 
-El **106 activa BC5/BC7**: la capacidad estaba deshabilitada al crear el
-dispositivo, aunque el cargador ya la soportaba. V16 pasa de 511,73 a 183,54 MiB.
-Prueba con mapas/clips/cinco armas: **355,43 MiB**, cero evicciones y recursos
-ausentes; cuatro pasadas del perfil elegido: **296,77–298,76 FPS**, p99 máximo
-**3,914 ms**, máximo **4,503 ms**, **0/1.440 frames >5 ms**, audio nulo/real.
-Las 16 pasadas completas conservan dos picos >5 ms en perfiles de 80.152 TPS;
-no se aprueba v16 por su media. Release 10/10, Debug 5/5, materiales/normales pasan.
-**Corrección del informe 104:** sus 30 evicciones iniciales ocultaban mallas
-del escenario; las 53 skins en el frustum no garantizaban integridad. Las nuevas
-medidas lo sustituyen para presupuestar. Skinning/Present y normales 103 siguen
-corregidos; no se amplía heap ni se cambia la escultura.
+V17, serie completa de cuatro pasadas 1080p, siete TPS + FPS, mapas/clips/cinco
+armas diagnósticos: **305,90–309,88 FPS**, p99 máximo **3,528 ms**, máximo
+**3,554 ms**, **0/1.440 frames >5 ms**, audio nulo/real, **345,26 MiB**,
+cero recursos ausentes/evicciones. Release 6/6 y Debug 3/3 pasan.
+Se conserva también la pasada previa: p99 **4,242 ms**, máximo **4,580 ms**;
+superó el margen p99 de 4 ms. El informe explica la interrupción del lector y
+no atribuye a ella el tiempo mayor. Total observado: 0/1.800 frames >5 ms.
 
-**H07 preparada con presupuesto disponible, sin ejecutar.**
-[Ficha autocontenida](art/hound/tasks/H07-malla-produccion.md) ·
-[Texto de inicio](art/hound/tasks/README.md#encargo-preparado-para-h07).
-Producir después en una versión nueva, conservando la maestra v16 exacta.
-Los mapas/UVs y clips del 106 son diagnósticos en caché, no entregas de H07–H12.
-Rig/agarres, mapas y clips finales se validarán en sus etapas; una partida
-humana/autoritativa de ocho sigue pendiente de integración. No son requisitos
-circulares para iniciar retopología. Commit local del 106, resolver con git log;
-sin push ni inicio de H07 u otra ficha.
-
-Fuente acumulada: `art/characters/hound/v16/hound-mesh-v16.blend`.
-Escena `Hound_Mesh_v16`, malla `H16_DeformMesh`, rig `Hound16_Rig`,
-acción `Hound16_joint_check`, colección `HOUND_v16_EXPORT`.
-Exportación: `assets/characters/hound_rig/v16/hound-rig.gltf` y BIN.
-V13/v14/v15 y sus manifiestos permanecen exactos; conservar las fuentes anteriores.
-La caída de capucha v15 se acepta con «mucho mejor!» y queda exacta en v16.
-La aceptación posterior de v16 cierra ahora la revisión artística H05.
-La aprobación es de formas: no certifica rig, holguras, agarre o malla de producción.
-
-Cambio H05/99: dos placas escapulares y tres lumbares más amplias, seis bandas
-laterales que envuelven el torso. Once piezas reconstruidas; 95 ajenas exactas,
-incluidos capucha, peto, abdominales centrales, garras, carcasas de antebrazos y grebas.
-Los hombros/axilas siguen libres; quedan separaciones entre placas.
-53 huesos, bind pose y claves intactos. Solo la nueva placa `Back_spine_1`
-pasa a `Bip001 Spine1` para acompañar su banda lateral sin cruzarla al girar.
-40.274 vértices / 80.152 triángulos: escultura de autoría, no la futura malla H07 presupuestada.
-
-Topología/pesos, 61 muestras, 33 poses globales/183.645 pares evaluados,
-roundtrip en 13 poses, regresiones v15, cooker/visor y CTest 3/3 pasan.
-Sin autointersecciones nuevas ni cruces de placas reconstruidas contra brazos,
-cabeza, cuello, capucha o manos. Se mantienen inserciones constructivas entre placas.
-[Contactos y cobertura](../reports/hound-armor-99/contacts.md).
-Siguen los límites heredados de codos, cabeza/torso, abdomen, guantes y apoyo
-Soul Reaper inválido; las holguras/pesos y agarre deben resolverse antes de UVs.
-El rig provisional aún dobla la capucha con fuerza al bajar la cabeza.
-Modelado v16: commit `0c28f79`. Aceptación: commit del hito 100; resolver con `git log --oneline --grep='^hito 100:'`.
-
-Sigue pendiente revisar una partida humana en Release y validar los assets Hound
-de producción cuando existan. Residencia resuelta y audio real repetido en 106.
-Actualizar este documento al cerrar cada hito; guardar el detalle en informes
-y crear el commit de cierre según `AGENTS.md`.
+**H08 y las demás fichas no iniciadas.** H08 debe resolver codos profundos,
+cabeza/torso, flexión de capucha, holguras de abdomen/guantes y agarres/sockets
+de las cinco armas; apoyo Soul Reaper aún inválido. Repetir LODs/rendimiento
+cuando cambien pesos o contenido. Mapas/UVs y clips diagnósticos del 106/107
+son caché, no assets finales. No se integra v17 como personaje del juego.
+La partida humana/autoritativa de ocho requiere su integración posterior.
+Commit local del hito 107; resolver con `git log -1 --oneline --grep='^hito 107:'`.
+Sin push. Actualizar estado e informe y crear commit al cerrar cada hito.
 
 ## Estado y cuidado del workspace
 
@@ -107,6 +95,18 @@ y crear el commit de cierre según `AGENTS.md`.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 107 ejecutado: H07, malla de producción v17
+
+Entrada `ffc2d99`, nueva fuente/exportación v17; escultura v16 y anteriores
+exactas. 39.504 TPS/13.834 FPS, LODs 19.747/8.247, 106 piezas y rig conservados.
+Se reduce densidad rígida y angular de faja manteniendo loops de articulación,
+normales y separación de placas. Silueta, deformación, reimportación y transiciones
+comprobadas con los límites y contactos del [informe 107](../reports/hound-production-107/README.md).
+Serie completa: 305,90–309,88 FPS, 345,26 MiB, cero ausencias/evicciones;
+la pasada previa con p99 de 4,242 ms se conserva junto a las cuatro conformes.
+Release 6/6, Debug 3/3. Herramientas compartidas conservan los controles v16.
+H08 no iniciada; sin cambios de gameplay ni integración. Commit local, sin push.
 
 ## Hito 106 ejecutado: presupuesto H06 y residencia
 

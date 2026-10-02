@@ -70,6 +70,8 @@ def snapshot(scene, model, target, transform, names=None):
         data.materials.append(material)
     for polygon,reference in zip(data.polygons,faces):
         polygon.material_index,polygon.use_smooth = reference.material_index,reference.use_smooth
+    data.normals_split_custom_set([(transform.to_3x3()@mesh.corner_normals[i].vector).normalized()
+                                  for face in faces for i in face.loop_indices])
     evaluated.to_mesh_clear()
     obj = bpy.data.objects.new(data.name,data)
     target.collection.objects.link(obj)

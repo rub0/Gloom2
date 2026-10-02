@@ -10,10 +10,13 @@ import shutil
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-version = next((v for v in ('v16','v15','v14') if '--'+v in sys.argv),'v13')
+version = next((v for v in ('v17','v16','v15','v14') if '--'+v in sys.argv),'v13')
 v14 = version!='v13'
 output = root/('docs/art/hound/mesh-'+version if v14 else 'docs/art/hound/review-h05')
-cache = root/({'v16':'.cache/hound-armor-v16','v15':'.cache/hound-hood-v15','v14':'.cache/hound-mesh-v14'}.get(version,'.cache/hound-h05'))
+cache = root/({'v17':'.cache/hound-production-v17','v16':'.cache/hound-armor-v16','v15':'.cache/hound-hood-v15',
+               'v14':'.cache/hound-mesh-v14'}.get(version,'.cache/hound-h05'))
+if version=='v17':
+    output = cache/'renders'
 output.mkdir(parents=True,exist_ok=True)
 cache.mkdir(parents=True,exist_ok=True)
 manifest_path = root/'art/characters/hound/v13/sculpture-reference.json'
@@ -199,7 +202,8 @@ if '--stills' in sys.argv:
         x = (i-1.5)*1.23
         hands.snapshot(scene,model,board,Matrix.Translation((x,0,0))@Matrix.Rotation(angle,4,'Z'))
         hands.label(board,title,x,-.12,.047)
-    hands.label(board,'H05 / ESCULTURA '+version.upper()+' / CANDIDATA A APROBACION',0,2.00,.063)
+    title = 'H07 / MALLA V17 / CONTROL DE PRODUCCION' if version=='v17' else 'H05 / ESCULTURA '+version.upper()+' / CANDIDATA A APROBACION'
+    hands.label(board,title,0,2.00,.063)
     hands.camera(board,(0,-6,.96),(0,0,.96),5.15)
     hands.render(board,output/'turnaround.png')
     for name,position,target,scale in [
@@ -228,7 +232,7 @@ if '--stills' in sys.argv:
     hands.camera(board,(0,-5,.93),(0,0,.93),2.9)
     hands.render(board,output/'approved-comparison.png')
     if v14:
-        previous = {'v16':'15','v15':'14','v14':'12'}[version]
+        previous = {'v17':'16','v16':'15','v15':'14','v14':'12'}[version]
         old_scene = bpy.data.scenes['Hound_Mesh_v'+previous]
         old_model,old_rig = old_scene.objects['H'+previous+'_DeformMesh'],old_scene.objects['Hound'+previous+'_Rig']
         old_rig.animation_data.action = None

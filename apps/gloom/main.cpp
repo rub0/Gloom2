@@ -324,6 +324,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     bool performance_audio_device = false;
     bool performance_rgba8 = false;
     bool hound_budget = false;
+    bool hound_production_v17 = false;
     gloom::uint32 hound_budget_lod = 0;
     if (performance_test) {
         gloom::backends::vulkan_present.enabled = true;
@@ -333,6 +334,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             else if (strcmp(arguments[i], "--present=fifo") == 0) gloom::backends::vulkan_present.unsynced_mode = 2;
             else if (strcmp(arguments[i], "--audio-device") == 0) performance_audio_device = true;
             else if (strcmp(arguments[i], "--rgba8") == 0) performance_rgba8 = true;
+            else if (strcmp(arguments[i], "--hound-production-v17") == 0 && performance_hound_eight) {
+                hound_production_v17 = true;
+                hound_budget = true;
+            }
             else if (strncmp(arguments[i], "--hound-budget-lod=", 19) == 0 && arguments[i][19] >= '0' &&
                 arguments[i][19] <= '2' && arguments[i][20] == 0 && performance_hound_eight) {
                 hound_budget = true;
@@ -617,8 +622,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             const auto index = static_cast<std::size_t>(character);
             const gloom::gameplay::CharacterPresentationRecipe recipe=performance_hound && character==gloom::gameplay::SliceCharacter::hound
                 ? gloom::gameplay::CharacterPresentationRecipe{.character=character,
-                    .authored_scene_uri=hound_budget ? "game:/h06-budget/hound.gltf" : "game:/characters/hound_rig/v16/hound-rig.gltf",
-                    .cooked_scene_uri=hound_budget ? "cache:/h06-budget/hound.gasset" : "cache:/characters/hound_rig/v16/hound-rig.gasset"}
+                    .authored_scene_uri=hound_production_v17 ? "game:/h07-v17/hound.gltf" :
+                        hound_budget ? "game:/h06-budget/hound.gltf" : "game:/characters/hound_rig/v16/hound-rig.gltf",
+                    .cooked_scene_uri=hound_production_v17 ? "cache:/h07-v17/hound.gasset" :
+                        hound_budget ? "cache:/h06-budget/hound.gasset" : "cache:/characters/hound_rig/v16/hound-rig.gasset"}
                 : gloom::gameplay::character_presentation_recipe(character, original_characters);
             const auto character_source =
                 gloom::assets::VirtualPath::parse(recipe.authored_scene_uri);
@@ -2586,7 +2593,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             static_cast<gloom::uint64>(residency.budget_limited_frames));
         printf("Texture compression: %s; measured missing meshes=%llu textures=%llu\n",
             renderer_view->capabilities().texture_compression_bc ? "BC5/BC7" : "RGBA8", profile.missing_meshes, profile.missing_textures);
-        if (hound_budget) printf("H06 budget probe: game:/h06-budget/hound.gltf; forced TPS LOD=%u; weapon_mask=%u\n",
+        if (hound_budget) printf("%s; forced TPS LOD=%u; weapon_mask=%u\n",
+            hound_production_v17 ? "H07 v17 probe: game:/h07-v17/hound.gltf" : "H06 budget probe: game:/h06-budget/hound.gltf",
             hound_budget_lod, benchmark_weapon_mask);
     }
     const auto job_metrics = jobs_view->metrics();

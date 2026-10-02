@@ -1,8 +1,11 @@
 # H07 — malla de producción y LODs
 
-30 de septiembre de 2026 · **Encargo preparado con presupuesto H06; producción no iniciada.**
-H05 aprobada y H06 cerrada como entrada técnica en el 106. Esta ficha ya dispone
-de límites medidos; ejecutarla requiere el encargo de H07 en una tarea posterior.
+2 de octubre de 2026 · **H07 ejecutada en v17, hito 107. H08 no iniciada.**
+Entrada H06/106, commit `ffc2d99`; v16 y exportaciones anteriores conservadas.
+[Resultado, pruebas y límites](../../../../reports/hound-production-107/README.md) ·
+[Fuente, exportación y evidencias v17](../mesh-v17/README.md).
+Commit local del hito 107; resolver con git log. Sin push.
+Se conserva debajo el encargo y sus criterios para reproducción y trazabilidad.
 
 ## Lectura mínima y entrada exacta
 
