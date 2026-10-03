@@ -1,41 +1,17 @@
 '''Render actual v04/v05 hand geometry, then save the editable v05 source and export its diagnostic glTF.'''
 import bpy
 import math
+import sys
 from mathutils import Matrix, Vector
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hound_h01_review import setup, camera as camera_for
 
 scene = bpy.data.scenes['Hound_Mesh_v05']
 bpy.context.window.scene = scene
 world = bpy.data.worlds.new('Hound05_ReviewWorld')
 world.color = (.105, .104, .10)
 output = 'D:/Projects/Gloom/docs/art/hound/mesh-v05/'
-
-
-def setup(target, width, height):
-    target.render.engine = 'BLENDER_WORKBENCH'
-    target.render.resolution_x, target.render.resolution_y = width, height
-    target.render.resolution_percentage = 100
-    target.render.image_settings.file_format = 'PNG'
-    target.display.shading.light = 'STUDIO'
-    target.display.shading.color_type = 'MATERIAL'
-    target.display.shading.show_shadows = False
-    target.display.shading.show_cavity = True
-    target.display.shading.cavity_type = 'WORLD'
-    target.display.shading.background_type = 'WORLD'
-    target.world = world
-    target.view_settings.view_transform = 'Standard'
-    target.view_settings.look = 'Medium High Contrast'
-
-
-def camera_for(target, position, look_at, scale):
-    data = bpy.data.cameras.new(target.name+'_Camera')
-    camera = bpy.data.objects.new(data.name, data)
-    target.collection.objects.link(camera)
-    camera.location = position
-    camera.rotation_euler = (Vector(look_at)-camera.location).to_track_quat('-Z', 'Y').to_euler()
-    data.type, data.ortho_scale = 'ORTHO', scale
-    target.camera = camera
-    return camera
-
 
 def label(board, body, x, z, size=.016):
     data = bpy.data.curves.new('Label_'+body, 'FONT')
@@ -45,7 +21,7 @@ def label(board, body, x, z, size=.016):
     obj.location = (x, -.14, z)
     obj.rotation_euler = (math.pi/2, 0, 0)
 
-
+scene.world = world
 setup(scene, 850, 1100)
 camera = camera_for(scene, (2.8, -5, 2.2), (0, 0, .91), 2.08)
 for name, frame in (('rest', 1), ('fingers', 151)):
@@ -55,6 +31,7 @@ for name, frame in (('rest', 1), ('fingers', 151)):
 
 for frame, filename in ((1, 'hand-comparison'), (151, 'hand-flexion')):
     board = bpy.data.scenes.new('Hound05_'+filename)
+    board.world = world
     setup(board, 1800, 850)
     for version, x, angle, only_glove, title in [
             ('04', -.36, math.pi/2, False, 'V04 / PALMA'),

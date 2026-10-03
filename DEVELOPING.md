@@ -186,8 +186,9 @@ normal/velocity, explicit impulses and queued character contact events.
 shortest quaternion path. The graphical smoke tests render the complete
 Jolt-driven cube scene through Vulkan rather than a hard-coded triangle.
 
-`gloom.render_graph` validates pass ordering, resource-state transitions,
-read-before-write and cycle failures, lifetimes and transient aliasing.
+Milestone 108 removes the unused compiled render graph. Passes execute in the
+existing Diligent sequence and use Diligent resource transitions. The Vulkan
+validation and image regression gates remain; there is no separate graph test.
 `gloom.gpu_assets` validates stable conversion from cooked-scene structures to
 owned mesh/material upload packets. The graphical smoke test also requires the
 built-in mesh, material and white texture to reach resident state on frame one.
@@ -202,8 +203,8 @@ every frame, including frames whose point-light, cluster or index arrays are
 empty. Skipping an empty upload leaves the SRB pointing at an expired Vulkan
 dynamic allocation and triggers `DvpVerifyDynamicAllocation`.
 
-`gloom.temporal` validates backend-neutral TAA/FSR/DLSS capability negotiation,
-vendor hook selection, fallback, scaled render extents and the deterministic
+`gloom.temporal` validates native TAA selection, fallback to disabled rendering,
+parameter bounds, scaled render extents and the deterministic
 Halton jitter sequence. Automated graphical modes render HDR, motion and depth
 at 75 percent of the output extent, resolve native TAA into ping-pong
 output-resolution history and require temporal telemetry. The 600-frame Vulkan
@@ -213,6 +214,12 @@ rejects disocclusions, reacts to luminance changes and applies configurable
 contrast-limited sharpening. Automated graphical modes enable the GPU-timed
 dynamic-resolution controller; smoke validation requires an observed scale
 change and a valid rebuilt history.
+
+Art scripts reuse `hound_h01_review.setup/camera` and
+`hound_h04_review.parts` (optional `keep_prefix=True` for the older checks).
+Run `tools/art/verify_shared_helpers.py` with Blender's `--background
+--factory-startup --python-exit-code 1 --python` options to check these helpers
+without writing any model or export.
 
 Renderer transforms use row-vector order (`world * view * projection`). All
 HLSL shaders are therefore compiled with Diligent's row-major matrix packing;

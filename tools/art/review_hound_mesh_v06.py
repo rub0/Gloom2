@@ -3,6 +3,9 @@ import bpy
 import math
 import sys
 from mathutils import Matrix, Vector
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hound_h01_review import setup, camera as camera_for
 
 revision = sys.argv[sys.argv.index('--')+1] if '--' in sys.argv else 'v06'
 assert revision in ('v06', 'v07', 'v08')
@@ -13,34 +16,6 @@ world = bpy.data.worlds.new('Hound'+suffix+'_ReviewWorld')
 world.color = (.105, .104, .10)
 output = 'D:/Projects/Gloom/docs/art/hound/mesh-'+revision+'/'
 
-
-def setup(target, width, height):
-    target.render.engine = 'BLENDER_WORKBENCH'
-    target.render.resolution_x, target.render.resolution_y = width, height
-    target.render.resolution_percentage = 100
-    target.render.image_settings.file_format = 'PNG'
-    target.display.shading.light = 'STUDIO'
-    target.display.shading.color_type = 'MATERIAL'
-    target.display.shading.show_shadows = False
-    target.display.shading.show_cavity = True
-    target.display.shading.cavity_type = 'WORLD'
-    target.display.shading.background_type = 'WORLD'
-    target.world = world
-    target.view_settings.view_transform = 'Standard'
-    target.view_settings.look = 'Medium High Contrast'
-
-
-def camera_for(target, position, look_at, scale):
-    data = bpy.data.cameras.new(target.name+'_Camera')
-    camera = bpy.data.objects.new(data.name, data)
-    target.collection.objects.link(camera)
-    camera.location = position
-    camera.rotation_euler = (Vector(look_at)-camera.location).to_track_quat('-Z', 'Y').to_euler()
-    data.type, data.ortho_scale = 'ORTHO', scale
-    target.camera = camera
-    return camera
-
-
 def label(board, body, x, z, size):
     data = bpy.data.curves.new('Label_'+body, 'FONT')
     data.body, data.size, data.align_x = body, size, 'CENTER'
@@ -49,7 +24,7 @@ def label(board, body, x, z, size):
     obj.location = (x, -.35, z)
     obj.rotation_euler = (math.pi/2, 0, 0)
 
-
+scene.world = world
 setup(scene, 850, 1100)
 camera = camera_for(scene, (2.8, -5, 2.2), (0, 0, .91), 2.08)
 for name, frame, position in [('rest', 1, (2.8, -5, 2.2)), ('step', 91, (2.8, -5, 2.2)),
@@ -62,6 +37,7 @@ for name, frame, position in [('rest', 1, (2.8, -5, 2.2)), ('step', 91, (2.8, -5
 
 for kind in (('waist', 'head') if revision == 'v06' else ('head', 'body') if revision == 'v08' else ('head', 'collar')):
     board = bpy.data.scenes.new('Hound'+suffix+'_'+kind+'Comparison')
+    board.world = world
     setup(board, 2000, 1050 if kind == 'head' else 550 if kind == 'collar' else 1200 if kind == 'body' else 850)
     spacing = .34 if kind == 'head' else 1.05 if kind == 'collar' else 1.12 if kind == 'body' else .58
     angle = math.pi if kind == 'waist' else .62

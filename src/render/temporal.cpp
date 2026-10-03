@@ -17,61 +17,25 @@ namespace {
     return result;
 }
 
-[[nodiscard]] bool built_in_available(const TemporalTechnique technique,
-                                      const TemporalCapabilities& capabilities) noexcept {
-    switch (technique) {
-    case TemporalTechnique::disabled:
-        return true;
-    case TemporalTechnique::taa:
-        return capabilities.motion_vectors && capabilities.jittered_camera &&
-               capabilities.history_resources && capabilities.taa;
-    case TemporalTechnique::fsr:
-        return capabilities.fsr;
-    case TemporalTechnique::dlss:
-        return capabilities.dlss;
-    }
-    return false;
-}
-
 } // namespace
 
 TemporalSelection negotiate_temporal_feature(
     TemporalSettings requested,
-    const TemporalCapabilities& capabilities,
-    const std::span<const TemporalFeatureHook* const> hooks) noexcept {
+    const TemporalCapabilities& capabilities) noexcept {
     requested.render_scale = std::clamp(requested.render_scale, 0.5F, 1.0F);
     requested.history_weight = std::clamp(requested.history_weight, 0.0F, 0.98F);
     TemporalSelection result{.technique = requested.technique,
                              .render_scale = requested.render_scale,
                              .history_weight = requested.history_weight,
                              .sharpness = std::clamp(requested.sharpness, 0.0F, 1.0F)};
-    if (requested.technique == TemporalTechnique::disabled) {
+    if (requested.technique == TemporalTechnique::disabled || !capabilities.motion_vectors ||
+        !capabilities.jittered_camera || !capabilities.history_resources || !capabilities.taa) {
+        result.fell_back = requested.technique != TemporalTechnique::disabled;
+        result.technique = TemporalTechnique::disabled;
         result.render_scale = 1.0F;
         result.history_weight = 0.0F;
         result.sharpness = 0.0F;
-        return result;
     }
-    if (requested.technique == TemporalTechnique::taa &&
-        built_in_available(requested.technique, capabilities)) {
-        return result;
-    }
-    for (const auto* hook : hooks) {
-        if (hook != nullptr && hook->technique() == requested.technique &&
-            hook->available(capabilities)) {
-            result.hook = hook;
-            return result;
-        }
-    }
-    result.fell_back = true;
-    result.hook = nullptr;
-    if (built_in_available(TemporalTechnique::taa, capabilities)) {
-        result.technique = TemporalTechnique::taa;
-        return result;
-    }
-    result.technique = TemporalTechnique::disabled;
-    result.render_scale = 1.0F;
-    result.history_weight = 0.0F;
-    result.sharpness = 0.0F;
     return result;
 }
 

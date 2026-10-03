@@ -1,4 +1,6 @@
 #include <gloom/backends/winhttp_match_service.hpp>
+#include <gloom/backends/winhttp_request.hpp>
+#include <stdlib.h>
 #include <gloom/backends/match_reader_credential.hpp>
 #include <gloom/backends/match_reader_grants.hpp>
 #include <gloom/gameplay/match_service_wire.hpp>
@@ -134,51 +136,13 @@ private:
         const std::string_view suffix, const std::string_view body, const std::string_view token) const {
         if (!(reader_ ? valid_match_identity_credential(token) : valid_match_credential(token)))
             return std::unexpected{"Invalid match service credential"};
-        URL_COMPONENTS parts{sizeof(parts)}; parts.dwSchemeLength = parts.dwHostNameLength =
-            parts.dwUrlPathLength = parts.dwUserNameLength = parts.dwPasswordLength =
-            parts.dwExtraInfoLength = static_cast<DWORD>(-1);
-        const auto wide_url = widen(url_);
-        if (!WinHttpCrackUrl(wide_url.c_str(), 0, 0, &parts) || parts.nScheme != INTERNET_SCHEME_HTTPS ||
-            parts.dwUserNameLength || parts.dwPasswordLength || parts.dwExtraInfoLength)
-            return std::unexpected{"Match service URL must be valid HTTPS"};
-        const std::wstring host{parts.lpszHostName, parts.dwHostNameLength};
-        std::wstring path{parts.lpszUrlPath, parts.dwUrlPathLength};
-        if (!path.empty() && path.back() == L'/') path.pop_back();
-        path += widen(suffix);
-        HINTERNET session = WinHttpOpen(L"Gloom/0.1", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
-                                        WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-        if (!session) return std::unexpected{"WinHTTP session failed"};
-        WinHttpSetTimeouts(session, 3000, 3000, 5000, 5000);
-        HINTERNET connection = WinHttpConnect(session, host.c_str(), parts.nPort, 0);
-        HINTERNET request_handle = connection ? WinHttpOpenRequest(connection, widen(method).c_str(),
-            path.c_str(), nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE) : nullptr;
-        DWORD redirect_policy = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
-        if (request_handle) WinHttpSetOption(request_handle, WINHTTP_OPTION_REDIRECT_POLICY,
-                                             &redirect_policy, sizeof(redirect_policy));
-        const auto auth = widen("Authorization: Bearer " + std::string{token} + "\r\nContent-Type: text/plain; charset=utf-8");
-        BOOL ok = request_handle && WinHttpSendRequest(request_handle, auth.c_str(), static_cast<DWORD>(-1),
-            body.empty() ? WINHTTP_NO_REQUEST_DATA : const_cast<char*>(body.data()),
-            static_cast<DWORD>(body.size()), static_cast<DWORD>(body.size()), 0) &&
-            WinHttpReceiveResponse(request_handle, nullptr);
-        HttpResult result;
-        if (ok) {
-            DWORD size = sizeof(result.status);
-            ok = WinHttpQueryHeaders(request_handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-                                     nullptr, &result.status, &size, nullptr);
-        }
-        while (ok) {
-            DWORD available = 0;
-            if (!WinHttpQueryDataAvailable(request_handle, &available)) { ok = FALSE; break; }
-            if (available == 0) break;
-            if (result.body.size() + available > 4 * 1024 * 1024) { ok = FALSE; break; }
-            const auto offset = result.body.size(); result.body.resize(offset + available); DWORD read = 0;
-            if (!WinHttpReadData(request_handle, result.body.data()+offset, available, &read)) { ok = FALSE; break; }
-            result.body.resize(offset + read);
-        }
-        if (request_handle) WinHttpCloseHandle(request_handle);
-        if (connection) WinHttpCloseHandle(connection);
-        WinHttpCloseHandle(session);
-        if (!ok) return std::unexpected{"Match service HTTPS request failed"};
+        const WinHttpResponse response = winhttp_request(widen(url_).c_str(), widen(suffix).c_str(), widen(method).c_str(),
+            widen("Authorization: Bearer " + std::string{token} + "\r\nContent-Type: text/plain; charset=utf-8").c_str(),
+            body.data(), static_cast<uint32>(body.size()), 4 * 1024 * 1024, L"Gloom/0.1");
+        if (response.error) return std::unexpected{response.error};
+        HttpResult result{.status = response.status};
+        if (response.size) result.body.assign(response.body, response.size);
+        free(response.body);
         if (result.status < 200 || result.status >= 300) {
             if (result.status == 404 && method == "DELETE") return result;
             return std::unexpected{"Match service returned HTTP " + std::to_string(result.status)};

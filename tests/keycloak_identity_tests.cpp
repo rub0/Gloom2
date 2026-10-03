@@ -1,4 +1,5 @@
 #include <gloom/backends/keycloak_identity.hpp>
+#include <gloom/backends/winhttp_request.hpp>
 #include <gloom/backends/match_https_host.hpp>
 #include <gloom/gameplay/match_discovery.hpp>
 #include <httplib.h>
@@ -34,6 +35,12 @@ void replace(std::string& text, std::string_view from, std::string_view to) {
 }
 
 void deterministic() {
+    const wchar_t* invalid_urls[] = {L"http://localhost/api", L"https://user:password@localhost/api",
+        L"https://localhost/api?q=1", L"https://localhost/api#fragment", L"https://", L"https://localhost:invalid/api"};
+    for (gloom::uint32 i = 0; i < sizeof(invalid_urls) / sizeof(invalid_urls[0]); ++i) {
+        const WinHttpResponse response = winhttp_request(invalid_urls[i], L"", L"POST", L"Content-Type: text/plain", "", 0, 64 * 1024, L"GloomTest");
+        expect(response.error && !response.body && response.size == 0 && response.status == 0, "Native HTTPS boundary accepted an invalid base URL");
+    }
     using Clock = KeycloakSignIn::Clock;
     auto now = Clock::time_point{};
     const auto issuer = settings().issuer;

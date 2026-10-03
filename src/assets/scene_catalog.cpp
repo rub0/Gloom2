@@ -9,10 +9,9 @@
 #include <vector>
 
 namespace gloom::assets {
-namespace {
 
 [[nodiscard]] std::expected<VirtualPath, std::string>
-join_source(const VirtualPath& source, std::string dependency) {
+dependency_source_path(const VirtualPath& source, std::string dependency) {
     std::ranges::replace(dependency, '\\', '/');
     const auto separator = source.relative().find_last_of('/');
     std::string combined = separator == std::string_view::npos
@@ -26,7 +25,7 @@ join_source(const VirtualPath& source, std::string dependency) {
         const auto part = combined.substr(begin, end - begin);
         if (part == "..") {
             if (parts.empty()) {
-                return std::unexpected{"Scene dependency escapes its virtual mount"};
+                return std::unexpected{"Asset dependency escapes its virtual mount"};
             }
             parts.pop_back();
         } else if (!part.empty() && part != ".") {
@@ -65,8 +64,6 @@ dependency_cooked_path(const VirtualPath& scene, const AssetId id) {
     return VirtualPath::parse(result);
 }
 
-} // namespace
-
 std::expected<DiscoveredSceneCatalog, std::string>
 discover_cooked_scene(const VirtualFileSystem& filesystem,
                       const VirtualPath& source,
@@ -94,7 +91,7 @@ discover_cooked_scene(const VirtualFileSystem& filesystem,
         if (image.embedded || image.external_uri.empty()) {
             continue;
         }
-        const auto dependency_source = join_source(source, image.external_uri);
+        const auto dependency_source = dependency_source_path(source, image.external_uri);
         if (!dependency_source) {
             return std::unexpected{dependency_source.error()};
         }

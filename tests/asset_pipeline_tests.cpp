@@ -236,6 +236,11 @@ void test_virtual_paths_and_catalog() {
              normalized->mount() == "game" &&
              normalized->relative() == "models/ship.gltf",
          "Virtual path normalization is incorrect");
+  expect(gloom::assets::dependency_source_path(*normalized, "..\\textures/./diffuse.png").value().string() == "game:/textures/diffuse.png",
+         "Shared dependency resolver changed parent/separator normalization");
+  expect(!gloom::assets::dependency_source_path(*normalized, "../../secret.png"), "Shared dependency resolver escaped its mount");
+  expect(gloom::assets::dependency_cooked_path(*gloom::assets::VirtualPath::parse("cache:/models/ship.gasset"), {.value = 0x1234}).value().string() ==
+             "cache:/models/dependencies/1234.gasset", "Shared cooked dependency layout changed");
   expect(!gloom::assets::VirtualPath::parse("game:/../secret.txt"),
          "Virtual path traversal was accepted");
   expect(!gloom::assets::VirtualPath::parse("C:\\absolute.txt"),

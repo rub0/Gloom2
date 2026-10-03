@@ -8,6 +8,7 @@ from pathlib import Path
 from mathutils.bvhtree import BVHTree
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 import hound_h03_review as review
+from hound_h04_review import parts
 
 root = Path(__file__).resolve().parents[2]
 scene,source = bpy.data.scenes['Hound_Mesh_v11'],bpy.data.scenes['Hound_Mesh_v10']
@@ -31,21 +32,9 @@ for curve,old in zip(action.fcurves,old_action.fcurves):
         assert key.co==previous.co and key.interpolation==previous.interpolation
         assert key.handle_left==previous.handle_left and key.handle_right==previous.handle_right
 
-
-def parts(obj):
-    result = {g.name[5:]: [] for g in obj.vertex_groups if g.name.startswith('PART_')}
-    for vertex in obj.data.vertices:
-        for group in vertex.groups:
-            name = obj.vertex_groups[group.group].name
-            if name.startswith('PART_'):
-                result[name[5:]].append(vertex.index)
-    return result
-
-
 def weights(obj,index):
     return {obj.vertex_groups[w.group].name:w.weight for w in obj.data.vertices[index].groups
             if obj.vertex_groups[w.group].name in rig.data.bones}
-
 
 before,after = parts(original),parts(model)
 assert before.keys()==after.keys() and len(after)==96
@@ -134,7 +123,6 @@ for frame in range(1,182,3):
             rigid_error = max(rigid_error,error)
     ev.to_mesh_clear()
 assert rigid_error<2e-6
-
 
 # Fitted details stay within 1.5 mm of the facial surface in front view; embedded back caps are intentional.
 from mathutils import Vector

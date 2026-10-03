@@ -3,6 +3,10 @@ import bpy
 import bmesh
 import json
 import math
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hound_h04_review import parts
 from mathutils import Quaternion
 
 scene = bpy.data.scenes['Hound_Mesh_v05']
@@ -33,23 +37,11 @@ for curve, reference in zip(action.fcurves, reference_action.fcurves):
     for point, other in zip(curve.keyframe_points, reference.keyframe_points):
         assert point.co == other.co and point.interpolation == other.interpolation
 
-
-def parts(obj):
-    result = {g.name: [] for g in obj.vertex_groups if g.name.startswith('PART_')}
-    for vertex in obj.data.vertices:
-        for group in vertex.groups:
-            name = obj.vertex_groups[group.group].name
-            if name in result:
-                result[name].append(vertex.index)
-    return result
-
-
 def bone_weights(obj, index):
     return {obj.vertex_groups[g.group].name: g.weight for g in obj.data.vertices[index].groups
             if obj.vertex_groups[g.group].name in rig.data.bones}
 
-
-source_parts, target_parts = parts(original), parts(model)
+source_parts, target_parts = parts(original, keep_prefix=True), parts(model, keep_prefix=True)
 replaced, added = {'PART_Palm_L', 'PART_Palm_R'}, {'PART_Hand_glove_L', 'PART_Hand_glove_R'}
 assert set(source_parts)-replaced == set(target_parts)-added
 preserved = 0

@@ -4,6 +4,12 @@
 
 Accepted for the first resident GPU asset and forward-PBR path.
 
+Milestone 108 supersedes the render-graph portion below. Its compiled ordering,
+barriers and alias slots were never consumed by the renderer. The existing
+Diligent pass sequence and native resource transitions now stand alone; GPU
+asset ownership and the graphical validation gates remain. The following
+decision records the historical implementation.
+
 ## Context
 
 The renderer previously owned one compile-time cube and issued clear, draw and

@@ -4,6 +4,12 @@
 
 Accepted.
 
+Milestone 108 supersedes the speculative vendor-hook portion below. The current
+API selects native TAA or disabled rendering and retains the same jitter,
+history, scaling, sharpening and dynamic-resolution behavior. FSR/DLSS have no
+production adapter; a future integration will define its interface when needed.
+The following decision records the historical foundation.
+
 ## Context
 
 The HDR lighting frame rendered at swapchain resolution and discarded all

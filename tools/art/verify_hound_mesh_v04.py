@@ -2,6 +2,10 @@
 import bpy
 import json
 import math
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hound_h04_review import parts
 
 scene = bpy.data.scenes['Hound_Mesh_v04']
 bpy.context.window.scene = scene
@@ -22,18 +26,7 @@ for bone in rig.data.bones:
     assert bone.matrix_local == reference.matrix_local and abs(bone.length-reference.length) < 1e-7
     assert (bone.parent.name if bone.parent else None) == (reference.parent.name if reference.parent else None)
 
-
-def parts(obj):
-    result = {g.name: [] for g in obj.vertex_groups if g.name.startswith('PART_')}
-    for vertex in obj.data.vertices:
-        for group in vertex.groups:
-            name = obj.vertex_groups[group.group].name
-            if name in result:
-                result[name].append(vertex.index)
-    return result
-
-
-source_parts, target_parts = parts(original), parts(model)
+source_parts, target_parts = parts(original, keep_prefix=True), parts(model, keep_prefix=True)
 replaced = {'PART_'+name+'_'+suffix for name in ('Arm_continuous', 'Biceps', 'Deltoid') for suffix in ('L', 'R')}
 assert set(source_parts)-replaced == set(target_parts)-{'PART_Arm_surface_L', 'PART_Arm_surface_R'}
 preserved = 0

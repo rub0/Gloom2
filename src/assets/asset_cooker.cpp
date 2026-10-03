@@ -1,78 +1,15 @@
 #include <gloom/assets/asset_cooker.hpp>
 
 #include <gloom/assets/gltf_importer.hpp>
+#include <gloom/assets/scene_catalog.hpp>
 #include <gloom/assets/texture_asset.hpp>
 
 #include <algorithm>
-#include <array>
-#include <charconv>
 #include <string_view>
 #include <unordered_map>
 
 namespace gloom::assets {
 namespace {
-
-[[nodiscard]] std::expected<VirtualPath, std::string>
-join_source_path(const VirtualPath &source, const std::string_view dependency) {
-  std::vector<std::string> parts;
-  const std::string_view source_relative = source.relative();
-  const std::size_t source_separator = source_relative.find_last_of('/');
-  std::string combined =
-      source_separator == std::string_view::npos
-          ? std::string{}
-          : std::string{source_relative.substr(0, source_separator)};
-  if (!combined.empty()) {
-    combined.push_back('/');
-  }
-  combined.append(dependency);
-  std::ranges::replace(combined, '\\', '/');
-  std::size_t begin = 0;
-  while (begin <= combined.size()) {
-    const std::size_t end = combined.find('/', begin);
-    const std::string part = combined.substr(
-        begin, (end == std::string::npos ? combined.size() : end) - begin);
-    if (part == "..") {
-      if (parts.empty()) {
-        return std::unexpected{"glTF dependency escapes its virtual mount"};
-      }
-      parts.pop_back();
-    } else if (!part.empty() && part != ".") {
-      parts.push_back(part);
-    }
-    if (end == std::string::npos) {
-      break;
-    }
-    begin = end + 1;
-  }
-  std::string path{source.mount()};
-  path += ":/";
-  for (std::size_t index = 0; index < parts.size(); ++index) {
-    if (index > 0)
-      path.push_back('/');
-    path += parts[index];
-  }
-  return VirtualPath::parse(path);
-}
-
-[[nodiscard]] std::string hexadecimal(const std::uint64_t value) {
-  std::array<char, 16> buffer{};
-  const auto result =
-      std::to_chars(buffer.data(), buffer.data() + buffer.size(), value, 16);
-  return std::string{buffer.data(), result.ptr};
-}
-
-[[nodiscard]] std::expected<VirtualPath, std::string>
-dependency_output_path(const VirtualPath &scene_output, const AssetId id) {
-  const std::string_view relative = scene_output.relative();
-  const std::size_t separator = relative.find_last_of('/');
-  std::string path{scene_output.mount()};
-  path += ":/";
-  if (separator != std::string_view::npos) {
-    path.append(relative.substr(0, separator + 1));
-  }
-  path += "dependencies/" + hexadecimal(id.value) + ".gasset";
-  return VirtualPath::parse(path);
-}
 
 [[nodiscard]] std::expected<TextureSemantic,std::string> texture_semantic(const ImportedScene& scene,
                                                const std::uint32_t image_index) {
@@ -130,7 +67,7 @@ cook_gltf(const VirtualFileSystem &filesystem, const VirtualPath &source,
     if (image.external_uri.empty() || discovered.contains(image.external_uri)) {
       continue;
     }
-    const auto dependency_source = join_source_path(source, image.external_uri);
+    const auto dependency_source = dependency_source_path(source, image.external_uri);
     if (!dependency_source) {
       return std::unexpected{dependency_source.error()};
     }
@@ -142,7 +79,7 @@ cook_gltf(const VirtualFileSystem &filesystem, const VirtualPath &source,
     const AssetId dependency_id =
         make_asset_id(*dependency_source, AssetType::texture);
     const auto dependency_output =
-        dependency_output_path(cooked_output, dependency_id);
+        dependency_cooked_path(cooked_output, dependency_id);
     if (!dependency_output) {
       return std::unexpected{dependency_output.error()};
     }

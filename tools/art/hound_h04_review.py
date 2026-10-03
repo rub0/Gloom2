@@ -37,13 +37,13 @@ def pose(scene, rig, kind, amount=1):
     bpy.context.view_layer.update()
 
 
-def parts(model):
-    result = {g.name[5:]: [] for g in model.vertex_groups if g.name.startswith('PART_')}
+def parts(model, keep_prefix=False):
+    result = {g.name if keep_prefix else g.name[5:]: [] for g in model.vertex_groups if g.name.startswith('PART_')}
     for vertex in model.data.vertices:
         for weight in vertex.groups:
             name = model.vertex_groups[weight.group].name
             if name.startswith('PART_'):
-                result[name[5:]].append(vertex.index)
+                result[name if keep_prefix else name[5:]].append(vertex.index)
     return result
 
 

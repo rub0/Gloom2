@@ -4,6 +4,9 @@ import bmesh
 import json
 import math
 import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hound_h04_review import parts
 from mathutils import Matrix, Quaternion, Vector
 from mathutils.bvhtree import BVHTree
 
@@ -38,23 +41,11 @@ for curve, reference in zip(action.fcurves, reference_action.fcurves):
     for point, other in zip(curve.keyframe_points, reference.keyframe_points):
         assert point.co == other.co and point.interpolation == other.interpolation
 
-
-def parts(obj):
-    result = {g.name: [] for g in obj.vertex_groups if g.name.startswith('PART_')}
-    for vertex in obj.data.vertices:
-        for group in vertex.groups:
-            name = obj.vertex_groups[group.group].name
-            if name in result:
-                result[name].append(vertex.index)
-    return result
-
-
 def bone_weights(obj, index):
     return {obj.vertex_groups[g.group].name: g.weight for g in obj.data.vertices[index].groups
             if obj.vertex_groups[g.group].name in rig.data.bones}
 
-
-source_parts, target_parts = parts(original), parts(model)
+source_parts, target_parts = parts(original, keep_prefix=True), parts(model, keep_prefix=True)
 replaced = {'PART_'+name for name in ('Head_planes', 'Jaw_plane', 'Nose_plane', 'Cheek_L', 'Cheek_R', 'Brow_L', 'Brow_R',
                                      'Pelvis_cloth', 'Waist_sash', 'Leg_continuous_L', 'Leg_continuous_R')}
 added = {'PART_Trousers_continuous', 'PART_Waist_wrap', 'PART_Head_surface'}

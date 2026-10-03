@@ -123,6 +123,9 @@ validation remain in H08–H13; they are not circular prerequisites for retopolo
 19. Production temporal reconstruction: depth-history disocclusion rejection,
     reactive luminance weighting, contrast-adaptive sharpening, backend-neutral
     dynamic resolution with hysteresis and temporal performance telemetry.
+
+    Milestone 108 removes the unused render-graph declarations and speculative
+    vendor discovery hooks from 17–18; native Diligent transitions and TAA remain.
 20. First Gloom gameplay vertical slice: audited legacy life, shield, Soul
     Reaper and respawn rules; a deterministic player-versus-combatant arena;
     backend-neutral fixed-tick gameplay; SDL controls, Jolt level geometry,
@@ -404,4 +407,5 @@ have cooked-content paths. Later milestones will add remaining abilities when
 their rules are established. Future network architecture choices such as
 relay/NAT services, multi-host availability and durable game-state recovery
 require a separately scoped milestone; they are not scheduled work in this list.
-Optional FSR/DLSS integrations remain behind the render-feature layer.
+Optional FSR/DLSS integrations remain future work. Milestone 108 removes their
+speculative discovery hooks; an integration will define its interface when needed.

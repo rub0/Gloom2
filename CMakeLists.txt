@@ -97,7 +97,6 @@ add_library(gloom_engine STATIC
     src/render/temporal.cpp
     src/render/lighting.cpp
     src/render/visibility.cpp
-    src/render/render_graph.cpp
     src/backends/placeholder.cpp
     src/backends/sdl_window.cpp
     src/backends/diligent_renderer.cpp
@@ -432,98 +431,49 @@ if(BUILD_TESTING)
         add_test(NAME gloom.match_https COMMAND gloom_match_https_tests $<TARGET_FILE:gloom_match_service>)
         set_tests_properties(gloom.match_https PROPERTIES LABELS network TIMEOUT 60)
     endif()
-    add_executable(gloom_tests tests/engine_tests.cpp)
-    target_link_libraries(gloom_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.unit COMMAND gloom_tests)
+    foreach(test IN ITEMS
+        "gloom_tests|tests/engine_tests.cpp|gloom.unit"
+        "gloom_job_tests|tests/job_system_tests.cpp|gloom.jobs"
+        "gloom_entity_tests|tests/entity_tests.cpp|gloom.entities"
+        "gloom_physics_tests|tests/physics_tests.cpp|gloom.physics"
+        "gloom_render_scene_tests|tests/render_scene_tests.cpp|gloom.render_scene"
+        "gloom_gpu_asset_tests|tests/gpu_asset_tests.cpp|gloom.gpu_assets"
+        "gloom_visibility_tests|tests/visibility_tests.cpp|gloom.visibility"
+        "gloom_lighting_tests|tests/lighting_tests.cpp|gloom.lighting"
+        "gloom_temporal_tests|tests/temporal_tests.cpp|gloom.temporal"
+        "gloom_vertical_slice_tests|tests/vertical_slice_tests.cpp|gloom.vertical_slice"
+        "gloom_vertical_slice_network_tests|tests/vertical_slice_network_tests.cpp|gloom.vertical_slice_network"
+        "gloom_match_lobby_tests|tests/match_lobby_tests.cpp|gloom.match_lobby"
+        "gloom_match_discovery_tests|tests/match_discovery_tests.cpp|gloom.match_discovery"
+        "gloom_vertical_slice_transport_tests|tests/vertical_slice_transport_tests.cpp|gloom.vertical_slice_transport"
+        "gloom_network_tests|tests/network_transport_tests.cpp|gloom.network"
+        "gloom_network_protocol_tests|tests/network_protocol_tests.cpp|gloom.network_protocol"
+        "gloom_network_replication_tests|tests/network_replication_tests.cpp|gloom.network_replication"
+        "gloom_combat_tests|tests/combat_tests.cpp|gloom.combat"
+        "gloom_session_tests|tests/session_tests.cpp|gloom.session"
+        "gloom_legacy_movement_tests|tests/legacy_movement_tests.cpp|gloom.legacy_movement"
+        "gloom_audio_backend_tests|tests/audio_backend_tests.cpp|gloom.audio_no_device"
+    )
+        string(REPLACE "|" ";" fields "${test}")
+        list(GET fields 0 target)
+        list(GET fields 1 source)
+        list(GET fields 2 name)
+        add_executable(${target} ${source})
+        target_link_libraries(${target} PRIVATE gloom_engine)
+        add_test(NAME ${name} COMMAND ${target})
+    endforeach()
 
-    add_executable(gloom_job_tests tests/job_system_tests.cpp)
-    target_link_libraries(gloom_job_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.jobs COMMAND gloom_job_tests)
-
-    add_executable(gloom_entity_tests tests/entity_tests.cpp)
-    target_link_libraries(gloom_entity_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.entities COMMAND gloom_entity_tests)
-
-    add_executable(gloom_physics_tests tests/physics_tests.cpp)
-    target_link_libraries(gloom_physics_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.physics COMMAND gloom_physics_tests)
-
-    add_executable(gloom_render_scene_tests tests/render_scene_tests.cpp)
-    target_link_libraries(gloom_render_scene_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.render_scene COMMAND gloom_render_scene_tests)
-
-    add_executable(gloom_render_graph_tests tests/render_graph_tests.cpp)
-    target_link_libraries(gloom_render_graph_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.render_graph COMMAND gloom_render_graph_tests)
-
-    add_executable(gloom_gpu_asset_tests tests/gpu_asset_tests.cpp)
-    target_link_libraries(gloom_gpu_asset_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.gpu_assets COMMAND gloom_gpu_asset_tests)
-
-    add_executable(gloom_visibility_tests tests/visibility_tests.cpp)
-    target_link_libraries(gloom_visibility_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.visibility COMMAND gloom_visibility_tests)
-
-    add_executable(gloom_lighting_tests tests/lighting_tests.cpp)
-    target_link_libraries(gloom_lighting_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.lighting COMMAND gloom_lighting_tests)
-
-    add_executable(gloom_temporal_tests tests/temporal_tests.cpp)
-    target_link_libraries(gloom_temporal_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.temporal COMMAND gloom_temporal_tests)
-
-    add_executable(gloom_vertical_slice_tests tests/vertical_slice_tests.cpp)
-    target_link_libraries(gloom_vertical_slice_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.vertical_slice COMMAND gloom_vertical_slice_tests)
-
-    add_executable(gloom_vertical_slice_network_tests tests/vertical_slice_network_tests.cpp)
-    target_link_libraries(gloom_vertical_slice_network_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.vertical_slice_network COMMAND gloom_vertical_slice_network_tests)
-
-    add_executable(gloom_match_lobby_tests tests/match_lobby_tests.cpp)
-    target_link_libraries(gloom_match_lobby_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.match_lobby COMMAND gloom_match_lobby_tests)
-
-    add_executable(gloom_match_discovery_tests tests/match_discovery_tests.cpp)
-    target_link_libraries(gloom_match_discovery_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.match_discovery COMMAND gloom_match_discovery_tests)
-
-    add_executable(gloom_vertical_slice_transport_tests tests/vertical_slice_transport_tests.cpp)
-    target_link_libraries(gloom_vertical_slice_transport_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.vertical_slice_transport COMMAND gloom_vertical_slice_transport_tests)
     set_tests_properties(gloom.vertical_slice_transport PROPERTIES LABELS network TIMEOUT 15)
 
     add_test(NAME gloom.slice_server_smoke
              COMMAND gloom_slice_server 127.0.0.1:0 --ticks 3)
     set_tests_properties(gloom.slice_server_smoke PROPERTIES LABELS network TIMEOUT 5)
 
-    add_executable(gloom_network_tests tests/network_transport_tests.cpp)
-    target_link_libraries(gloom_network_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.network COMMAND gloom_network_tests)
     set_tests_properties(gloom.network PROPERTIES TIMEOUT 15)
-
-    add_executable(gloom_network_protocol_tests tests/network_protocol_tests.cpp)
-    target_link_libraries(gloom_network_protocol_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.network_protocol COMMAND gloom_network_protocol_tests)
-
-    add_executable(gloom_network_replication_tests tests/network_replication_tests.cpp)
-    target_link_libraries(gloom_network_replication_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.network_replication COMMAND gloom_network_replication_tests)
-
-    add_executable(gloom_combat_tests tests/combat_tests.cpp)
-    target_link_libraries(gloom_combat_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.combat COMMAND gloom_combat_tests)
-
-    add_executable(gloom_session_tests tests/session_tests.cpp)
-    target_link_libraries(gloom_session_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.session COMMAND gloom_session_tests)
 
     add_executable(gloom_factory_restoration_tests tests/factory_restoration_tests.cpp)
     add_executable(gloom_character_restoration_tests tests/character_restoration_tests.cpp)
     add_executable(gloom_animation_vfx_tests tests/animation_vfx_tests.cpp)
-    add_executable(gloom_legacy_movement_tests tests/legacy_movement_tests.cpp)
-    target_link_libraries(gloom_legacy_movement_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.legacy_movement COMMAND gloom_legacy_movement_tests)
 
     add_executable(gloom_legacy_arsenal_tests tests/legacy_arsenal_tests.cpp)
     add_executable(gloom_legacy_pickups_tests tests/legacy_pickups_tests.cpp)
@@ -538,9 +488,6 @@ if(BUILD_TESTING)
     target_compile_definitions(gloom_audio_network_tests PRIVATE GLOOM_BINARY_ROOT="${CMAKE_BINARY_DIR}")
     add_dependencies(gloom_audio_network_tests gloom_audio_content)
     add_test(NAME gloom.audio_network COMMAND gloom_audio_network_tests)
-    add_executable(gloom_audio_backend_tests tests/audio_backend_tests.cpp)
-    target_link_libraries(gloom_audio_backend_tests PRIVATE gloom_engine)
-    add_test(NAME gloom.audio_no_device COMMAND gloom_audio_backend_tests)
     set_tests_properties(gloom.audio_no_device PROPERTIES ENVIRONMENT "SDL_AUDIODRIVER=gloom_missing_driver")
     target_link_libraries(gloom_legacy_pickups_tests PRIVATE gloom_engine)
     add_test(NAME gloom.legacy_pickups COMMAND gloom_legacy_pickups_tests)

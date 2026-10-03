@@ -1,5 +1,4 @@
 #include <gloom/backends/diligent_renderer.hpp>
-#include <gloom/render/render_graph.hpp>
 #include <gloom/render/lighting.hpp>
 #include <gloom/render/temporal.hpp>
 #include <gloom/render/ui.hpp>
@@ -777,7 +776,6 @@ struct DiligentRenderer::Impl {
     std::deque<render::RenderAssetId> release_requests;
     std::unordered_map<render::RenderAssetId, render::GpuAssetState, render::RenderAssetIdHash>
         asset_states;
-    render::RenderGraph frame_graph;
     std::vector<DeferredMesh> deferred_meshes;
     std::vector<DeferredTexture> deferred_textures;
     render::GpuResidencyMetrics residency_metrics;
@@ -2107,122 +2105,6 @@ void DiligentRenderer::begin_frame() {
         dynamic_metrics.filtered_frame_milliseconds;
     impl_->frame_metrics.dynamic_resolution_changes = dynamic_metrics.scale_changes;
     impl_->frame_metrics.temporal_history_valid = impl_->history_valid;
-    impl_->frame_graph.clear();
-    const auto back_buffer = impl_->frame_graph.add_resource(
-        "swapchain color",
-        {.external = true, .initial_state = render::ResourceState::present});
-    const auto hdr_color = impl_->frame_graph.add_resource(
-        "HDR scene color",
-        {.format = Diligent::TEX_FORMAT_RGBA16_FLOAT,
-         .width = impl_->render_extent.width,
-         .height = impl_->render_extent.height,
-         .external = true,
-         .initial_state = render::ResourceState::shader_resource});
-    const auto motion = impl_->frame_graph.add_resource(
-        "motion vectors",
-        {.format = Diligent::TEX_FORMAT_RG16_FLOAT,
-         .width = impl_->render_extent.width,
-         .height = impl_->render_extent.height,
-         .external = true,
-         .initial_state = render::ResourceState::shader_resource});
-    const auto linear_depth = impl_->frame_graph.add_resource(
-        "linear depth",
-        {.format = Diligent::TEX_FORMAT_R32_FLOAT,
-         .width = impl_->render_extent.width,
-         .height = impl_->render_extent.height,
-         .external = true,
-         .initial_state = render::ResourceState::shader_resource});
-    const auto history = impl_->frame_graph.add_resource(
-        "temporal history",
-        {.format = Diligent::TEX_FORMAT_RGBA16_FLOAT,
-         .width = impl_->output_extent.width,
-         .height = impl_->output_extent.height,
-         .external = true,
-         .initial_state = render::ResourceState::shader_resource});
-    const auto history_depth = impl_->frame_graph.add_resource(
-        "temporal depth history",
-        {.format = Diligent::TEX_FORMAT_R32_FLOAT,
-         .width = impl_->output_extent.width,
-         .height = impl_->output_extent.height,
-         .external = true,
-         .initial_state = render::ResourceState::shader_resource});
-    const auto depth = impl_->frame_graph.add_resource(
-        "swapchain depth",
-        {.external = true, .initial_state = render::ResourceState::depth_write});
-    const auto shadow_depth = impl_->frame_graph.add_resource(
-        "directional shadow cascades",
-        {.format = Diligent::TEX_FORMAT_D32_FLOAT,
-         .width = 1024,
-         .height = 1024,
-         .external = true,
-         .initial_state = render::ResourceState::shader_resource});
-    const render::ResourceUse shadow_uses[]{
-        {shadow_depth, render::AccessMode::write, render::ResourceState::depth_write},
-    };
-    const auto shadow_pass = impl_->frame_graph.add_pass("directional shadow cascades",
-                                                         shadow_uses);
-    const render::ResourceUse clear_uses[]{
-        {hdr_color, render::AccessMode::write, render::ResourceState::render_target},
-        {motion, render::AccessMode::write, render::ResourceState::render_target},
-        {linear_depth, render::AccessMode::write, render::ResourceState::render_target},
-        {depth, render::AccessMode::write, render::ResourceState::depth_write},
-    };
-    const auto clear_pass = impl_->frame_graph.add_pass("clear", clear_uses);
-    impl_->frame_graph.add_dependency(shadow_pass, clear_pass);
-    const render::ResourceUse opaque_uses[]{
-        {hdr_color, render::AccessMode::read_write, render::ResourceState::render_target},
-        {motion, render::AccessMode::read_write, render::ResourceState::render_target},
-        {linear_depth, render::AccessMode::read_write, render::ResourceState::render_target},
-        {depth, render::AccessMode::read_write, render::ResourceState::depth_write},
-    };
-    const auto opaque_pass = impl_->frame_graph.add_pass("opaque PBR", opaque_uses);
-    impl_->frame_graph.add_dependency(clear_pass, opaque_pass);
-    const auto particle_color=impl_->frame_graph.add_resource("particle color snapshot",{.format=Diligent::TEX_FORMAT_RGBA16_FLOAT,.external=true});
-    const auto particle_depth=impl_->frame_graph.add_resource("particle depth snapshot",{.format=Diligent::TEX_FORMAT_R32_FLOAT,.external=true});
-    const render::ResourceUse particle_copy_uses[]{
-        {hdr_color,render::AccessMode::read,render::ResourceState::copy_source},
-        {linear_depth,render::AccessMode::read,render::ResourceState::copy_source},
-        {particle_color,render::AccessMode::write,render::ResourceState::copy_destination},
-        {particle_depth,render::AccessMode::write,render::ResourceState::copy_destination}};
-    const auto particle_copy_pass=impl_->frame_graph.add_pass("particle scene snapshots",particle_copy_uses);
-    impl_->frame_graph.add_dependency(opaque_pass,particle_copy_pass);
-    const render::ResourceUse particle_uses[]{
-        {particle_color,render::AccessMode::read,render::ResourceState::shader_resource},
-        {particle_depth,render::AccessMode::read,render::ResourceState::shader_resource},
-        {hdr_color,render::AccessMode::read_write,render::ResourceState::render_target}};
-    const auto particle_pass=impl_->frame_graph.add_pass("sorted transparent particles and refraction",particle_uses);
-    impl_->frame_graph.add_dependency(particle_copy_pass,particle_pass);
-    auto tone_input = hdr_color;
-    auto tone_dependency = particle_pass;
-    if (impl_->temporal_selection.technique == render::TemporalTechnique::taa) {
-        const render::ResourceUse temporal_uses[]{
-            {hdr_color, render::AccessMode::read, render::ResourceState::shader_resource},
-            {motion, render::AccessMode::read, render::ResourceState::shader_resource},
-            {linear_depth, render::AccessMode::read, render::ResourceState::shader_resource},
-            {history, render::AccessMode::read_write, render::ResourceState::render_target},
-            {history_depth,
-             render::AccessMode::read_write,
-             render::ResourceState::render_target},
-        };
-        tone_dependency = impl_->frame_graph.add_pass("native TAA resolve", temporal_uses);
-        impl_->frame_graph.add_dependency(particle_pass, tone_dependency);
-        tone_input = history;
-    }
-    const render::ResourceUse tone_map_uses[]{
-        {tone_input, render::AccessMode::read, render::ResourceState::shader_resource},
-        {back_buffer, render::AccessMode::write, render::ResourceState::render_target},
-    };
-    const auto tone_map_pass = impl_->frame_graph.add_pass("ACES tone map", tone_map_uses);
-    impl_->frame_graph.add_dependency(tone_dependency, tone_map_pass);
-    const render::ResourceUse present_uses[]{
-        {back_buffer, render::AccessMode::read, render::ResourceState::present},
-    };
-    const auto present_pass = impl_->frame_graph.add_pass("present", present_uses);
-    impl_->frame_graph.add_dependency(tone_map_pass, present_pass);
-    if (const auto graph = impl_->frame_graph.compile(); !graph) {
-        throw std::runtime_error{"Could not compile frame render graph: " + graph.error()};
-    }
-
     if (!impl_->hdr_render_target || !impl_->motion_render_target ||
         !impl_->linear_depth_render_target || !impl_->scene_depth_target) {
         return;

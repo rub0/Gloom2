@@ -1,6 +1,13 @@
 # Traspaso de Gloom
 
-Actualizado: 2 de octubre de 2026, hito 107: H07 terminada en v17. H08 no iniciada.
+Actualizado: 3 de octubre de 2026, hito 108: simplificación Ponytail. H07 terminada en v17; H08 no iniciada.
+
+**Último cambio técnico:** siete recortes aplicados, 839 líneas netas menos,
+sin dependencias nuevas. Release 45/49 y Debug 46/49; cuatro fallos previos
+reproducidos con el código del hito 107 (GNS 25 en Release y tres comparaciones
+visuales). Las 64 capturas antes/después pasan con los umbrales existentes;
+Vulkan/Hound pasan en ambos builds. Sin regresiones nuevas detectadas ni cambios
+de fuentes/exportaciones/referencias. [Informe 108](../reports/ponytail-108/README.md).
 
 **Para una tarea nueva de Hound:** leer este inicio, AGENTS.md y el
 [índice de tareas](art/hound/tasks/README.md); después, solo su CONTEXTO.md
@@ -95,6 +102,23 @@ Sin push. Actualizar estado e informe y crear commit al cerrar cada hito.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 108 ejecutado: simplificación Ponytail y comprobación de regresiones
+
+Se elimina el grafo cuyo plan no usaba el renderer y los hooks FSR/DLSS sin
+adaptadores. Se comparten carga de contenido, rutas cooker/catálogo, funciones
+de arte y transporte WinHTTP; CMake agrupa 21 registros uniformes conservando
+propiedades. 839 líneas netas menos incluyendo pruebas nuevas, sin dependencias.
+TAA, transiciones Diligent, TLS/permisos/límites, prioridades y propietarios
+conservados. Los scripts de arte mantienen las claves de cada versión.
+
+Builds completos Release/Debug. Baterías completas: 45/49 y 46/49. Los fallos
+visuales y GNS 25 Release también se reproducen antes del refactor. Comparación
+contra ese código: 51 capturas UI, seis Factory y siete personajes/arma pasan;
+no se cambian las referencias para ocultar los fallos existentes. Blender y
+sintaxis de 74 scripts pasan; modelos/exportaciones intactos. Detalles y límites
+en el [informe 108](../reports/ponytail-108/README.md). No se inicia H08.
+Commit local, sin push; resolver con `git log -1 --oneline --grep='^hito 108:'`.
 
 ## Hito 107 ejecutado: H07, malla de producción v17
 

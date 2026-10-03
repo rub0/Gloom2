@@ -1,9 +1,6 @@
 #pragma once
 
-#include <array>
 #include <cstdint>
-#include <span>
-#include <string_view>
 
 namespace gloom::render {
 
@@ -16,8 +13,6 @@ struct RenderExtent {
 enum class TemporalTechnique : std::uint8_t {
     disabled,
     taa,
-    fsr,
-    dlss,
 };
 
 struct TemporalCapabilities {
@@ -30,8 +25,6 @@ struct TemporalCapabilities {
     bool reactive_history{false};
     bool contrast_adaptive_sharpening{false};
     bool dynamic_resolution{false};
-    bool fsr{false};
-    bool dlss{false};
 };
 
 struct DynamicResolutionSettings {
@@ -50,22 +43,11 @@ struct TemporalSettings {
     DynamicResolutionSettings dynamic_resolution;
 };
 
-// Vendor integrations implement this small discovery hook while their GPU adapter
-// remains private to the renderer backend.
-class TemporalFeatureHook {
-public:
-    virtual ~TemporalFeatureHook() = default;
-    [[nodiscard]] virtual std::string_view name() const noexcept = 0;
-    [[nodiscard]] virtual TemporalTechnique technique() const noexcept = 0;
-    [[nodiscard]] virtual bool available(const TemporalCapabilities& capabilities) const noexcept = 0;
-};
-
 struct TemporalSelection {
     TemporalTechnique technique{TemporalTechnique::disabled};
     float render_scale{1.0F};
     float history_weight{0.0F};
     float sharpness{0.0F};
-    const TemporalFeatureHook* hook{nullptr};
     bool fell_back{false};
 };
 
@@ -100,8 +82,7 @@ struct CameraJitter {
 
 [[nodiscard]] TemporalSelection negotiate_temporal_feature(
     TemporalSettings requested,
-    const TemporalCapabilities& capabilities,
-    std::span<const TemporalFeatureHook* const> hooks = {}) noexcept;
+    const TemporalCapabilities& capabilities) noexcept;
 
 [[nodiscard]] RenderExtent scaled_render_extent(RenderExtent output, float scale) noexcept;
 [[nodiscard]] CameraJitter temporal_jitter(std::uint64_t frame_index,

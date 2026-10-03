@@ -123,6 +123,29 @@ void apply_pickup_visual(gloom::render::RenderInstance& instance, const gloom::g
     }
 }
 
+bool discover_presentation(gloom::core::JobSystem& jobs, const gloom::assets::VirtualFileSystem& filesystem,
+    gloom::render::Renderer& renderer, const std::string_view source_text, const std::string_view cooked_text,
+    std::unique_ptr<gloom::assets::AssetCatalog>& catalog, std::unique_ptr<gloom::assets::AsyncAssetLoader>& loader,
+    std::unique_ptr<gloom::assets::AssetResidencyCoordinator>& residency, std::optional<gloom::assets::SceneTicket>& ticket,
+    const gloom::assets::AssetPriority priority, const char* failure_message) {
+    const std::expected<gloom::assets::VirtualPath, std::string> source = gloom::assets::VirtualPath::parse(source_text);
+    const std::expected<gloom::assets::VirtualPath, std::string> cooked = gloom::assets::VirtualPath::parse(cooked_text);
+    if (!source || !cooked) {
+        std::cerr << failure_message << ": " << (source ? cooked.error() : source.error()) << '\n';
+        return false;
+    }
+    std::expected<gloom::assets::DiscoveredSceneCatalog, std::string> discovered = gloom::assets::discover_cooked_scene(filesystem, *source, *cooked);
+    if (!discovered) {
+        std::cerr << failure_message << ": " << discovered.error() << '\n';
+        return false;
+    }
+    catalog = std::make_unique<gloom::assets::AssetCatalog>(std::move(discovered->catalog));
+    loader = std::make_unique<gloom::assets::AsyncAssetLoader>(jobs, filesystem, *catalog);
+    residency = std::make_unique<gloom::assets::AssetResidencyCoordinator>(jobs, *loader, *catalog, renderer);
+    ticket = residency->request_scene(discovered->scene, priority);
+    return true;
+}
+
 constexpr std::array slice_roster{
     gloom::gameplay::SlicePlayerSelection{},
     gloom::gameplay::SlicePlayerSelection{.ability = gloom::gameplay::SliceAbility::guard},
@@ -566,54 +589,15 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         factory_filesystem = std::make_unique<gloom::assets::VirtualFileSystem>();
         factory_filesystem->mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets");
         factory_filesystem->mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content");
-        const auto source = gloom::assets::VirtualPath::parse(
-            "game:/factory/cargo_lift.gltf");
-        const auto cooked = gloom::assets::VirtualPath::parse(
-            "cache:/factory/cargo_lift.gasset");
-        if (source && cooked) {
-            auto discovered = gloom::assets::discover_cooked_scene(
-                *factory_filesystem, *source, *cooked);
-            if (discovered) {
-                const auto scene = discovered->scene;
-                factory_catalog = std::make_unique<gloom::assets::AssetCatalog>(
-                    std::move(discovered->catalog));
-                factory_asset_loader = std::make_unique<gloom::assets::AsyncAssetLoader>(
-                    *jobs_view, *factory_filesystem, *factory_catalog);
-                factory_residency =
-                    std::make_unique<gloom::assets::AssetResidencyCoordinator>(
-                        *jobs_view, *factory_asset_loader, *factory_catalog, *renderer_view);
-                factory_lift_ticket = factory_residency->request_scene(
-                    scene, gloom::assets::AssetPriority::critical);
-            } else {
-                std::cerr << "Factory authored lift unavailable; using logical blockout: "
-                          << discovered.error() << '\n';
-            }
-        }
-        const auto surface_source = gloom::assets::VirtualPath::parse(
-            original_factory ? "game:/legacy/factory.gltf" : "game:/factory/surface_modules.gltf");
-        const auto surface_cooked = gloom::assets::VirtualPath::parse(
-            original_factory ? "cache:/legacy/factory.gasset" : "cache:/factory/surface_modules.gasset");
-        if (surface_source && surface_cooked) {
-            auto discovered = gloom::assets::discover_cooked_scene(
-                *factory_filesystem, *surface_source, *surface_cooked);
-            if (discovered) {
-                const auto scene = discovered->scene;
-                factory_surface_catalog = std::make_unique<gloom::assets::AssetCatalog>(
-                    std::move(discovered->catalog));
-                factory_surface_loader = std::make_unique<gloom::assets::AsyncAssetLoader>(
-                    *jobs_view, *factory_filesystem, *factory_surface_catalog);
-                factory_surface_residency =
-                    std::make_unique<gloom::assets::AssetResidencyCoordinator>(
-                        *jobs_view, *factory_surface_loader, *factory_surface_catalog,
-                        *renderer_view);
-                factory_surface_ticket = factory_surface_residency->request_scene(
-                    scene, gloom::assets::AssetPriority::high);
-            } else {
-                if (original_factory) throw std::runtime_error{"Factory original content unavailable: " + discovered.error()};
-                std::cerr << "Factory authored surfaces unavailable; using logical blockout: "
-                          << discovered.error() << '\n';
-            }
-        }
+        discover_presentation(*jobs_view, *factory_filesystem, *renderer_view, "game:/factory/cargo_lift.gltf", "cache:/factory/cargo_lift.gasset",
+            factory_catalog, factory_asset_loader, factory_residency, factory_lift_ticket, gloom::assets::AssetPriority::critical,
+            "Factory authored lift unavailable; using logical blockout");
+        if (!discover_presentation(*jobs_view, *factory_filesystem, *renderer_view,
+            original_factory ? "game:/legacy/factory.gltf" : "game:/factory/surface_modules.gltf",
+            original_factory ? "cache:/legacy/factory.gasset" : "cache:/factory/surface_modules.gasset",
+            factory_surface_catalog, factory_surface_loader, factory_surface_residency, factory_surface_ticket, gloom::assets::AssetPriority::high,
+            original_factory ? "Factory original content unavailable" : "Factory authored surfaces unavailable; using logical blockout") && original_factory)
+            return 1;
         for (const auto character : {gloom::gameplay::SliceCharacter::hound,
                                      gloom::gameplay::SliceCharacter::berserker,
                                      gloom::gameplay::SliceCharacter::archangel,
@@ -627,73 +611,30 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                     .cooked_scene_uri=hound_production_v17 ? "cache:/h07-v17/hound.gasset" :
                         hound_budget ? "cache:/h06-budget/hound.gasset" : "cache:/characters/hound_rig/v16/hound-rig.gasset"}
                 : gloom::gameplay::character_presentation_recipe(character, original_characters);
-            const auto character_source =
-                gloom::assets::VirtualPath::parse(recipe.authored_scene_uri);
-            const auto character_cooked =
-                gloom::assets::VirtualPath::parse(recipe.cooked_scene_uri);
-            if (!character_source || !character_cooked) {
-                continue;
-            }
-            auto discovered = gloom::assets::discover_cooked_scene(
-                *factory_filesystem, *character_source, *character_cooked);
-            if (!discovered) {
-                if (performance_hound && character==gloom::gameplay::SliceCharacter::hound)
-                    throw std::runtime_error{"Hound v16 diagnostic content unavailable: "+discovered.error()};
-                std::cerr << "Authored character unavailable; using recipe fallback: "
-                          << discovered.error() << '\n';
-                continue;
-            }
-            const auto scene = discovered->scene;
-            character_catalogs[index] = std::make_unique<gloom::assets::AssetCatalog>(
-                std::move(discovered->catalog));
-            character_loaders[index] = std::make_unique<gloom::assets::AsyncAssetLoader>(
-                *jobs_view, *factory_filesystem, *character_catalogs[index]);
-            character_residencies[index] =
-                std::make_unique<gloom::assets::AssetResidencyCoordinator>(
-                    *jobs_view, *character_loaders[index], *character_catalogs[index],
-                    *renderer_view);
-            character_tickets[index] = character_residencies[index]->request_scene(
-                scene, gloom::assets::AssetPriority::high);
+            if (!discover_presentation(*jobs_view, *factory_filesystem, *renderer_view, recipe.authored_scene_uri, recipe.cooked_scene_uri,
+                character_catalogs[index], character_loaders[index], character_residencies[index], character_tickets[index],
+                gloom::assets::AssetPriority::high, performance_hound && character == gloom::gameplay::SliceCharacter::hound
+                    ? "Hound diagnostic content unavailable" : "Authored character unavailable; using recipe fallback") &&
+                performance_hound && character == gloom::gameplay::SliceCharacter::hound) return 1;
         }
-        const auto discover_presentation = [&] (
-            const std::string_view source_text, const std::string_view cooked_text,
-            std::unique_ptr<gloom::assets::AssetCatalog>& catalog,
-            std::unique_ptr<gloom::assets::AsyncAssetLoader>& loader,
-            std::unique_ptr<gloom::assets::AssetResidencyCoordinator>& residency,
-            std::optional<gloom::assets::SceneTicket>& ticket) {
-            const auto source = gloom::assets::VirtualPath::parse(source_text);
-            const auto cooked = gloom::assets::VirtualPath::parse(cooked_text);
-            if (!source || !cooked) {
-                return;
-            }
-            auto discovered = gloom::assets::discover_cooked_scene(
-                *factory_filesystem, *source, *cooked);
-            if (!discovered) {
-                std::cerr << "Authored first-person content unavailable; using fallback: "
-                          << discovered.error() << '\n';
-                return;
-            }
-            const auto scene = discovered->scene;
-            catalog = std::make_unique<gloom::assets::AssetCatalog>(
-                std::move(discovered->catalog));
-            loader = std::make_unique<gloom::assets::AsyncAssetLoader>(
-                *jobs_view, *factory_filesystem, *catalog);
-            residency = std::make_unique<gloom::assets::AssetResidencyCoordinator>(
-                *jobs_view, *loader, *catalog, *renderer_view);
-            ticket = residency->request_scene(scene, gloom::assets::AssetPriority::high);
-        };
         const auto weapon_slot=original_characters ? gloom::gameplay::original_weapon_presentation(slice_selection.weapon) : gloom::gameplay::soul_reaper_presentation;
-        discover_presentation(weapon_slot.source_uri,
-                              weapon_slot.cooked_uri,
-                              weapon_catalog, weapon_loader, weapon_residency,
-                              weapon_ticket);
-        if(original_characters)for(std::size_t i=1;i<gloom::gameplay::slice_weapon_count;++i){const auto slot=gloom::gameplay::original_weapon_presentation(static_cast<gloom::gameplay::SliceWeapon>(i));discover_presentation(slot.source_uri,slot.cooked_uri,arsenal_catalogs[i-1],arsenal_loaders[i-1],arsenal_residencies[i-1],arsenal_tickets[i-1]);}
-        discover_presentation(gloom::gameplay::hound_ability_presentation.source_uri,
-                              gloom::gameplay::hound_ability_presentation.cooked_uri,
-                              ability_catalog, ability_loader, ability_residency,
-                              ability_ticket);
-        discover_presentation("game:/effects/effects.gltf","cache:/effects/effects.gasset",
-                              effects_catalog,effects_loader,effects_residency,effects_ticket);
+        discover_presentation(*jobs_view, *factory_filesystem, *renderer_view, weapon_slot.source_uri, weapon_slot.cooked_uri,
+            weapon_catalog, weapon_loader, weapon_residency, weapon_ticket, gloom::assets::AssetPriority::high,
+            "Authored first-person content unavailable; using fallback");
+        if (original_characters) for (gloom::uint32 i = 1; i < gloom::gameplay::slice_weapon_count; ++i) {
+            const gloom::gameplay::CookedPresentationSlot slot =
+                gloom::gameplay::original_weapon_presentation(static_cast<gloom::gameplay::SliceWeapon>(i));
+            discover_presentation(*jobs_view, *factory_filesystem, *renderer_view, slot.source_uri, slot.cooked_uri,
+                arsenal_catalogs[i - 1], arsenal_loaders[i - 1], arsenal_residencies[i - 1], arsenal_tickets[i - 1], gloom::assets::AssetPriority::high,
+                "Authored first-person content unavailable; using fallback");
+        }
+        discover_presentation(*jobs_view, *factory_filesystem, *renderer_view,
+            gloom::gameplay::hound_ability_presentation.source_uri, gloom::gameplay::hound_ability_presentation.cooked_uri,
+            ability_catalog, ability_loader, ability_residency, ability_ticket, gloom::assets::AssetPriority::high,
+            "Authored first-person content unavailable; using fallback");
+        discover_presentation(*jobs_view, *factory_filesystem, *renderer_view, "game:/effects/effects.gltf", "cache:/effects/effects.gasset",
+            effects_catalog, effects_loader, effects_residency, effects_ticket, gloom::assets::AssetPriority::high,
+            "Authored first-person content unavailable; using fallback");
     }
     std::unique_ptr<gloom::backends::JoltWorld> slice_authoritative_physics;
     if (vertical_slice && !vertical_slice_join) {
