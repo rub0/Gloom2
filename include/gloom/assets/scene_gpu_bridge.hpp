@@ -29,9 +29,7 @@ struct GpuSceneUploads {
 
 // Converts the backend-neutral cooked scene representation into owned upload
 // packets. It performs no GPU work and is therefore safe on loader/job threads.
-[[nodiscard]] GpuSceneUploads build_gpu_scene_uploads(const ImportedScene& scene,
-                                                      AssetId scene_asset,
-                                                      std::span<const render::RenderAssetId>
-                                                          image_assets = {});
+[[nodiscard]] GpuSceneUploads build_gpu_scene_uploads(
+    const ImportedScene& scene, AssetId scene_asset, std::span<const render::RenderAssetId> image_assets = {});
 
 } // namespace gloom::assets

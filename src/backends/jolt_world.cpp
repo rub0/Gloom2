@@ -47,7 +47,7 @@ constexpr std::uint32_t count = 2;
 } // namespace broad_phase_layers
 
 class BroadPhaseLayers final : public JPH::BroadPhaseLayerInterface {
-public:
+  public:
     [[nodiscard]] JPH::uint GetNumBroadPhaseLayers() const override {
         return broad_phase_layers::count;
     }
@@ -67,9 +67,8 @@ public:
 };
 
 class ObjectLayerPairs final : public JPH::ObjectLayerPairFilter {
-public:
-    [[nodiscard]] bool ShouldCollide(const JPH::ObjectLayer first,
-                                     const JPH::ObjectLayer second) const override {
+  public:
+    [[nodiscard]] bool ShouldCollide(const JPH::ObjectLayer first, const JPH::ObjectLayer second) const override {
         if (first == object_layers::non_moving) {
             return second == object_layers::moving;
         }
@@ -78,9 +77,8 @@ public:
 };
 
 class ObjectVsBroadPhase final : public JPH::ObjectVsBroadPhaseLayerFilter {
-public:
-    [[nodiscard]] bool ShouldCollide(const JPH::ObjectLayer object_layer,
-                                     const JPH::BroadPhaseLayer broad_phase_layer) const override {
+  public:
+    [[nodiscard]] bool ShouldCollide(const JPH::ObjectLayer object_layer, const JPH::BroadPhaseLayer broad_phase_layer) const override {
         if (object_layer == object_layers::non_moving) {
             return broad_phase_layer == broad_phase_layers::moving;
         }
@@ -110,9 +108,13 @@ void release_jolt_runtime() noexcept {
 }
 
 class RuntimeLease final {
-public:
-    RuntimeLease() { acquire_jolt_runtime(); }
-    ~RuntimeLease() { release_jolt_runtime(); }
+  public:
+    RuntimeLease() {
+        acquire_jolt_runtime();
+    }
+    ~RuntimeLease() {
+        release_jolt_runtime();
+    }
 
     RuntimeLease(const RuntimeLease&) = delete;
     RuntimeLease& operator=(const RuntimeLease&) = delete;
@@ -158,8 +160,8 @@ void validate_settings(const physics::PhysicsSettings& settings) {
     if (!std::isfinite(settings.fixed_time_step) || settings.fixed_time_step <= 0.0) {
         throw std::invalid_argument{"Physics fixed time step must be finite and positive"};
     }
-    if (settings.max_sub_steps == 0 || settings.max_bodies == 0 || settings.max_body_pairs == 0 ||
-        settings.max_contact_constraints == 0 || settings.temporary_allocator_bytes == 0) {
+    if (settings.max_sub_steps == 0 || settings.max_bodies == 0 || settings.max_body_pairs == 0 || settings.max_contact_constraints == 0 ||
+        settings.temporary_allocator_bytes == 0) {
         throw std::invalid_argument{"Physics capacity settings must be greater than zero"};
     }
 }
@@ -168,16 +170,14 @@ void validate_settings(const physics::PhysicsSettings& settings) {
     if (!entity.valid()) {
         return 0;
     }
-    return static_cast<std::uint64_t>(entity.generation) << 32U |
-           static_cast<std::uint64_t>(entity.index);
+    return static_cast<std::uint64_t>(entity.generation) << 32U | static_cast<std::uint64_t>(entity.index);
 }
 
 [[nodiscard]] core::EntityId unpack_entity(const std::uint64_t value) noexcept {
     if (value == 0) {
         return {};
     }
-    return {.index = static_cast<std::uint32_t>(value),
-            .generation = static_cast<std::uint32_t>(value >> 32U)};
+    return {.index = static_cast<std::uint32_t>(value), .generation = static_cast<std::uint32_t>(value >> 32U)};
 }
 
 struct BodyPairKey {
@@ -189,31 +189,24 @@ struct BodyPairKey {
 
 struct BodyPairHash {
     [[nodiscard]] std::size_t operator()(const BodyPairKey pair) const noexcept {
-        const std::uint64_t packed = static_cast<std::uint64_t>(pair.first) << 32U |
-                                     static_cast<std::uint64_t>(pair.second);
+        const std::uint64_t packed = static_cast<std::uint64_t>(pair.first) << 32U | static_cast<std::uint64_t>(pair.second);
         return std::hash<std::uint64_t>{}(packed);
     }
 };
 
 class ContactCollector final : public JPH::ContactListener {
-public:
+  public:
     void begin_step(const std::uint64_t simulation_step) {
         const std::scoped_lock lock{mutex_};
         simulation_step_ = simulation_step;
         emitted_pairs_.clear();
     }
 
-    void OnContactAdded(const JPH::Body& first,
-                        const JPH::Body& second,
-                        const JPH::ContactManifold& manifold,
-                        JPH::ContactSettings&) override {
+    void OnContactAdded(const JPH::Body& first, const JPH::Body& second, const JPH::ContactManifold& manifold, JPH::ContactSettings&) override {
         add_contact(first, second, manifold, false);
     }
 
-    void OnContactPersisted(const JPH::Body& first,
-                            const JPH::Body& second,
-                            const JPH::ContactManifold& manifold,
-                            JPH::ContactSettings&) override {
+    void OnContactPersisted(const JPH::Body& first, const JPH::Body& second, const JPH::ContactManifold& manifold, JPH::ContactSettings&) override {
         add_contact(first, second, manifold, true);
     }
 
@@ -241,8 +234,7 @@ public:
             const std::scoped_lock lock{mutex_};
             result.swap(events_);
         }
-        std::ranges::sort(result, [](const physics::TriggerEvent& first,
-                                    const physics::TriggerEvent& second) {
+        std::ranges::sort(result, [](const physics::TriggerEvent& first, const physics::TriggerEvent& second) {
             if (first.simulation_step != second.simulation_step) {
                 return first.simulation_step < second.simulation_step;
             }
@@ -269,7 +261,7 @@ public:
         return result;
     }
 
-private:
+  private:
     struct Contact {
         BodyPairKey pair;
         physics::BodyId first_body;
@@ -280,20 +272,13 @@ private:
         bool second_sensor{false};
     };
 
-    void add_contact(const JPH::Body& first,
-                     const JPH::Body& second,
-                     const JPH::ContactManifold& manifold,
-                     const bool persisted) {
+    void add_contact(const JPH::Body& first, const JPH::Body& second, const JPH::ContactManifold& manifold, const bool persisted) {
         if (!first.IsSensor() && !second.IsSensor()) {
             return;
         }
-        const JPH::SubShapeIDPair sub_shapes{first.GetID(),
-                                             manifold.mSubShapeID1,
-                                             second.GetID(),
-                                             manifold.mSubShapeID2};
+        const JPH::SubShapeIDPair sub_shapes{first.GetID(), manifold.mSubShapeID1, second.GetID(), manifold.mSubShapeID2};
         const Contact contact{
-            .pair = {.first = first.GetID().GetIndexAndSequenceNumber(),
-                     .second = second.GetID().GetIndexAndSequenceNumber()},
+            .pair = {.first = first.GetID().GetIndexAndSequenceNumber(), .second = second.GetID().GetIndexAndSequenceNumber()},
             .first_body = {first.GetID().GetIndexAndSequenceNumber()},
             .second_body = {second.GetID().GetIndexAndSequenceNumber()},
             .first_entity = unpack_entity(first.GetUserData()),
@@ -319,31 +304,23 @@ private:
     }
 
     void emit(const physics::TriggerEventType type, const Contact& contact) {
-        const auto append = [&](const core::EntityId trigger,
-                                const core::EntityId other,
-                                const physics::BodyId trigger_body,
+        const auto append = [&](const core::EntityId trigger, const core::EntityId other, const physics::BodyId trigger_body,
                                 const physics::BodyId other_body) {
             if (!trigger.valid() || !other.valid()) {
                 return;
             }
             events_.push_back({.trigger = trigger,
-                               .other = other,
-                               .trigger_body = trigger_body,
-                               .other_body = other_body,
-                               .simulation_step = simulation_step_,
-                               .type = type});
+                .other = other,
+                .trigger_body = trigger_body,
+                .other_body = other_body,
+                .simulation_step = simulation_step_,
+                .type = type});
         };
         if (contact.first_sensor) {
-            append(contact.first_entity,
-                   contact.second_entity,
-                   contact.first_body,
-                   contact.second_body);
+            append(contact.first_entity, contact.second_entity, contact.first_body, contact.second_body);
         }
         if (contact.second_sensor) {
-            append(contact.second_entity,
-                   contact.first_entity,
-                   contact.second_body,
-                   contact.first_body);
+            append(contact.second_entity, contact.first_entity, contact.second_body, contact.first_body);
         }
     }
 
@@ -356,29 +333,24 @@ private:
 };
 
 class CharacterContactCollector final : public JPH::CharacterContactListener {
-public:
+  public:
     void begin_step(const std::uint64_t step) {
         const std::scoped_lock lock{mutex_};
         simulation_step_ = step;
     }
 
-    void OnContactAdded(const JPH::CharacterVirtual* character,
-                        const JPH::CharacterContact& contact,
-                        JPH::CharacterContactSettings&) override {
+    void OnContactAdded(const JPH::CharacterVirtual* character, const JPH::CharacterContact& contact, JPH::CharacterContactSettings&) override {
         append(character, contact, physics::CharacterContactEventType::entered);
     }
-    void OnContactPersisted(const JPH::CharacterVirtual* character,
-                            const JPH::CharacterContact& contact,
-                            JPH::CharacterContactSettings&) override {
+    void OnContactPersisted(const JPH::CharacterVirtual* character, const JPH::CharacterContact& contact, JPH::CharacterContactSettings&) override {
         append(character, contact, physics::CharacterContactEventType::stayed);
     }
-    void OnContactRemoved(const JPH::CharacterVirtual* character,
-                          const JPH::BodyID& body,
-                          const JPH::SubShapeID&) override {
+    void OnContactRemoved(const JPH::CharacterVirtual* character, const JPH::BodyID& body, const JPH::SubShapeID&) override {
         const std::scoped_lock lock{mutex_};
         const auto key = make_key(character, body);
         const auto found = active_.find(key);
-        if (found == active_.end()) return;
+        if (found == active_.end())
+            return;
         auto event = found->second;
         event.type = physics::CharacterContactEventType::exited;
         event.simulation_step = simulation_step_;
@@ -388,36 +360,39 @@ public:
 
     [[nodiscard]] std::vector<physics::CharacterContactEvent> take_events() {
         std::vector<physics::CharacterContactEvent> result;
-        { const std::scoped_lock lock{mutex_}; result.swap(events_); }
+        {
+            const std::scoped_lock lock{mutex_};
+            result.swap(events_);
+        }
         std::ranges::sort(result, [](const auto& a, const auto& b) {
-            if (a.simulation_step != b.simulation_step) return a.simulation_step < b.simulation_step;
-            if (a.character.index != b.character.index) return a.character.index < b.character.index;
-            if (a.other.index != b.other.index) return a.other.index < b.other.index;
-            if (a.other_body.value != b.other_body.value) return a.other_body.value < b.other_body.value;
+            if (a.simulation_step != b.simulation_step)
+                return a.simulation_step < b.simulation_step;
+            if (a.character.index != b.character.index)
+                return a.character.index < b.character.index;
+            if (a.other.index != b.other.index)
+                return a.other.index < b.other.index;
+            if (a.other_body.value != b.other_body.value)
+                return a.other_body.value < b.other_body.value;
             return a.type < b.type;
         });
         return result;
     }
 
-private:
-    [[nodiscard]] static std::uint64_t make_key(const JPH::CharacterVirtual* character,
-                                                const JPH::BodyID body) {
-        return static_cast<std::uint64_t>(character->GetID().GetValue()) << 32U |
-               body.GetIndexAndSequenceNumber();
+  private:
+    [[nodiscard]] static std::uint64_t make_key(const JPH::CharacterVirtual* character, const JPH::BodyID body) {
+        return static_cast<std::uint64_t>(character->GetID().GetValue()) << 32U | body.GetIndexAndSequenceNumber();
     }
-    void append(const JPH::CharacterVirtual* character,
-                const JPH::CharacterContact& contact,
-                const physics::CharacterContactEventType type) {
+    void append(const JPH::CharacterVirtual* character, const JPH::CharacterContact& contact, const physics::CharacterContactEventType type) {
         const auto owner = unpack_entity(character->GetUserData());
         const auto other = unpack_entity(contact.mUserData);
-        if (!owner.valid() || !other.valid()) return;
+        if (!owner.valid() || !other.valid())
+            return;
         physics::CharacterContactEvent event{
             .character = owner,
             .other = other,
             .other_body = {contact.mBodyB.GetIndexAndSequenceNumber()},
-            .position = {static_cast<float>(contact.mPosition.GetX()),
-                         static_cast<float>(contact.mPosition.GetY()),
-                         static_cast<float>(contact.mPosition.GetZ())},
+            .position = {static_cast<float>(contact.mPosition.GetX()), static_cast<float>(contact.mPosition.GetY()),
+                static_cast<float>(contact.mPosition.GetZ())},
             .normal = from_jolt(contact.mContactNormal),
             .simulation_step = simulation_step_,
             .type = type,
@@ -442,15 +417,9 @@ struct JoltWorld::Impl {
     };
 
     Impl(const physics::PhysicsSettings& settings, const std::uint32_t worker_threads)
-        : temporary_allocator{settings.temporary_allocator_bytes},
-          jobs{JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, static_cast<int>(worker_threads)} {
-        system.Init(settings.max_bodies,
-                    0,
-                    settings.max_body_pairs,
-                    settings.max_contact_constraints,
-                    broad_phase_layer_interface,
-                    object_vs_broad_phase,
-                    object_layer_pairs);
+        : temporary_allocator{settings.temporary_allocator_bytes}, jobs{JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, static_cast<int>(worker_threads)} {
+        system.Init(settings.max_bodies, 0, settings.max_body_pairs, settings.max_contact_constraints, broad_phase_layer_interface, object_vs_broad_phase,
+            object_layer_pairs);
         system.SetContactListener(&contact_collector);
     }
 
@@ -478,8 +447,7 @@ struct JoltWorld::Impl {
         return found->second;
     }
 
-    [[nodiscard]] const CharacterRecord& checked_character(
-        const physics::CharacterId character) const {
+    [[nodiscard]] const CharacterRecord& checked_character(const physics::CharacterId character) const {
         const auto found = characters.find(character.value);
         if (!character.valid() || found == characters.end()) {
             throw std::invalid_argument{"Physics character handle is invalid or no longer exists"};
@@ -557,8 +525,7 @@ void JoltWorld::simulate(const double delta_seconds) {
     accumulator_ = std::min(accumulator_ + delta_seconds, maximum_accumulation);
     stats_.last_sub_steps = 0;
 
-    while (accumulator_ + 1.0e-12 >= settings_.fixed_time_step &&
-           stats_.last_sub_steps < settings_.max_sub_steps) {
+    while (accumulator_ + 1.0e-12 >= settings_.fixed_time_step && stats_.last_sub_steps < settings_.max_sub_steps) {
         const float fixed_delta = static_cast<float>(settings_.fixed_time_step);
         impl_->contact_collector.begin_step(stats_.completed_steps + 1);
         impl_->character_contact_collector.begin_step(stats_.completed_steps + 1);
@@ -573,24 +540,13 @@ void JoltWorld::simulate(const double delta_seconds) {
             if (supported && record.character->GetLinearVelocity().GetY() <= 0.0F) {
                 velocity.SetY(record.character->GetGroundVelocity().GetY());
             } else {
-                velocity.SetY(record.character->GetLinearVelocity().GetY() +
-                              gravity.GetY() * fixed_delta);
+                velocity.SetY(record.character->GetLinearVelocity().GetY() + gravity.GetY() * fixed_delta);
             }
             record.character->SetLinearVelocity(velocity);
-            record.character->ExtendedUpdate(
-                fixed_delta,
-                gravity,
-                record.update_settings,
-                impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
-                impl_->system.GetDefaultLayerFilter(object_layers::moving),
-                {},
-                {},
-                impl_->temporary_allocator);
+            record.character->ExtendedUpdate(fixed_delta, gravity, record.update_settings, impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
+                impl_->system.GetDefaultLayerFilter(object_layers::moving), {}, {}, impl_->temporary_allocator);
         }
-        const auto update_error = impl_->system.Update(static_cast<float>(settings_.fixed_time_step),
-                                                       1,
-                                                       &impl_->temporary_allocator,
-                                                       &impl_->jobs);
+        const auto update_error = impl_->system.Update(static_cast<float>(settings_.fixed_time_step), 1, &impl_->temporary_allocator, &impl_->jobs);
         if (update_error != JPH::EPhysicsUpdateError::None) {
             throw std::runtime_error{"Jolt reported a physics update capacity error"};
         }
@@ -608,31 +564,31 @@ physics::BodyId JoltWorld::create_body(const physics::BodyDesc& description) {
     JPH::RefConst<JPH::Shape> shape;
     switch (description.shape.type) {
     case physics::ShapeType::triangle_mesh: {
-        const auto& mesh=description.shape.triangle_mesh;
-        if (!mesh || mesh->indices.empty() || mesh->indices.size()%3 ||
-            description.motion!=physics::MotionType::static_body)
+        const auto& mesh = description.shape.triangle_mesh;
+        if (!mesh || mesh->indices.empty() || mesh->indices.size() % 3 || description.motion != physics::MotionType::static_body)
             throw std::invalid_argument{"Triangle collision requires a nonempty static mesh"};
         JPH::VertexList vertices;
         for (const auto& vertex : mesh->vertices) {
-            if (!std::isfinite(vertex.x)||!std::isfinite(vertex.y)||!std::isfinite(vertex.z))
+            if (!std::isfinite(vertex.x) || !std::isfinite(vertex.y) || !std::isfinite(vertex.z))
                 throw std::invalid_argument{"Nonfinite collision vertex"};
-            vertices.emplace_back(vertex.x,vertex.y,vertex.z);
+            vertices.emplace_back(vertex.x, vertex.y, vertex.z);
         }
         JPH::IndexedTriangleList triangles;
-        for (std::size_t i=0;i<mesh->indices.size();i+=3) {
-            for (std::size_t j=0;j<3;++j)
-                if (mesh->indices[i+j]>=vertices.size()) throw std::invalid_argument{"Invalid collision index"};
-            triangles.emplace_back(mesh->indices[i],mesh->indices[i+1],mesh->indices[i+2]);
+        for (std::size_t i = 0; i < mesh->indices.size(); i += 3) {
+            for (std::size_t j = 0; j < 3; ++j)
+                if (mesh->indices[i + j] >= vertices.size())
+                    throw std::invalid_argument{"Invalid collision index"};
+            triangles.emplace_back(mesh->indices[i], mesh->indices[i + 1], mesh->indices[i + 2]);
         }
-        JPH::MeshShapeSettings settings{std::move(vertices),std::move(triangles)};
-        const auto result=settings.Create();
-        if (result.HasError()) throw std::invalid_argument{result.GetError().c_str()};
-        shape=result.Get();
+        JPH::MeshShapeSettings settings{std::move(vertices), std::move(triangles)};
+        const auto result = settings.Create();
+        if (result.HasError())
+            throw std::invalid_argument{result.GetError().c_str()};
+        shape = result.Get();
         break;
     }
     case physics::ShapeType::box:
-        if (description.shape.half_extent.x <= 0.0F || description.shape.half_extent.y <= 0.0F ||
-            description.shape.half_extent.z <= 0.0F) {
+        if (description.shape.half_extent.x <= 0.0F || description.shape.half_extent.y <= 0.0F || description.shape.half_extent.z <= 0.0F) {
             throw std::invalid_argument{"Box half extents must be positive"};
         }
         shape = new JPH::BoxShape{to_jolt(description.shape.half_extent)};
@@ -645,23 +601,16 @@ physics::BodyId JoltWorld::create_body(const physics::BodyDesc& description) {
         break;
     }
 
-    const JPH::ObjectLayer layer = description.motion == physics::MotionType::static_body
-                                       ? object_layers::non_moving
-                                       : object_layers::moving;
-    JPH::BodyCreationSettings body_settings{shape,
-                                            JPH::RVec3{to_jolt(description.transform.position)},
-                                            to_jolt(description.transform.rotation),
-                                            to_jolt(description.motion),
-                                            layer};
+    const JPH::ObjectLayer layer = description.motion == physics::MotionType::static_body ? object_layers::non_moving : object_layers::moving;
+    JPH::BodyCreationSettings body_settings{
+        shape, JPH::RVec3{to_jolt(description.transform.position)}, to_jolt(description.transform.rotation), to_jolt(description.motion), layer};
     body_settings.mFriction = description.friction;
     body_settings.mRestitution = description.restitution;
     body_settings.mUserData = pack_entity(description.owner);
     body_settings.mIsSensor = description.sensor;
 
     auto& bodies = impl_->system.GetBodyInterface();
-    const JPH::EActivation activation = description.motion == physics::MotionType::dynamic
-                                            ? JPH::EActivation::Activate
-                                            : JPH::EActivation::DontActivate;
+    const JPH::EActivation activation = description.motion == physics::MotionType::dynamic ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
     const JPH::BodyID id = bodies.CreateAndAddBody(body_settings, activation);
     if (id.IsInvalid()) {
         throw std::runtime_error{"Jolt could not create a physics body; capacity may be exhausted"};
@@ -681,59 +630,55 @@ void JoltWorld::destroy_body(const physics::BodyId body) {
     impl_->body_ids.erase(body.value);
 }
 
-physics::CharacterState JoltWorld::query_character_motion(
-    const physics::CharacterDesc& description, const physics::Vec3 velocity,
-    const float delta_seconds, const physics::Vec3 gravity, const float contact_padding) {
+physics::CharacterState JoltWorld::query_character_motion(const physics::CharacterDesc& description, const physics::Vec3 velocity, const float delta_seconds,
+    const physics::Vec3 gravity, const float contact_padding) {
     require_running();
-    if (!(delta_seconds>0.0F) || !std::isfinite(delta_seconds) ||
-        !std::isfinite(contact_padding) || contact_padding<=0 || contact_padding>.5F ||
-        !std::isfinite(description.radius) || !std::isfinite(description.cylinder_half_height) ||
-        description.radius<=0 || description.cylinder_half_height<=0 ||
-        !std::isfinite(description.position.x) || !std::isfinite(description.position.y) || !std::isfinite(description.position.z) ||
-        !std::isfinite(velocity.x) || !std::isfinite(velocity.y) || !std::isfinite(velocity.z) ||
+    if (!(delta_seconds > 0.0F) || !std::isfinite(delta_seconds) || !std::isfinite(contact_padding) || contact_padding <= 0 || contact_padding > .5F ||
+        !std::isfinite(description.radius) || !std::isfinite(description.cylinder_half_height) || description.radius <= 0 ||
+        description.cylinder_half_height <= 0 || !std::isfinite(description.position.x) || !std::isfinite(description.position.y) ||
+        !std::isfinite(description.position.z) || !std::isfinite(velocity.x) || !std::isfinite(velocity.y) || !std::isfinite(velocity.z) ||
         !std::isfinite(gravity.x) || !std::isfinite(gravity.y) || !std::isfinite(gravity.z))
         throw std::invalid_argument{"Invalid scene movement query"};
-    const JPH::RefConst<JPH::Shape> capsule=new JPH::CapsuleShape{
-        description.cylinder_half_height,description.radius};
-    const JPH::RefConst<JPH::Shape> standing=new JPH::RotatedTranslatedShape{
-        JPH::Vec3{0,description.cylinder_half_height+description.radius,0},JPH::Quat::sIdentity(),capsule};
+    const JPH::RefConst<JPH::Shape> capsule = new JPH::CapsuleShape{description.cylinder_half_height, description.radius};
+    const JPH::RefConst<JPH::Shape> standing =
+        new JPH::RotatedTranslatedShape{JPH::Vec3{0, description.cylinder_half_height + description.radius, 0}, JPH::Quat::sIdentity(), capsule};
     JPH::CharacterVirtualSettings settings;
-    settings.mShape=standing;
-    settings.mCharacterPadding=contact_padding;
-    settings.mMaxSlopeAngle=description.max_slope_angle_radians;
-    settings.mSupportingVolume=JPH::Plane{JPH::Vec3::sAxisY(),-description.radius};
-    JPH::CharacterVirtual character{&settings,JPH::RVec3{to_jolt(description.position)},
-                                    JPH::Quat::sIdentity(),0,&impl_->system};
+    settings.mShape = standing;
+    settings.mCharacterPadding = contact_padding;
+    settings.mMaxSlopeAngle = description.max_slope_angle_radians;
+    settings.mSupportingVolume = JPH::Plane{JPH::Vec3::sAxisY(), -description.radius};
+    JPH::CharacterVirtual character{&settings, JPH::RVec3{to_jolt(description.position)}, JPH::Quat::sIdentity(), 0, &impl_->system};
     character.SetLinearVelocity(to_jolt(velocity));
     // Queries reconstruct the virtual character each tick. ExtendedUpdate needs
     // the initial support state to follow descending stairs and slopes.
-    character.RefreshContacts(
-        impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
-        impl_->system.GetDefaultLayerFilter(object_layers::moving),{},{},impl_->temporary_allocator);
+    character.RefreshContacts(impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving), impl_->system.GetDefaultLayerFilter(object_layers::moving),
+        {}, {}, impl_->temporary_allocator);
     JPH::CharacterVirtual::ExtendedUpdateSettings update;
-    update.mWalkStairsStepUp={0,description.step_up_height,0};
-    update.mStickToFloorStepDown=velocity.y>0 ? JPH::Vec3::sZero() : JPH::Vec3{0,-description.step_down_height,0};
-    character.ExtendedUpdate(delta_seconds,to_jolt(gravity),update,
-        impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
-        impl_->system.GetDefaultLayerFilter(object_layers::moving),{},{},impl_->temporary_allocator);
-    const auto position=character.GetPosition();
+    update.mWalkStairsStepUp = {0, description.step_up_height, 0};
+    update.mStickToFloorStepDown = velocity.y > 0 ? JPH::Vec3::sZero() : JPH::Vec3{0, -description.step_down_height, 0};
+    character.ExtendedUpdate(delta_seconds, to_jolt(gravity), update, impl_->system.GetDefaultBroadPhaseLayerFilter(object_layers::moving),
+        impl_->system.GetDefaultLayerFilter(object_layers::moving), {}, {}, impl_->temporary_allocator);
+    const auto position = character.GetPosition();
     // CharacterVirtual resolves displacement, but preserves the requested
     // velocity. Persist only momentum tangent to actual blocking contacts.
-    auto resolved=character.GetLinearVelocity();
-    for (unsigned pass=0; pass<4; ++pass)
-        for (const auto& contact:character.GetActiveContacts()) {
-            if (!contact.mHadCollision || contact.mIsSensorB || contact.mWasDiscarded) continue;
+    auto resolved = character.GetLinearVelocity();
+    for (unsigned pass = 0; pass < 4; ++pass)
+        for (const auto& contact : character.GetActiveContacts()) {
+            if (!contact.mHadCollision || contact.mIsSensorB || contact.mWasDiscarded)
+                continue;
             // Traversable ground redirects displacement, not stored horizontal
             // momentum. Repeated projection against ramp normals brakes uphill.
-            if(contact.mSurfaceNormal.GetY()>=std::cos(description.max_slope_angle_radians))continue;
-            const float inward=(resolved-contact.mLinearVelocity).Dot(contact.mContactNormal);
-            if (inward<0) resolved-=inward*contact.mContactNormal;
+            if (contact.mSurfaceNormal.GetY() >= std::cos(description.max_slope_angle_radians))
+                continue;
+            const float inward = (resolved - contact.mLinearVelocity).Dot(contact.mContactNormal);
+            if (inward < 0)
+                resolved -= inward * contact.mContactNormal;
         }
-    return {.position={static_cast<float>(position.GetX()),static_cast<float>(position.GetY()),static_cast<float>(position.GetZ())},
-            .velocity=from_jolt(resolved),
-            .ground_velocity=from_jolt(character.GetGroundVelocity()),
-            .ground_normal=from_jolt(character.GetGroundNormal()),
-            .grounded=character.GetGroundState()==JPH::CharacterBase::EGroundState::OnGround};
+    return {.position = {static_cast<float>(position.GetX()), static_cast<float>(position.GetY()), static_cast<float>(position.GetZ())},
+        .velocity = from_jolt(resolved),
+        .ground_velocity = from_jolt(character.GetGroundVelocity()),
+        .ground_normal = from_jolt(character.GetGroundNormal()),
+        .grounded = character.GetGroundState() == JPH::CharacterBase::EGroundState::OnGround};
 }
 
 core::EntityId JoltWorld::body_owner(const physics::BodyId body) const {
@@ -748,23 +693,16 @@ physics::Transform JoltWorld::body_transform(const physics::BodyId body) const {
     JPH::RVec3 position;
     JPH::Quat rotation;
     impl_->system.GetBodyInterface().GetPositionAndRotation(id, position, rotation);
-    return {{static_cast<float>(position.GetX()),
-             static_cast<float>(position.GetY()),
-             static_cast<float>(position.GetZ())},
-            from_jolt(rotation)};
+    return {{static_cast<float>(position.GetX()), static_cast<float>(position.GetY()), static_cast<float>(position.GetZ())}, from_jolt(rotation)};
 }
 
-void JoltWorld::set_body_transform(const physics::BodyId body,
-                                   const physics::Transform transform) {
+void JoltWorld::set_body_transform(const physics::BodyId body, const physics::Transform transform) {
     require_running();
     impl_->system.GetBodyInterface().SetPositionAndRotation(
-        impl_->checked_body(body), JPH::RVec3{to_jolt(transform.position)},
-        to_jolt(transform.rotation), JPH::EActivation::Activate);
+        impl_->checked_body(body), JPH::RVec3{to_jolt(transform.position)}, to_jolt(transform.rotation), JPH::EActivation::Activate);
 }
 
-void JoltWorld::move_kinematic_body(const physics::BodyId body,
-                                    const physics::Transform target,
-                                    const float delta_seconds) {
+void JoltWorld::move_kinematic_body(const physics::BodyId body, const physics::Transform target, const float delta_seconds) {
     require_running();
     if (!std::isfinite(delta_seconds) || delta_seconds <= 0.0F) {
         throw std::invalid_argument{"Kinematic move delta must be finite and positive"};
@@ -773,8 +711,7 @@ void JoltWorld::move_kinematic_body(const physics::BodyId body,
     if (impl_->system.GetBodyInterface().GetMotionType(id) != JPH::EMotionType::Kinematic) {
         throw std::invalid_argument{"Only kinematic bodies can use velocity-derived movement"};
     }
-    impl_->system.GetBodyInterface().MoveKinematic(
-        id, JPH::RVec3{to_jolt(target.position)}, to_jolt(target.rotation), delta_seconds);
+    impl_->system.GetBodyInterface().MoveKinematic(id, JPH::RVec3{to_jolt(target.position)}, to_jolt(target.rotation), delta_seconds);
 }
 
 physics::Vec3 JoltWorld::linear_velocity(const physics::BodyId body) const {
@@ -787,15 +724,15 @@ void JoltWorld::set_linear_velocity(const physics::BodyId body, const physics::V
     impl_->system.GetBodyInterface().SetLinearVelocity(impl_->checked_body(body), to_jolt(velocity));
 }
 
-float JoltWorld::cast_ray(const physics::Vec3 origin,const physics::Vec3 direction,const float maximum_distance) const {
+float JoltWorld::cast_ray(const physics::Vec3 origin, const physics::Vec3 direction, const float maximum_distance) const {
     require_running();
-    assert(std::isfinite(origin.x)&&std::isfinite(origin.y)&&std::isfinite(origin.z));
-    assert(std::isfinite(direction.x)&&std::isfinite(direction.y)&&std::isfinite(direction.z));
-    assert(std::abs(direction.x*direction.x+direction.y*direction.y+direction.z*direction.z-1.F)<.01F);
-    assert(std::isfinite(maximum_distance)&&maximum_distance>0);
-    const JPH::RRayCast ray{JPH::RVec3{to_jolt(origin)},to_jolt(direction)*maximum_distance};
+    assert(std::isfinite(origin.x) && std::isfinite(origin.y) && std::isfinite(origin.z));
+    assert(std::isfinite(direction.x) && std::isfinite(direction.y) && std::isfinite(direction.z));
+    assert(std::abs(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z - 1.F) < .01F);
+    assert(std::isfinite(maximum_distance) && maximum_distance > 0);
+    const JPH::RRayCast ray{JPH::RVec3{to_jolt(origin)}, to_jolt(direction) * maximum_distance};
     JPH::RayCastResult hit;
-    return impl_->system.GetNarrowPhaseQuery().CastRay(ray,hit)?hit.mFraction*maximum_distance:maximum_distance;
+    return impl_->system.GetNarrowPhaseQuery().CastRay(ray, hit) ? hit.mFraction * maximum_distance : maximum_distance;
 }
 
 std::vector<physics::TriggerEvent> JoltWorld::take_trigger_events() {
@@ -805,27 +742,17 @@ std::vector<physics::TriggerEvent> JoltWorld::take_trigger_events() {
 
 physics::CharacterId JoltWorld::create_character(const physics::CharacterDesc& description) {
     require_running();
-    if (!std::isfinite(description.position.x) || !std::isfinite(description.position.y) ||
-        !std::isfinite(description.position.z) ||
-        !std::isfinite(description.radius) || description.radius <= 0.0F ||
-        !std::isfinite(description.cylinder_half_height) ||
-        description.cylinder_half_height <= 0.0F ||
-        !std::isfinite(description.max_slope_angle_radians) ||
-        description.max_slope_angle_radians <= 0.0F ||
-        description.max_slope_angle_radians > 1.570796327F ||
-        !std::isfinite(description.step_up_height) || description.step_up_height < 0.0F ||
-        !std::isfinite(description.step_down_height) || description.step_down_height < 0.0F ||
-        !std::isfinite(description.mass) || description.mass <= 0.0F ||
+    if (!std::isfinite(description.position.x) || !std::isfinite(description.position.y) || !std::isfinite(description.position.z) ||
+        !std::isfinite(description.radius) || description.radius <= 0.0F || !std::isfinite(description.cylinder_half_height) ||
+        description.cylinder_half_height <= 0.0F || !std::isfinite(description.max_slope_angle_radians) || description.max_slope_angle_radians <= 0.0F ||
+        description.max_slope_angle_radians > 1.570796327F || !std::isfinite(description.step_up_height) || description.step_up_height < 0.0F ||
+        !std::isfinite(description.step_down_height) || description.step_down_height < 0.0F || !std::isfinite(description.mass) || description.mass <= 0.0F ||
         !std::isfinite(description.maximum_push_force) || description.maximum_push_force < 0.0F) {
-        throw std::invalid_argument{
-            "Character position must be finite; dimensions and slope angle must be valid"};
+        throw std::invalid_argument{"Character position must be finite; dimensions and slope angle must be valid"};
     }
-    const JPH::RefConst<JPH::Shape> capsule =
-        new JPH::CapsuleShape{description.cylinder_half_height, description.radius};
-    const JPH::RefConst<JPH::Shape> standing_shape = new JPH::RotatedTranslatedShape{
-        JPH::Vec3{0.0F, description.cylinder_half_height + description.radius, 0.0F},
-        JPH::Quat::sIdentity(),
-        capsule};
+    const JPH::RefConst<JPH::Shape> capsule = new JPH::CapsuleShape{description.cylinder_half_height, description.radius};
+    const JPH::RefConst<JPH::Shape> standing_shape =
+        new JPH::RotatedTranslatedShape{JPH::Vec3{0.0F, description.cylinder_half_height + description.radius, 0.0F}, JPH::Quat::sIdentity(), capsule};
     JPH::CharacterVirtualSettings settings;
     settings.mShape = standing_shape;
     settings.mInnerBodyShape = standing_shape;
@@ -834,19 +761,14 @@ physics::CharacterId JoltWorld::create_character(const physics::CharacterDesc& d
     settings.mMass = description.mass;
     settings.mMaxStrength = description.maximum_push_force;
     settings.mSupportingVolume = JPH::Plane{JPH::Vec3::sAxisY(), -description.radius};
-    JPH::Ref<JPH::CharacterVirtual> character = new JPH::CharacterVirtual{
-        &settings,
-        JPH::RVec3{to_jolt(description.position)},
-        JPH::Quat::sIdentity(),
-        pack_entity(description.owner),
-        &impl_->system};
+    JPH::Ref<JPH::CharacterVirtual> character =
+        new JPH::CharacterVirtual{&settings, JPH::RVec3{to_jolt(description.position)}, JPH::Quat::sIdentity(), pack_entity(description.owner), &impl_->system};
     character->SetListener(&impl_->character_contact_collector);
     JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
     update_settings.mWalkStairsStepUp = {0.0F, description.step_up_height, 0.0F};
     update_settings.mStickToFloorStepDown = {0.0F, -description.step_down_height, 0.0F};
     const std::uint32_t id = impl_->next_character_id++;
-    impl_->characters.emplace(id, Impl::CharacterRecord{.character = std::move(character),
-                                                        .update_settings = update_settings});
+    impl_->characters.emplace(id, Impl::CharacterRecord{.character = std::move(character), .update_settings = update_settings});
     return physics::CharacterId{id};
 }
 
@@ -856,8 +778,7 @@ void JoltWorld::destroy_character(const physics::CharacterId character) {
     impl_->characters.erase(character.value);
 }
 
-void JoltWorld::set_character_horizontal_velocity(const physics::CharacterId character,
-                                                  const physics::Vec3 velocity) {
+void JoltWorld::set_character_horizontal_velocity(const physics::CharacterId character, const physics::Vec3 velocity) {
     require_running();
     if (!std::isfinite(velocity.x) || !std::isfinite(velocity.y) || !std::isfinite(velocity.z)) {
         throw std::invalid_argument{"Character velocity must be finite"};
@@ -879,8 +800,7 @@ void JoltWorld::jump_character(const physics::CharacterId character, const float
     }
 }
 
-void JoltWorld::add_character_impulse(const physics::CharacterId character,
-                                      const physics::Vec3 impulse) {
+void JoltWorld::add_character_impulse(const physics::CharacterId character, const physics::Vec3 impulse) {
     require_running();
     if (!std::isfinite(impulse.x) || !std::isfinite(impulse.y) || !std::isfinite(impulse.z)) {
         throw std::invalid_argument{"Character impulse must be finite"};
@@ -889,8 +809,7 @@ void JoltWorld::add_character_impulse(const physics::CharacterId character,
     record.character->SetLinearVelocity(record.character->GetLinearVelocity() + to_jolt(impulse));
 }
 
-void JoltWorld::set_character_position(const physics::CharacterId character,
-                                       const physics::Vec3 position) {
+void JoltWorld::set_character_position(const physics::CharacterId character, const physics::Vec3 position) {
     require_running();
     if (!std::isfinite(position.x) || !std::isfinite(position.y) || !std::isfinite(position.z)) {
         throw std::invalid_argument{"Character position must be finite"};
@@ -903,14 +822,11 @@ physics::CharacterState JoltWorld::character_state(const physics::CharacterId ch
     const auto& virtual_character = impl_->checked_character(character).character;
     const JPH::RVec3 position = virtual_character->GetPosition();
     return {
-        .position = {static_cast<float>(position.GetX()),
-                     static_cast<float>(position.GetY()),
-                     static_cast<float>(position.GetZ())},
+        .position = {static_cast<float>(position.GetX()), static_cast<float>(position.GetY()), static_cast<float>(position.GetZ())},
         .velocity = from_jolt(virtual_character->GetLinearVelocity()),
         .ground_velocity = from_jolt(virtual_character->GetGroundVelocity()),
         .ground_normal = from_jolt(virtual_character->GetGroundNormal()),
-        .grounded = virtual_character->GetGroundState() ==
-                    JPH::CharacterBase::EGroundState::OnGround,
+        .grounded = virtual_character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround,
     };
 }
 

@@ -67,7 +67,7 @@ struct RendererSettings {
 
 // Gloom owns this API. Diligent is the first interchangeable implementation.
 class Renderer : public core::Subsystem {
-public:
+  public:
     [[nodiscard]] virtual RenderCapabilities capabilities() const noexcept = 0;
     virtual void resize(std::uint32_t width, std::uint32_t height) = 0;
     virtual void enqueue(MeshUpload upload) = 0;
@@ -76,7 +76,9 @@ public:
     virtual void release(RenderAssetId id) = 0;
     [[nodiscard]] virtual GpuAssetState asset_state(RenderAssetId id) const noexcept = 0;
     [[nodiscard]] virtual GpuResidencyMetrics residency_metrics() const noexcept = 0;
-    [[nodiscard]] virtual FrameRenderMetrics frame_metrics() const noexcept { return {}; }
+    [[nodiscard]] virtual FrameRenderMetrics frame_metrics() const noexcept {
+        return {};
+    }
     virtual void begin_frame() = 0;
     virtual void draw(const RenderSnapshot& snapshot) = 0;
     virtual void end_frame() = 0;

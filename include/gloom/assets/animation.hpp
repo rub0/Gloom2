@@ -13,14 +13,11 @@ using LocalPose = std::vector<render::Transform>;
 [[nodiscard]] bool valid_animations(const ImportedScene& scene);
 [[nodiscard]] LocalPose rest_pose(const ImportedScene& scene);
 // Sampling clamps non-looping clips, wraps looping clips and uses quaternion slerp.
-[[nodiscard]] LocalPose sample_animation(const ImportedScene& scene, std::string_view name,
-                                        double seconds, bool loop = true);
+[[nodiscard]] LocalPose sample_animation(const ImportedScene& scene, std::string_view name, double seconds, bool loop = true);
 [[nodiscard]] LocalPose blend_poses(const LocalPose& a, const LocalPose& b, float weight);
 [[nodiscard]] std::vector<RigMatrix> pose_worlds(const ImportedScene& scene, const LocalPose& pose);
-[[nodiscard]] std::shared_ptr<render::SkinPose> skin_pose(const ImportedScene& scene,
-    std::uint32_t mesh_node, const std::vector<RigMatrix>& worlds);
-[[nodiscard]] render::BoundingSphere skinned_bounds(const ImportedPrimitive& primitive,
-                                                    const render::SkinPose& pose);
+[[nodiscard]] std::shared_ptr<render::SkinPose> skin_pose(const ImportedScene& scene, std::uint32_t mesh_node, const std::vector<RigMatrix>& worlds);
+[[nodiscard]] render::BoundingSphere skinned_bounds(const ImportedPrimitive& primitive, const render::SkinPose& pose);
 [[nodiscard]] render::Vec3 skinned_position(const ImportedVertex& vertex, const render::SkinPose& pose);
 // Precompute from immutable geometry, then transform joint boxes instead of every vertex.
 // The convex hull of transformed boxes covers linear skinning with nonnegative weights.

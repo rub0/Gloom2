@@ -8,22 +8,15 @@
 namespace gloom::network {
 
 void ClockSynchronizer::observe(const ClockExchange& exchange) {
-    if (!std::isfinite(exchange.client_send_seconds) ||
-        !std::isfinite(exchange.server_receive_seconds) ||
-        !std::isfinite(exchange.server_send_seconds) ||
-        !std::isfinite(exchange.client_receive_seconds) ||
-        exchange.client_receive_seconds < exchange.client_send_seconds ||
+    if (!std::isfinite(exchange.client_send_seconds) || !std::isfinite(exchange.server_receive_seconds) || !std::isfinite(exchange.server_send_seconds) ||
+        !std::isfinite(exchange.client_receive_seconds) || exchange.client_receive_seconds < exchange.client_send_seconds ||
         exchange.server_send_seconds < exchange.server_receive_seconds) {
         throw std::invalid_argument{"Clock exchange timestamps are invalid"};
     }
-    const double server_processing = exchange.server_send_seconds -
-                                     exchange.server_receive_seconds;
-    const double round_trip = std::max(
-        0.0,
-        exchange.client_receive_seconds - exchange.client_send_seconds - server_processing);
-    const double offset = ((exchange.server_receive_seconds - exchange.client_send_seconds) +
-                           (exchange.server_send_seconds - exchange.client_receive_seconds)) *
-                          0.5;
+    const double server_processing = exchange.server_send_seconds - exchange.server_receive_seconds;
+    const double round_trip = std::max(0.0, exchange.client_receive_seconds - exchange.client_send_seconds - server_processing);
+    const double offset =
+        ((exchange.server_receive_seconds - exchange.client_send_seconds) + (exchange.server_send_seconds - exchange.client_receive_seconds)) * 0.5;
     if (estimate_.samples == 0) {
         estimate_ = {.offset_seconds = offset, .round_trip_seconds = round_trip, .samples = 1};
         best_round_trip_seconds_ = round_trip;

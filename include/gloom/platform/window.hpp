@@ -18,7 +18,7 @@ struct WindowDesc {
 
 // SDL3 will implement this interface without leaking SDL types to the engine.
 class Window : public core::Subsystem {
-public:
+  public:
     [[nodiscard]] virtual bool poll_events() = 0;
     [[nodiscard]] virtual void* native_handle() noexcept = 0;
     [[nodiscard]] virtual std::pair<std::uint32_t, std::uint32_t> drawable_size() const noexcept = 0;

@@ -7,7 +7,7 @@
 namespace gloom::backends {
 
 class JoltWorld final : public physics::World {
-public:
+  public:
     explicit JoltWorld(physics::PhysicsSettings settings = {});
     ~JoltWorld() override;
 
@@ -30,32 +30,25 @@ public:
     [[nodiscard]] core::EntityId body_owner(physics::BodyId body) const override;
     [[nodiscard]] physics::Transform body_transform(physics::BodyId body) const override;
     void set_body_transform(physics::BodyId body, physics::Transform transform) override;
-    void move_kinematic_body(physics::BodyId body, physics::Transform target,
-                             float delta_seconds) override;
+    void move_kinematic_body(physics::BodyId body, physics::Transform target, float delta_seconds) override;
     [[nodiscard]] physics::Vec3 linear_velocity(physics::BodyId body) const override;
     void set_linear_velocity(physics::BodyId body, physics::Vec3 velocity) override;
-    [[nodiscard]] float cast_ray(physics::Vec3 origin, physics::Vec3 direction,
-                                 float maximum_distance) const override;
+    [[nodiscard]] float cast_ray(physics::Vec3 origin, physics::Vec3 direction, float maximum_distance) const override;
     [[nodiscard]] std::vector<physics::TriggerEvent> take_trigger_events() override;
-    [[nodiscard]] physics::CharacterId create_character(
-        const physics::CharacterDesc& description) override;
+    [[nodiscard]] physics::CharacterId create_character(const physics::CharacterDesc& description) override;
     void destroy_character(physics::CharacterId character) override;
-    void set_character_horizontal_velocity(physics::CharacterId character,
-                                           physics::Vec3 velocity) override;
+    void set_character_horizontal_velocity(physics::CharacterId character, physics::Vec3 velocity) override;
     void jump_character(physics::CharacterId character, float jump_speed) override;
     void add_character_impulse(physics::CharacterId character, physics::Vec3 impulse) override;
     void set_character_position(physics::CharacterId character, physics::Vec3 position) override;
-    [[nodiscard]] physics::CharacterState character_state(
-        physics::CharacterId character) const override;
-    [[nodiscard]] std::vector<physics::CharacterContactEvent>
-    take_character_contact_events() override;
+    [[nodiscard]] physics::CharacterState character_state(physics::CharacterId character) const override;
+    [[nodiscard]] std::vector<physics::CharacterContactEvent> take_character_contact_events() override;
     [[nodiscard]] physics::SimulationStats statistics() const noexcept override;
     // A fresh virtual capsule query: no hidden contact history survives rollback.
     [[nodiscard]] physics::CharacterState query_character_motion(
-        const physics::CharacterDesc& description, physics::Vec3 velocity,
-        float delta_seconds, physics::Vec3 gravity, float contact_padding = .02F);
+        const physics::CharacterDesc& description, physics::Vec3 velocity, float delta_seconds, physics::Vec3 gravity, float contact_padding = .02F);
 
-private:
+  private:
     struct Impl;
 
     void require_running() const;

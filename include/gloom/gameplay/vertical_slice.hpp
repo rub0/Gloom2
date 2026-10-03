@@ -170,7 +170,7 @@ struct WeaponProjectileView {
     std::uint32_t id{};
     network::NetworkEntityId owner{};
     SliceWeapon weapon{SliceWeapon::shotgun};
-    float position_x{},position_y{},position_z{};
+    float position_x{}, position_y{}, position_z{};
     float radius{};
 };
 
@@ -181,10 +181,10 @@ struct SliceSnapshot {
     KinematicMechanismView factory_lift;
     SliceHud hud;
     SliceNetworkMetrics network;
-    std::array<WeaponProjectileView,32> projectiles{};
+    std::array<WeaponProjectileView, 32> projectiles{};
     std::uint8_t projectile_count{};
     std::uint32_t scene_id{0};
-    std::array<PickupView,factory_pickup_count> pickups{};
+    std::array<PickupView, factory_pickup_count> pickups{};
     std::uint8_t pickup_count{};
     audio::EventJournal audio_events;
     // Local presentation generation, never serialized. Changes on accepted reconnect.
@@ -200,12 +200,12 @@ struct SlicePresentationFeedbackState {
 // Converts authoritative snapshot transitions into short-lived, renderer-neutral
 // presentation cues. It never predicts or mutates combat state.
 class SlicePresentationFeedback final {
-public:
+  public:
     void observe(const SliceSnapshot& snapshot) noexcept;
     void advance(double elapsed_seconds) noexcept;
     [[nodiscard]] const SlicePresentationFeedbackState& state() const noexcept;
 
-private:
+  private:
     SlicePresentationFeedbackState state_;
     std::uint64_t last_tick_{0};
     network::NetworkEntityId opponent_entity_{0};
@@ -217,7 +217,7 @@ private:
 // A fixed-tick, backend-neutral gameplay seam. Platform input, physics and rendering
 // are adapters around this class; none of those implementation APIs leak into it.
 class VerticalSliceSimulation final {
-public:
+  public:
     static constexpr std::uint32_t tick_rate = 60;
     static constexpr network::NetworkEntityId player_entity = 1;
     static constexpr network::NetworkEntityId opponent_entity = 2;
@@ -234,21 +234,17 @@ public:
     void tick(const SliceInput& input);
     void tick(const SliceInput& player_input, const SliceInput& opponent_input);
     void add_shield(network::NetworkEntityId entity, float amount);
-    [[nodiscard]] bool acquire_weapon(network::NetworkEntityId entity,
-                                      SliceWeapon weapon, std::uint16_t ammunition);
-    [[nodiscard]] bool add_ammunition(network::NetworkEntityId entity,
-                                      SliceWeapon weapon, std::uint16_t ammunition);
+    [[nodiscard]] bool acquire_weapon(network::NetworkEntityId entity, SliceWeapon weapon, std::uint16_t ammunition);
+    [[nodiscard]] bool add_ammunition(network::NetworkEntityId entity, SliceWeapon weapon, std::uint16_t ammunition);
     [[nodiscard]] bool select_weapon(network::NetworkEntityId entity, SliceWeapon weapon);
-    [[nodiscard]] bool set_selection(network::NetworkEntityId entity,
-                                     SlicePlayerSelection selection);
+    [[nodiscard]] bool set_selection(network::NetworkEntityId entity, SlicePlayerSelection selection);
     [[nodiscard]] const SliceSnapshot& snapshot() const noexcept;
-    [[nodiscard]] SliceSnapshot
-    snapshot_for(network::NetworkEntityId controlled_entity) const;
+    [[nodiscard]] SliceSnapshot snapshot_for(network::NetworkEntityId controlled_entity) const;
     [[nodiscard]] std::span<const ArenaBox> arena() const noexcept;
     [[nodiscard]] std::span<const ArenaSurface> surfaces() const noexcept;
     [[nodiscard]] const network::ReplicationSettings& movement_settings() const noexcept;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

@@ -46,16 +46,13 @@ struct ProtocolMessage {
 };
 
 [[nodiscard]] std::vector<std::byte> encode_message(const ProtocolMessage& message);
-[[nodiscard]] std::expected<ProtocolMessage, std::string>
-decode_message(std::span<const std::byte> encoded,
-               std::size_t maximum_payload = maximum_protocol_payload);
+[[nodiscard]] std::expected<ProtocolMessage, std::string> decode_message(
+    std::span<const std::byte> encoded, std::size_t maximum_payload = maximum_protocol_payload);
 
 // Wrap-aware comparison for monotonically increasing 32-bit packet/input sequences.
 // It is only meaningful when the compared values are less than 2^31 apart.
-[[nodiscard]] constexpr bool sequence_more_recent(const std::uint32_t candidate,
-                                                  const std::uint32_t reference) noexcept {
-    return candidate != reference &&
-           static_cast<std::int32_t>(candidate - reference) > 0;
+[[nodiscard]] constexpr bool sequence_more_recent(const std::uint32_t candidate, const std::uint32_t reference) noexcept {
+    return candidate != reference && static_cast<std::int32_t>(candidate - reference) > 0;
 }
 
 } // namespace gloom::network

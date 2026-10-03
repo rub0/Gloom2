@@ -25,4 +25,3 @@ void PlaceholderSubsystem::stop() noexcept {
 }
 
 } // namespace gloom::backends
-

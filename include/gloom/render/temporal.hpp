@@ -60,14 +60,13 @@ struct DynamicResolutionMetrics {
 };
 
 class DynamicResolutionController final {
-public:
-    explicit DynamicResolutionController(DynamicResolutionSettings settings = {},
-                                         float initial_scale = 1.0F) noexcept;
+  public:
+    explicit DynamicResolutionController(DynamicResolutionSettings settings = {}, float initial_scale = 1.0F) noexcept;
     [[nodiscard]] float update(float gpu_frame_milliseconds) noexcept;
     void reset(float scale) noexcept;
     [[nodiscard]] const DynamicResolutionMetrics& metrics() const noexcept;
 
-private:
+  private:
     DynamicResolutionSettings settings_;
     DynamicResolutionMetrics metrics_;
     std::uint32_t frames_since_change_{0};
@@ -80,12 +79,9 @@ struct CameraJitter {
     [[nodiscard]] bool operator==(const CameraJitter&) const noexcept = default;
 };
 
-[[nodiscard]] TemporalSelection negotiate_temporal_feature(
-    TemporalSettings requested,
-    const TemporalCapabilities& capabilities) noexcept;
+[[nodiscard]] TemporalSelection negotiate_temporal_feature(TemporalSettings requested, const TemporalCapabilities& capabilities) noexcept;
 
 [[nodiscard]] RenderExtent scaled_render_extent(RenderExtent output, float scale) noexcept;
-[[nodiscard]] CameraJitter temporal_jitter(std::uint64_t frame_index,
-                                           RenderExtent render_extent) noexcept;
+[[nodiscard]] CameraJitter temporal_jitter(std::uint64_t frame_index, RenderExtent render_extent) noexcept;
 
 } // namespace gloom::render

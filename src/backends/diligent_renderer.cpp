@@ -464,28 +464,76 @@ struct Vertex {
 };
 
 constexpr std::array cube_vertices{
-    Vertex{{-1, -1, -1}, {0, 0, -1}}, Vertex{{-1, +1, -1}, {0, 0, -1}},
-    Vertex{{+1, +1, -1}, {0, 0, -1}}, Vertex{{+1, -1, -1}, {0, 0, -1}},
-    Vertex{{-1, -1, +1}, {0, 0, +1}}, Vertex{{+1, -1, +1}, {0, 0, +1}},
-    Vertex{{+1, +1, +1}, {0, 0, +1}}, Vertex{{-1, +1, +1}, {0, 0, +1}},
-    Vertex{{-1, -1, -1}, {-1, 0, 0}}, Vertex{{-1, -1, +1}, {-1, 0, 0}},
-    Vertex{{-1, +1, +1}, {-1, 0, 0}}, Vertex{{-1, +1, -1}, {-1, 0, 0}},
-    Vertex{{+1, -1, -1}, {+1, 0, 0}}, Vertex{{+1, +1, -1}, {+1, 0, 0}},
-    Vertex{{+1, +1, +1}, {+1, 0, 0}}, Vertex{{+1, -1, +1}, {+1, 0, 0}},
-    Vertex{{-1, -1, -1}, {0, -1, 0}}, Vertex{{+1, -1, -1}, {0, -1, 0}},
-    Vertex{{+1, -1, +1}, {0, -1, 0}}, Vertex{{-1, -1, +1}, {0, -1, 0}},
-    Vertex{{-1, +1, -1}, {0, +1, 0}}, Vertex{{-1, +1, +1}, {0, +1, 0}},
-    Vertex{{+1, +1, +1}, {0, +1, 0}}, Vertex{{+1, +1, -1}, {0, +1, 0}},
+    Vertex{{-1, -1, -1}, {0, 0, -1}},
+    Vertex{{-1, +1, -1}, {0, 0, -1}},
+    Vertex{{+1, +1, -1}, {0, 0, -1}},
+    Vertex{{+1, -1, -1}, {0, 0, -1}},
+    Vertex{{-1, -1, +1}, {0, 0, +1}},
+    Vertex{{+1, -1, +1}, {0, 0, +1}},
+    Vertex{{+1, +1, +1}, {0, 0, +1}},
+    Vertex{{-1, +1, +1}, {0, 0, +1}},
+    Vertex{{-1, -1, -1}, {-1, 0, 0}},
+    Vertex{{-1, -1, +1}, {-1, 0, 0}},
+    Vertex{{-1, +1, +1}, {-1, 0, 0}},
+    Vertex{{-1, +1, -1}, {-1, 0, 0}},
+    Vertex{{+1, -1, -1}, {+1, 0, 0}},
+    Vertex{{+1, +1, -1}, {+1, 0, 0}},
+    Vertex{{+1, +1, +1}, {+1, 0, 0}},
+    Vertex{{+1, -1, +1}, {+1, 0, 0}},
+    Vertex{{-1, -1, -1}, {0, -1, 0}},
+    Vertex{{+1, -1, -1}, {0, -1, 0}},
+    Vertex{{+1, -1, +1}, {0, -1, 0}},
+    Vertex{{-1, -1, +1}, {0, -1, 0}},
+    Vertex{{-1, +1, -1}, {0, +1, 0}},
+    Vertex{{-1, +1, +1}, {0, +1, 0}},
+    Vertex{{+1, +1, +1}, {0, +1, 0}},
+    Vertex{{+1, +1, -1}, {0, +1, 0}},
 };
 
 constexpr std::array<Diligent::Uint32, 36> cube_indices{
-    0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11,
-    12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
+    0,
+    1,
+    2,
+    0,
+    2,
+    3,
+    4,
+    5,
+    6,
+    4,
+    6,
+    7,
+    8,
+    9,
+    10,
+    8,
+    10,
+    11,
+    12,
+    13,
+    14,
+    12,
+    14,
+    15,
+    16,
+    17,
+    18,
+    16,
+    18,
+    19,
+    20,
+    21,
+    22,
+    20,
+    22,
+    23,
 };
 
 constexpr std::array horizontal_quad_vertices{
-    Vertex{{-1, 0, -1}, {0, +1, 0}}, Vertex{{-1, 0, +1}, {0, +1, 0}},
-    Vertex{{+1, 0, +1}, {0, +1, 0}}, Vertex{{+1, 0, -1}, {0, +1, 0}},
+    Vertex{{-1, 0, -1}, {0, +1, 0}},
+    Vertex{{-1, 0, +1}, {0, +1, 0}},
+    Vertex{{+1, 0, +1}, {0, +1, 0}},
+    Vertex{{+1, 0, -1}, {0, +1, 0}},
 };
 constexpr std::array<Diligent::Uint32, 6> horizontal_quad_indices{0, 1, 2, 0, 2, 3};
 
@@ -513,12 +561,12 @@ struct alignas(16) DrawConstants {
     Diligent::float4 specular_color_rotation;
     Diligent::float4 surface_animation;
     Diligent::float4 surface_flags;
-    std::array<Diligent::float4,20> texture_mappings;
-    Diligent::float4 skin_flags,particle_depth;
+    std::array<Diligent::float4, 20> texture_mappings;
+    Diligent::float4 skin_flags, particle_depth;
 };
 
 struct alignas(16) SkinConstants {
-    std::array<Diligent::float4x4,256> bones,previous_bones,bone_normals;
+    std::array<Diligent::float4x4, 256> bones, previous_bones, bone_normals;
 };
 
 struct ShadowConstants {
@@ -571,8 +619,7 @@ struct TemporalConstants {
 }
 
 [[nodiscard]] std::uint64_t upload_size(const render::MeshUpload& upload) noexcept {
-    return upload.vertices.size() * sizeof(render::GpuVertex) +
-           upload.indices.size() * sizeof(std::uint32_t);
+    return upload.vertices.size() * sizeof(render::GpuVertex) + upload.indices.size() * sizeof(std::uint32_t);
 }
 
 [[nodiscard]] std::uint64_t upload_size(const render::TextureUpload& upload) noexcept {
@@ -592,17 +639,12 @@ struct TemporalConstants {
     const Diligent::float3 forward = Diligent::normalize(to_diligent(camera.target) - position);
     const Diligent::float3 right = Diligent::normalize(Diligent::cross(to_diligent(camera.up), forward));
     const Diligent::float3 up = Diligent::cross(forward, right);
-    return Diligent::float4x4::Translation(-position.x, -position.y, -position.z) *
-           Diligent::float4x4::ViewFromBasis(right, up, forward);
+    return Diligent::float4x4::Translation(-position.x, -position.y, -position.z) * Diligent::float4x4::ViewFromBasis(right, up, forward);
 }
 
 [[nodiscard]] Diligent::float4x4 world_matrix(const render::Transform& transform) {
-    const Diligent::QuaternionF rotation{transform.rotation.x,
-                                         transform.rotation.y,
-                                         transform.rotation.z,
-                                         transform.rotation.w};
-    return Diligent::float4x4::Scale(to_diligent(transform.scale)) * rotation.ToMatrix() *
-           Diligent::float4x4::Translation(to_diligent(transform.position));
+    const Diligent::QuaternionF rotation{transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w};
+    return Diligent::float4x4::Scale(to_diligent(transform.scale)) * rotation.ToMatrix() * Diligent::float4x4::Translation(to_diligent(transform.position));
 }
 
 struct ShadowFrame {
@@ -610,16 +652,14 @@ struct ShadowFrame {
     Diligent::float4 splits;
 };
 
-[[nodiscard]] ShadowFrame shadow_frame(const render::Camera& camera,
-                                       const render::DirectionalLight& light, float aspect) {
+[[nodiscard]] ShadowFrame shadow_frame(const render::Camera& camera, const render::DirectionalLight& light, float aspect) {
     ShadowFrame result;
     const float near_plane = std::max(camera.near_plane, 0.05F);
     const float far_plane = std::max(std::min(camera.far_plane, 80.0F), near_plane + 1.0F);
     std::array<float, 4> splits{};
     constexpr float logarithmic_weight = 0.80F;
     for (std::size_t cascade = 0; cascade < splits.size(); ++cascade) {
-        const float fraction = static_cast<float>(cascade + 1) /
-                               static_cast<float>(splits.size());
+        const float fraction = static_cast<float>(cascade + 1) / static_cast<float>(splits.size());
         const float logarithmic = near_plane * std::pow(far_plane / near_plane, fraction);
         const float linear = near_plane + (far_plane - near_plane) * fraction;
         splits[cascade] = std::lerp(linear, logarithmic, logarithmic_weight);
@@ -632,9 +672,7 @@ struct ShadowFrame {
         light_forward = {0.0F, -1.0F, 0.0F};
     }
     light_forward = Diligent::normalize(light_forward);
-    const Diligent::float3 up_hint = std::abs(light_forward.y) > 0.95F
-                                         ? Diligent::float3{0.0F, 0.0F, 1.0F}
-                                         : Diligent::float3{0.0F, 1.0F, 0.0F};
+    const Diligent::float3 up_hint = std::abs(light_forward.y) > 0.95F ? Diligent::float3{0.0F, 0.0F, 1.0F} : Diligent::float3{0.0F, 1.0F, 0.0F};
     const auto right = Diligent::normalize(Diligent::cross(up_hint, light_forward));
     const auto up = Diligent::cross(light_forward, right);
     float previous_split = near_plane;
@@ -642,7 +680,7 @@ struct ShadowFrame {
         const float half_height = splits[cascade] * std::tan(camera.vertical_field_of_view_radians * 0.5F);
         const float half_width = half_height * aspect;
         const float half_depth = (splits[cascade] - previous_split) * 0.5F;
-        const float radius = std::ceil(std::sqrt(half_width*half_width + half_height*half_height + half_depth*half_depth) * 16.0F) / 16.0F;
+        const float radius = std::ceil(std::sqrt(half_width * half_width + half_height * half_height + half_depth * half_depth) * 16.0F) / 16.0F;
         const float midpoint = (previous_split + splits[cascade]) * 0.5F;
         auto center = camera_position + camera_forward * midpoint;
         const float texel = 2.0F * radius / 2048.0F;
@@ -651,15 +689,9 @@ struct ShadowFrame {
         center += up * (std::round(vertical / texel) * texel - vertical);
         const float depth_radius = radius + 30.0F;
         const auto light_position = center - light_forward * depth_radius;
-        const auto view = Diligent::float4x4::Translation(-light_position.x,
-                                                          -light_position.y,
-                                                          -light_position.z) *
+        const auto view = Diligent::float4x4::Translation(-light_position.x, -light_position.y, -light_position.z) *
                           Diligent::float4x4::ViewFromBasis(right, up, light_forward);
-        const auto projection = Diligent::float4x4::Ortho(radius * 2.0F,
-                                                          radius * 2.0F,
-                                                          0.1F,
-                                                          depth_radius * 2.0F,
-                                                          false);
+        const auto projection = Diligent::float4x4::Ortho(radius * 2.0F, radius * 2.0F, 0.1F, depth_radius * 2.0F, false);
         result.matrices[cascade] = view * projection;
         previous_split = splits[cascade];
     }
@@ -714,7 +746,7 @@ struct DiligentRenderer::Impl {
     Diligent::RefCntAutoPtr<Diligent::IDeviceContext> immediate_context;
     Diligent::RefCntAutoPtr<Diligent::ISwapChain> swap_chain;
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> scene_pipeline;
-    std::array<Diligent::RefCntAutoPtr<Diligent::IPipelineState>,8> surface_pipelines;
+    std::array<Diligent::RefCntAutoPtr<Diligent::IPipelineState>, 8> surface_pipelines;
     Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> scene_resources;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> draw_constants;
     // Static slot, 64 cached pose pairs, and a streaming overflow slot.
@@ -725,7 +757,7 @@ struct DiligentRenderer::Impl {
     uint32 bound_skin[2]{};
     void bind_skin(const render::RenderInstance& instance, Diligent::IShaderResourceBinding* resources);
     Diligent::RefCntAutoPtr<Diligent::ITexture> hdr_texture;
-    Diligent::RefCntAutoPtr<Diligent::ITexture> particle_color_copy,particle_depth_copy;
+    Diligent::RefCntAutoPtr<Diligent::ITexture> particle_color_copy, particle_depth_copy;
     Diligent::RefCntAutoPtr<Diligent::ITextureView> hdr_render_target;
     Diligent::RefCntAutoPtr<Diligent::ITextureView> hdr_shader_resource;
     Diligent::RefCntAutoPtr<Diligent::ITexture> motion_texture;
@@ -740,17 +772,13 @@ struct DiligentRenderer::Impl {
     std::array<Diligent::RefCntAutoPtr<Diligent::ITextureView>, 2> history_render_targets;
     std::array<Diligent::RefCntAutoPtr<Diligent::ITextureView>, 2> history_shader_resources;
     std::array<Diligent::RefCntAutoPtr<Diligent::ITexture>, 2> history_depth_textures;
-    std::array<Diligent::RefCntAutoPtr<Diligent::ITextureView>, 2>
-        history_depth_render_targets;
-    std::array<Diligent::RefCntAutoPtr<Diligent::ITextureView>, 2>
-        history_depth_shader_resources;
+    std::array<Diligent::RefCntAutoPtr<Diligent::ITextureView>, 2> history_depth_render_targets;
+    std::array<Diligent::RefCntAutoPtr<Diligent::ITextureView>, 2> history_depth_shader_resources;
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> temporal_pipeline;
-    std::array<Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>, 2>
-        temporal_resources;
+    std::array<Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>, 2> temporal_resources;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> temporal_constants;
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> tone_map_pipeline;
-    std::array<Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>, 3>
-        tone_map_resources;
+    std::array<Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding>, 3> tone_map_resources;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> tone_constants;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> point_light_buffer;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> cluster_buffer;
@@ -767,15 +795,13 @@ struct DiligentRenderer::Impl {
     Diligent::RefCntAutoPtr<Diligent::IFence> residency_fence;
     std::unordered_map<render::RenderAssetId, MeshResource, render::RenderAssetIdHash> meshes;
     std::unordered_map<render::RenderAssetId, TextureResource, render::RenderAssetIdHash> textures;
-    std::unordered_map<render::RenderAssetId, render::MaterialUpload, render::RenderAssetIdHash>
-        materials;
+    std::unordered_map<render::RenderAssetId, render::MaterialUpload, render::RenderAssetIdHash> materials;
     mutable std::mutex upload_mutex;
     std::deque<render::MeshUpload> mesh_uploads;
     std::deque<render::TextureUpload> texture_uploads;
     std::deque<render::MaterialUpload> material_uploads;
     std::deque<render::RenderAssetId> release_requests;
-    std::unordered_map<render::RenderAssetId, render::GpuAssetState, render::RenderAssetIdHash>
-        asset_states;
+    std::unordered_map<render::RenderAssetId, render::GpuAssetState, render::RenderAssetIdHash> asset_states;
     std::vector<DeferredMesh> deferred_meshes;
     std::vector<DeferredTexture> deferred_textures;
     render::GpuResidencyMetrics residency_metrics;
@@ -807,11 +833,14 @@ void DiligentRenderer::Impl::bind_skin(const render::RenderInstance& instance, D
     if (instance.pose) {
         const render::SkinPose& pose = *instance.pose;
         assert(pose.matrices.size() <= 256 && pose.normal_matrices.size() == pose.matrices.size());
-        const render::SkinPose* previous = instance.previous_pose && instance.has_previous_transform &&
-            instance.previous_pose->matrices.size() == pose.matrices.size() ? instance.previous_pose.get() : &pose;
+        const render::SkinPose* previous =
+            instance.previous_pose && instance.has_previous_transform && instance.previous_pose->matrices.size() == pose.matrices.size()
+                ? instance.previous_pose.get()
+                : &pose;
         uint32 cached = 0;
         // ponytail: linear cache for small scenes; excess poses stream without imposing a scene limit.
-        while (cached < skin_count && (skin_current[cached] != &pose || skin_previous[cached] != previous)) ++cached;
+        while (cached < skin_count && (skin_current[cached] != &pose || skin_previous[cached] != previous))
+            ++cached;
         slot = cached + 1;
         if (cached == skin_count) {
             if (skin_count < 64) {
@@ -841,45 +870,46 @@ void DiligentRenderer::Impl::bind_skin(const render::RenderInstance& instance, D
 DiligentRenderer::DiligentRenderer(platform::Window& window, const render::RendererSettings settings)
     : window_{window}, settings_{settings}, impl_{std::make_unique<Impl>()} {
     const render::TemporalCapabilities temporal{.motion_vectors = true,
-                                                 .jittered_camera = true,
-                                                 .history_resources = true,
-                                                 .resolution_scaling = true,
-                                                 .taa = true,
-                                                 .depth_disocclusion = true,
-                                                 .reactive_history = true,
-                                                 .contrast_adaptive_sharpening = true,
-                                                 .dynamic_resolution = true};
+        .jittered_camera = true,
+        .history_resources = true,
+        .resolution_scaling = true,
+        .taa = true,
+        .depth_disocclusion = true,
+        .reactive_history = true,
+        .contrast_adaptive_sharpening = true,
+        .dynamic_resolution = true};
     impl_->temporal_selection = render::negotiate_temporal_feature(settings_.temporal, temporal);
-    impl_->dynamic_resolution = render::DynamicResolutionController{
-        settings_.temporal.dynamic_resolution, impl_->temporal_selection.render_scale};
+    impl_->dynamic_resolution = render::DynamicResolutionController{settings_.temporal.dynamic_resolution, impl_->temporal_selection.render_scale};
 }
 
-DiligentRenderer::~DiligentRenderer() { stop(); }
+DiligentRenderer::~DiligentRenderer() {
+    stop();
+}
 
-std::string_view DiligentRenderer::name() const noexcept { return "render.diligent.vulkan"; }
+std::string_view DiligentRenderer::name() const noexcept {
+    return "render.diligent.vulkan";
+}
 
-core::SubsystemState DiligentRenderer::state() const noexcept { return state_; }
+core::SubsystemState DiligentRenderer::state() const noexcept {
+    return state_;
+}
 
 render::RenderCapabilities DiligentRenderer::capabilities() const noexcept {
-    const bool bc = impl_->device &&
-                    impl_->device->GetDeviceInfo().Features.TextureCompressionBC !=
-                        Diligent::DEVICE_FEATURE_STATE_DISABLED;
-    const bool timestamps = impl_->device &&
-                            impl_->device->GetDeviceInfo().Features.DurationQueries !=
-                                Diligent::DEVICE_FEATURE_STATE_DISABLED;
+    const bool bc = impl_->device && impl_->device->GetDeviceInfo().Features.TextureCompressionBC != Diligent::DEVICE_FEATURE_STATE_DISABLED;
+    const bool timestamps = impl_->device && impl_->device->GetDeviceInfo().Features.DurationQueries != Diligent::DEVICE_FEATURE_STATE_DISABLED;
     return {.api = render::GraphicsApi::vulkan,
-            .temporal_upscaling = true,
-            .texture_compression_bc = bc,
-            .gpu_timestamps = timestamps,
-            .temporal = {.motion_vectors = true,
-                         .jittered_camera = true,
-                         .history_resources = true,
-                         .resolution_scaling = true,
-                         .taa = true,
-                         .depth_disocclusion = true,
-                         .reactive_history = true,
-                         .contrast_adaptive_sharpening = true,
-                         .dynamic_resolution = true}};
+        .temporal_upscaling = true,
+        .texture_compression_bc = bc,
+        .gpu_timestamps = timestamps,
+        .temporal = {.motion_vectors = true,
+            .jittered_camera = true,
+            .history_resources = true,
+            .resolution_scaling = true,
+            .taa = true,
+            .depth_disocclusion = true,
+            .reactive_history = true,
+            .contrast_adaptive_sharpening = true,
+            .dynamic_resolution = true}};
 }
 
 void DiligentRenderer::start() {
@@ -896,8 +926,8 @@ void DiligentRenderer::start() {
     }
     Diligent::EngineVkCreateInfo engine_create_info;
     engine_create_info.Features.IndependentBlend = Diligent::DEVICE_FEATURE_STATE_ENABLED;
-    engine_create_info.Features.TextureCompressionBC = settings_.texture_compression_bc
-        ? Diligent::DEVICE_FEATURE_STATE_OPTIONAL : Diligent::DEVICE_FEATURE_STATE_DISABLED;
+    engine_create_info.Features.TextureCompressionBC =
+        settings_.texture_compression_bc ? Diligent::DEVICE_FEATURE_STATE_OPTIONAL : Diligent::DEVICE_FEATURE_STATE_DISABLED;
 #if defined(_DEBUG)
     Diligent::BasicPlatformDebug::SetBreakOnError(false);
     engine_create_info.SetValidationLevel(Diligent::VALIDATION_LEVEL_1);
@@ -926,11 +956,7 @@ void DiligentRenderer::start() {
     if (native_window.hWnd == nullptr) {
         throw std::runtime_error{"SDL did not provide a native Win32 window handle"};
     }
-    factory->CreateSwapChainVk(impl_->device,
-                               impl_->immediate_context,
-                               swap_chain_description,
-                               native_window,
-                               &impl_->swap_chain);
+    factory->CreateSwapChainVk(impl_->device, impl_->immediate_context, swap_chain_description, native_window, &impl_->swap_chain);
     if (!impl_->swap_chain) {
         throw std::runtime_error{"Diligent failed to create the Vulkan swap chain"};
     }
@@ -958,18 +984,12 @@ void DiligentRenderer::start() {
     enqueue(builtin_horizontal_quad_upload());
     enqueue(render::TextureUpload{
         .id = render::builtin_white_texture,
-        .mip_levels = {{.data = {std::byte{0xff},
-                                 std::byte{0xff},
-                                 std::byte{0xff},
-                                 std::byte{0xff}}}},
+        .mip_levels = {{.data = {std::byte{0xff}, std::byte{0xff}, std::byte{0xff}, std::byte{0xff}}}},
     });
     enqueue(render::TextureUpload{
         .id = render::builtin_flat_normal_texture,
         .srgb = false,
-        .mip_levels = {{.data = {std::byte{0x80},
-                                 std::byte{0x80},
-                                 std::byte{0xff},
-                                 std::byte{0xff}}}},
+        .mip_levels = {{.data = {std::byte{0x80}, std::byte{0x80}, std::byte{0xff}, std::byte{0xff}}}},
     });
     enqueue(render::MaterialUpload{.id = render::builtin_default_material});
     state_ = core::SubsystemState::running;
@@ -983,9 +1003,10 @@ void DiligentRenderer::create_scene_resources() {
     constants_description.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
     constants_description.Size = sizeof(DrawConstants);
     impl_->device->CreateBuffer(constants_description, nullptr, &impl_->draw_constants);
-    constants_description.Name="Gloom animated skin constants";
-    constants_description.Size=sizeof(SkinConstants);
-    for (uint32 i = 0; i < 66; ++i) impl_->device->CreateBuffer(constants_description, nullptr, &impl_->skin_constants[i]);
+    constants_description.Name = "Gloom animated skin constants";
+    constants_description.Size = sizeof(SkinConstants);
+    for (uint32 i = 0; i < 66; ++i)
+        impl_->device->CreateBuffer(constants_description, nullptr, &impl_->skin_constants[i]);
 
     Diligent::ShaderCreateInfo shader_create_info;
     shader_create_info.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
@@ -1022,63 +1043,42 @@ void DiligentRenderer::create_scene_resources() {
     Diligent::GraphicsPipelineStateCreateInfo pipeline_create_info;
     pipeline_create_info.PSODesc.Name = "Gloom opaque scene pipeline";
     pipeline_create_info.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
-    pipeline_create_info.PSODesc.ResourceLayout.DefaultVariableType =
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+    pipeline_create_info.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
     constexpr Diligent::ShaderResourceVariableDesc resource_variables[]{
         {Diligent::SHADER_TYPE_VERTEX, "SkinConstants", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "BaseColorTexture",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "MetallicRoughnessTexture",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "NormalTexture",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"EmissiveTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"OcclusionTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"SpecularTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"SpecularColorTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"AnisotropyTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"DetailTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"LightmapTexture",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"SceneColorCopy",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,"SceneDepthCopy",Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "PointLights",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "LightClusters",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "LightIndices",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "EnvironmentTexture",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "ShadowMap",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "BaseColorTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "MetallicRoughnessTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "NormalTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "EmissiveTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "OcclusionTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "SpecularTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "SpecularColorTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "AnisotropyTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "DetailTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "LightmapTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "SceneColorCopy", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "SceneDepthCopy", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
+        {Diligent::SHADER_TYPE_PIXEL, "PointLights", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "LightClusters", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "LightIndices", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "EnvironmentTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "ShadowMap", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
     };
     Diligent::SamplerDesc surface_sampler;
-    surface_sampler.AddressU=surface_sampler.AddressV=Diligent::TEXTURE_ADDRESS_WRAP;
+    surface_sampler.AddressU = surface_sampler.AddressV = Diligent::TEXTURE_ADDRESS_WRAP;
     Diligent::SamplerDesc copy_sampler;
-    copy_sampler.AddressU=copy_sampler.AddressV=Diligent::TEXTURE_ADDRESS_CLAMP;
+    copy_sampler.AddressU = copy_sampler.AddressV = Diligent::TEXTURE_ADDRESS_CLAMP;
     const Diligent::ImmutableSamplerDesc immutable_samplers[]{
-        {Diligent::SHADER_TYPE_PIXEL,"SceneColorCopy_sampler",copy_sampler},
+        {Diligent::SHADER_TYPE_PIXEL, "SceneColorCopy_sampler", copy_sampler},
         {Diligent::SHADER_TYPE_PIXEL, "BaseColorTexture_sampler", surface_sampler},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "MetallicRoughnessTexture_sampler",
-         surface_sampler},
+        {Diligent::SHADER_TYPE_PIXEL, "MetallicRoughnessTexture_sampler", surface_sampler},
         {Diligent::SHADER_TYPE_PIXEL, "NormalTexture_sampler", surface_sampler},
         {Diligent::SHADER_TYPE_PIXEL, "EnvironmentTexture_sampler", Diligent::SamplerDesc{}},
     };
     pipeline_create_info.PSODesc.ResourceLayout.Variables = resource_variables;
-    pipeline_create_info.PSODesc.ResourceLayout.NumVariables =
-        static_cast<Diligent::Uint32>(std::size(resource_variables));
+    pipeline_create_info.PSODesc.ResourceLayout.NumVariables = static_cast<Diligent::Uint32>(std::size(resource_variables));
     pipeline_create_info.PSODesc.ResourceLayout.ImmutableSamplers = immutable_samplers;
-    pipeline_create_info.PSODesc.ResourceLayout.NumImmutableSamplers =
-        static_cast<Diligent::Uint32>(std::size(immutable_samplers));
+    pipeline_create_info.PSODesc.ResourceLayout.NumImmutableSamplers = static_cast<Diligent::Uint32>(std::size(immutable_samplers));
     pipeline_create_info.GraphicsPipeline.NumRenderTargets = 3;
     pipeline_create_info.GraphicsPipeline.RTVFormats[0] = Diligent::TEX_FORMAT_RGBA16_FLOAT;
     pipeline_create_info.GraphicsPipeline.RTVFormats[1] = Diligent::TEX_FORMAT_RG16_FLOAT;
@@ -1089,55 +1089,51 @@ void DiligentRenderer::create_scene_resources() {
     pipeline_create_info.GraphicsPipeline.RasterizerDesc.FrontCounterClockwise = false;
     pipeline_create_info.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
     pipeline_create_info.GraphicsPipeline.InputLayout.LayoutElements = input_layout.data();
-    pipeline_create_info.GraphicsPipeline.InputLayout.NumElements =
-        static_cast<Diligent::Uint32>(input_layout.size());
+    pipeline_create_info.GraphicsPipeline.InputLayout.NumElements = static_cast<Diligent::Uint32>(input_layout.size());
     pipeline_create_info.pVS = vertex_shader;
     pipeline_create_info.pPS = pixel_shader;
     impl_->device->CreateGraphicsPipelineState(pipeline_create_info, &impl_->scene_pipeline);
     if (!impl_->scene_pipeline) {
         throw std::runtime_error{"Diligent failed to create the scene pipeline"};
     }
-    auto* constants =
-        impl_->scene_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "Constants");
+    auto* constants = impl_->scene_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "Constants");
     if (constants == nullptr) {
         throw std::runtime_error{"Diligent could not bind scene constants"};
     }
     constants->Set(impl_->draw_constants);
-    constants =
-        impl_->scene_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "Constants");
+    constants = impl_->scene_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "Constants");
     if (constants == nullptr) {
         throw std::runtime_error{"Diligent could not bind pixel material constants"};
     }
     constants->Set(impl_->draw_constants);
-    impl_->surface_pipelines[0]=impl_->scene_pipeline;
-    for (std::uint32_t variant=1;variant<8;++variant) {
-        auto& graphics=pipeline_create_info.GraphicsPipeline;
-        graphics.RasterizerDesc.CullMode=(variant%2)!=0 ? Diligent::CULL_MODE_NONE : Diligent::CULL_MODE_BACK;
-        const auto mode=variant/2;
-        graphics.DepthStencilDesc.DepthWriteEnable=mode<2;
-        graphics.BlendDesc.RenderTargets[1].RenderTargetWriteMask=mode>=2?Diligent::COLOR_MASK_NONE:Diligent::COLOR_MASK_ALL;
-        graphics.BlendDesc.RenderTargets[2].RenderTargetWriteMask=mode>=2?Diligent::COLOR_MASK_NONE:Diligent::COLOR_MASK_ALL;
-        auto& blend=graphics.BlendDesc.RenderTargets[0];
-        graphics.BlendDesc.IndependentBlendEnable=true;
-        blend.BlendEnable=mode>=2;
-        blend.SrcBlend=Diligent::BLEND_FACTOR_SRC_ALPHA;
-        blend.DestBlend=mode==3 ? Diligent::BLEND_FACTOR_ONE : Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
-        blend.SrcBlendAlpha=Diligent::BLEND_FACTOR_ONE;
-        blend.DestBlendAlpha=Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
-        impl_->device->CreateGraphicsPipelineState(pipeline_create_info,&impl_->surface_pipelines[variant]);
-        auto* pipeline=impl_->surface_pipelines[variant].RawPtr();
-        if (!pipeline) throw std::runtime_error{"Failed to create surface pipeline"};
-        for (auto stage : {Diligent::SHADER_TYPE_VERTEX,Diligent::SHADER_TYPE_PIXEL})
-            pipeline->GetStaticVariableByName(stage,"Constants")->Set(impl_->draw_constants);
+    impl_->surface_pipelines[0] = impl_->scene_pipeline;
+    for (std::uint32_t variant = 1; variant < 8; ++variant) {
+        auto& graphics = pipeline_create_info.GraphicsPipeline;
+        graphics.RasterizerDesc.CullMode = (variant % 2) != 0 ? Diligent::CULL_MODE_NONE : Diligent::CULL_MODE_BACK;
+        const auto mode = variant / 2;
+        graphics.DepthStencilDesc.DepthWriteEnable = mode < 2;
+        graphics.BlendDesc.RenderTargets[1].RenderTargetWriteMask = mode >= 2 ? Diligent::COLOR_MASK_NONE : Diligent::COLOR_MASK_ALL;
+        graphics.BlendDesc.RenderTargets[2].RenderTargetWriteMask = mode >= 2 ? Diligent::COLOR_MASK_NONE : Diligent::COLOR_MASK_ALL;
+        auto& blend = graphics.BlendDesc.RenderTargets[0];
+        graphics.BlendDesc.IndependentBlendEnable = true;
+        blend.BlendEnable = mode >= 2;
+        blend.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA;
+        blend.DestBlend = mode == 3 ? Diligent::BLEND_FACTOR_ONE : Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+        blend.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE;
+        blend.DestBlendAlpha = Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+        impl_->device->CreateGraphicsPipelineState(pipeline_create_info, &impl_->surface_pipelines[variant]);
+        auto* pipeline = impl_->surface_pipelines[variant].RawPtr();
+        if (!pipeline)
+            throw std::runtime_error{"Failed to create surface pipeline"};
+        for (auto stage : {Diligent::SHADER_TYPE_VERTEX, Diligent::SHADER_TYPE_PIXEL})
+            pipeline->GetStaticVariableByName(stage, "Constants")->Set(impl_->draw_constants);
     }
     impl_->scene_pipeline->CreateShaderResourceBinding(&impl_->scene_resources, true);
     if (!impl_->scene_resources) {
         throw std::runtime_error{"Diligent failed to create scene shader resources"};
     }
 
-    const auto create_structured_buffer = [&](const char* name,
-                                              const Diligent::Uint64 size,
-                                              const Diligent::Uint32 stride,
+    const auto create_structured_buffer = [&](const char* name, const Diligent::Uint64 size, const Diligent::Uint32 stride,
                                               Diligent::RefCntAutoPtr<Diligent::IBuffer>& buffer) {
         Diligent::BufferDesc description;
         description.Name = name;
@@ -1149,24 +1145,13 @@ void DiligentRenderer::create_scene_resources() {
         description.ElementByteStride = stride;
         impl_->device->CreateBuffer(description, nullptr, &buffer);
     };
-    create_structured_buffer("Gloom clustered point lights",
-                             256U * sizeof(PointLightGpu),
-                             sizeof(PointLightGpu),
-                             impl_->point_light_buffer);
-    create_structured_buffer("Gloom light cluster ranges",
-                             16U * 9U * 24U * sizeof(render::LightClusterRange),
-                             sizeof(render::LightClusterRange),
-                             impl_->cluster_buffer);
-    create_structured_buffer("Gloom clustered light indices",
-                             16U * 9U * 24U * 64U * sizeof(std::uint32_t),
-                             sizeof(std::uint32_t),
-                             impl_->light_index_buffer);
-    for (const auto [name, buffer] :
-         {std::pair{"PointLights", impl_->point_light_buffer.RawPtr()},
-          std::pair{"LightClusters", impl_->cluster_buffer.RawPtr()},
-          std::pair{"LightIndices", impl_->light_index_buffer.RawPtr()}}) {
-        auto* variable = impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL,
-                                                                    name);
+    create_structured_buffer("Gloom clustered point lights", 256U * sizeof(PointLightGpu), sizeof(PointLightGpu), impl_->point_light_buffer);
+    create_structured_buffer(
+        "Gloom light cluster ranges", 16U * 9U * 24U * sizeof(render::LightClusterRange), sizeof(render::LightClusterRange), impl_->cluster_buffer);
+    create_structured_buffer("Gloom clustered light indices", 16U * 9U * 24U * 64U * sizeof(std::uint32_t), sizeof(std::uint32_t), impl_->light_index_buffer);
+    for (const auto [name, buffer] : {std::pair{"PointLights", impl_->point_light_buffer.RawPtr()}, std::pair{"LightClusters", impl_->cluster_buffer.RawPtr()},
+             std::pair{"LightIndices", impl_->light_index_buffer.RawPtr()}}) {
+        auto* variable = impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, name);
         if (variable == nullptr || buffer == nullptr) {
             throw std::runtime_error{"Diligent failed to create clustered-light resources"};
         }
@@ -1185,9 +1170,7 @@ void DiligentRenderer::create_scene_resources() {
         environment_subresources[face].pData = environment_faces[face].data();
         environment_subresources[face].Stride = sizeof(environment_faces[face]);
     }
-    Diligent::TextureData environment_data{
-        environment_subresources.data(),
-        static_cast<Diligent::Uint32>(environment_subresources.size())};
+    Diligent::TextureData environment_data{environment_subresources.data(), static_cast<Diligent::Uint32>(environment_subresources.size())};
     Diligent::TextureDesc environment_description;
     environment_description.Name = "Gloom fallback image-based environment";
     environment_description.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
@@ -1197,15 +1180,11 @@ void DiligentRenderer::create_scene_resources() {
     environment_description.Format = Diligent::TEX_FORMAT_RGBA32_FLOAT;
     environment_description.Usage = Diligent::USAGE_IMMUTABLE;
     environment_description.BindFlags = Diligent::BIND_SHADER_RESOURCE;
-    impl_->device->CreateTexture(environment_description,
-                                 &environment_data,
-                                 &impl_->environment_texture);
+    impl_->device->CreateTexture(environment_description, &environment_data, &impl_->environment_texture);
     if (impl_->environment_texture) {
-        impl_->environment_shader_resource = impl_->environment_texture->GetDefaultView(
-            Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+        impl_->environment_shader_resource = impl_->environment_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
     }
-    auto* environment_variable = impl_->scene_resources->GetVariableByName(
-        Diligent::SHADER_TYPE_PIXEL, "EnvironmentTexture");
+    auto* environment_variable = impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "EnvironmentTexture");
     if (environment_variable == nullptr || !impl_->environment_shader_resource) {
         throw std::runtime_error{"Diligent failed to create the fallback IBL environment"};
     }
@@ -1218,14 +1197,11 @@ void DiligentRenderer::create_scene_resources() {
     shadow_description.Height = 2048;
     shadow_description.ArraySize = 4;
     shadow_description.Format = Diligent::TEX_FORMAT_D32_FLOAT;
-    shadow_description.BindFlags = Diligent::BIND_DEPTH_STENCIL |
-                                   Diligent::BIND_SHADER_RESOURCE;
+    shadow_description.BindFlags = Diligent::BIND_DEPTH_STENCIL | Diligent::BIND_SHADER_RESOURCE;
     impl_->device->CreateTexture(shadow_description, nullptr, &impl_->shadow_texture);
     if (impl_->shadow_texture) {
-        impl_->shadow_shader_resource = impl_->shadow_texture->GetDefaultView(
-            Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
-        for (Diligent::Uint32 cascade = 0; cascade < impl_->shadow_depth_targets.size();
-             ++cascade) {
+        impl_->shadow_shader_resource = impl_->shadow_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+        for (Diligent::Uint32 cascade = 0; cascade < impl_->shadow_depth_targets.size(); ++cascade) {
             Diligent::TextureViewDesc view_description;
             view_description.Name = "Gloom shadow cascade DSV";
             view_description.ViewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL;
@@ -1233,15 +1209,13 @@ void DiligentRenderer::create_scene_resources() {
             view_description.Format = Diligent::TEX_FORMAT_D32_FLOAT;
             view_description.FirstArraySlice = cascade;
             view_description.NumArraySlices = 1;
-            impl_->shadow_texture->CreateView(view_description,
-                                              &impl_->shadow_depth_targets[cascade]);
+            impl_->shadow_texture->CreateView(view_description, &impl_->shadow_depth_targets[cascade]);
         }
     }
-    auto* shadow_variable = impl_->scene_resources->GetVariableByName(
-        Diligent::SHADER_TYPE_PIXEL, "ShadowMap");
-    if (shadow_variable == nullptr || !impl_->shadow_shader_resource ||
-        std::ranges::any_of(impl_->shadow_depth_targets,
-                            [](const auto& view) { return !view; })) {
+    auto* shadow_variable = impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "ShadowMap");
+    if (shadow_variable == nullptr || !impl_->shadow_shader_resource || std::ranges::any_of(impl_->shadow_depth_targets, [](const auto& view) {
+            return !view;
+        })) {
         throw std::runtime_error{"Diligent failed to create cascaded shadow resources"};
     }
     shadow_variable->Set(impl_->shadow_shader_resource);
@@ -1259,37 +1233,33 @@ void DiligentRenderer::create_scene_resources() {
     shader_create_info.Source = shadow_vertex_shader_source;
     impl_->device->CreateShader(shader_create_info, &shadow_vertex_shader);
     Diligent::RefCntAutoPtr<Diligent::IShader> shadow_pixel_shader;
-    shader_create_info.Desc.ShaderType=Diligent::SHADER_TYPE_PIXEL;
-    shader_create_info.Desc.Name="Gloom alpha-aware shadow pixel shader";
-    shader_create_info.Source=shadow_pixel_shader_source;
-    impl_->device->CreateShader(shader_create_info,&shadow_pixel_shader);
+    shader_create_info.Desc.ShaderType = Diligent::SHADER_TYPE_PIXEL;
+    shader_create_info.Desc.Name = "Gloom alpha-aware shadow pixel shader";
+    shader_create_info.Source = shadow_pixel_shader_source;
+    impl_->device->CreateShader(shader_create_info, &shadow_pixel_shader);
     Diligent::GraphicsPipelineStateCreateInfo shadow_pipeline_description;
     shadow_pipeline_description.PSODesc.Name = "Gloom cascaded shadow pipeline";
     shadow_pipeline_description.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
-    shadow_pipeline_description.PSODesc.ResourceLayout.DefaultVariableType =
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
-    const std::array shadow_layout{
-        Diligent::LayoutElement{0,0,3,Diligent::VT_FLOAT32,false,0,sizeof(render::GpuVertex)},
-        Diligent::LayoutElement{2,0,2,Diligent::VT_FLOAT32,false,offsetof(render::GpuVertex,texture_coordinate),sizeof(render::GpuVertex)},
-        Diligent::LayoutElement{4,0,2,Diligent::VT_FLOAT32,false,offsetof(render::GpuVertex,texture_coordinate_1),sizeof(render::GpuVertex)},
-        Diligent::LayoutElement{5,0,4,Diligent::VT_UINT16,false,offsetof(render::GpuVertex,joints),sizeof(render::GpuVertex)},
-        Diligent::LayoutElement{6,0,4,Diligent::VT_UINT16,false,offsetof(render::GpuVertex,joints)+8,sizeof(render::GpuVertex)},
-        Diligent::LayoutElement{7,0,4,Diligent::VT_FLOAT32,false,offsetof(render::GpuVertex,weights),sizeof(render::GpuVertex)},
-        Diligent::LayoutElement{8,0,4,Diligent::VT_FLOAT32,false,offsetof(render::GpuVertex,weights)+16,sizeof(render::GpuVertex)}};
+    shadow_pipeline_description.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+    const std::array shadow_layout{Diligent::LayoutElement{0, 0, 3, Diligent::VT_FLOAT32, false, 0, sizeof(render::GpuVertex)},
+        Diligent::LayoutElement{2, 0, 2, Diligent::VT_FLOAT32, false, offsetof(render::GpuVertex, texture_coordinate), sizeof(render::GpuVertex)},
+        Diligent::LayoutElement{4, 0, 2, Diligent::VT_FLOAT32, false, offsetof(render::GpuVertex, texture_coordinate_1), sizeof(render::GpuVertex)},
+        Diligent::LayoutElement{5, 0, 4, Diligent::VT_UINT16, false, offsetof(render::GpuVertex, joints), sizeof(render::GpuVertex)},
+        Diligent::LayoutElement{6, 0, 4, Diligent::VT_UINT16, false, offsetof(render::GpuVertex, joints) + 8, sizeof(render::GpuVertex)},
+        Diligent::LayoutElement{7, 0, 4, Diligent::VT_FLOAT32, false, offsetof(render::GpuVertex, weights), sizeof(render::GpuVertex)},
+        Diligent::LayoutElement{8, 0, 4, Diligent::VT_FLOAT32, false, offsetof(render::GpuVertex, weights) + 16, sizeof(render::GpuVertex)}};
     const Diligent::ShaderResourceVariableDesc shadow_variables[]{
         {Diligent::SHADER_TYPE_PIXEL, "ShadowBaseColor", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
         {Diligent::SHADER_TYPE_VERTEX, "SkinConstants", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC}};
-    const Diligent::ImmutableSamplerDesc shadow_sampler{Diligent::SHADER_TYPE_PIXEL,"ShadowBaseColor_sampler",surface_sampler};
-    shadow_pipeline_description.PSODesc.ResourceLayout.Variables=shadow_variables;
-    shadow_pipeline_description.PSODesc.ResourceLayout.NumVariables=2;
-    shadow_pipeline_description.PSODesc.ResourceLayout.ImmutableSamplers=&shadow_sampler;
-    shadow_pipeline_description.PSODesc.ResourceLayout.NumImmutableSamplers=1;
+    const Diligent::ImmutableSamplerDesc shadow_sampler{Diligent::SHADER_TYPE_PIXEL, "ShadowBaseColor_sampler", surface_sampler};
+    shadow_pipeline_description.PSODesc.ResourceLayout.Variables = shadow_variables;
+    shadow_pipeline_description.PSODesc.ResourceLayout.NumVariables = 2;
+    shadow_pipeline_description.PSODesc.ResourceLayout.ImmutableSamplers = &shadow_sampler;
+    shadow_pipeline_description.PSODesc.ResourceLayout.NumImmutableSamplers = 1;
     shadow_pipeline_description.GraphicsPipeline.NumRenderTargets = 0;
     shadow_pipeline_description.GraphicsPipeline.DSVFormat = Diligent::TEX_FORMAT_D32_FLOAT;
-    shadow_pipeline_description.GraphicsPipeline.PrimitiveTopology =
-        Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.CullMode =
-        Diligent::CULL_MODE_BACK;
+    shadow_pipeline_description.GraphicsPipeline.PrimitiveTopology = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.CullMode = Diligent::CULL_MODE_BACK;
     shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.DepthBias = 2;
     shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.SlopeScaledDepthBias = 1.5F;
     shadow_pipeline_description.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
@@ -1297,24 +1267,23 @@ void DiligentRenderer::create_scene_resources() {
     shadow_pipeline_description.GraphicsPipeline.InputLayout.NumElements = static_cast<Diligent::Uint32>(shadow_layout.size());
     shadow_pipeline_description.pVS = shadow_vertex_shader;
     shadow_pipeline_description.pPS = shadow_pixel_shader;
-    impl_->device->CreateGraphicsPipelineState(shadow_pipeline_description,
-                                                &impl_->shadow_pipeline);
+    impl_->device->CreateGraphicsPipelineState(shadow_pipeline_description, &impl_->shadow_pipeline);
     if (!impl_->shadow_pipeline || !impl_->shadow_constants || !shadow_vertex_shader) {
         throw std::runtime_error{"Diligent failed to create the cascaded shadow pipeline"};
     }
-    auto* shadow_constants = impl_->shadow_pipeline->GetStaticVariableByName(
-        Diligent::SHADER_TYPE_VERTEX, "ShadowConstants");
+    auto* shadow_constants = impl_->shadow_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_VERTEX, "ShadowConstants");
     if (shadow_constants == nullptr) {
         throw std::runtime_error{"Diligent could not bind shadow constants"};
     }
     shadow_constants->Set(impl_->shadow_constants);
-    impl_->shadow_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL,"ShadowConstants")->Set(impl_->shadow_constants);
-    shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.CullMode=Diligent::CULL_MODE_NONE;
-    shadow_pipeline_description.PSODesc.Name="Gloom double-sided shadow pipeline";
-    impl_->device->CreateGraphicsPipelineState(shadow_pipeline_description,&impl_->double_sided_shadow_pipeline);
-    if (!impl_->double_sided_shadow_pipeline) throw std::runtime_error{"Double sided shadow pipeline failed"};
-    for (const auto stage:{Diligent::SHADER_TYPE_VERTEX,Diligent::SHADER_TYPE_PIXEL})
-        impl_->double_sided_shadow_pipeline->GetStaticVariableByName(stage,"ShadowConstants")->Set(impl_->shadow_constants);
+    impl_->shadow_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ShadowConstants")->Set(impl_->shadow_constants);
+    shadow_pipeline_description.GraphicsPipeline.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
+    shadow_pipeline_description.PSODesc.Name = "Gloom double-sided shadow pipeline";
+    impl_->device->CreateGraphicsPipelineState(shadow_pipeline_description, &impl_->double_sided_shadow_pipeline);
+    if (!impl_->double_sided_shadow_pipeline)
+        throw std::runtime_error{"Double sided shadow pipeline failed"};
+    for (const auto stage : {Diligent::SHADER_TYPE_VERTEX, Diligent::SHADER_TYPE_PIXEL})
+        impl_->double_sided_shadow_pipeline->GetStaticVariableByName(stage, "ShadowConstants")->Set(impl_->shadow_constants);
     impl_->shadow_pipeline->CreateShaderResourceBinding(&impl_->shadow_resources, true);
     if (!impl_->shadow_resources) {
         throw std::runtime_error{"Diligent failed to create shadow shader resources"};
@@ -1341,14 +1310,9 @@ void DiligentRenderer::create_scene_resources() {
     Diligent::GraphicsPipelineStateCreateInfo tone_pipeline;
     tone_pipeline.PSODesc.Name = "Gloom ACES tone-map pipeline";
     tone_pipeline.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
-    tone_pipeline.PSODesc.ResourceLayout.DefaultVariableType =
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
-    const Diligent::ShaderResourceVariableDesc tone_variable{
-        Diligent::SHADER_TYPE_PIXEL,
-        "HdrTexture",
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE};
-    const Diligent::ImmutableSamplerDesc tone_sampler{
-        Diligent::SHADER_TYPE_PIXEL, "HdrTexture_sampler", Diligent::SamplerDesc{}};
+    tone_pipeline.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+    const Diligent::ShaderResourceVariableDesc tone_variable{Diligent::SHADER_TYPE_PIXEL, "HdrTexture", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE};
+    const Diligent::ImmutableSamplerDesc tone_sampler{Diligent::SHADER_TYPE_PIXEL, "HdrTexture_sampler", Diligent::SamplerDesc{}};
     tone_pipeline.PSODesc.ResourceLayout.Variables = &tone_variable;
     tone_pipeline.PSODesc.ResourceLayout.NumVariables = 1;
     tone_pipeline.PSODesc.ResourceLayout.ImmutableSamplers = &tone_sampler;
@@ -1361,12 +1325,10 @@ void DiligentRenderer::create_scene_resources() {
     tone_pipeline.pVS = tone_vertex_shader;
     tone_pipeline.pPS = tone_pixel_shader;
     impl_->device->CreateGraphicsPipelineState(tone_pipeline, &impl_->tone_map_pipeline);
-    if (!impl_->tone_map_pipeline || !impl_->tone_constants || !tone_vertex_shader ||
-        !tone_pixel_shader) {
+    if (!impl_->tone_map_pipeline || !impl_->tone_constants || !tone_vertex_shader || !tone_pixel_shader) {
         throw std::runtime_error{"Diligent failed to create HDR tone-map resources"};
     }
-    auto* tone_constants = impl_->tone_map_pipeline->GetStaticVariableByName(
-        Diligent::SHADER_TYPE_PIXEL, "ToneConstants");
+    auto* tone_constants = impl_->tone_map_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "ToneConstants");
     if (tone_constants == nullptr) {
         throw std::runtime_error{"Diligent could not bind tone-map constants"};
     }
@@ -1384,8 +1346,7 @@ void DiligentRenderer::create_scene_resources() {
     temporal_constants_description.Usage = Diligent::USAGE_DYNAMIC;
     temporal_constants_description.BindFlags = Diligent::BIND_UNIFORM_BUFFER;
     temporal_constants_description.CPUAccessFlags = Diligent::CPU_ACCESS_WRITE;
-    impl_->device->CreateBuffer(
-        temporal_constants_description, nullptr, &impl_->temporal_constants);
+    impl_->device->CreateBuffer(temporal_constants_description, nullptr, &impl_->temporal_constants);
     Diligent::RefCntAutoPtr<Diligent::IShader> temporal_pixel_shader;
     shader_create_info.Desc.ShaderType = Diligent::SHADER_TYPE_PIXEL;
     shader_create_info.Desc.Name = "Gloom native TAA pixel shader";
@@ -1394,24 +1355,13 @@ void DiligentRenderer::create_scene_resources() {
     Diligent::GraphicsPipelineStateCreateInfo temporal_pipeline;
     temporal_pipeline.PSODesc.Name = "Gloom native TAA pipeline";
     temporal_pipeline.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
-    temporal_pipeline.PSODesc.ResourceLayout.DefaultVariableType =
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+    temporal_pipeline.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
     constexpr Diligent::ShaderResourceVariableDesc temporal_variables[]{
-        {Diligent::SHADER_TYPE_PIXEL,
-         "CurrentColor",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "MotionVectors",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "HistoryColor",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "CurrentDepth",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
-        {Diligent::SHADER_TYPE_PIXEL,
-         "HistoryDepth",
-         Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "CurrentColor", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "MotionVectors", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "HistoryColor", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "CurrentDepth", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
+        {Diligent::SHADER_TYPE_PIXEL, "HistoryDepth", Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE},
     };
     constexpr Diligent::ImmutableSamplerDesc temporal_samplers[]{
         {Diligent::SHADER_TYPE_PIXEL, "CurrentColor_sampler", Diligent::SamplerDesc{}},
@@ -1421,16 +1371,13 @@ void DiligentRenderer::create_scene_resources() {
         {Diligent::SHADER_TYPE_PIXEL, "HistoryDepth_sampler", Diligent::SamplerDesc{}},
     };
     temporal_pipeline.PSODesc.ResourceLayout.Variables = temporal_variables;
-    temporal_pipeline.PSODesc.ResourceLayout.NumVariables =
-        static_cast<Diligent::Uint32>(std::size(temporal_variables));
+    temporal_pipeline.PSODesc.ResourceLayout.NumVariables = static_cast<Diligent::Uint32>(std::size(temporal_variables));
     temporal_pipeline.PSODesc.ResourceLayout.ImmutableSamplers = temporal_samplers;
-    temporal_pipeline.PSODesc.ResourceLayout.NumImmutableSamplers =
-        static_cast<Diligent::Uint32>(std::size(temporal_samplers));
+    temporal_pipeline.PSODesc.ResourceLayout.NumImmutableSamplers = static_cast<Diligent::Uint32>(std::size(temporal_samplers));
     temporal_pipeline.GraphicsPipeline.NumRenderTargets = 2;
     temporal_pipeline.GraphicsPipeline.RTVFormats[0] = Diligent::TEX_FORMAT_RGBA16_FLOAT;
     temporal_pipeline.GraphicsPipeline.RTVFormats[1] = Diligent::TEX_FORMAT_R32_FLOAT;
-    temporal_pipeline.GraphicsPipeline.PrimitiveTopology =
-        Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    temporal_pipeline.GraphicsPipeline.PrimitiveTopology = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     temporal_pipeline.GraphicsPipeline.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
     temporal_pipeline.GraphicsPipeline.DepthStencilDesc.DepthEnable = false;
     temporal_pipeline.pVS = tone_vertex_shader;
@@ -1439,8 +1386,7 @@ void DiligentRenderer::create_scene_resources() {
     if (!impl_->temporal_pipeline || !impl_->temporal_constants || !temporal_pixel_shader) {
         throw std::runtime_error{"Diligent failed to create native TAA resources"};
     }
-    auto* temporal_constants = impl_->temporal_pipeline->GetStaticVariableByName(
-        Diligent::SHADER_TYPE_PIXEL, "TemporalConstants");
+    auto* temporal_constants = impl_->temporal_pipeline->GetStaticVariableByName(Diligent::SHADER_TYPE_PIXEL, "TemporalConstants");
     if (temporal_constants == nullptr) {
         throw std::runtime_error{"Diligent could not bind native TAA constants"};
     }
@@ -1453,8 +1399,7 @@ void DiligentRenderer::create_scene_resources() {
     }
 }
 
-void DiligentRenderer::create_frame_resources(const std::uint32_t width,
-                                              const std::uint32_t height) {
+void DiligentRenderer::create_frame_resources(const std::uint32_t width, const std::uint32_t height) {
     impl_->scene_depth_target.Release();
     impl_->scene_depth_texture.Release();
     impl_->motion_shader_resource.Release();
@@ -1466,7 +1411,8 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
     impl_->hdr_shader_resource.Release();
     impl_->hdr_render_target.Release();
     impl_->hdr_texture.Release();
-    impl_->particle_color_copy.Release();impl_->particle_depth_copy.Release();
+    impl_->particle_color_copy.Release();
+    impl_->particle_depth_copy.Release();
     for (std::size_t index = 0; index < impl_->history_textures.size(); ++index) {
         impl_->history_shader_resources[index].Release();
         impl_->history_render_targets[index].Release();
@@ -1476,8 +1422,7 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
         impl_->history_depth_textures[index].Release();
     }
     impl_->output_extent = {width, height};
-    impl_->render_extent = render::scaled_render_extent(
-        impl_->output_extent, impl_->temporal_selection.render_scale);
+    impl_->render_extent = render::scaled_render_extent(impl_->output_extent, impl_->temporal_selection.render_scale);
     impl_->history_valid = false;
     impl_->previous_camera_valid = false;
     if (width == 0 || height == 0 || !impl_->device) {
@@ -1492,54 +1437,46 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
     description.BindFlags = Diligent::BIND_RENDER_TARGET | Diligent::BIND_SHADER_RESOURCE;
     impl_->device->CreateTexture(description, nullptr, &impl_->hdr_texture);
     if (impl_->hdr_texture) {
-        impl_->hdr_render_target =
-            impl_->hdr_texture->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
-        impl_->hdr_shader_resource =
-            impl_->hdr_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+        impl_->hdr_render_target = impl_->hdr_texture->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
+        impl_->hdr_shader_resource = impl_->hdr_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
     }
     if (!impl_->hdr_texture || !impl_->hdr_render_target || !impl_->hdr_shader_resource) {
         throw std::runtime_error{"Diligent failed to create the HDR scene target"};
     }
 
-    description.Name="Gloom particle immutable color snapshot";
-    description.BindFlags=Diligent::BIND_SHADER_RESOURCE;
-    impl_->device->CreateTexture(description,nullptr,&impl_->particle_color_copy);
-    description.Format=Diligent::TEX_FORMAT_R32_FLOAT;
-    description.Name="Gloom particle immutable depth snapshot";
-    impl_->device->CreateTexture(description,nullptr,&impl_->particle_depth_copy);
-    if (!impl_->particle_color_copy || !impl_->particle_depth_copy) throw std::runtime_error{"Particle snapshot allocation failed"};
-    description.BindFlags=Diligent::BIND_RENDER_TARGET|Diligent::BIND_SHADER_RESOURCE;
+    description.Name = "Gloom particle immutable color snapshot";
+    description.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+    impl_->device->CreateTexture(description, nullptr, &impl_->particle_color_copy);
+    description.Format = Diligent::TEX_FORMAT_R32_FLOAT;
+    description.Name = "Gloom particle immutable depth snapshot";
+    impl_->device->CreateTexture(description, nullptr, &impl_->particle_depth_copy);
+    if (!impl_->particle_color_copy || !impl_->particle_depth_copy)
+        throw std::runtime_error{"Particle snapshot allocation failed"};
+    description.BindFlags = Diligent::BIND_RENDER_TARGET | Diligent::BIND_SHADER_RESOURCE;
     description.Name = "Gloom motion vectors";
     description.Format = Diligent::TEX_FORMAT_RG16_FLOAT;
     impl_->device->CreateTexture(description, nullptr, &impl_->motion_texture);
     if (impl_->motion_texture) {
-        impl_->motion_render_target =
-            impl_->motion_texture->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
-        impl_->motion_shader_resource =
-            impl_->motion_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+        impl_->motion_render_target = impl_->motion_texture->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
+        impl_->motion_shader_resource = impl_->motion_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
     }
     description.Name = "Gloom linear depth";
     description.Format = Diligent::TEX_FORMAT_R32_FLOAT;
     impl_->device->CreateTexture(description, nullptr, &impl_->linear_depth_texture);
     if (impl_->linear_depth_texture) {
-        impl_->linear_depth_render_target =
-            impl_->linear_depth_texture->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
-        impl_->linear_depth_shader_resource =
-            impl_->linear_depth_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+        impl_->linear_depth_render_target = impl_->linear_depth_texture->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
+        impl_->linear_depth_shader_resource = impl_->linear_depth_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
     }
     description.Name = "Gloom scene depth";
     description.Format = Diligent::TEX_FORMAT_D32_FLOAT;
     description.BindFlags = Diligent::BIND_DEPTH_STENCIL;
     impl_->device->CreateTexture(description, nullptr, &impl_->scene_depth_texture);
     if (impl_->scene_depth_texture) {
-        impl_->scene_depth_target =
-            impl_->scene_depth_texture->GetDefaultView(Diligent::TEXTURE_VIEW_DEPTH_STENCIL);
+        impl_->scene_depth_target = impl_->scene_depth_texture->GetDefaultView(Diligent::TEXTURE_VIEW_DEPTH_STENCIL);
     }
-    if (!impl_->motion_render_target || !impl_->motion_shader_resource ||
-        !impl_->linear_depth_render_target || !impl_->linear_depth_shader_resource ||
+    if (!impl_->motion_render_target || !impl_->motion_shader_resource || !impl_->linear_depth_render_target || !impl_->linear_depth_shader_resource ||
         !impl_->scene_depth_target) {
-        throw std::runtime_error{
-            "Diligent failed to create motion-vector or scene-depth targets"};
+        throw std::runtime_error{"Diligent failed to create motion-vector or scene-depth targets"};
     }
 
     description.Width = width;
@@ -1550,10 +1487,8 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
         description.Name = index == 0 ? "Gloom temporal history A" : "Gloom temporal history B";
         impl_->device->CreateTexture(description, nullptr, &impl_->history_textures[index]);
         if (impl_->history_textures[index]) {
-            impl_->history_render_targets[index] = impl_->history_textures[index]->GetDefaultView(
-                Diligent::TEXTURE_VIEW_RENDER_TARGET);
-            impl_->history_shader_resources[index] = impl_->history_textures[index]->GetDefaultView(
-                Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+            impl_->history_render_targets[index] = impl_->history_textures[index]->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
+            impl_->history_shader_resources[index] = impl_->history_textures[index]->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
         }
         if (!impl_->history_render_targets[index] || !impl_->history_shader_resources[index]) {
             throw std::runtime_error{"Diligent failed to create temporal history resources"};
@@ -1564,15 +1499,10 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
         description.Name = index == 0 ? "Gloom depth history A" : "Gloom depth history B";
         impl_->device->CreateTexture(description, nullptr, &impl_->history_depth_textures[index]);
         if (impl_->history_depth_textures[index]) {
-            impl_->history_depth_render_targets[index] =
-                impl_->history_depth_textures[index]->GetDefaultView(
-                    Diligent::TEXTURE_VIEW_RENDER_TARGET);
-            impl_->history_depth_shader_resources[index] =
-                impl_->history_depth_textures[index]->GetDefaultView(
-                    Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+            impl_->history_depth_render_targets[index] = impl_->history_depth_textures[index]->GetDefaultView(Diligent::TEXTURE_VIEW_RENDER_TARGET);
+            impl_->history_depth_shader_resources[index] = impl_->history_depth_textures[index]->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
         }
-        if (!impl_->history_depth_render_targets[index] ||
-            !impl_->history_depth_shader_resources[index]) {
+        if (!impl_->history_depth_render_targets[index] || !impl_->history_depth_shader_resources[index]) {
             throw std::runtime_error{"Diligent failed to create temporal depth history"};
         }
     }
@@ -1585,8 +1515,7 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
         if (impl_->tone_map_resources[index] == nullptr) {
             continue;
         }
-        if (auto* variable = impl_->tone_map_resources[index]->GetVariableByName(
-                Diligent::SHADER_TYPE_PIXEL, "HdrTexture")) {
+        if (auto* variable = impl_->tone_map_resources[index]->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "HdrTexture")) {
             variable->Set(tone_inputs[index], Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
         }
     }
@@ -1595,8 +1524,7 @@ void DiligentRenderer::create_frame_resources(const std::uint32_t width,
             continue;
         }
         const auto bind = [&](const char* name, Diligent::ITextureView* view) {
-            auto* variable = impl_->temporal_resources[index]->GetVariableByName(
-                Diligent::SHADER_TYPE_PIXEL, name);
+            auto* variable = impl_->temporal_resources[index]->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, name);
             if (variable == nullptr) {
                 throw std::runtime_error{std::string{"Diligent lost temporal binding: "} + name};
             }
@@ -1627,7 +1555,8 @@ void DiligentRenderer::enqueue(render::TextureUpload upload) {
 }
 
 void DiligentRenderer::enqueue(render::MaterialUpload upload) {
-    if (!render::valid_material_surface(upload.surface)) throw std::invalid_argument{"Invalid extended material surface"};
+    if (!render::valid_material_surface(upload.surface))
+        throw std::invalid_argument{"Invalid extended material surface"};
     std::scoped_lock lock{impl_->upload_mutex};
     impl_->asset_states[upload.id] = render::GpuAssetState::queued;
     impl_->material_uploads.push_back(std::move(upload));
@@ -1667,8 +1596,7 @@ void DiligentRenderer::process_uploads() {
                 return false;
             }
             remaining = bytes > remaining ? 0 : remaining - bytes;
-            impl_->residency_metrics.queued_bytes -=
-                std::min(impl_->residency_metrics.queued_bytes, bytes);
+            impl_->residency_metrics.queued_bytes -= std::min(impl_->residency_metrics.queued_bytes, bytes);
             meshes.push_back(std::move(impl_->mesh_uploads.front()));
             impl_->mesh_uploads.pop_front();
             return true;
@@ -1679,8 +1607,7 @@ void DiligentRenderer::process_uploads() {
                 return false;
             }
             remaining = bytes > remaining ? 0 : remaining - bytes;
-            impl_->residency_metrics.queued_bytes -=
-                std::min(impl_->residency_metrics.queued_bytes, bytes);
+            impl_->residency_metrics.queued_bytes -= std::min(impl_->residency_metrics.queued_bytes, bytes);
             textures.push_back(std::move(impl_->texture_uploads.front()));
             impl_->texture_uploads.pop_front();
             return true;
@@ -1707,43 +1634,35 @@ void DiligentRenderer::process_uploads() {
     const auto released_meshes = std::erase_if(impl_->deferred_meshes, [&](const auto& entry) {
         return entry.fence_value <= completed_fence;
     });
-    const auto released_textures =
-        std::erase_if(impl_->deferred_textures, [&](const auto& entry) {
-            return entry.fence_value <= completed_fence;
-        });
+    const auto released_textures = std::erase_if(impl_->deferred_textures, [&](const auto& entry) {
+        return entry.fence_value <= completed_fence;
+    });
     if (released_meshes + released_textures > 0) {
         std::scoped_lock lock{impl_->upload_mutex};
         impl_->residency_metrics.completed_releases += released_meshes + released_textures;
     }
 
-    const auto defer_asset = [&](const render::RenderAssetId id,
-                                 const bool mark_missing,
-                                 const bool eviction) {
+    const auto defer_asset = [&](const render::RenderAssetId id, const bool mark_missing, const bool eviction) {
         std::uint64_t removed_bytes = 0;
         std::uint64_t deferred = 0;
         if (auto mesh = impl_->meshes.find(id); mesh != impl_->meshes.end()) {
             removed_bytes += mesh->second.byte_size;
-            impl_->deferred_meshes.push_back(
-                {.resource = std::move(mesh->second),
-                 .fence_value = impl_->submitted_fence_value});
+            impl_->deferred_meshes.push_back({.resource = std::move(mesh->second), .fence_value = impl_->submitted_fence_value});
             impl_->meshes.erase(mesh);
             ++deferred;
         }
         if (auto texture = impl_->textures.find(id); texture != impl_->textures.end()) {
             removed_bytes += texture->second.byte_size;
-            impl_->deferred_textures.push_back(
-                {.resource = std::move(texture->second),
-                 .fence_value = impl_->submitted_fence_value});
+            impl_->deferred_textures.push_back({.resource = std::move(texture->second), .fence_value = impl_->submitted_fence_value});
             impl_->textures.erase(texture);
             ++deferred;
         }
         impl_->materials.erase(id);
-        if (vulkan_present.enabled && removed_bytes) printf("GPU release: id=%llu bytes=%llu eviction=%u\n",
-            static_cast<uint64>(id.value), static_cast<uint64>(removed_bytes), eviction ? 1U : 0U);
+        if (vulkan_present.enabled && removed_bytes)
+            printf("GPU release: id=%llu bytes=%llu eviction=%u\n", static_cast<uint64>(id.value), static_cast<uint64>(removed_bytes), eviction ? 1U : 0U);
         {
             std::scoped_lock lock{impl_->upload_mutex};
-            impl_->residency_metrics.resident_bytes -=
-                std::min(impl_->residency_metrics.resident_bytes, removed_bytes);
+            impl_->residency_metrics.resident_bytes -= std::min(impl_->residency_metrics.resident_bytes, removed_bytes);
             impl_->residency_metrics.deferred_releases += deferred;
             if (eviction && removed_bytes > 0) {
                 ++impl_->residency_metrics.evictions;
@@ -1755,8 +1674,7 @@ void DiligentRenderer::process_uploads() {
     };
 
     for (const auto id : releases) {
-        if (id != render::builtin_cube_mesh && id != render::builtin_horizontal_quad_mesh &&
-            id != render::builtin_default_material &&
+        if (id != render::builtin_cube_mesh && id != render::builtin_horizontal_quad_mesh && id != render::builtin_default_material &&
             id != render::builtin_white_texture && id != render::builtin_flat_normal_texture) {
             defer_asset(id, true, false);
         }
@@ -1798,8 +1716,8 @@ void DiligentRenderer::process_uploads() {
             impl_->residency_metrics.resident_bytes += upload_size(upload);
         }
         set_state(upload.id, render::GpuAssetState::resident);
-        if (vulkan_present.enabled) printf("GPU upload: mesh id=%llu bytes=%llu\n",
-            static_cast<uint64>(upload.id.value), static_cast<uint64>(upload_size(upload)));
+        if (vulkan_present.enabled)
+            printf("GPU upload: mesh id=%llu bytes=%llu\n", static_cast<uint64>(upload.id.value), static_cast<uint64>(upload_size(upload)));
     }
 
     for (auto& upload : textures) {
@@ -1808,13 +1726,9 @@ void DiligentRenderer::process_uploads() {
         std::uint32_t expected_height = valid ? upload.mip_levels.front().height : 0;
         for (const auto& level : upload.mip_levels) {
             const bool compressed = upload.format != render::TextureFormat::rgba8;
-            const std::size_t required_bytes = compressed
-                                                   ? static_cast<std::size_t>((level.width + 3U) / 4U) *
-                                                         ((level.height + 3U) / 4U) * 16U
-                                                   : static_cast<std::size_t>(level.width) *
-                                                         level.height * 4U;
-            valid = valid && level.width == expected_width && level.height == expected_height &&
-                    level.data.size() == required_bytes;
+            const std::size_t required_bytes = compressed ? static_cast<std::size_t>((level.width + 3U) / 4U) * ((level.height + 3U) / 4U) * 16U
+                                                          : static_cast<std::size_t>(level.width) * level.height * 4U;
+            valid = valid && level.width == expected_width && level.height == expected_height && level.data.size() == required_bytes;
             expected_width = std::max(expected_width / 2U, 1U);
             expected_height = std::max(expected_height / 2U, 1U);
         }
@@ -1833,12 +1747,10 @@ void DiligentRenderer::process_uploads() {
             description.Format = Diligent::TEX_FORMAT_BC5_UNORM;
             break;
         case render::TextureFormat::bc7:
-            description.Format = upload.srgb ? Diligent::TEX_FORMAT_BC7_UNORM_SRGB
-                                             : Diligent::TEX_FORMAT_BC7_UNORM;
+            description.Format = upload.srgb ? Diligent::TEX_FORMAT_BC7_UNORM_SRGB : Diligent::TEX_FORMAT_BC7_UNORM;
             break;
         case render::TextureFormat::rgba8:
-            description.Format = upload.srgb ? Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB
-                                             : Diligent::TEX_FORMAT_RGBA8_UNORM;
+            description.Format = upload.srgb ? Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB : Diligent::TEX_FORMAT_RGBA8_UNORM;
             break;
         }
         description.Usage = Diligent::USAGE_IMMUTABLE;
@@ -1846,13 +1758,11 @@ void DiligentRenderer::process_uploads() {
         std::vector<Diligent::TextureSubResData> subresources;
         subresources.reserve(upload.mip_levels.size());
         for (const auto& level : upload.mip_levels) {
-            const auto stride = upload.format == render::TextureFormat::rgba8
-                                    ? static_cast<Diligent::Uint64>(level.width) * 4U
-                                    : static_cast<Diligent::Uint64>((level.width + 3U) / 4U) * 16U;
+            const auto stride = upload.format == render::TextureFormat::rgba8 ? static_cast<Diligent::Uint64>(level.width) * 4U
+                                                                              : static_cast<Diligent::Uint64>((level.width + 3U) / 4U) * 16U;
             subresources.emplace_back(level.data.data(), stride);
         }
-        Diligent::TextureData data{subresources.data(),
-                                   static_cast<Diligent::Uint32>(subresources.size())};
+        Diligent::TextureData data{subresources.data(), static_cast<Diligent::Uint32>(subresources.size())};
         Impl::TextureResource resource;
         resource.byte_size = upload_size(upload);
         resource.last_used_frame = impl_->frame_index;
@@ -1872,9 +1782,9 @@ void DiligentRenderer::process_uploads() {
             impl_->residency_metrics.resident_bytes += upload_size(upload);
         }
         set_state(upload.id, render::GpuAssetState::resident);
-        if (vulkan_present.enabled) printf("GPU upload: texture id=%llu bytes=%llu format=%u width=%u height=%u\n",
-            static_cast<uint64>(upload.id.value), static_cast<uint64>(upload_size(upload)),
-            static_cast<uint32>(upload.format), description.Width, description.Height);
+        if (vulkan_present.enabled)
+            printf("GPU upload: texture id=%llu bytes=%llu format=%u width=%u height=%u\n", static_cast<uint64>(upload.id.value),
+                static_cast<uint64>(upload_size(upload)), static_cast<uint32>(upload.format), description.Width, description.Height);
     }
 
     for (auto& upload : materials) {
@@ -1898,17 +1808,13 @@ void DiligentRenderer::process_uploads() {
         render::RenderAssetId oldest{};
         std::uint64_t oldest_frame = std::numeric_limits<std::uint64_t>::max();
         for (const auto& [id, resource] : impl_->meshes) {
-            if (id != render::builtin_cube_mesh &&
-                id != render::builtin_horizontal_quad_mesh &&
-                resource.last_used_frame < oldest_frame) {
+            if (id != render::builtin_cube_mesh && id != render::builtin_horizontal_quad_mesh && resource.last_used_frame < oldest_frame) {
                 oldest = id;
                 oldest_frame = resource.last_used_frame;
             }
         }
         for (const auto& [id, resource] : impl_->textures) {
-            if (id != render::builtin_white_texture &&
-                id != render::builtin_flat_normal_texture &&
-                resource.last_used_frame < oldest_frame) {
+            if (id != render::builtin_white_texture && id != render::builtin_flat_normal_texture && resource.last_used_frame < oldest_frame) {
                 oldest = id;
                 oldest_frame = resource.last_used_frame;
             }
@@ -1926,15 +1832,21 @@ void DiligentRenderer::stop() noexcept {
         impl_->immediate_context->WaitForIdle();
     }
     impl_->scene_resources.Release();
-    for (auto& pipeline : impl_->surface_pipelines) pipeline.Release();
+    for (auto& pipeline : impl_->surface_pipelines)
+        pipeline.Release();
     impl_->scene_pipeline.Release();
     impl_->draw_constants.Release();
-    for (uint32 i = 0; i < 66; ++i) impl_->skin_constants[i].Release();
+    for (uint32 i = 0; i < 66; ++i)
+        impl_->skin_constants[i].Release();
     for (auto& resources : impl_->tone_map_resources) {
         resources.Release();
     }
     impl_->tone_map_pipeline.Release();
-    impl_->ui_resources.Release();impl_->ui_pipeline.Release();impl_->ui_vertices.Release();impl_->ui_bound_view=nullptr;impl_->ui.vertices.clear();
+    impl_->ui_resources.Release();
+    impl_->ui_pipeline.Release();
+    impl_->ui_vertices.Release();
+    impl_->ui_bound_view = nullptr;
+    impl_->ui.vertices.clear();
     impl_->tone_constants.Release();
     for (auto& resources : impl_->temporal_resources) {
         resources.Release();
@@ -1984,7 +1896,8 @@ void DiligentRenderer::stop() noexcept {
     impl_->hdr_shader_resource.Release();
     impl_->hdr_render_target.Release();
     impl_->hdr_texture.Release();
-    impl_->particle_color_copy.Release();impl_->particle_depth_copy.Release();
+    impl_->particle_color_copy.Release();
+    impl_->particle_depth_copy.Release();
     impl_->materials.clear();
     impl_->textures.clear();
     impl_->meshes.clear();
@@ -2008,7 +1921,8 @@ void DiligentRenderer::stop() noexcept {
 
 void DiligentRenderer::resize(const std::uint32_t width, const std::uint32_t height) {
     if (impl_->swap_chain) {
-        if (impl_->output_extent.width == width && impl_->output_extent.height == height) return;
+        if (impl_->output_extent.width == width && impl_->output_extent.height == height)
+            return;
         // Frame targets also back mutable tone-map/TAA descriptors. Drain their
         // users before replacing them, including SDL's initial resize events.
         impl_->immediate_context->Flush();
@@ -2044,28 +1958,23 @@ void DiligentRenderer::begin_frame() {
     process_uploads();
     impl_->shadow_rendered = false;
     impl_->drew_scene = false;
-    impl_->jitter = impl_->temporal_selection.technique == render::TemporalTechnique::taa
-                        ? render::temporal_jitter(impl_->frame_index, impl_->render_extent)
-                        : render::CameraJitter{};
+    impl_->jitter = impl_->temporal_selection.technique == render::TemporalTechnique::taa ? render::temporal_jitter(impl_->frame_index, impl_->render_extent)
+                                                                                          : render::CameraJitter{};
     impl_->frame_metrics.frame_index = impl_->frame_index;
     impl_->frame_metrics.gpu_timing_supported = capabilities().gpu_timestamps;
     if (impl_->frame_metrics.gpu_timing_supported) {
         auto& timing = impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count];
         const bool full_sample_pending = timing.full_pending;
-        const auto collect = [](Diligent::IQuery* query,
-                                bool& pending,
-                                std::uint64_t& nanoseconds) {
+        const auto collect = [](Diligent::IQuery* query, bool& pending, std::uint64_t& nanoseconds) {
             if (!pending) {
                 return;
             }
             Diligent::QueryDataDuration result;
             if (query->GetData(&result, sizeof(result), true)) {
-                nanoseconds = result.Frequency == 0
-                                  ? 0
-                                  : static_cast<std::uint64_t>(
-                                        static_cast<long double>(result.Duration) *
-                                        1'000'000'000.0L /
-                                        static_cast<long double>(result.Frequency));
+                nanoseconds =
+                    result.Frequency == 0
+                        ? 0
+                        : static_cast<std::uint64_t>(static_cast<long double>(result.Duration) * 1'000'000'000.0L / static_cast<long double>(result.Frequency));
                 pending = false;
             }
         };
@@ -2073,23 +1982,14 @@ void DiligentRenderer::begin_frame() {
         impl_->frame_metrics.gpu_sample_ready = full_sample_pending && !timing.full_pending;
         collect(timing.opaque, timing.opaque_pending, impl_->frame_metrics.opaque_nanoseconds);
         collect(timing.shadow, timing.shadow_pending, impl_->frame_metrics.shadow_nanoseconds);
-        collect(timing.tone_map,
-                timing.tone_map_pending,
-                impl_->frame_metrics.tone_map_nanoseconds);
-        collect(timing.temporal,
-                timing.temporal_pending,
-                impl_->frame_metrics.temporal_resolve_nanoseconds);
+        collect(timing.tone_map, timing.tone_map_pending, impl_->frame_metrics.tone_map_nanoseconds);
+        collect(timing.temporal, timing.temporal_pending, impl_->frame_metrics.temporal_resolve_nanoseconds);
     }
-    const auto gpu_nanoseconds = impl_->frame_metrics.shadow_nanoseconds +
-                                 impl_->frame_metrics.opaque_nanoseconds +
-                                 impl_->frame_metrics.temporal_resolve_nanoseconds +
-                                 impl_->frame_metrics.tone_map_nanoseconds;
-    const float requested_scale = impl_->dynamic_resolution.update(
-        static_cast<float>(gpu_nanoseconds) / 1'000'000.0F);
-    const auto requested_extent = render::scaled_render_extent(impl_->output_extent,
-                                                               requested_scale);
-    if (requested_extent != impl_->render_extent && impl_->output_extent.width != 0 &&
-        impl_->output_extent.height != 0) {
+    const auto gpu_nanoseconds = impl_->frame_metrics.shadow_nanoseconds + impl_->frame_metrics.opaque_nanoseconds +
+                                 impl_->frame_metrics.temporal_resolve_nanoseconds + impl_->frame_metrics.tone_map_nanoseconds;
+    const float requested_scale = impl_->dynamic_resolution.update(static_cast<float>(gpu_nanoseconds) / 1'000'000.0F);
+    const auto requested_extent = render::scaled_render_extent(impl_->output_extent, requested_scale);
+    if (requested_extent != impl_->render_extent && impl_->output_extent.width != 0 && impl_->output_extent.height != 0) {
         impl_->immediate_context->Flush();
         impl_->immediate_context->WaitForIdle();
         impl_->temporal_selection.render_scale = requested_scale;
@@ -2101,59 +2001,42 @@ void DiligentRenderer::begin_frame() {
     impl_->frame_metrics.output_width = impl_->output_extent.width;
     impl_->frame_metrics.output_height = impl_->output_extent.height;
     impl_->frame_metrics.render_scale = dynamic_metrics.scale;
-    impl_->frame_metrics.filtered_gpu_frame_milliseconds =
-        dynamic_metrics.filtered_frame_milliseconds;
+    impl_->frame_metrics.filtered_gpu_frame_milliseconds = dynamic_metrics.filtered_frame_milliseconds;
     impl_->frame_metrics.dynamic_resolution_changes = dynamic_metrics.scale_changes;
     impl_->frame_metrics.temporal_history_valid = impl_->history_valid;
-    if (!impl_->hdr_render_target || !impl_->motion_render_target ||
-        !impl_->linear_depth_render_target || !impl_->scene_depth_target) {
+    if (!impl_->hdr_render_target || !impl_->motion_render_target || !impl_->linear_depth_render_target || !impl_->scene_depth_target) {
         return;
     }
-    Diligent::ITextureView* render_targets[]{impl_->hdr_render_target,
-                                             impl_->motion_render_target,
-                                             impl_->linear_depth_render_target};
+    Diligent::ITextureView* render_targets[]{impl_->hdr_render_target, impl_->motion_render_target, impl_->linear_depth_render_target};
     auto* const depth_target = impl_->scene_depth_target.RawPtr();
-    impl_->immediate_context->SetRenderTargets(3,
-                                               render_targets,
-                                               depth_target,
-                                               Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    impl_->immediate_context->SetRenderTargets(3, render_targets, depth_target, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     constexpr std::array clear_color{0.025F, 0.035F, 0.065F, 1.0F};
-    impl_->immediate_context->ClearRenderTarget(render_targets[0],
-                                                clear_color.data(),
-                                                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    impl_->immediate_context->ClearRenderTarget(render_targets[0], clear_color.data(), Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     constexpr std::array clear_motion{0.0F, 0.0F, 0.0F, 0.0F};
-    impl_->immediate_context->ClearRenderTarget(render_targets[1],
-                                                clear_motion.data(),
-                                                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    impl_->immediate_context->ClearRenderTarget(render_targets[1], clear_motion.data(), Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     constexpr std::array clear_linear_depth{1.0F, 1.0F, 1.0F, 1.0F};
-    impl_->immediate_context->ClearRenderTarget(render_targets[2],
-                                                clear_linear_depth.data(),
-                                                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    impl_->immediate_context->ClearDepthStencil(depth_target,
-                                                Diligent::CLEAR_DEPTH_FLAG,
-                                                1.0F,
-                                                0,
-                                                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    impl_->immediate_context->ClearRenderTarget(render_targets[2], clear_linear_depth.data(), Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    impl_->immediate_context->ClearDepthStencil(depth_target, Diligent::CLEAR_DEPTH_FLAG, 1.0F, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
-    if(snapshot.ui){
-        if(snapshot.ui->vertices.size()>65536)throw std::invalid_argument{"UI draw list exceeds capacity"};
-        impl_->ui=*snapshot.ui;
+    if (snapshot.ui) {
+        if (snapshot.ui->vertices.size() > 65536)
+            throw std::invalid_argument{"UI draw list exceeds capacity"};
+        impl_->ui = *snapshot.ui;
     }
     if (state_ != core::SubsystemState::running) {
         throw std::logic_error{"Diligent renderer must be running before drawing a snapshot"};
     }
     const auto& swap_chain_description = impl_->swap_chain->GetDesc();
-    if (swap_chain_description.Width == 0 || swap_chain_description.Height == 0 ||
-        !impl_->hdr_render_target || snapshot.instances.empty()) {
+    if (swap_chain_description.Width == 0 || swap_chain_description.Height == 0 || !impl_->hdr_render_target || snapshot.instances.empty()) {
         return;
     }
     if (impl_->frame_metrics.gpu_timing_supported) {
-        auto& timing=impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count];
+        auto& timing = impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count];
         if (!timing.full_pending) {
             impl_->immediate_context->BeginQuery(timing.full);
-            impl_->full_timing_active=true;
+            impl_->full_timing_active = true;
         }
     }
     // DISCARD preserves earlier frames until Diligent retires their allocations by fence.
@@ -2169,18 +2052,15 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
     impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, "SkinConstants")->Set(impl_->skin_constants[0]);
     impl_->shadow_resources->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, "SkinConstants")->Set(impl_->skin_constants[0]);
     const auto instance_alpha_mode = [&](const render::RenderInstance& instance) {
-        if (instance.alpha_mode_override != 0xff) return static_cast<std::uint32_t>(instance.alpha_mode_override);
+        if (instance.alpha_mode_override != 0xff)
+            return static_cast<std::uint32_t>(instance.alpha_mode_override);
         const auto material = impl_->materials.find(instance.material);
         return material == impl_->materials.end() ? 0U : material->second.surface.alpha_mode;
     };
-    const float aspect = static_cast<float>(impl_->output_extent.width) /
-                         static_cast<float>(impl_->output_extent.height);
+    const float aspect = static_cast<float>(impl_->output_extent.width) / static_cast<float>(impl_->output_extent.height);
     const auto view = camera_view(snapshot.camera);
-    const auto projection = Diligent::float4x4::Projection(snapshot.camera.vertical_field_of_view_radians,
-                                                           aspect,
-                                                           snapshot.camera.near_plane,
-                                                           snapshot.camera.far_plane,
-                                                           false);
+    const auto projection =
+        Diligent::float4x4::Projection(snapshot.camera.vertical_field_of_view_radians, aspect, snapshot.camera.near_plane, snapshot.camera.far_plane, false);
     const auto current_view_projection = view * projection;
     if (impl_->previous_camera_valid) {
         const auto distance_squared = [](const render::Vec3 a, const render::Vec3 b) {
@@ -2189,33 +2069,22 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
             const float z = a.z - b.z;
             return x * x + y * y + z * z;
         };
-        const bool camera_cut = distance_squared(snapshot.camera.position,
-                                                  impl_->previous_camera.position) > 25.0F ||
-                                distance_squared(snapshot.camera.target,
-                                                 impl_->previous_camera.target) > 25.0F ||
-                                std::abs(snapshot.camera.vertical_field_of_view_radians -
-                                         impl_->previous_camera.vertical_field_of_view_radians) >
-                                    0.1F;
+        const bool camera_cut = distance_squared(snapshot.camera.position, impl_->previous_camera.position) > 25.0F ||
+                                distance_squared(snapshot.camera.target, impl_->previous_camera.target) > 25.0F ||
+                                std::abs(snapshot.camera.vertical_field_of_view_radians - impl_->previous_camera.vertical_field_of_view_radians) > 0.1F;
         if (camera_cut) {
             impl_->history_valid = false;
         }
     }
-    const auto previous_view_projection = impl_->previous_camera_valid && impl_->history_valid
-                                              ? impl_->previous_view_projection
-                                              : current_view_projection;
+    const auto previous_view_projection = impl_->previous_camera_valid && impl_->history_valid ? impl_->previous_view_projection : current_view_projection;
 
     render::DirectionalLight directional;
     render::EnvironmentLighting environment;
     render::LightClusterGrid cluster_grid;
     std::uint32_t point_light_count = 0;
-    const auto upload_dynamic_buffer = [&](Diligent::IBuffer* buffer,
-                                           const void* data,
-                                           const std::size_t bytes) {
+    const auto upload_dynamic_buffer = [&](Diligent::IBuffer* buffer, const void* data, const std::size_t bytes) {
         void* mapped = nullptr;
-        impl_->immediate_context->MapBuffer(buffer,
-                                            Diligent::MAP_WRITE,
-                                            Diligent::MAP_FLAG_DISCARD,
-                                            mapped);
+        impl_->immediate_context->MapBuffer(buffer, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD, mapped);
         if (mapped == nullptr) {
             throw std::runtime_error{"Could not map clustered-light buffer"};
         }
@@ -2229,35 +2098,22 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         environment = snapshot.lighting->environment;
         cluster_grid = snapshot.lighting->grid;
         point_light_count = static_cast<std::uint32_t>(snapshot.lighting->point_lights.size());
-        if (point_light_count > 256U || snapshot.lighting->clusters.size() > 16U * 9U * 24U ||
-            snapshot.lighting->light_indices.size() > 16U * 9U * 24U * 64U) {
+        if (point_light_count > 256U || snapshot.lighting->clusters.size() > 16U * 9U * 24U || snapshot.lighting->light_indices.size() > 16U * 9U * 24U * 64U) {
             throw std::length_error{"Clustered lighting exceeds renderer buffer capacity"};
         }
         std::array<PointLightGpu, 256> gpu_lights{};
         for (std::size_t light_index = 0; light_index < snapshot.lighting->point_lights.size(); ++light_index) {
             const auto& light = snapshot.lighting->point_lights[light_index];
             gpu_lights[light_index] = {
-                .position_range = {light.position.x,
-                                   light.position.y,
-                                   light.position.z,
-                                   light.range},
-                .color_intensity = {light.color.x,
-                                    light.color.y,
-                                    light.color.z,
-                                    light.intensity},
+                .position_range = {light.position.x, light.position.y, light.position.z, light.range},
+                .color_intensity = {light.color.x, light.color.y, light.color.z, light.intensity},
             };
         }
-        upload_dynamic_buffer(impl_->point_light_buffer,
-                              gpu_lights.data(),
-                              point_light_count * sizeof(PointLightGpu));
+        upload_dynamic_buffer(impl_->point_light_buffer, gpu_lights.data(), point_light_count * sizeof(PointLightGpu));
         upload_dynamic_buffer(
-            impl_->cluster_buffer,
-            snapshot.lighting->clusters.data(),
-            snapshot.lighting->clusters.size() * sizeof(render::LightClusterRange));
+            impl_->cluster_buffer, snapshot.lighting->clusters.data(), snapshot.lighting->clusters.size() * sizeof(render::LightClusterRange));
         upload_dynamic_buffer(
-            impl_->light_index_buffer,
-            snapshot.lighting->light_indices.data(),
-            snapshot.lighting->light_indices.size() * sizeof(std::uint32_t));
+            impl_->light_index_buffer, snapshot.lighting->light_indices.data(), snapshot.lighting->light_indices.size() * sizeof(std::uint32_t));
         impl_->frame_metrics.point_lights = point_light_count;
         impl_->frame_metrics.light_references = snapshot.lighting->light_indices.size();
     } else {
@@ -2276,42 +2132,50 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         impl_->immediate_context->WaitForIdle();
         impl_->probe_texture.Release();
         if (environment.probe) {
-            const auto& probe=*environment.probe;
-            if (probe.size==0 || probe.size>1024 || probe.mip_levels==0 || probe.mip_levels>11)
+            const auto& probe = *environment.probe;
+            if (probe.size == 0 || probe.size > 1024 || probe.mip_levels == 0 || probe.mip_levels > 11)
                 throw std::invalid_argument{"Invalid environment probe dimensions"};
             std::vector<Diligent::TextureSubResData> subresources;
-            std::size_t offset=0;
-            for (unsigned face=0;face<6;++face) for (unsigned level=0;level<probe.mip_levels;++level) {
-                const auto size=std::max(1U,probe.size>>level);
-                if (offset+size*size>probe.radiance.size()) throw std::invalid_argument{"Truncated environment probe"};
-                Diligent::TextureSubResData sub;
-                sub.pData=probe.radiance.data()+offset;sub.Stride=size*sizeof(probe.radiance.front());
-                subresources.push_back(sub);offset+=size*size;
-            }
-            if (offset!=probe.radiance.size()) throw std::invalid_argument{"Unexpected environment probe texels"};
+            std::size_t offset = 0;
+            for (unsigned face = 0; face < 6; ++face)
+                for (unsigned level = 0; level < probe.mip_levels; ++level) {
+                    const auto size = std::max(1U, probe.size >> level);
+                    if (offset + size * size > probe.radiance.size())
+                        throw std::invalid_argument{"Truncated environment probe"};
+                    Diligent::TextureSubResData sub;
+                    sub.pData = probe.radiance.data() + offset;
+                    sub.Stride = size * sizeof(probe.radiance.front());
+                    subresources.push_back(sub);
+                    offset += size * size;
+                }
+            if (offset != probe.radiance.size())
+                throw std::invalid_argument{"Unexpected environment probe texels"};
             Diligent::TextureDesc description;
-            description.Name="Gloom static GGX environment probe";
-            description.Type=Diligent::RESOURCE_DIM_TEX_CUBE;description.Width=description.Height=probe.size;
-            description.ArraySize=6;description.MipLevels=probe.mip_levels;
-            description.Format=Diligent::TEX_FORMAT_RGBA32_FLOAT;description.Usage=Diligent::USAGE_IMMUTABLE;
-            description.BindFlags=Diligent::BIND_SHADER_RESOURCE;
-            Diligent::TextureData data{subresources.data(),static_cast<Diligent::Uint32>(subresources.size())};
-            impl_->device->CreateTexture(description,&data,&impl_->probe_texture);
-            if (!impl_->probe_texture) throw std::runtime_error{"Environment probe upload failed"};
+            description.Name = "Gloom static GGX environment probe";
+            description.Type = Diligent::RESOURCE_DIM_TEX_CUBE;
+            description.Width = description.Height = probe.size;
+            description.ArraySize = 6;
+            description.MipLevels = probe.mip_levels;
+            description.Format = Diligent::TEX_FORMAT_RGBA32_FLOAT;
+            description.Usage = Diligent::USAGE_IMMUTABLE;
+            description.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+            Diligent::TextureData data{subresources.data(), static_cast<Diligent::Uint32>(subresources.size())};
+            impl_->device->CreateTexture(description, &data, &impl_->probe_texture);
+            if (!impl_->probe_texture)
+                throw std::runtime_error{"Environment probe upload failed"};
         }
-        impl_->active_probe=environment.probe;
-        impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL,"EnvironmentTexture")->Set(
-            impl_->probe_texture ? impl_->probe_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE) : impl_->environment_shader_resource.RawPtr(),
-            Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
+        impl_->active_probe = environment.probe;
+        impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "EnvironmentTexture")
+            ->Set(impl_->probe_texture ? impl_->probe_texture->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE)
+                                       : impl_->environment_shader_resource.RawPtr(),
+                Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
     }
     impl_->exposure = environment.exposure;
-    const auto shadows = shadow_frame(snapshot.camera, directional,
-        static_cast<float>(impl_->render_extent.width) / static_cast<float>(impl_->render_extent.height));
+    const auto shadows =
+        shadow_frame(snapshot.camera, directional, static_cast<float>(impl_->render_extent.width) / static_cast<float>(impl_->render_extent.height));
 
     if (!impl_->shadow_rendered && impl_->shadow_pipeline) {
-        auto* timing = impl_->frame_metrics.gpu_timing_supported
-                           ? &impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count]
-                           : nullptr;
+        auto* timing = impl_->frame_metrics.gpu_timing_supported ? &impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count] : nullptr;
         const bool measure_shadows = timing != nullptr && !timing->shadow_pending;
         if (measure_shadows) {
             impl_->immediate_context->BeginQuery(timing->shadow);
@@ -2320,36 +2184,34 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
 
         for (std::size_t cascade = 0; cascade < impl_->shadow_depth_targets.size(); ++cascade) {
             auto* depth_target = impl_->shadow_depth_targets[cascade].RawPtr();
-            impl_->immediate_context->SetRenderTargets(
-                0,
-                nullptr,
-                depth_target,
-                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            impl_->immediate_context->SetRenderTargets(0, nullptr, depth_target, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
             impl_->immediate_context->SetViewports(1, nullptr, 0, 0);
-            impl_->immediate_context->ClearDepthStencil(
-                depth_target,
-                Diligent::CLEAR_DEPTH_FLAG,
-                1.0F,
-                0,
-                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            impl_->immediate_context->ClearDepthStencil(depth_target, Diligent::CLEAR_DEPTH_FLAG, 1.0F, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
             if (!directional.casts_shadows) {
                 continue;
             }
             for (const auto& instance : snapshot.shadow_instances.empty() ? snapshot.instances : snapshot.shadow_instances) {
                 if (instance.view_model || !instance.casts_shadow ||
-                    std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F) continue;
+                    std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F)
+                    continue;
                 const Diligent::float4x4 shadow_transform = world_matrix(instance.transform) * shadows.matrices[cascade];
-                if (!render::shadow_visible(instance.local_bounds, &shadow_transform.m00)) continue;
-                auto material=impl_->materials.find(instance.material);
-                if (material==impl_->materials.end()) material=impl_->materials.find(render::builtin_default_material);
-                const auto& shadow_material=material->second;
-                if (shadow_material.surface.alpha_mode>=2 || (instance.alpha_mode_override>=2 && instance.alpha_mode_override!=0xff)) continue;
+                if (!render::shadow_visible(instance.local_bounds, &shadow_transform.m00))
+                    continue;
+                auto material = impl_->materials.find(instance.material);
+                if (material == impl_->materials.end())
+                    material = impl_->materials.find(render::builtin_default_material);
+                const auto& shadow_material = material->second;
+                if (shadow_material.surface.alpha_mode >= 2 || (instance.alpha_mode_override >= 2 && instance.alpha_mode_override != 0xff))
+                    continue;
                 impl_->immediate_context->SetPipelineState(shadow_material.surface.double_sided ? impl_->double_sided_shadow_pipeline : impl_->shadow_pipeline);
-                auto texture=impl_->textures.find(shadow_material.base_color_texture);
-                if (texture == impl_->textures.end()) ++impl_->frame_metrics.missing_textures;
-                if (texture==impl_->textures.end()) texture=impl_->textures.find(render::builtin_white_texture);
-                impl_->shadow_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL,"ShadowBaseColor")->Set(texture->second.view,Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
-                impl_->immediate_context->CommitShaderResources(impl_->shadow_resources,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+                auto texture = impl_->textures.find(shadow_material.base_color_texture);
+                if (texture == impl_->textures.end())
+                    ++impl_->frame_metrics.missing_textures;
+                if (texture == impl_->textures.end())
+                    texture = impl_->textures.find(render::builtin_white_texture);
+                impl_->shadow_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "ShadowBaseColor")
+                    ->Set(texture->second.view, Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
+                impl_->immediate_context->CommitShaderResources(impl_->shadow_resources, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
                 const auto mesh = impl_->meshes.find(instance.mesh);
                 if (mesh == impl_->meshes.end()) {
                     ++impl_->frame_metrics.missing_meshes;
@@ -2358,29 +2220,20 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 Diligent::IBuffer* vertex_buffers[] = {mesh->second.vertices};
                 constexpr Diligent::Uint64 offsets[] = {0};
                 impl_->immediate_context->SetVertexBuffers(
-                    0,
-                    1,
-                    vertex_buffers,
-                    offsets,
-                    Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-                    Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
-                impl_->immediate_context->SetIndexBuffer(
-                    mesh->second.indices,
-                    0,
-                    Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+                    0, 1, vertex_buffers, offsets, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
+                impl_->immediate_context->SetIndexBuffer(mesh->second.indices, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
                 impl_->bind_skin(instance, impl_->shadow_resources);
                 {
                     Diligent::MapHelper<ShadowConstants> constants{
-                        impl_->immediate_context,
-                        impl_->shadow_constants,
-                        Diligent::MAP_WRITE,
-                        Diligent::MAP_FLAG_DISCARD};
-                    constants->skin_flags={instance.pose?static_cast<float>(instance.pose->matrices.size()):0,0,0,0};
+                        impl_->immediate_context, impl_->shadow_constants, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD};
+                    constants->skin_flags = {instance.pose ? static_cast<float>(instance.pose->matrices.size()) : 0, 0, 0, 0};
                     constants->world_view_projection = shadow_transform;
-                    const auto& uv=shadow_material.surface.mapping[0];
-                    constants->mapping={uv.scale[0],uv.scale[1],uv.offset[0]+shadow_material.surface.uv_scroll[0]*snapshot.presentation_seconds,uv.offset[1]+shadow_material.surface.uv_scroll[1]*snapshot.presentation_seconds};
-                    constants->rotation={std::cos(uv.rotation),std::sin(uv.rotation),static_cast<float>(uv.uv_set),0};
-                    constants->alpha={shadow_material.surface.alpha_mode==1?1.0F:0.0F,shadow_material.surface.alpha_cutoff,shadow_material.base_color[3]*instance.color.alpha,0};
+                    const auto& uv = shadow_material.surface.mapping[0];
+                    constants->mapping = {uv.scale[0], uv.scale[1], uv.offset[0] + shadow_material.surface.uv_scroll[0] * snapshot.presentation_seconds,
+                        uv.offset[1] + shadow_material.surface.uv_scroll[1] * snapshot.presentation_seconds};
+                    constants->rotation = {std::cos(uv.rotation), std::sin(uv.rotation), static_cast<float>(uv.uv_set), 0};
+                    constants->alpha = {shadow_material.surface.alpha_mode == 1 ? 1.0F : 0.0F, shadow_material.surface.alpha_cutoff,
+                        shadow_material.base_color[3] * instance.color.alpha, 0};
                 }
                 Diligent::DrawIndexedAttribs draw_attributes;
                 draw_attributes.NumIndices = mesh->second.index_count;
@@ -2391,15 +2244,9 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
                 ++impl_->frame_metrics.shadow_draws;
             }
         }
-        Diligent::ITextureView* render_targets[]{impl_->hdr_render_target,
-                                                 impl_->motion_render_target,
-                                                 impl_->linear_depth_render_target};
+        Diligent::ITextureView* render_targets[]{impl_->hdr_render_target, impl_->motion_render_target, impl_->linear_depth_render_target};
         auto* depth_target = impl_->scene_depth_target.RawPtr();
-        impl_->immediate_context->SetRenderTargets(
-            3,
-            render_targets,
-            depth_target,
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        impl_->immediate_context->SetRenderTargets(3, render_targets, depth_target, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         impl_->immediate_context->SetViewports(1, nullptr, 0, 0);
         if (measure_shadows) {
             impl_->immediate_context->EndQuery(timing->shadow);
@@ -2417,10 +2264,8 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
     }
 
     impl_->immediate_context->SetPipelineState(impl_->scene_pipeline);
-    const auto draw_batch = [&](const render::RenderAssetId mesh_id,
-                                const render::RenderAssetId material_id,
-                                const std::span<const render::RenderInstance> instances, bool view_models,
-                                const std::uint32_t forced_alpha_mode = 0xff) {
+    const auto draw_batch = [&](const render::RenderAssetId mesh_id, const render::RenderAssetId material_id,
+                                const std::span<const render::RenderInstance> instances, bool view_models, const std::uint32_t forced_alpha_mode = 0xff) {
         const auto mesh = impl_->meshes.find(mesh_id);
         if (mesh == impl_->meshes.end()) {
             ++impl_->frame_metrics.missing_meshes;
@@ -2428,26 +2273,20 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         }
         const auto material = impl_->materials.find(material_id);
         const render::MaterialUpload default_material{.id = render::builtin_default_material};
-        const auto& material_data =
-            material == impl_->materials.end() ? default_material : material->second;
+        const auto& material_data = material == impl_->materials.end() ? default_material : material->second;
         const auto alpha_mode = forced_alpha_mode == 0xff ? material_data.surface.alpha_mode : forced_alpha_mode;
-        const auto variant=std::min(alpha_mode,3U)*2U+(material_data.surface.double_sided?1U:0U);
+        const auto variant = std::min(alpha_mode, 3U) * 2U + (material_data.surface.double_sided ? 1U : 0U);
         impl_->immediate_context->SetPipelineState(impl_->surface_pipelines[variant]);
-        const auto find_texture = [&](const render::RenderAssetId requested,
-                                      const render::RenderAssetId fallback) {
+        const auto find_texture = [&](const render::RenderAssetId requested, const render::RenderAssetId fallback) {
             auto found = impl_->textures.find(requested);
-            if (found == impl_->textures.end()) ++impl_->frame_metrics.missing_textures;
+            if (found == impl_->textures.end())
+                ++impl_->frame_metrics.missing_textures;
             return found == impl_->textures.end() ? impl_->textures.find(fallback) : found;
         };
-        auto base_color_texture =
-            find_texture(material_data.base_color_texture, render::builtin_white_texture);
-        auto metallic_roughness_texture = find_texture(
-            material_data.metallic_roughness_texture, render::builtin_white_texture);
-        auto normal_texture =
-            find_texture(material_data.normal_texture, render::builtin_flat_normal_texture);
-        if (base_color_texture == impl_->textures.end() ||
-            metallic_roughness_texture == impl_->textures.end() ||
-            normal_texture == impl_->textures.end()) {
+        auto base_color_texture = find_texture(material_data.base_color_texture, render::builtin_white_texture);
+        auto metallic_roughness_texture = find_texture(material_data.metallic_roughness_texture, render::builtin_white_texture);
+        auto normal_texture = find_texture(material_data.normal_texture, render::builtin_flat_normal_texture);
+        if (base_color_texture == impl_->textures.end() || metallic_roughness_texture == impl_->textures.end() || normal_texture == impl_->textures.end()) {
             return;
         }
         mesh->second.last_used_frame = impl_->frame_index;
@@ -2455,120 +2294,80 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         metallic_roughness_texture->second.last_used_frame = impl_->frame_index;
         normal_texture->second.last_used_frame = impl_->frame_index;
         const auto bind_texture = [&](const char* name, Diligent::ITextureView* view) {
-            auto* const variable = impl_->scene_resources->GetVariableByName(
-                Diligent::SHADER_TYPE_PIXEL, name);
+            auto* const variable = impl_->scene_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, name);
             if (variable == nullptr) {
                 throw std::runtime_error{std::string{"Diligent lost texture binding: "} + name};
             }
             variable->Set(view, Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE);
         };
-        const bool particle=!instances.empty() && instances.front().particle;
-        bind_texture("SceneColorCopy",particle?impl_->particle_color_copy->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE):base_color_texture->second.view.RawPtr());
-        bind_texture("SceneDepthCopy",particle?impl_->particle_depth_copy->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE):base_color_texture->second.view.RawPtr());
+        const bool particle = !instances.empty() && instances.front().particle;
+        bind_texture("SceneColorCopy",
+            particle ? impl_->particle_color_copy->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE) : base_color_texture->second.view.RawPtr());
+        bind_texture("SceneDepthCopy",
+            particle ? impl_->particle_depth_copy->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE) : base_color_texture->second.view.RawPtr());
         bind_texture("BaseColorTexture", base_color_texture->second.view);
         bind_texture("MetallicRoughnessTexture", metallic_roughness_texture->second.view);
         bind_texture("NormalTexture", normal_texture->second.view);
-        constexpr std::array extra_names{"EmissiveTexture","OcclusionTexture","SpecularTexture",
-                                         "SpecularColorTexture","AnisotropyTexture","DetailTexture","LightmapTexture"};
-        for (std::size_t slot=0;slot<extra_names.size();++slot) {
-            auto texture=find_texture(material_data.extra_textures[slot],render::builtin_white_texture);
-            texture->second.last_used_frame=impl_->frame_index;
-            bind_texture(extra_names[slot],texture->second.view);
+        constexpr std::array extra_names{
+            "EmissiveTexture", "OcclusionTexture", "SpecularTexture", "SpecularColorTexture", "AnisotropyTexture", "DetailTexture", "LightmapTexture"};
+        for (std::size_t slot = 0; slot < extra_names.size(); ++slot) {
+            auto texture = find_texture(material_data.extra_textures[slot], render::builtin_white_texture);
+            texture->second.last_used_frame = impl_->frame_index;
+            bind_texture(extra_names[slot], texture->second.view);
         }
-        impl_->immediate_context->CommitShaderResources(
-            impl_->scene_resources, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        impl_->immediate_context->CommitShaderResources(impl_->scene_resources, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
         Diligent::IBuffer* vertex_buffers[] = {mesh->second.vertices};
         constexpr Diligent::Uint64 offsets[] = {0};
         impl_->immediate_context->SetVertexBuffers(
-            0,
-            1,
-            vertex_buffers,
-            offsets,
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-            Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
-        impl_->immediate_context->SetIndexBuffer(
-            mesh->second.indices, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            0, 1, vertex_buffers, offsets, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
+        impl_->immediate_context->SetIndexBuffer(mesh->second.indices, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         for (const auto& instance : instances) {
-            if (instance.view_model != view_models || (forced_alpha_mode == 0xff && instance.alpha_mode_override>=2 && instance.alpha_mode_override!=0xff) ||
-                std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F) continue;
+            if (instance.view_model != view_models ||
+                (forced_alpha_mode == 0xff && instance.alpha_mode_override >= 2 && instance.alpha_mode_override != 0xff) ||
+                std::abs(instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z) < 1.0e-12F)
+                continue;
             const auto world = world_matrix(instance.transform);
-            const auto previous_world = world_matrix(instance.has_previous_transform
-                                                          ? instance.previous_transform
-                                                          : instance.transform);
+            const auto previous_world = world_matrix(instance.has_previous_transform ? instance.previous_transform : instance.transform);
             impl_->bind_skin(instance, impl_->scene_resources);
-            Diligent::MapHelper<DrawConstants> constants{impl_->immediate_context,
-                                                         impl_->draw_constants,
-                                                         Diligent::MAP_WRITE,
-                                                         Diligent::MAP_FLAG_DISCARD};
-            if (static_cast<DrawConstants*>(constants)==nullptr) throw std::runtime_error{"Draw constant mapping failed"};
-            constants->skin_flags={instance.pose?static_cast<float>(instance.pose->matrices.size()):0,instance.particle?1.0F:0.0F,instance.distortion,instance.soft_distance};
-            constants->particle_depth={snapshot.camera.near_plane,snapshot.camera.far_plane,1.0F/static_cast<float>(impl_->render_extent.width),1.0F/static_cast<float>(impl_->render_extent.height)};
+            Diligent::MapHelper<DrawConstants> constants{impl_->immediate_context, impl_->draw_constants, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD};
+            if (static_cast<DrawConstants*>(constants) == nullptr)
+                throw std::runtime_error{"Draw constant mapping failed"};
+            constants->skin_flags = {instance.pose ? static_cast<float>(instance.pose->matrices.size()) : 0, instance.particle ? 1.0F : 0.0F,
+                instance.distortion, instance.soft_distance};
+            constants->particle_depth = {snapshot.camera.near_plane, snapshot.camera.far_plane, 1.0F / static_cast<float>(impl_->render_extent.width),
+                1.0F / static_cast<float>(impl_->render_extent.height)};
             constants->world = world;
             constants->normal_world = world_matrix(render::normal_transform(instance.transform));
             const auto camera_forward = Diligent::normalize(to_diligent(snapshot.camera.target) - to_diligent(snapshot.camera.position));
             constants->camera_forward = {camera_forward.x, camera_forward.y, camera_forward.z, 0.0F};
             constants->world_view_projection = world * current_view_projection;
-            constants->previous_world_view_projection =
-                previous_world * previous_view_projection;
-            constants->temporal_jitter = {impl_->jitter.x,
-                                          impl_->jitter.y,
-                                          impl_->previous_jitter.x,
-                                          impl_->previous_jitter.y};
-            constants->color = {instance.color.red,
-                                instance.color.green,
-                                instance.color.blue,
-                                instance.color.alpha};
-            constants->base_color = {material_data.base_color[0],
-                                     material_data.base_color[1],
-                                     material_data.base_color[2],
-                                     material_data.base_color[3]};
-            constants->material_parameters = {
-                material_data.metallic, material_data.roughness,
-                instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z < 0.0F ? -1.0F : 1.0F,
-                instance.view_model ? 1.0F : 0.0F};
-            constants->emissive = {material_data.emissive[0],
-                                   material_data.emissive[1],
-                                   material_data.emissive[2],
-                                   0.0F};
-            const auto& surface=material_data.surface;
-            constants->surface_parameters={surface.normal_scale,surface.occlusion_strength,surface.specular_factor,surface.anisotropy_strength};
-            constants->specular_color_rotation={surface.specular_color[0],surface.specular_color[1],surface.specular_color[2],surface.anisotropy_rotation};
-            constants->surface_animation={surface.uv_scroll[0],surface.uv_scroll[1],surface.lava_wave,surface.alpha_cutoff};
-            constants->surface_flags={static_cast<float>(alpha_mode),surface.double_sided?1.0F:0.0F,
-                snapshot.presentation_seconds,material_data.extra_textures[4]!=render::builtin_white_texture?1.0F:0.0F};
-            for (std::size_t slot=0;slot<surface.mapping.size();++slot) {
-                const auto& map=surface.mapping[slot];
-                constants->texture_mappings[slot*2]={map.scale[0],map.scale[1],map.offset[0],map.offset[1]};
-                constants->texture_mappings[slot*2+1]={std::cos(map.rotation),std::sin(map.rotation),static_cast<float>(map.uv_set),0.0F};
+            constants->previous_world_view_projection = previous_world * previous_view_projection;
+            constants->temporal_jitter = {impl_->jitter.x, impl_->jitter.y, impl_->previous_jitter.x, impl_->previous_jitter.y};
+            constants->color = {instance.color.red, instance.color.green, instance.color.blue, instance.color.alpha};
+            constants->base_color = {material_data.base_color[0], material_data.base_color[1], material_data.base_color[2], material_data.base_color[3]};
+            constants->material_parameters = {material_data.metallic, material_data.roughness,
+                instance.transform.scale.x * instance.transform.scale.y * instance.transform.scale.z < 0.0F ? -1.0F : 1.0F, instance.view_model ? 1.0F : 0.0F};
+            constants->emissive = {material_data.emissive[0], material_data.emissive[1], material_data.emissive[2], 0.0F};
+            const auto& surface = material_data.surface;
+            constants->surface_parameters = {surface.normal_scale, surface.occlusion_strength, surface.specular_factor, surface.anisotropy_strength};
+            constants->specular_color_rotation = {surface.specular_color[0], surface.specular_color[1], surface.specular_color[2], surface.anisotropy_rotation};
+            constants->surface_animation = {surface.uv_scroll[0], surface.uv_scroll[1], surface.lava_wave, surface.alpha_cutoff};
+            constants->surface_flags = {static_cast<float>(alpha_mode), surface.double_sided ? 1.0F : 0.0F, snapshot.presentation_seconds,
+                material_data.extra_textures[4] != render::builtin_white_texture ? 1.0F : 0.0F};
+            for (std::size_t slot = 0; slot < surface.mapping.size(); ++slot) {
+                const auto& map = surface.mapping[slot];
+                constants->texture_mappings[slot * 2] = {map.scale[0], map.scale[1], map.offset[0], map.offset[1]};
+                constants->texture_mappings[slot * 2 + 1] = {std::cos(map.rotation), std::sin(map.rotation), static_cast<float>(map.uv_set), 0.0F};
             }
-            constants->camera_exposure = {snapshot.camera.position.x,
-                                          snapshot.camera.position.y,
-                                          snapshot.camera.position.z,
-                                          environment.exposure};
-            constants->directional_direction_intensity = {
-                directional.direction.x,
-                directional.direction.y,
-                directional.direction.z,
-                directional.intensity};
-            constants->directional_color = {
-                directional.color.x, directional.color.y, directional.color.z, environment.ambient_fill};
-            constants->environment_sky = {environment.sky_radiance.x,
-                                          environment.sky_radiance.y,
-                                          environment.sky_radiance.z,
-                                          environment.intensity};
-            constants->environment_ground = {environment.ground_radiance.x,
-                                             environment.ground_radiance.y,
-                                             environment.ground_radiance.z,
-                                             environment.probe ? static_cast<float>(environment.probe->mip_levels-1) : 0.0F};
-            constants->cluster_dimensions = {cluster_grid.width,
-                                             cluster_grid.height,
-                                             cluster_grid.depth,
-                                             point_light_count};
-            constants->cluster_depth_viewport = {
-                cluster_grid.near_plane,
-                cluster_grid.far_plane,
-                static_cast<float>(impl_->render_extent.width),
+            constants->camera_exposure = {snapshot.camera.position.x, snapshot.camera.position.y, snapshot.camera.position.z, environment.exposure};
+            constants->directional_direction_intensity = {directional.direction.x, directional.direction.y, directional.direction.z, directional.intensity};
+            constants->directional_color = {directional.color.x, directional.color.y, directional.color.z, environment.ambient_fill};
+            constants->environment_sky = {environment.sky_radiance.x, environment.sky_radiance.y, environment.sky_radiance.z, environment.intensity};
+            constants->environment_ground = {environment.ground_radiance.x, environment.ground_radiance.y, environment.ground_radiance.z,
+                environment.probe ? static_cast<float>(environment.probe->mip_levels - 1) : 0.0F};
+            constants->cluster_dimensions = {cluster_grid.width, cluster_grid.height, cluster_grid.depth, point_light_count};
+            constants->cluster_depth_viewport = {cluster_grid.near_plane, cluster_grid.far_plane, static_cast<float>(impl_->render_extent.width),
                 static_cast<float>(impl_->render_extent.height)};
             constants->shadow_matrices = shadows.matrices;
             constants->shadow_splits = shadows.splits;
@@ -2581,45 +2380,58 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
         }
     };
     for (const bool view_models : {false, true}) {
-        if (view_models) impl_->immediate_context->ClearDepthStencil(impl_->scene_depth_target,
-            Diligent::CLEAR_DEPTH_FLAG, 1.0F, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        if (view_models)
+            impl_->immediate_context->ClearDepthStencil(
+                impl_->scene_depth_target, Diligent::CLEAR_DEPTH_FLAG, 1.0F, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         std::vector<const render::RenderInstance*> transparent;
         if (snapshot.batches.empty()) {
             for (const auto& instance : snapshot.instances) {
-                if (instance.view_model != view_models) continue;
-                if (instance_alpha_mode(instance)>=2) transparent.push_back(&instance);
-                else draw_batch(instance.mesh,instance.material,{&instance,1},view_models);
+                if (instance.view_model != view_models)
+                    continue;
+                if (instance_alpha_mode(instance) >= 2)
+                    transparent.push_back(&instance);
+                else
+                    draw_batch(instance.mesh, instance.material, {&instance, 1}, view_models);
             }
         } else {
             for (const auto& batch : snapshot.batches) {
-                if (batch.first_instance >= snapshot.instances.size()) continue;
-                const std::size_t count = std::min<std::size_t>(batch.instance_count,
-                                                                 snapshot.instances.size() - batch.first_instance);
+                if (batch.first_instance >= snapshot.instances.size())
+                    continue;
+                const std::size_t count = std::min<std::size_t>(batch.instance_count, snapshot.instances.size() - batch.first_instance);
                 const auto instances = snapshot.instances.subspan(batch.first_instance, count);
                 bool has_opaque = false;
                 for (const auto& instance : instances) {
-                    if (instance.view_model != view_models) continue;
-                    if (instance_alpha_mode(instance)>=2) transparent.push_back(&instance);
-                    else has_opaque = true;
+                    if (instance.view_model != view_models)
+                        continue;
+                    if (instance_alpha_mode(instance) >= 2)
+                        transparent.push_back(&instance);
+                    else
+                        has_opaque = true;
                 }
-                if (has_opaque) draw_batch(batch.mesh, batch.material, instances, view_models);
+                if (has_opaque)
+                    draw_batch(batch.mesh, batch.material, instances, view_models);
             }
         }
-        if (std::ranges::any_of(transparent,[](const auto* instance){return instance->particle;})) {
-            impl_->immediate_context->SetRenderTargets(0,nullptr,nullptr,Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE);
-            impl_->immediate_context->CopyTexture({impl_->hdr_texture,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-                impl_->particle_color_copy,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION});
-            impl_->immediate_context->CopyTexture({impl_->linear_depth_texture,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-                impl_->particle_depth_copy,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION});
-            Diligent::ITextureView* targets[]{impl_->hdr_render_target,impl_->motion_render_target,impl_->linear_depth_render_target};
-            impl_->immediate_context->SetRenderTargets(3,targets,impl_->scene_depth_target,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        if (std::ranges::any_of(transparent, [](const auto* instance) {
+                return instance->particle;
+            })) {
+            impl_->immediate_context->SetRenderTargets(0, nullptr, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE);
+            impl_->immediate_context->CopyTexture({impl_->hdr_texture, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, impl_->particle_color_copy,
+                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION});
+            impl_->immediate_context->CopyTexture({impl_->linear_depth_texture, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, impl_->particle_depth_copy,
+                Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION});
+            Diligent::ITextureView* targets[]{impl_->hdr_render_target, impl_->motion_render_target, impl_->linear_depth_render_target};
+            impl_->immediate_context->SetRenderTargets(3, targets, impl_->scene_depth_target, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         }
-        const auto distance=[&](const auto* instance) {
-            const auto delta=to_diligent(instance->transform.position)-to_diligent(snapshot.camera.position);
-            return Diligent::dot(delta,delta);
+        const auto distance = [&](const auto* instance) {
+            const auto delta = to_diligent(instance->transform.position) - to_diligent(snapshot.camera.position);
+            return Diligent::dot(delta, delta);
         };
-        std::stable_sort(transparent.begin(),transparent.end(),[&](const auto* a,const auto* b){return distance(a)>distance(b);});
-        for (const auto* instance : transparent) draw_batch(instance->mesh,instance->material,{instance,1},view_models,instance_alpha_mode(*instance));
+        std::stable_sort(transparent.begin(), transparent.end(), [&](const auto* a, const auto* b) {
+            return distance(a) > distance(b);
+        });
+        for (const auto* instance : transparent)
+            draw_batch(instance->mesh, instance->material, {instance, 1}, view_models, instance_alpha_mode(*instance));
     }
     impl_->previous_view_projection = current_view_projection;
     impl_->previous_camera = snapshot.camera;
@@ -2628,7 +2440,8 @@ void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
 }
 
 void DiligentRenderer::capture_next_frame(std::filesystem::path path) {
-    if (path.empty() || !impl_->capture_path.empty()) throw std::invalid_argument{"Invalid or pending frame capture"};
+    if (path.empty() || !impl_->capture_path.empty())
+        throw std::invalid_argument{"Invalid or pending frame capture"};
     impl_->capture_path = std::move(path);
 }
 
@@ -2637,17 +2450,14 @@ void DiligentRenderer::end_frame() {
         throw std::logic_error{"Diligent renderer must be running before end_frame"};
     }
     const auto& swap_chain_description = impl_->swap_chain->GetDesc();
-    auto* timing = impl_->frame_metrics.gpu_timing_supported
-                       ? &impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count]
-                       : nullptr;
+    auto* timing = impl_->frame_metrics.gpu_timing_supported ? &impl_->timing_frames[impl_->frame_index % Impl::timing_frame_count] : nullptr;
     if (impl_->opaque_timing_active && timing != nullptr) {
         impl_->immediate_context->EndQuery(timing->opaque);
         timing->opaque_pending = true;
         impl_->opaque_timing_active = false;
     }
     std::size_t tone_resource_index = 0;
-    if (swap_chain_description.Width != 0 && swap_chain_description.Height != 0 &&
-        impl_->temporal_selection.technique == render::TemporalTechnique::taa &&
+    if (swap_chain_description.Width != 0 && swap_chain_description.Height != 0 && impl_->temporal_selection.technique == render::TemporalTechnique::taa &&
         impl_->temporal_pipeline && impl_->hdr_shader_resource) {
         const std::size_t history_index = impl_->frame_index % 2U;
         const bool measure_temporal = timing != nullptr && !timing->temporal_pending;
@@ -2658,26 +2468,16 @@ void DiligentRenderer::end_frame() {
             impl_->history_render_targets[history_index],
             impl_->history_depth_render_targets[history_index],
         };
-        impl_->immediate_context->SetRenderTargets(
-            2,
-            history_targets,
-            nullptr,
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        impl_->immediate_context->SetRenderTargets(2, history_targets, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         impl_->immediate_context->SetPipelineState(impl_->temporal_pipeline);
         {
-            Diligent::MapHelper<TemporalConstants> constants{impl_->immediate_context,
-                                                             impl_->temporal_constants,
-                                                             Diligent::MAP_WRITE,
-                                                             Diligent::MAP_FLAG_DISCARD};
+            Diligent::MapHelper<TemporalConstants> constants{
+                impl_->immediate_context, impl_->temporal_constants, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD};
             constants->inverse_render_width = 1.0F / static_cast<float>(impl_->render_extent.width);
-            constants->inverse_render_height =
-                1.0F / static_cast<float>(impl_->render_extent.height);
-            constants->history_weight =
-                impl_->history_valid ? impl_->temporal_selection.history_weight : 0.0F;
+            constants->inverse_render_height = 1.0F / static_cast<float>(impl_->render_extent.height);
+            constants->history_weight = impl_->history_valid ? impl_->temporal_selection.history_weight : 0.0F;
         }
-        impl_->immediate_context->CommitShaderResources(
-            impl_->temporal_resources[history_index],
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        impl_->immediate_context->CommitShaderResources(impl_->temporal_resources[history_index], Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         Diligent::DrawAttribs resolve_draw;
         resolve_draw.NumVertices = 3;
         resolve_draw.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
@@ -2691,34 +2491,22 @@ void DiligentRenderer::end_frame() {
         impl_->frame_metrics.temporal_history_valid = true;
         tone_resource_index = history_index + 1U;
     }
-    if (swap_chain_description.Width != 0 && swap_chain_description.Height != 0 &&
-        impl_->hdr_shader_resource && impl_->tone_map_pipeline) {
+    if (swap_chain_description.Width != 0 && swap_chain_description.Height != 0 && impl_->hdr_shader_resource && impl_->tone_map_pipeline) {
         const bool measure_tone_map = timing != nullptr && !timing->tone_map_pending;
         if (measure_tone_map) {
             impl_->immediate_context->BeginQuery(timing->tone_map);
         }
         auto* render_target = impl_->swap_chain->GetCurrentBackBufferRTV();
-        impl_->immediate_context->SetRenderTargets(
-            1,
-            &render_target,
-            nullptr,
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        impl_->immediate_context->SetRenderTargets(1, &render_target, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         impl_->immediate_context->SetPipelineState(impl_->tone_map_pipeline);
         {
-            Diligent::MapHelper<ToneConstants> constants{impl_->immediate_context,
-                                                         impl_->tone_constants,
-                                                         Diligent::MAP_WRITE,
-                                                         Diligent::MAP_FLAG_DISCARD};
+            Diligent::MapHelper<ToneConstants> constants{impl_->immediate_context, impl_->tone_constants, Diligent::MAP_WRITE, Diligent::MAP_FLAG_DISCARD};
             constants->exposure = impl_->exposure;
-            constants->inverse_output_width =
-                1.0F / static_cast<float>(impl_->output_extent.width);
-            constants->inverse_output_height =
-                1.0F / static_cast<float>(impl_->output_extent.height);
+            constants->inverse_output_width = 1.0F / static_cast<float>(impl_->output_extent.width);
+            constants->inverse_output_height = 1.0F / static_cast<float>(impl_->output_extent.height);
             constants->sharpness = impl_->temporal_selection.sharpness;
         }
-        impl_->immediate_context->CommitShaderResources(
-            impl_->tone_map_resources[tone_resource_index],
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        impl_->immediate_context->CommitShaderResources(impl_->tone_map_resources[tone_resource_index], Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         Diligent::DrawAttribs draw;
         draw.NumVertices = 3;
         draw.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
@@ -2729,77 +2517,104 @@ void DiligentRenderer::end_frame() {
             timing->tone_map_pending = true;
         }
     }
-    if(!impl_->ui.vertices.empty() && swap_chain_description.Width && swap_chain_description.Height){
-        const auto atlas=impl_->textures.find(impl_->ui.atlas);
-        if(atlas!=impl_->textures.end()){
-            if(!impl_->ui_pipeline){
-                constexpr char ui_vs[]=R"(
+    if (!impl_->ui.vertices.empty() && swap_chain_description.Width && swap_chain_description.Height) {
+        const auto atlas = impl_->textures.find(impl_->ui.atlas);
+        if (atlas != impl_->textures.end()) {
+            if (!impl_->ui_pipeline) {
+                constexpr char ui_vs[] = R"(
 struct Input {float2 position:ATTRIB0;float2 uv:ATTRIB1;float4 color:ATTRIB2;};
 struct Output {float4 position:SV_POSITION;float2 uv:TEX_COORD;float4 color:COLOR;};
 Output main(Input v){Output o;o.position=float4(v.position,0,1);o.uv=v.uv;o.color=v.color;return o;}
 )";
-                constexpr char ui_ps[]=R"(
+                constexpr char ui_ps[] = R"(
 Texture2D UiAtlas;SamplerState UiAtlas_sampler;
 float4 main(float4 position:SV_POSITION,float2 uv:TEX_COORD,float4 color:COLOR):SV_TARGET{
  return UiAtlas.Sample(UiAtlas_sampler,uv)*color;}
 )";
-                Diligent::ShaderCreateInfo shader;shader.SourceLanguage=Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
-                shader.EntryPoint="main";
-                shader.Desc.ShaderType=Diligent::SHADER_TYPE_VERTEX;shader.Desc.Name="Gloom UI vertices";shader.Source=ui_vs;
-                Diligent::RefCntAutoPtr<Diligent::IShader> vs,ps;impl_->device->CreateShader(shader,&vs);
-                shader.Desc.ShaderType=Diligent::SHADER_TYPE_PIXEL;shader.Desc.Name="Gloom UI atlas";shader.Source=ui_ps;
-                impl_->device->CreateShader(shader,&ps);
-                Diligent::GraphicsPipelineStateCreateInfo pso;pso.PSODesc.Name="Gloom UI after tone mapping";
-                pso.PSODesc.PipelineType=Diligent::PIPELINE_TYPE_GRAPHICS;
-                pso.PSODesc.ResourceLayout.DefaultVariableType=Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
-                const Diligent::ImmutableSamplerDesc sampler{Diligent::SHADER_TYPE_PIXEL,"UiAtlas_sampler",Diligent::SamplerDesc{}};
-                pso.PSODesc.ResourceLayout.ImmutableSamplers=&sampler;pso.PSODesc.ResourceLayout.NumImmutableSamplers=1;
-                auto& gp=pso.GraphicsPipeline;gp.NumRenderTargets=1;gp.RTVFormats[0]=swap_chain_description.ColorBufferFormat;
-                gp.PrimitiveTopology=Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;gp.RasterizerDesc.CullMode=Diligent::CULL_MODE_NONE;
-                gp.DepthStencilDesc.DepthEnable=false;
-                auto& blend=gp.BlendDesc.RenderTargets[0];blend.BlendEnable=true;
-                blend.SrcBlend=Diligent::BLEND_FACTOR_SRC_ALPHA;blend.DestBlend=Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
-                blend.SrcBlendAlpha=Diligent::BLEND_FACTOR_ONE;blend.DestBlendAlpha=Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+                Diligent::ShaderCreateInfo shader;
+                shader.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
+                shader.EntryPoint = "main";
+                shader.Desc.ShaderType = Diligent::SHADER_TYPE_VERTEX;
+                shader.Desc.Name = "Gloom UI vertices";
+                shader.Source = ui_vs;
+                Diligent::RefCntAutoPtr<Diligent::IShader> vs, ps;
+                impl_->device->CreateShader(shader, &vs);
+                shader.Desc.ShaderType = Diligent::SHADER_TYPE_PIXEL;
+                shader.Desc.Name = "Gloom UI atlas";
+                shader.Source = ui_ps;
+                impl_->device->CreateShader(shader, &ps);
+                Diligent::GraphicsPipelineStateCreateInfo pso;
+                pso.PSODesc.Name = "Gloom UI after tone mapping";
+                pso.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
+                pso.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
+                const Diligent::ImmutableSamplerDesc sampler{Diligent::SHADER_TYPE_PIXEL, "UiAtlas_sampler", Diligent::SamplerDesc{}};
+                pso.PSODesc.ResourceLayout.ImmutableSamplers = &sampler;
+                pso.PSODesc.ResourceLayout.NumImmutableSamplers = 1;
+                auto& gp = pso.GraphicsPipeline;
+                gp.NumRenderTargets = 1;
+                gp.RTVFormats[0] = swap_chain_description.ColorBufferFormat;
+                gp.PrimitiveTopology = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+                gp.RasterizerDesc.CullMode = Diligent::CULL_MODE_NONE;
+                gp.DepthStencilDesc.DepthEnable = false;
+                auto& blend = gp.BlendDesc.RenderTargets[0];
+                blend.BlendEnable = true;
+                blend.SrcBlend = Diligent::BLEND_FACTOR_SRC_ALPHA;
+                blend.DestBlend = Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
+                blend.SrcBlendAlpha = Diligent::BLEND_FACTOR_ONE;
+                blend.DestBlendAlpha = Diligent::BLEND_FACTOR_INV_SRC_ALPHA;
                 const Diligent::LayoutElement layout[]{
-                    {0,0,2,Diligent::VT_FLOAT32,false},{1,0,2,Diligent::VT_FLOAT32,false},{2,0,4,Diligent::VT_FLOAT32,false}};
-                gp.InputLayout.LayoutElements=layout;gp.InputLayout.NumElements=3;pso.pVS=vs;pso.pPS=ps;
-                impl_->device->CreateGraphicsPipelineState(pso,&impl_->ui_pipeline);
-                if(!impl_->ui_pipeline)throw std::runtime_error{"UI pipeline creation failed"};
-                impl_->ui_pipeline->CreateShaderResourceBinding(&impl_->ui_resources,true);
-                Diligent::BufferDesc buffer;buffer.Name="Gloom UI quads";buffer.Size=65536*sizeof(render::UiVertex);
-                buffer.Usage=Diligent::USAGE_DEFAULT;buffer.BindFlags=Diligent::BIND_VERTEX_BUFFER;
-                impl_->device->CreateBuffer(buffer,nullptr,&impl_->ui_vertices);
-                if(!impl_->ui_vertices || !impl_->ui_resources)throw std::runtime_error{"UI resources unavailable"};
+                    {0, 0, 2, Diligent::VT_FLOAT32, false}, {1, 0, 2, Diligent::VT_FLOAT32, false}, {2, 0, 4, Diligent::VT_FLOAT32, false}};
+                gp.InputLayout.LayoutElements = layout;
+                gp.InputLayout.NumElements = 3;
+                pso.pVS = vs;
+                pso.pPS = ps;
+                impl_->device->CreateGraphicsPipelineState(pso, &impl_->ui_pipeline);
+                if (!impl_->ui_pipeline)
+                    throw std::runtime_error{"UI pipeline creation failed"};
+                impl_->ui_pipeline->CreateShaderResourceBinding(&impl_->ui_resources, true);
+                Diligent::BufferDesc buffer;
+                buffer.Name = "Gloom UI quads";
+                buffer.Size = 65536 * sizeof(render::UiVertex);
+                buffer.Usage = Diligent::USAGE_DEFAULT;
+                buffer.BindFlags = Diligent::BIND_VERTEX_BUFFER;
+                impl_->device->CreateBuffer(buffer, nullptr, &impl_->ui_vertices);
+                if (!impl_->ui_vertices || !impl_->ui_resources)
+                    throw std::runtime_error{"UI resources unavailable"};
             }
-            atlas->second.last_used_frame=impl_->frame_index;
+            atlas->second.last_used_frame = impl_->frame_index;
             // Mutable descriptors must not be rewritten while earlier frames use
             // them. This immutable atlas binds once; a rare replacement drains
             // outstanding work before creating a fresh binding.
-            if(impl_->ui_bound_view!=atlas->second.view){
-                if(impl_->ui_bound_view)impl_->immediate_context->WaitForIdle();
-                impl_->ui_resources.Release();impl_->ui_pipeline->CreateShaderResourceBinding(&impl_->ui_resources,true);
-                impl_->ui_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL,"UiAtlas")->Set(atlas->second.view);
-                impl_->ui_bound_view=atlas->second.view;
+            if (impl_->ui_bound_view != atlas->second.view) {
+                if (impl_->ui_bound_view)
+                    impl_->immediate_context->WaitForIdle();
+                impl_->ui_resources.Release();
+                impl_->ui_pipeline->CreateShaderResourceBinding(&impl_->ui_resources, true);
+                impl_->ui_resources->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, "UiAtlas")->Set(atlas->second.view);
+                impl_->ui_bound_view = atlas->second.view;
             }
             // Keep large UI uploads out of the shared dynamic constant-buffer heap.
-            impl_->immediate_context->UpdateBuffer(impl_->ui_vertices,0,
-                impl_->ui.vertices.size()*sizeof(render::UiVertex),impl_->ui.vertices.data(),
+            impl_->immediate_context->UpdateBuffer(impl_->ui_vertices, 0, impl_->ui.vertices.size() * sizeof(render::UiVertex), impl_->ui.vertices.data(),
                 Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-            auto* target=impl_->swap_chain->GetCurrentBackBufferRTV();
-            impl_->immediate_context->SetRenderTargets(1,&target,nullptr,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            auto* target = impl_->swap_chain->GetCurrentBackBufferRTV();
+            impl_->immediate_context->SetRenderTargets(1, &target, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
             impl_->immediate_context->SetPipelineState(impl_->ui_pipeline);
-            Diligent::IBuffer* vertex_buffer=impl_->ui_vertices;Diligent::Uint64 offset=0;
-            impl_->immediate_context->SetVertexBuffers(0,1,&vertex_buffer,&offset,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
-            impl_->immediate_context->CommitShaderResources(impl_->ui_resources,Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-            Diligent::DrawAttribs draw;draw.NumVertices=static_cast<Diligent::Uint32>(impl_->ui.vertices.size());draw.Flags=Diligent::DRAW_FLAG_VERIFY_ALL;
+            Diligent::IBuffer* vertex_buffer = impl_->ui_vertices;
+            Diligent::Uint64 offset = 0;
+            impl_->immediate_context->SetVertexBuffers(
+                0, 1, &vertex_buffer, &offset, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, Diligent::SET_VERTEX_BUFFERS_FLAG_RESET);
+            impl_->immediate_context->CommitShaderResources(impl_->ui_resources, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            Diligent::DrawAttribs draw;
+            draw.NumVertices = static_cast<Diligent::Uint32>(impl_->ui.vertices.size());
+            draw.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
             impl_->immediate_context->Draw(draw);
             ++impl_->frame_metrics.draw_calls;
         }
     }
     if (impl_->full_timing_active && timing != nullptr) {
         impl_->immediate_context->EndQuery(timing->full);
-        timing->full_pending=true;
-        impl_->full_timing_active=false;
+        timing->full_pending = true;
+        impl_->full_timing_active = false;
     }
     if (!impl_->capture_path.empty() && swap_chain_description.Width && swap_chain_description.Height) {
         auto* source = impl_->swap_chain->GetCurrentBackBufferRTV()->GetTexture();
@@ -2811,17 +2626,17 @@ float4 main(float4 position:SV_POSITION,float2 uv:TEX_COORD,float4 color:COLOR):
         description.MiscFlags = Diligent::MISC_TEXTURE_FLAG_NONE;
         Diligent::RefCntAutoPtr<Diligent::ITexture> staging;
         impl_->device->CreateTexture(description, nullptr, &staging);
-        if (!staging) throw std::runtime_error{"Frame capture staging allocation failed"};
+        if (!staging)
+            throw std::runtime_error{"Frame capture staging allocation failed"};
         impl_->immediate_context->SetRenderTargets(0, nullptr, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_NONE);
-        impl_->immediate_context->CopyTexture({source, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-                                              staging, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION});
+        impl_->immediate_context->CopyTexture(
+            {source, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, staging, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION});
         impl_->immediate_context->WaitForIdle();
         Diligent::MappedTextureSubresource mapped;
-        impl_->immediate_context->MapTextureSubresource(staging, 0, 0, Diligent::MAP_READ,
-            Diligent::MAP_FLAG_DO_NOT_WAIT, nullptr, mapped);
-        if (!mapped.pData) throw std::runtime_error{"Frame capture map failed"};
-        const bool bgra = description.Format == Diligent::TEX_FORMAT_BGRA8_UNORM ||
-                          description.Format == Diligent::TEX_FORMAT_BGRA8_UNORM_SRGB;
+        impl_->immediate_context->MapTextureSubresource(staging, 0, 0, Diligent::MAP_READ, Diligent::MAP_FLAG_DO_NOT_WAIT, nullptr, mapped);
+        if (!mapped.pData)
+            throw std::runtime_error{"Frame capture map failed"};
+        const bool bgra = description.Format == Diligent::TEX_FORMAT_BGRA8_UNORM || description.Format == Diligent::TEX_FORMAT_BGRA8_UNORM_SRGB;
         std::vector<char> rgb(static_cast<std::size_t>(description.Width) * description.Height * 3);
         for (std::uint32_t y = 0; y < description.Height; ++y) {
             const auto* row = static_cast<const unsigned char*>(mapped.pData) + y * mapped.Stride;
@@ -2836,11 +2651,11 @@ float4 main(float4 position:SV_POSITION,float2 uv:TEX_COORD,float4 color:COLOR):
         std::ofstream output{impl_->capture_path, std::ios::binary};
         output << "P6\n" << description.Width << ' ' << description.Height << "\n255\n";
         output.write(rgb.data(), static_cast<std::streamsize>(rgb.size()));
-        if (!output) throw std::runtime_error{"Frame capture write failed"};
+        if (!output)
+            throw std::runtime_error{"Frame capture write failed"};
         impl_->capture_path.clear();
     }
-    impl_->immediate_context->EnqueueSignal(impl_->residency_fence,
-                                            ++impl_->submitted_fence_value);
+    impl_->immediate_context->EnqueueSignal(impl_->residency_fence, ++impl_->submitted_fence_value);
     impl_->submission_ticks[impl_->submitted_fence_value % 16] = present_clock();
     impl_->swap_chain->Present(settings_.vertical_sync ? 1 : 0);
     impl_->previous_jitter = impl_->jitter;

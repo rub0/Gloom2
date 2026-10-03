@@ -57,6 +57,21 @@ endforeach()
 
 option(GLOOM_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
+find_program(GLOOM_CLANG_FORMAT NAMES clang-format
+    HINTS "${CMAKE_GENERATOR_INSTANCE}/VC/Tools/Llvm/bin")
+if(GLOOM_CLANG_FORMAT)
+    file(GLOB_RECURSE GLOOM_FORMAT_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_SOURCE_DIR}/include/*.hpp" "${CMAKE_SOURCE_DIR}/src/*.cpp"
+        "${CMAKE_SOURCE_DIR}/apps/*.hpp" "${CMAKE_SOURCE_DIR}/apps/*.cpp"
+        "${CMAKE_SOURCE_DIR}/tests/*.cpp")
+    add_custom_target(gloom_format
+        COMMAND "${GLOOM_CLANG_FORMAT}" -i ${GLOOM_FORMAT_SOURCES}
+        COMMENT "Formatting Gloom C++ sources" VERBATIM)
+    add_custom_target(gloom_format_check
+        COMMAND "${GLOOM_CLANG_FORMAT}" --dry-run --Werror ${GLOOM_FORMAT_SOURCES}
+        COMMENT "Checking Gloom C++ formatting" VERBATIM)
+endif()
+
 add_library(gloom_engine STATIC
     src/audio/mixer.cpp
     src/backends/sdl_audio.cpp

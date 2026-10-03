@@ -36,12 +36,15 @@ struct PickupActor {
 };
 // Array order is the stable map identity. Only the authority mutates this state.
 class LegacyPickups {
-public:
+  public:
     void reset(std::span<const PickupDefinition> definitions);
     void tick(std::span<PickupActor> actors);
     bool pull(const PickupActor& actor, physics::Vec3 direction, float range);
-    [[nodiscard]] std::span<const PickupView> views() const { return states_; }
-private:
+    [[nodiscard]] std::span<const PickupView> views() const {
+        return states_;
+    }
+
+  private:
     std::vector<PickupDefinition> definitions_;
     std::vector<PickupView> states_;
 };

@@ -22,12 +22,9 @@ void test_session_wire_schemas() {
         .resume_token = 23,
         .credential = "credential",
     };
-    const auto decoded_hello =
-        gloom::network::decode_client_hello(gloom::network::encode_client_hello(hello));
-    expect(decoded_hello && decoded_hello->client_nonce == 17 &&
-               decoded_hello->resume_token == 23 &&
-               decoded_hello->credential == "credential",
-           "Client hello wire round trip changed values");
+    const auto decoded_hello = gloom::network::decode_client_hello(gloom::network::encode_client_hello(hello));
+    expect(decoded_hello && decoded_hello->client_nonce == 17 && decoded_hello->resume_token == 23 && decoded_hello->credential == "credential",
+        "Client hello wire round trip changed values");
 
     const gloom::network::ServerWelcome welcome{
         .client_nonce = 17,
@@ -38,14 +35,11 @@ void test_session_wire_schemas() {
         .server_time_seconds = 2.0,
     };
     const auto encoded_welcome = gloom::network::encode_server_welcome(welcome);
-    const auto envelope = gloom::network::decode_message(
-        gloom::network::encode_message(encoded_welcome));
+    const auto envelope = gloom::network::decode_message(gloom::network::encode_message(encoded_welcome));
     expect(envelope.has_value(), "Protocol v6 rejected a server welcome envelope");
     const auto decoded_welcome = gloom::network::decode_server_welcome(*envelope);
-    expect(decoded_welcome && decoded_welcome->session == 2 &&
-               decoded_welcome->controlled_entity == 4 &&
-               decoded_welcome->server_tick == 120,
-           "Server welcome wire round trip changed values");
+    expect(decoded_welcome && decoded_welcome->session == 2 && decoded_welcome->controlled_entity == 4 && decoded_welcome->server_tick == 120,
+        "Server welcome wire round trip changed values");
 
     const gloom::network::ClockResponse response{
         .nonce = 7,
@@ -53,11 +47,8 @@ void test_session_wire_schemas() {
         .server_receive_seconds = 4.8,
         .server_send_seconds = 4.81,
     };
-    const auto decoded_response =
-        gloom::network::decode_clock_response(gloom::network::encode_clock_response(response));
-    expect(decoded_response && decoded_response->nonce == 7 &&
-               decoded_response->server_send_seconds == 4.81,
-           "Clock response wire round trip changed values");
+    const auto decoded_response = gloom::network::decode_clock_response(gloom::network::encode_clock_response(response));
+    expect(decoded_response && decoded_response->nonce == 7 && decoded_response->server_send_seconds == 4.81, "Clock response wire round trip changed values");
 }
 
 void test_multiclient_admission_ownership_and_reconnect() {
@@ -65,16 +56,19 @@ void test_multiclient_admission_ownership_and_reconnect() {
     gloom::network::ServerSessionManager server({
         .maximum_clients = 2,
         .reconnect_grace_ticks = 10,
-        .authenticate = [](const std::string_view credential) {
-            return credential == "accepted";
-        },
-        .generate_resume_token = [&next_token] { return ++next_token; },
+        .authenticate =
+            [](const std::string_view credential) {
+                return credential == "accepted";
+            },
+        .generate_resume_token =
+            [&next_token] {
+                return ++next_token;
+            },
     });
 
     gloom::network::ClientSession first;
     server.connected(10);
-    const auto rejected = server.admit(
-        10, *gloom::network::decode_client_hello(first.begin("wrong", 1)), 100, 5.0);
+    const auto rejected = server.admit(10, *gloom::network::decode_client_hello(first.begin("wrong", 1)), 100, 5.0);
     expect(!rejected, "Invalid session credential was accepted");
     const auto first_hello = gloom::network::decode_client_hello(first.begin("accepted", 2));
     const auto first_welcome = server.admit(10, *first_hello, 100, 5.0);
@@ -85,8 +79,7 @@ void test_multiclient_admission_ownership_and_reconnect() {
     server.connected(20);
     const auto second_hello = gloom::network::decode_client_hello(second.begin("accepted", 3));
     const auto second_welcome = server.admit(20, *second_hello, 100, 5.0);
-    expect(second_welcome && second_welcome->controlled_entity != first.controlled_entity(),
-           "Two clients received the same controlled entity");
+    expect(second_welcome && second_welcome->controlled_entity != first.controlled_entity(), "Two clients received the same controlled entity");
     second.accept(gloom::network::encode_server_welcome(*second_welcome));
     expect(server.active_sessions() == 2, "Server did not retain two active sessions");
 
@@ -95,13 +88,10 @@ void test_multiclient_admission_ownership_and_reconnect() {
         .acknowledged_sequence = 8,
     };
     const auto input_owner = server.authorize_input(10, input);
-    expect(input_owner && *input_owner == first.controlled_entity(),
-           "Input was not routed to its connection-owned entity");
+    expect(input_owner && *input_owner == first.controlled_entity(), "Input was not routed to its connection-owned entity");
     const auto* replication = server.replication_state(10);
-    expect(replication && replication->has_acknowledged_snapshot &&
-               replication->acknowledged_snapshot == 8 &&
-               replication->received_input_batches == 1,
-           "Per-client replication state was not updated");
+    expect(replication && replication->has_acknowledged_snapshot && replication->acknowledged_snapshot == 8 && replication->received_input_batches == 1,
+        "Per-client replication state was not updated");
 
     const gloom::network::FireCommand own_fire{
         .sequence = 1,
@@ -110,47 +100,44 @@ void test_multiclient_admission_ownership_and_reconnect() {
     };
     auto spoofed_fire = own_fire;
     spoofed_fire.shooter = second.controlled_entity();
-    expect(server.authorize_fire(10, own_fire) && !server.authorize_fire(10, spoofed_fire),
-           "Session ownership allowed a spoofed shooter entity");
+    expect(server.authorize_fire(10, own_fire) && !server.authorize_fire(10, spoofed_fire), "Session ownership allowed a spoofed shooter entity");
 
     server.connected(30);
-    const auto third = server.admit(
-        30, {.client_nonce = 4, .credential = "accepted"}, 100, 5.0);
+    const auto third = server.admit(30, {.client_nonce = 4, .credential = "accepted"}, 100, 5.0);
     expect(!third, "Session capacity limit was not enforced");
 
     const auto original_session = first.session();
     const auto original_entity = first.controlled_entity();
     const auto original_token = first.resume_token();
     server.disconnected(10, 100);
-    expect(server.active_sessions() == 1 && server.dormant_sessions() == 1,
-           "Disconnected session did not enter reconnect grace state");
-    expect(!server.authorize_input(10, input),
-           "Disconnected connection retained entity authority");
+    expect(server.active_sessions() == 1 && server.dormant_sessions() == 1, "Disconnected session did not enter reconnect grace state");
+    expect(!server.authorize_input(10, input), "Disconnected connection retained entity authority");
 
     server.connected(11);
-    const auto resume_hello =
-        gloom::network::decode_client_hello(first.reconnect("accepted", 5));
-    expect(resume_hello && resume_hello->resume_token == original_token,
-           "Client did not present its reconnect token");
+    const auto resume_hello = gloom::network::decode_client_hello(first.reconnect("accepted", 5));
+    expect(resume_hello && resume_hello->resume_token == original_token, "Client did not present its reconnect token");
     expect(!first.active(), "Client remained active while reconnect admission was pending");
     const auto resumed = server.admit(11, *resume_hello, 105, 5.1);
-    expect(resumed && resumed->session == original_session &&
-               resumed->controlled_entity == original_entity &&
-               resumed->resume_token != original_token,
-           "Reconnect did not preserve identity and rotate its token");
+    expect(resumed && resumed->session == original_session && resumed->controlled_entity == original_entity && resumed->resume_token != original_token,
+        "Reconnect did not preserve identity and rotate its token");
     first.accept(gloom::network::encode_server_welcome(*resumed));
 
     server.disconnected(11, 110);
     server.expire(121);
-    expect(server.dormant_sessions() == 0 && server.metrics().expired == 1,
-           "Expired reconnect state was not removed");
+    expect(server.dormant_sessions() == 0 && server.metrics().expired == 1, "Expired reconnect state was not removed");
 }
 
 void test_live_clock_exchange() {
     std::uint64_t token = 500;
     gloom::network::ServerSessionManager server({
-        .authenticate = [](std::string_view) { return true; },
-        .generate_resume_token = [&token] { return ++token; },
+        .authenticate =
+            [](std::string_view) {
+                return true;
+            },
+        .generate_resume_token =
+            [&token] {
+                return ++token;
+            },
     });
     gloom::network::ClientSession client;
     server.connected(1);
@@ -169,9 +156,8 @@ void test_live_clock_exchange() {
     });
     client.receive_clock_response(response, 10.45);
     const auto estimate = client.clock().estimate();
-    expect(estimate.samples == 1 && std::abs(estimate.offset_seconds + 0.395) < 0.000'001 &&
-               std::abs(estimate.round_trip_seconds - 0.09) < 0.000'001,
-           "Live session clock exchange produced the wrong estimate");
+    expect(estimate.samples == 1 && std::abs(estimate.offset_seconds + 0.395) < 0.000'001 && std::abs(estimate.round_trip_seconds - 0.09) < 0.000'001,
+        "Live session clock exchange produced the wrong estimate");
 
     bool replay_rejected = false;
     try {
@@ -203,13 +189,12 @@ void test_per_client_replication_channels() {
                         }));
     const auto first_snapshot = movement.tick();
     const auto second_snapshot = movement.take_snapshot(2);
-    expect(first_snapshot && second_snapshot &&
-               first_snapshot->flags == gloom::network::MessageFlags::full_snapshot &&
+    expect(first_snapshot && second_snapshot && first_snapshot->flags == gloom::network::MessageFlags::full_snapshot &&
                second_snapshot->flags == gloom::network::MessageFlags::full_snapshot,
-           "Initial per-client snapshots were not generated independently");
-    expect(movement.acknowledged_input(1) == 10 && movement.acknowledged_input(2) == 20 &&
-               movement.entity(1).position_x > 0.0F && movement.entity(2).position_x < 0.0F,
-           "Inputs from two clients were not applied to their owned entities");
+        "Initial per-client snapshots were not generated independently");
+    expect(movement.acknowledged_input(1) == 10 && movement.acknowledged_input(2) == 20 && movement.entity(1).position_x > 0.0F &&
+               movement.entity(2).position_x < 0.0F,
+        "Inputs from two clients were not applied to their owned entities");
 
     auto first_input = gloom::network::encode_movement_input({
         .sequence = 11,
@@ -223,13 +208,11 @@ void test_per_client_replication_channels() {
                         }));
     const auto first_delta = movement.tick();
     const auto second_full = movement.take_snapshot(2);
-    expect(first_delta && second_full &&
-               first_delta->flags == gloom::network::MessageFlags::delta_snapshot &&
+    expect(first_delta && second_full && first_delta->flags == gloom::network::MessageFlags::delta_snapshot &&
                second_full->flags == gloom::network::MessageFlags::full_snapshot,
-           "Snapshot acknowledgement from one client contaminated another baseline");
-    expect(movement.snapshot_metrics(1).delta_snapshots == 1 &&
-               movement.snapshot_metrics(2).delta_snapshots == 0,
-           "Per-client snapshot metrics were not isolated");
+        "Snapshot acknowledgement from one client contaminated another baseline");
+    expect(movement.snapshot_metrics(1).delta_snapshots == 1 && movement.snapshot_metrics(2).delta_snapshots == 0,
+        "Per-client snapshot metrics were not isolated");
 }
 
 void test_idempotent_event_delivery() {
@@ -247,24 +230,20 @@ void test_idempotent_event_delivery() {
     auto outgoing = sender.poll(0.0);
     expect(outgoing.size() == 1, "New gameplay event was not transmitted immediately");
     const auto first = receiver.receive(outgoing.front());
-    expect(first && !first->duplicate && first->payload == payload,
-           "Gameplay event was not delivered exactly once");
+    expect(first && !first->duplicate && first->payload == payload, "Gameplay event was not delivered exactly once");
     expect(sender.poll(0.05).empty(), "Gameplay event retried before its deadline");
 
     outgoing = sender.poll(0.1);
     expect(outgoing.size() == 1, "Unacknowledged gameplay event was not retried");
     const auto duplicate = receiver.receive(outgoing.front());
-    expect(duplicate && duplicate->duplicate && duplicate->payload.empty(),
-           "Retransmitted gameplay event was delivered twice");
-    expect(sender.acknowledge(receiver.acknowledgement(sequence)) && sender.pending() == 0,
-           "Gameplay event acknowledgement did not clear the send queue");
+    expect(duplicate && duplicate->duplicate && duplicate->payload.empty(), "Retransmitted gameplay event was delivered twice");
+    expect(sender.acknowledge(receiver.acknowledgement(sequence)) && sender.pending() == 0, "Gameplay event acknowledgement did not clear the send queue");
 
     static_cast<void>(sender.queue(payload, 1.0));
-    expect(sender.poll(1.31).empty() && sender.metrics().expired == 1,
-           "Stale gameplay event was not expired");
-    expect(sender.metrics().transmissions == 2 && sender.metrics().retransmissions == 1 &&
-               receiver.metrics().delivered == 1 && receiver.metrics().duplicates == 1,
-           "Reliable event telemetry is incorrect");
+    expect(sender.poll(1.31).empty() && sender.metrics().expired == 1, "Stale gameplay event was not expired");
+    expect(
+        sender.metrics().transmissions == 2 && sender.metrics().retransmissions == 1 && receiver.metrics().delivered == 1 && receiver.metrics().duplicates == 1,
+        "Reliable event telemetry is incorrect");
 }
 
 } // namespace

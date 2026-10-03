@@ -49,7 +49,7 @@ struct NetworkSimulationMetrics {
 // Deterministic, simulated-time packet conditioner for tests and network labs.
 // It owns packet data and performs no sleeping or wall-clock access.
 class NetworkSimulator final {
-public:
+  public:
     explicit NetworkSimulator(NetworkSimulationSettings settings = {});
     ~NetworkSimulator();
 
@@ -65,7 +65,7 @@ public:
     [[nodiscard]] NetworkSimulationMetrics metrics() const noexcept;
     void clear() noexcept;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

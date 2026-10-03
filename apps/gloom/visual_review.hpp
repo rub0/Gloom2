@@ -49,15 +49,13 @@ inline constexpr std::array character_views{
 };
 inline constexpr std::array ability_views{
     View{"hound-bite", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::bite},
-    View{"hound-berserker", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::bite,
-         gameplay::SliceCharacter::hound, gameplay::SliceSecondaryAbility::berserker},
-    View{"archangel-diamond-skin", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::diamond_skin,
-         gameplay::SliceCharacter::archangel},
-    View{"archangel-life-dome", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::diamond_skin,
-         gameplay::SliceCharacter::archangel, gameplay::SliceSecondaryAbility::life_dome},
-    View{"shadow-invisibility", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::invisibility,
-         gameplay::SliceCharacter::shadow},
-    View{"shadow-flash", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::invisibility,
-         gameplay::SliceCharacter::shadow, gameplay::SliceSecondaryAbility::flash, true},
+    View{"hound-berserker", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::bite, gameplay::SliceCharacter::hound,
+        gameplay::SliceSecondaryAbility::berserker},
+    View{"archangel-diamond-skin", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::diamond_skin, gameplay::SliceCharacter::archangel},
+    View{"archangel-life-dome", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::diamond_skin, gameplay::SliceCharacter::archangel,
+        gameplay::SliceSecondaryAbility::life_dome},
+    View{"shadow-invisibility", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::invisibility, gameplay::SliceCharacter::shadow},
+    View{"shadow-flash", -35.4855F, 0.10F, 8.9985F, 3.14159265F, -0.18F, gameplay::SliceAbility::invisibility, gameplay::SliceCharacter::shadow,
+        gameplay::SliceSecondaryAbility::flash, true},
 };
 }

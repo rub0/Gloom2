@@ -48,6 +48,7 @@ int main() {
     const PickupVisual phase_a = pickup_visual(2, PickupKind::ammo, 3.0F, pickup_appearance_duration);
     const PickupVisual phase_b = pickup_visual(3, PickupKind::ammo, 3.0F, pickup_appearance_duration);
     require(fabsf(phase_a.vertical_offset - phase_b.vertical_offset) > 0.001F, "Pickup phases are synchronized");
-    if (!failures) printf("Pickup bobbing, yaw, halo exclusion and respawn presentation passed\n");
+    if (!failures)
+        printf("Pickup bobbing, yaw, halo exclusion and respawn presentation passed\n");
     return failures ? 1 : 0;
 }

@@ -7,7 +7,7 @@
 namespace gloom::backends {
 
 class SdlWindow final : public platform::Window {
-public:
+  public:
     explicit SdlWindow(platform::WindowDesc description);
     ~SdlWindow() override;
 
@@ -31,7 +31,7 @@ public:
     void set_relative_mouse_mode(bool enabled) override;
     void set_title(std::string title) override;
 
-private:
+  private:
     struct Impl;
 
     platform::WindowDesc description_;

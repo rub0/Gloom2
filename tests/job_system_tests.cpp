@@ -36,7 +36,9 @@ int main() try {
     jobs.schedule(nested_group, [&] {
         auto inner_group = jobs.create_group();
         for (int index = 0; index < 64; ++index) {
-            jobs.schedule(inner_group, [&] { nested_count.fetch_add(1, std::memory_order_relaxed); });
+            jobs.schedule(inner_group, [&] {
+                nested_count.fetch_add(1, std::memory_order_relaxed);
+            });
         }
         jobs.wait(inner_group);
     });
@@ -44,7 +46,9 @@ int main() try {
     expect(nested_count.load() == 64, "Nested task-group wait deadlocked or lost work");
 
     auto exception_group = jobs.create_group();
-    jobs.schedule(exception_group, [] { throw std::runtime_error{"expected job failure"}; });
+    jobs.schedule(exception_group, [] {
+        throw std::runtime_error{"expected job failure"};
+    });
     bool exception_observed = false;
     try {
         jobs.wait(exception_group);
@@ -58,13 +62,13 @@ int main() try {
     constexpr std::uint32_t reuse_rounds = 1'000;
     for (std::uint32_t round = 0; round < reuse_rounds; ++round) {
         for (std::uint32_t job = 0; job < 3; ++job) {
-            jobs.schedule(reused_group,
-                          [&] { reuse_count.fetch_add(1, std::memory_order_relaxed); });
+            jobs.schedule(reused_group, [&] {
+                reuse_count.fetch_add(1, std::memory_order_relaxed);
+            });
         }
         jobs.wait(reused_group);
     }
-    expect(reuse_count.load() == reuse_rounds * 3,
-           "Reused task group lost work or a completion notification");
+    expect(reuse_count.load() == reuse_rounds * 3, "Reused task group lost work or a completion notification");
 
     const auto metrics = jobs.metrics();
     expect(metrics.worker_threads == 4, "Requested worker count was not used");

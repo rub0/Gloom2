@@ -58,7 +58,7 @@ struct TransportMetrics {
 // Backend-independent, message-oriented transport contract. Calls, including tick(),
 // are serialized by the owning engine thread in the current implementation.
 class Transport : public core::Subsystem {
-public:
+  public:
     [[nodiscard]] virtual std::string listen(std::string_view endpoint) = 0;
     virtual void stop_listening() = 0;
     [[nodiscard]] virtual ConnectionId connect(std::string_view endpoint) = 0;

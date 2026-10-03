@@ -37,14 +37,12 @@ struct PreparedVisibility {
 };
 
 class VisibilitySystem final {
-public:
+  public:
     explicit VisibilitySystem(core::JobSystem& jobs, VisibilitySettings settings = {});
 
-    [[nodiscard]] PreparedVisibility build(const Camera& camera,
-                                           float aspect_ratio,
-                                           std::span<const RenderInstance> instances);
+    [[nodiscard]] PreparedVisibility build(const Camera& camera, float aspect_ratio, std::span<const RenderInstance> instances);
 
-private:
+  private:
     core::JobSystem& jobs_;
     VisibilitySettings settings_;
 };

@@ -60,4 +60,3 @@ bool Engine::running() const noexcept {
 }
 
 } // namespace gloom::core
-

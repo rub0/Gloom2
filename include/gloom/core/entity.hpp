@@ -16,8 +16,7 @@
 namespace gloom::core {
 
 struct EntityId {
-    static constexpr std::uint32_t invalid_index =
-        std::numeric_limits<std::uint32_t>::max();
+    static constexpr std::uint32_t invalid_index = std::numeric_limits<std::uint32_t>::max();
 
     std::uint32_t index{invalid_index};
     std::uint32_t generation{0};
@@ -33,30 +32,26 @@ struct EntityId {
 // values; backend handles belong inside adapter components introduced by the
 // owning subsystem rather than in this registry.
 class EntityRegistry final {
-public:
+  public:
     [[nodiscard]] EntityId create();
     [[nodiscard]] bool destroy(EntityId entity);
     [[nodiscard]] bool alive(EntityId entity) const noexcept;
     [[nodiscard]] std::size_t size() const noexcept;
     void clear();
 
-    template <typename Component, typename... Arguments>
-    Component& emplace(EntityId entity, Arguments&&... arguments) {
+    template <typename Component, typename... Arguments> Component& emplace(EntityId entity, Arguments&&... arguments) {
         using Value = std::remove_cvref_t<Component>;
-        static_assert(std::same_as<Component, Value>,
-                      "Component type must be an unqualified value type");
+        static_assert(std::same_as<Component, Value>, "Component type must be an unqualified value type");
         require_alive(entity);
         auto& values = pool<Value>().values;
-        const auto [iterator, inserted] = values.try_emplace(
-            entity.index, std::forward<Arguments>(arguments)...);
+        const auto [iterator, inserted] = values.try_emplace(entity.index, std::forward<Arguments>(arguments)...);
         if (!inserted) {
             throw std::logic_error{"Entity already owns this component type"};
         }
         return iterator->second;
     }
 
-    template <typename Component>
-    [[nodiscard]] bool remove(EntityId entity) noexcept {
+    template <typename Component> [[nodiscard]] bool remove(EntityId entity) noexcept {
         using Value = std::remove_cvref_t<Component>;
         if (!alive(entity)) {
             return false;
@@ -65,8 +60,7 @@ public:
         return values != nullptr && values->values.erase(entity.index) != 0;
     }
 
-    template <typename Component>
-    [[nodiscard]] Component* get(EntityId entity) noexcept {
+    template <typename Component> [[nodiscard]] Component* get(EntityId entity) noexcept {
         using Value = std::remove_cvref_t<Component>;
         if (!alive(entity)) {
             return nullptr;
@@ -79,8 +73,7 @@ public:
         return found == values->values.end() ? nullptr : &found->second;
     }
 
-    template <typename Component>
-    [[nodiscard]] const Component* get(EntityId entity) const noexcept {
+    template <typename Component> [[nodiscard]] const Component* get(EntityId entity) const noexcept {
         using Value = std::remove_cvref_t<Component>;
         if (!alive(entity)) {
             return nullptr;
@@ -93,47 +86,45 @@ public:
         return found == values->values.end() ? nullptr : &found->second;
     }
 
-    template <typename Component>
-    [[nodiscard]] bool has(EntityId entity) const noexcept {
+    template <typename Component> [[nodiscard]] bool has(EntityId entity) const noexcept {
         return get<Component>(entity) != nullptr;
     }
 
-    template <typename Component>
-    [[nodiscard]] std::size_t component_count() const noexcept {
+    template <typename Component> [[nodiscard]] std::size_t component_count() const noexcept {
         using Value = std::remove_cvref_t<Component>;
         const auto* values = find_pool<Value>();
         return values == nullptr ? 0 : values->values.size();
     }
 
-private:
+  private:
     struct Slot {
         std::uint32_t generation{1};
         bool alive{false};
     };
 
     class ComponentPoolBase {
-    public:
+      public:
         virtual ~ComponentPoolBase() = default;
         virtual void erase(std::uint32_t entity_index) noexcept = 0;
         virtual void clear() noexcept = 0;
     };
 
-    template <typename Component>
-    class ComponentPool final : public ComponentPoolBase {
-    public:
+    template <typename Component> class ComponentPool final : public ComponentPoolBase {
+      public:
         void erase(const std::uint32_t entity_index) noexcept override {
             values.erase(entity_index);
         }
 
-        void clear() noexcept override { values.clear(); }
+        void clear() noexcept override {
+            values.clear();
+        }
 
         std::unordered_map<std::uint32_t, Component> values;
     };
 
     void require_alive(EntityId entity) const;
 
-    template <typename Component>
-    ComponentPool<Component>& pool() {
+    template <typename Component> ComponentPool<Component>& pool() {
         const std::type_index type{typeid(Component)};
         const auto found = component_pools_.find(type);
         if (found != component_pools_.end()) {
@@ -145,20 +136,14 @@ private:
         return *result;
     }
 
-    template <typename Component>
-    [[nodiscard]] ComponentPool<Component>* find_pool() noexcept {
+    template <typename Component> [[nodiscard]] ComponentPool<Component>* find_pool() noexcept {
         const auto found = component_pools_.find(std::type_index{typeid(Component)});
-        return found == component_pools_.end()
-                   ? nullptr
-                   : static_cast<ComponentPool<Component>*>(found->second.get());
+        return found == component_pools_.end() ? nullptr : static_cast<ComponentPool<Component>*>(found->second.get());
     }
 
-    template <typename Component>
-    [[nodiscard]] const ComponentPool<Component>* find_pool() const noexcept {
+    template <typename Component> [[nodiscard]] const ComponentPool<Component>* find_pool() const noexcept {
         const auto found = component_pools_.find(std::type_index{typeid(Component)});
-        return found == component_pools_.end()
-                   ? nullptr
-                   : static_cast<const ComponentPool<Component>*>(found->second.get());
+        return found == component_pools_.end() ? nullptr : static_cast<const ComponentPool<Component>*>(found->second.get());
     }
 
     std::vector<Slot> slots_;

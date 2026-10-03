@@ -32,8 +32,7 @@ struct NetworkSimulator::Impl {
     };
 
     struct Later {
-        [[nodiscard]] bool operator()(const ScheduledPacket& left,
-                                      const ScheduledPacket& right) const noexcept {
+        [[nodiscard]] bool operator()(const ScheduledPacket& left, const ScheduledPacket& right) const noexcept {
             if (left.ready_at_seconds != right.ready_at_seconds) {
                 return left.ready_at_seconds > right.ready_at_seconds;
             }
@@ -41,12 +40,10 @@ struct NetworkSimulator::Impl {
         }
     };
 
-    explicit Impl(NetworkSimulationSettings configured_settings)
-        : settings{configured_settings}, random_state{settings.random_seed} {
+    explicit Impl(NetworkSimulationSettings configured_settings) : settings{configured_settings}, random_state{settings.random_seed} {
         validate_duration(settings.latency_seconds, "Network latency");
         validate_duration(settings.jitter_seconds, "Network jitter");
-        validate_duration(settings.maximum_reorder_delay_seconds,
-                          "Maximum reorder delay");
+        validate_duration(settings.maximum_reorder_delay_seconds, "Maximum reorder delay");
         validate_probability(settings.loss_probability, "Packet loss probability");
         validate_probability(settings.duplicate_probability, "Packet duplicate probability");
         validate_probability(settings.reorder_probability, "Packet reorder probability");
@@ -77,8 +74,7 @@ struct NetworkSimulator::Impl {
             return now_seconds;
         }
         const double transmission_start = std::max(now_seconds, next_transmission_seconds);
-        const double duration = static_cast<double>(byte_count) /
-                                static_cast<double>(settings.bandwidth_bytes_per_second);
+        const double duration = static_cast<double>(byte_count) / static_cast<double>(settings.bandwidth_bytes_per_second);
         next_transmission_seconds = transmission_start + duration;
         return next_transmission_seconds;
     }
@@ -110,8 +106,7 @@ struct NetworkSimulator::Impl {
     NetworkSimulationMetrics counters;
 };
 
-NetworkSimulator::NetworkSimulator(NetworkSimulationSettings settings)
-    : impl_{std::make_unique<Impl>(settings)} {}
+NetworkSimulator::NetworkSimulator(NetworkSimulationSettings settings) : impl_{std::make_unique<Impl>(settings)} {}
 
 NetworkSimulator::~NetworkSimulator() = default;
 NetworkSimulator::NetworkSimulator(NetworkSimulator&&) noexcept = default;
@@ -120,8 +115,7 @@ NetworkSimulator& NetworkSimulator::operator=(NetworkSimulator&&) noexcept = def
 void NetworkSimulator::submit(const SimulatedPacketView packet) {
     ++impl_->counters.submitted_packets;
     impl_->counters.submitted_bytes += packet.payload.size();
-    if (impl_->settings.queue_capacity_packets != 0 &&
-        impl_->queue.size() >= impl_->settings.queue_capacity_packets) {
+    if (impl_->settings.queue_capacity_packets != 0 && impl_->queue.size() >= impl_->settings.queue_capacity_packets) {
         ++impl_->counters.dropped_by_queue;
         return;
     }
@@ -133,8 +127,7 @@ void NetworkSimulator::submit(const SimulatedPacketView packet) {
     const double transmission_done = impl_->transmission_completion(packet.payload.size());
     impl_->schedule_copy(packet, transmission_done);
     if (impl_->chance(impl_->settings.duplicate_probability)) {
-        if (impl_->settings.queue_capacity_packets == 0 ||
-            impl_->queue.size() < impl_->settings.queue_capacity_packets) {
+        if (impl_->settings.queue_capacity_packets == 0 || impl_->queue.size() < impl_->settings.queue_capacity_packets) {
             impl_->schedule_copy(packet, transmission_done);
             ++impl_->counters.duplicated_packets;
         } else {

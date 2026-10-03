@@ -91,16 +91,13 @@ struct LightingSettings {
 };
 
 class ClusteredLightingBuilder final {
-public:
+  public:
     explicit ClusteredLightingBuilder(LightingSettings settings = {});
 
-    [[nodiscard]] PreparedLighting build(const Camera& camera,
-                                         float aspect_ratio,
-                                         std::span<const PointLight> lights,
-                                         DirectionalLight directional = {},
-                                         EnvironmentLighting environment = {}) const;
+    [[nodiscard]] PreparedLighting build(const Camera& camera, float aspect_ratio, std::span<const PointLight> lights, DirectionalLight directional = {},
+        EnvironmentLighting environment = {}) const;
 
-private:
+  private:
     LightingSettings settings_;
 };
 

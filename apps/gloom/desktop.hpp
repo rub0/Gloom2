@@ -9,7 +9,7 @@ namespace gloom::desktop {
 struct Session {
     std::shared_ptr<gameplay::AudioPresentation> audio;
     std::shared_ptr<gameplay::SliceMatchDirectory> directory;
-    std::function<std::expected<std::string,std::string>()> identity;
+    std::function<std::expected<std::string, std::string>()> identity;
     std::string notice;
     bool quit{false};
     // Bounded acceptance driver. Empty in normal play; uses the same UI input seam.
@@ -17,5 +17,5 @@ struct Session {
     std::string flow_name;
     std::size_t flow_selection{3};
 };
-std::vector<std::string> menu(Session& session,const std::filesystem::path& review={},unsigned width=1280,unsigned height=720);
+std::vector<std::string> menu(Session& session, const std::filesystem::path& review = {}, unsigned width = 1280, unsigned height = 720);
 }

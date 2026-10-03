@@ -52,19 +52,15 @@ struct ResidencyCoordinatorMetrics {
 };
 
 class AssetResidencyCoordinator final {
-public:
-    AssetResidencyCoordinator(core::JobSystem& jobs,
-                              AsyncAssetLoader& loader,
-                              const AssetCatalog& catalog,
-                              render::Renderer& renderer,
-                              ResidencyCoordinatorSettings settings = {});
+  public:
+    AssetResidencyCoordinator(
+        core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, render::Renderer& renderer, ResidencyCoordinatorSettings settings = {});
     ~AssetResidencyCoordinator();
 
     AssetResidencyCoordinator(const AssetResidencyCoordinator&) = delete;
     AssetResidencyCoordinator& operator=(const AssetResidencyCoordinator&) = delete;
 
-    [[nodiscard]] SceneTicket request_scene(
-        AssetId scene, AssetPriority priority = AssetPriority::normal);
+    [[nodiscard]] SceneTicket request_scene(AssetId scene, AssetPriority priority = AssetPriority::normal);
     void cancel(SceneTicket ticket);
     void reload(SceneTicket ticket);
     void update();
@@ -74,7 +70,7 @@ public:
     [[nodiscard]] std::string_view error(SceneTicket ticket) const noexcept;
     [[nodiscard]] ResidencyCoordinatorMetrics metrics() const noexcept;
 
-private:
+  private:
     struct PreparedScene;
     struct Request;
 
@@ -88,10 +84,7 @@ private:
     ResidencyCoordinatorSettings settings_;
     core::TaskGroup preparation_tasks_;
     std::unordered_map<std::uint64_t, Request> requests_;
-    std::unordered_map<render::RenderAssetId,
-                       std::uint32_t,
-                       render::RenderAssetIdHash>
-        resource_references_;
+    std::unordered_map<render::RenderAssetId, std::uint32_t, render::RenderAssetIdHash> resource_references_;
     ResidencyCoordinatorMetrics metrics_;
     std::uint64_t next_ticket_{1};
 };

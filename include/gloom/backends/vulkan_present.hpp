@@ -9,7 +9,8 @@
 #include <time.h>
 #endif
 
-namespace gloom { namespace backends {
+namespace gloom {
+namespace backends {
 // Shared with the pinned Diligent swapchain patch. Modes use VkPresentModeKHR values.
 // Single immediate context; measurements are opt-in and in performance-clock ticks.
 struct VulkanPresentProfile {
@@ -25,7 +26,8 @@ struct VulkanPresentProfile {
 extern VulkanPresentProfile vulkan_present;
 
 inline uint64 present_clock() {
-    if (!vulkan_present.enabled) return 0;
+    if (!vulkan_present.enabled)
+        return 0;
 #ifdef _WIN32
     LARGE_INTEGER counter;
     QueryPerformanceCounter(&counter);

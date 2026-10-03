@@ -13,113 +13,88 @@ namespace {
 constexpr std::size_t maximum_display_name_bytes = 20;
 
 class DevelopmentSliceIdentityProvider final : public SliceIdentityProvider {
-public:
-    explicit DevelopmentSliceIdentityProvider(std::string secret)
-        : secret_{std::move(secret)} {
+  public:
+    explicit DevelopmentSliceIdentityProvider(std::string secret) : secret_{std::move(secret)} {
         if (secret_.empty()) {
             throw std::invalid_argument{"Development identity secret cannot be empty"};
         }
     }
 
-    [[nodiscard]] std::expected<SlicePlayerIdentity, std::string>
-    verify(const std::string_view credential) const override {
+    [[nodiscard]] std::expected<SlicePlayerIdentity, std::string> verify(const std::string_view credential) const override {
         return decode_slice_credential(credential, secret_);
     }
 
-private:
+  private:
     std::string secret_;
 };
 
-template <typename Integer>
-void append_integer(std::vector<std::byte>& output, const Integer value) {
+template <typename Integer> void append_integer(std::vector<std::byte>& output, const Integer value) {
     static_assert(std::is_unsigned_v<Integer>);
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
         output.push_back(static_cast<std::byte>(value >> (index * 8)));
     }
 }
 
-template <typename Integer>
-[[nodiscard]] Integer read_integer(const std::span<const std::byte> input,
-                                   std::size_t& offset) {
+template <typename Integer> [[nodiscard]] Integer read_integer(const std::span<const std::byte> input, std::size_t& offset) {
     static_assert(std::is_unsigned_v<Integer>);
     Integer value = 0;
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
-        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++]))
-                 << (index * 8);
+        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++])) << (index * 8);
     }
     return value;
 }
 
 [[nodiscard]] bool valid_phase(const SliceMatchPhase phase) noexcept {
-    return phase == SliceMatchPhase::waiting || phase == SliceMatchPhase::active ||
-           phase == SliceMatchPhase::completed;
+    return phase == SliceMatchPhase::waiting || phase == SliceMatchPhase::active || phase == SliceMatchPhase::completed;
 }
 
 [[nodiscard]] bool valid_end_reason(const SliceMatchEndReason reason) noexcept {
-    return reason == SliceMatchEndReason::none ||
-           reason == SliceMatchEndReason::abandonment;
+    return reason == SliceMatchEndReason::none || reason == SliceMatchEndReason::abandonment;
 }
 
 } // namespace
 
-std::shared_ptr<const SliceIdentityProvider>
-make_development_identity_provider(std::string secret) {
+std::shared_ptr<const SliceIdentityProvider> make_development_identity_provider(std::string secret) {
     return std::make_shared<DevelopmentSliceIdentityProvider>(std::move(secret));
 }
 
 bool valid_development_identity(const SlicePlayerIdentity& identity) noexcept {
-    return identity.account_id != 0 && !identity.display_name.empty() &&
-           identity.display_name.size() <= maximum_display_name_bytes &&
+    return identity.account_id != 0 && !identity.display_name.empty() && identity.display_name.size() <= maximum_display_name_bytes &&
            std::ranges::all_of(identity.display_name, [](const unsigned char character) {
-               return (character >= 'a' && character <= 'z') ||
-                      (character >= 'A' && character <= 'Z') ||
-                      (character >= '0' && character <= '9') || character == '-' ||
-                      character == '_';
+               return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') ||
+                      character == '-' || character == '_';
            });
 }
 
-std::string encode_slice_credential(const std::string_view secret,
-                                    const SlicePlayerIdentity& identity) {
+std::string encode_slice_credential(const std::string_view secret, const SlicePlayerIdentity& identity) {
     if (secret.empty() || !valid_development_identity(identity)) {
         throw std::invalid_argument{"Slice development identity is invalid"};
     }
-    return std::string{secret} + ':' + std::to_string(identity.account_id) + ':' +
-           identity.display_name;
+    return std::string{secret} + ':' + std::to_string(identity.account_id) + ':' + identity.display_name;
 }
 
-std::expected<SlicePlayerIdentity, std::string>
-decode_slice_credential(const std::string_view credential,
-                        const std::string_view expected_secret) {
+std::expected<SlicePlayerIdentity, std::string> decode_slice_credential(const std::string_view credential, const std::string_view expected_secret) {
     const auto first = credential.find(':');
-    const auto second = first == std::string_view::npos
-                            ? std::string_view::npos
-                            : credential.find(':', first + 1);
-    if (first == std::string_view::npos || second == std::string_view::npos ||
-        credential.substr(0, first) != expected_secret) {
+    const auto second = first == std::string_view::npos ? std::string_view::npos : credential.find(':', first + 1);
+    if (first == std::string_view::npos || second == std::string_view::npos || credential.substr(0, first) != expected_secret) {
         return std::unexpected{"Slice credential has an invalid format or secret"};
     }
     SlicePlayerIdentity identity;
     const auto account = credential.substr(first + 1, second - first - 1);
-    const auto [end, error] = std::from_chars(account.data(),
-                                              account.data() + account.size(),
-                                              identity.account_id);
+    const auto [end, error] = std::from_chars(account.data(), account.data() + account.size(), identity.account_id);
     identity.display_name = credential.substr(second + 1);
-    if (error != std::errc{} || end != account.data() + account.size() ||
-        !valid_development_identity(identity)) {
+    if (error != std::errc{} || end != account.data() + account.size() || !valid_development_identity(identity)) {
         return std::unexpected{"Slice credential identity is invalid"};
     }
     return identity;
 }
 
 network::ProtocolMessage encode_lobby_ready(const bool ready) {
-    return {.kind = network::MessageKind::lobby_command,
-            .payload = {std::byte{0}, static_cast<std::byte>(ready)}};
+    return {.kind = network::MessageKind::lobby_command, .payload = {std::byte{0}, static_cast<std::byte>(ready)}};
 }
 
-std::expected<bool, std::string>
-decode_lobby_ready(const network::ProtocolMessage& message) {
-    if (message.kind != network::MessageKind::lobby_command || message.payload.size() != 2 ||
-        message.payload[0] != std::byte{0}) {
+std::expected<bool, std::string> decode_lobby_ready(const network::ProtocolMessage& message) {
+    if (message.kind != network::MessageKind::lobby_command || message.payload.size() != 2 || message.payload[0] != std::byte{0}) {
         return std::unexpected{"Message is not a lobby ready command"};
     }
     const auto value = std::to_integer<std::uint8_t>(message.payload[1]);
@@ -134,25 +109,18 @@ network::ProtocolMessage encode_lobby_selection(const SlicePlayerSelection selec
         throw std::invalid_argument{"Lobby selection is invalid"};
     }
     return {.kind = network::MessageKind::lobby_command,
-            .payload = {std::byte{1},
-                        static_cast<std::byte>(selection.character),
-                        static_cast<std::byte>(selection.weapon),
-                        static_cast<std::byte>(selection.ability)}};
+        .payload = {
+            std::byte{1}, static_cast<std::byte>(selection.character), static_cast<std::byte>(selection.weapon), static_cast<std::byte>(selection.ability)}};
 }
 
-std::expected<SlicePlayerSelection, std::string>
-decode_lobby_selection(const network::ProtocolMessage& message) {
-    if (message.kind != network::MessageKind::lobby_command || message.payload.size() != 4 ||
-        message.payload[0] != std::byte{1}) {
+std::expected<SlicePlayerSelection, std::string> decode_lobby_selection(const network::ProtocolMessage& message) {
+    if (message.kind != network::MessageKind::lobby_command || message.payload.size() != 4 || message.payload[0] != std::byte{1}) {
         return std::unexpected{"Message is not a lobby selection command"};
     }
     const SlicePlayerSelection selection{
-        .character = static_cast<SliceCharacter>(
-            std::to_integer<std::uint8_t>(message.payload[1])),
-        .weapon = static_cast<SliceWeapon>(
-            std::to_integer<std::uint8_t>(message.payload[2])),
-        .ability = static_cast<SliceAbility>(
-            std::to_integer<std::uint8_t>(message.payload[3])),
+        .character = static_cast<SliceCharacter>(std::to_integer<std::uint8_t>(message.payload[1])),
+        .weapon = static_cast<SliceWeapon>(std::to_integer<std::uint8_t>(message.payload[2])),
+        .ability = static_cast<SliceAbility>(std::to_integer<std::uint8_t>(message.payload[3])),
     };
     if (!valid_slice_selection(selection)) {
         return std::unexpected{"Lobby selection value is invalid"};
@@ -161,20 +129,17 @@ decode_lobby_selection(const network::ProtocolMessage& message) {
 }
 
 network::ProtocolMessage encode_lobby_state(const SliceLobbyState& state) {
-    if (!valid_phase(state.phase) || !valid_end_reason(state.end_reason) ||
-        state.players.size() > 2) {
+    if (!valid_phase(state.phase) || !valid_end_reason(state.end_reason) || state.players.size() > 2) {
         throw std::invalid_argument{"Lobby state is invalid"};
     }
-    network::ProtocolMessage message{.kind = network::MessageKind::lobby_state,
-                                     .sequence = static_cast<std::uint32_t>(state.revision)};
+    network::ProtocolMessage message{.kind = network::MessageKind::lobby_state, .sequence = static_cast<std::uint32_t>(state.revision)};
     append_integer(message.payload, state.revision);
     append_integer(message.payload, static_cast<std::uint8_t>(state.phase));
     append_integer(message.payload, static_cast<std::uint8_t>(state.end_reason));
     append_integer(message.payload, state.winner_entity);
     append_integer(message.payload, static_cast<std::uint8_t>(state.players.size()));
     for (const auto& player : state.players) {
-        if (player.entity == 0 || !valid_development_identity(player.identity) ||
-            !valid_slice_selection(player.selection)) {
+        if (player.entity == 0 || !valid_development_identity(player.identity) || !valid_slice_selection(player.selection)) {
             throw std::invalid_argument{"Lobby player is invalid"};
         }
         append_integer(message.payload, player.entity);
@@ -184,8 +149,7 @@ network::ProtocolMessage encode_lobby_state(const SliceLobbyState& state) {
         append_integer(message.payload, static_cast<std::uint8_t>(player.selection.ability));
         append_integer(message.payload, static_cast<std::uint8_t>(player.connected));
         append_integer(message.payload, static_cast<std::uint8_t>(player.ready));
-        append_integer(message.payload,
-                       static_cast<std::uint8_t>(player.identity.display_name.size()));
+        append_integer(message.payload, static_cast<std::uint8_t>(player.identity.display_name.size()));
         for (const char character : player.identity.display_name) {
             message.payload.push_back(static_cast<std::byte>(character));
         }
@@ -193,24 +157,19 @@ network::ProtocolMessage encode_lobby_state(const SliceLobbyState& state) {
     return message;
 }
 
-std::expected<SliceLobbyState, std::string>
-decode_lobby_state(const network::ProtocolMessage& message) {
+std::expected<SliceLobbyState, std::string> decode_lobby_state(const network::ProtocolMessage& message) {
     constexpr std::size_t header_size = 19;
-    if (message.kind != network::MessageKind::lobby_state ||
-        message.payload.size() < header_size) {
+    if (message.kind != network::MessageKind::lobby_state || message.payload.size() < header_size) {
         return std::unexpected{"Message is not a lobby state"};
     }
     std::size_t offset = 0;
     SliceLobbyState state;
     state.revision = read_integer<std::uint64_t>(message.payload, offset);
-    state.phase = static_cast<SliceMatchPhase>(read_integer<std::uint8_t>(message.payload,
-                                                                         offset));
-    state.end_reason = static_cast<SliceMatchEndReason>(
-        read_integer<std::uint8_t>(message.payload, offset));
+    state.phase = static_cast<SliceMatchPhase>(read_integer<std::uint8_t>(message.payload, offset));
+    state.end_reason = static_cast<SliceMatchEndReason>(read_integer<std::uint8_t>(message.payload, offset));
     state.winner_entity = read_integer<std::uint64_t>(message.payload, offset);
     const auto count = read_integer<std::uint8_t>(message.payload, offset);
-    if (!valid_phase(state.phase) || !valid_end_reason(state.end_reason) || count > 2 ||
-        state.revision == 0) {
+    if (!valid_phase(state.phase) || !valid_end_reason(state.end_reason) || count > 2 || state.revision == 0) {
         return std::unexpected{"Lobby state header is invalid"};
     }
     state.players.reserve(count);
@@ -222,12 +181,9 @@ decode_lobby_state(const network::ProtocolMessage& message) {
         SliceLobbyPlayer player;
         player.entity = read_integer<std::uint64_t>(message.payload, offset);
         player.identity.account_id = read_integer<std::uint64_t>(message.payload, offset);
-        player.selection.character = static_cast<SliceCharacter>(
-            read_integer<std::uint8_t>(message.payload, offset));
-        player.selection.weapon = static_cast<SliceWeapon>(
-            read_integer<std::uint8_t>(message.payload, offset));
-        player.selection.ability = static_cast<SliceAbility>(
-            read_integer<std::uint8_t>(message.payload, offset));
+        player.selection.character = static_cast<SliceCharacter>(read_integer<std::uint8_t>(message.payload, offset));
+        player.selection.weapon = static_cast<SliceWeapon>(read_integer<std::uint8_t>(message.payload, offset));
+        player.selection.ability = static_cast<SliceAbility>(read_integer<std::uint8_t>(message.payload, offset));
         const auto connected = read_integer<std::uint8_t>(message.payload, offset);
         const auto ready = read_integer<std::uint8_t>(message.payload, offset);
         if (connected > 1 || ready > 1) {
@@ -236,17 +192,14 @@ decode_lobby_state(const network::ProtocolMessage& message) {
         player.connected = connected != 0;
         player.ready = ready != 0;
         const auto name_size = read_integer<std::uint8_t>(message.payload, offset);
-        if (name_size > maximum_display_name_bytes ||
-            message.payload.size() - offset < name_size) {
+        if (name_size > maximum_display_name_bytes || message.payload.size() - offset < name_size) {
             return std::unexpected{"Lobby player name is invalid"};
         }
         player.identity.display_name.reserve(name_size);
         for (std::uint8_t character = 0; character < name_size; ++character) {
-            player.identity.display_name.push_back(
-                static_cast<char>(std::to_integer<unsigned char>(message.payload[offset++])));
+            player.identity.display_name.push_back(static_cast<char>(std::to_integer<unsigned char>(message.payload[offset++])));
         }
-        if (!valid_development_identity(player.identity) ||
-            !valid_slice_selection(player.selection)) {
+        if (!valid_development_identity(player.identity) || !valid_slice_selection(player.selection)) {
             return std::unexpected{"Lobby player identity or selection is invalid"};
         }
         state.players.push_back(std::move(player));
@@ -257,19 +210,15 @@ decode_lobby_state(const network::ProtocolMessage& message) {
     return state;
 }
 
-SliceMatchLobby::SliceMatchLobby(SliceLobbySettings settings)
-    : settings_{std::move(settings)} {
-    if (settings_.required_players == 0 || settings_.required_players > 2 ||
-        settings_.reconnect_grace_ticks == 0 || !settings_.validate_identity) {
+SliceMatchLobby::SliceMatchLobby(SliceLobbySettings settings) : settings_{std::move(settings)} {
+    if (settings_.required_players == 0 || settings_.required_players > 2 || settings_.reconnect_grace_ticks == 0 || !settings_.validate_identity) {
         throw std::invalid_argument{"Slice lobby settings are invalid"};
     }
     refresh_state();
 }
 
-std::expected<void, std::string>
-SliceMatchLobby::admit(const network::NetworkEntityId entity,
-                       const SlicePlayerIdentity& identity,
-                       const std::uint64_t server_tick) {
+std::expected<void, std::string> SliceMatchLobby::admit(
+    const network::NetworkEntityId entity, const SlicePlayerIdentity& identity, const std::uint64_t server_tick) {
     static_cast<void>(server_tick);
     if (!settings_.validate_identity(identity)) {
         return std::unexpected{"Player identity was rejected"};
@@ -278,8 +227,7 @@ SliceMatchLobby::admit(const network::NetworkEntityId entity,
         return item.player.entity;
     });
     if (record != records_.end()) {
-        if (record->player.identity.account_id != identity.account_id ||
-            record->player.identity.display_name != identity.display_name) {
+        if (record->player.identity.account_id != identity.account_id || record->player.identity.display_name != identity.display_name) {
             return std::unexpected{"Resume identity does not match the player slot"};
         }
         record->player.connected = true;
@@ -288,38 +236,33 @@ SliceMatchLobby::admit(const network::NetworkEntityId entity,
         refresh_state();
         return {};
     }
-    if (state_.phase != SliceMatchPhase::waiting ||
-        records_.size() >= settings_.required_players ||
-        std::ranges::any_of(records_, [&](const Record& item) {
+    if (state_.phase != SliceMatchPhase::waiting || records_.size() >= settings_.required_players || std::ranges::any_of(records_, [&](const Record& item) {
             return item.player.identity.account_id == identity.account_id;
         })) {
         return std::unexpected{"Lobby cannot admit this player"};
     }
-    records_.push_back({.player = {.entity = entity,
-                                   .identity = identity,
-                                   .connected = true}});
+    records_.push_back({.player = {.entity = entity, .identity = identity, .connected = true}});
     ++state_.revision;
     refresh_state();
     return {};
 }
 
 bool SliceMatchLobby::can_admit_identity(const SlicePlayerIdentity& identity, bool resume) const {
-    if (!settings_.validate_identity(identity) || state_.phase == SliceMatchPhase::completed) return false;
+    if (!settings_.validate_identity(identity) || state_.phase == SliceMatchPhase::completed)
+        return false;
     const auto record = std::ranges::find(records_, identity.account_id, [](const Record& item) {
         return item.player.identity.account_id;
     });
-    if (resume) return record != records_.end() && !record->player.connected &&
-                       record->player.identity.display_name == identity.display_name;
-    return record == records_.end() && state_.phase == SliceMatchPhase::waiting &&
-           records_.size() < settings_.required_players;
+    if (resume)
+        return record != records_.end() && !record->player.connected && record->player.identity.display_name == identity.display_name;
+    return record == records_.end() && state_.phase == SliceMatchPhase::waiting && records_.size() < settings_.required_players;
 }
 
 bool SliceMatchLobby::set_ready(const network::NetworkEntityId entity, const bool ready) {
     auto record = std::ranges::find(records_, entity, [](const Record& item) {
         return item.player.entity;
     });
-    if (record == records_.end() || !record->player.connected ||
-        state_.phase != SliceMatchPhase::waiting || record->player.ready == ready) {
+    if (record == records_.end() || !record->player.connected || state_.phase != SliceMatchPhase::waiting || record->player.ready == ready) {
         return false;
     }
     record->player.ready = ready;
@@ -329,13 +272,11 @@ bool SliceMatchLobby::set_ready(const network::NetworkEntityId entity, const boo
     return true;
 }
 
-bool SliceMatchLobby::set_selection(const network::NetworkEntityId entity,
-                                    const SlicePlayerSelection selection) {
+bool SliceMatchLobby::set_selection(const network::NetworkEntityId entity, const SlicePlayerSelection selection) {
     auto record = std::ranges::find(records_, entity, [](const Record& item) {
         return item.player.entity;
     });
-    if (record == records_.end() || !record->player.connected ||
-        state_.phase != SliceMatchPhase::waiting || !valid_slice_selection(selection)) {
+    if (record == records_.end() || !record->player.connected || state_.phase != SliceMatchPhase::waiting || !valid_slice_selection(selection)) {
         return false;
     }
     if (record->player.selection == selection) {
@@ -348,8 +289,7 @@ bool SliceMatchLobby::set_selection(const network::NetworkEntityId entity,
     return true;
 }
 
-void SliceMatchLobby::disconnected(const network::NetworkEntityId entity,
-                                   const std::uint64_t server_tick) {
+void SliceMatchLobby::disconnected(const network::NetworkEntityId entity, const std::uint64_t server_tick) {
     auto record = std::ranges::find(records_, entity, [](const Record& item) {
         return item.player.entity;
     });
@@ -392,14 +332,14 @@ bool SliceMatchLobby::tick(const std::uint64_t server_tick) {
 }
 
 bool SliceMatchLobby::accepts_gameplay(const network::NetworkEntityId entity) const noexcept {
-    return state_.phase == SliceMatchPhase::active &&
-           std::ranges::any_of(records_, [&](const Record& record) {
-               return record.player.entity == entity && record.player.connected &&
-                      record.player.ready;
-           });
+    return state_.phase == SliceMatchPhase::active && std::ranges::any_of(records_, [&](const Record& record) {
+        return record.player.entity == entity && record.player.connected && record.player.ready;
+    });
 }
 
-const SliceLobbyState& SliceMatchLobby::state() const noexcept { return state_; }
+const SliceLobbyState& SliceMatchLobby::state() const noexcept {
+    return state_;
+}
 
 void SliceMatchLobby::refresh_state() {
     state_.players.clear();
@@ -411,10 +351,8 @@ void SliceMatchLobby::refresh_state() {
 }
 
 void SliceMatchLobby::try_start() {
-    if (records_.size() == settings_.required_players &&
-        std::ranges::all_of(records_, [](const Record& record) {
-            return record.player.connected && record.player.ready &&
-                   valid_slice_selection(record.player.selection);
+    if (records_.size() == settings_.required_players && std::ranges::all_of(records_, [](const Record& record) {
+            return record.player.connected && record.player.ready && valid_slice_selection(record.player.selection);
         })) {
         state_.phase = SliceMatchPhase::active;
     }

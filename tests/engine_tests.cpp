@@ -23,18 +23,11 @@ int main() try {
     const auto idle_axes = gloom::platform::movement_axes({});
     expect(idle_axes.x == 0.0F && idle_axes.z == 0.0F, "Idle input produced movement");
 
-    const auto forward_right = gloom::platform::movement_axes(
-        {.move_right = true, .move_forward = true});
-    expect(forward_right.x == 1.0F && forward_right.z == -1.0F,
-           "Forward/right input axes were mapped incorrectly");
+    const auto forward_right = gloom::platform::movement_axes({.move_right = true, .move_forward = true});
+    expect(forward_right.x == 1.0F && forward_right.z == -1.0F, "Forward/right input axes were mapped incorrectly");
 
-    const auto cancelled = gloom::platform::movement_axes(
-        {.move_left = true,
-         .move_right = true,
-         .move_forward = true,
-         .move_backward = true});
-    expect(cancelled.x == 0.0F && cancelled.z == 0.0F,
-           "Opposing input directions did not cancel");
+    const auto cancelled = gloom::platform::movement_axes({.move_left = true, .move_right = true, .move_forward = true, .move_backward = true});
+    expect(cancelled.x == 0.0F && cancelled.z == 0.0F, "Opposing input directions did not cancel");
 
     gloom::core::Engine engine;
     auto platform = std::make_unique<PlaceholderSubsystem>("platform");

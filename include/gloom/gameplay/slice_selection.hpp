@@ -40,26 +40,28 @@ struct SlicePlayerSelection {
     [[nodiscard]] bool operator==(const SlicePlayerSelection&) const noexcept = default;
 };
 
-[[nodiscard]] constexpr bool valid_slice_selection(
-    const SlicePlayerSelection selection) noexcept {
+[[nodiscard]] constexpr bool valid_slice_selection(const SlicePlayerSelection selection) noexcept {
     if (static_cast<std::size_t>(selection.weapon) >= slice_weapon_count) {
         return false;
     }
     if (selection.character == SliceCharacter::berserker) {
         return selection.ability == SliceAbility::none;
     }
-    if (selection.character == SliceCharacter::archangel) return selection.ability == SliceAbility::diamond_skin;
-    if (selection.character == SliceCharacter::shadow) return selection.ability == SliceAbility::invisibility;
+    if (selection.character == SliceCharacter::archangel)
+        return selection.ability == SliceAbility::diamond_skin;
+    if (selection.character == SliceCharacter::shadow)
+        return selection.ability == SliceAbility::invisibility;
     return selection.character == SliceCharacter::hound &&
-           (selection.ability == SliceAbility::bite ||
-            selection.ability == SliceAbility::none ||
-            selection.ability == SliceAbility::guard);
+           (selection.ability == SliceAbility::bite || selection.ability == SliceAbility::none || selection.ability == SliceAbility::guard);
 }
 
 [[nodiscard]] constexpr SliceSecondaryAbility secondary_ability(const SlicePlayerSelection selection) noexcept {
-    if (selection.character == SliceCharacter::hound && selection.ability != SliceAbility::none) return SliceSecondaryAbility::berserker;
-    if (selection.character == SliceCharacter::archangel) return SliceSecondaryAbility::life_dome;
-    if (selection.character == SliceCharacter::shadow) return SliceSecondaryAbility::flash;
+    if (selection.character == SliceCharacter::hound && selection.ability != SliceAbility::none)
+        return SliceSecondaryAbility::berserker;
+    if (selection.character == SliceCharacter::archangel)
+        return SliceSecondaryAbility::life_dome;
+    if (selection.character == SliceCharacter::shadow)
+        return SliceSecondaryAbility::flash;
     return SliceSecondaryAbility::none;
 }
 

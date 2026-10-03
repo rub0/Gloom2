@@ -28,33 +28,26 @@ int main() try {
     scene.textures.push_back({.image = 0});
     scene.images.push_back({.name = "packed"});
     scene.primitives.push_back({
-        .vertices = {
-            {.position = {0.0F, 1.0F, 0.0F}},
-            {.position = {-1.0F, -1.0F, 0.0F}},
-            {.position = {1.0F, -1.0F, 0.0F}},
-        },
+        .vertices =
+            {
+                {.position = {0.0F, 1.0F, 0.0F}},
+                {.position = {-1.0F, -1.0F, 0.0F}},
+                {.position = {1.0F, -1.0F, 0.0F}},
+            },
         .indices = {0, 1, 2},
         .material = 0,
     });
 
     constexpr std::array image_assets{gloom::render::RenderAssetId{0x9876}};
-    const auto first =
-        gloom::assets::build_gpu_scene_uploads(scene, {.value = 0x1234}, image_assets);
-    const auto second =
-        gloom::assets::build_gpu_scene_uploads(scene, {.value = 0x1234}, image_assets);
-    require(first.meshes.size() == 1 && first.materials.size() == 1,
-            "Scene did not produce mesh and material uploads");
-    require(first.meshes[0].vertices.size() == 3 && first.meshes[0].indices.size() == 3,
-            "Scene geometry was not preserved");
-    require(first.primitives[0].mesh == first.meshes[0].id &&
-                first.primitives[0].material == first.materials[0].id,
-            "Primitive GPU bindings are inconsistent");
-    require(first.meshes[0].id == second.meshes[0].id,
-            "Derived GPU asset identifiers are not stable");
-    require(first.materials[0].base_color_texture == image_assets[0] &&
-                first.materials[0].metallic_roughness_texture == image_assets[0] &&
+    const auto first = gloom::assets::build_gpu_scene_uploads(scene, {.value = 0x1234}, image_assets);
+    const auto second = gloom::assets::build_gpu_scene_uploads(scene, {.value = 0x1234}, image_assets);
+    require(first.meshes.size() == 1 && first.materials.size() == 1, "Scene did not produce mesh and material uploads");
+    require(first.meshes[0].vertices.size() == 3 && first.meshes[0].indices.size() == 3, "Scene geometry was not preserved");
+    require(first.primitives[0].mesh == first.meshes[0].id && first.primitives[0].material == first.materials[0].id, "Primitive GPU bindings are inconsistent");
+    require(first.meshes[0].id == second.meshes[0].id, "Derived GPU asset identifiers are not stable");
+    require(first.materials[0].base_color_texture == image_assets[0] && first.materials[0].metallic_roughness_texture == image_assets[0] &&
                 first.materials[0].normal_texture == image_assets[0],
-            "Scene texture bindings were not mapped into the GPU material");
+        "Scene texture bindings were not mapped into the GPU material");
 
     std::cout << "Gloom GPU-asset bridge tests completed successfully.\n";
     return 0;

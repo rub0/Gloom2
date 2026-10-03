@@ -22,11 +22,9 @@ struct PresentationSmoothingMetrics {
 // Keeps presentation continuous when prediction reconciliation changes the
 // canonical local state. Simulation itself always uses the corrected state.
 class PresentationSmoother final {
-public:
-    explicit PresentationSmoother(PresentationSmoothingSettings settings = {})
-        : settings_{settings} {
-        if (!std::isfinite(settings_.half_life_seconds) ||
-            settings_.half_life_seconds <= 0.0 || !std::isfinite(settings_.snap_distance) ||
+  public:
+    explicit PresentationSmoother(PresentationSmoothingSettings settings = {}) : settings_{settings} {
+        if (!std::isfinite(settings_.half_life_seconds) || settings_.half_life_seconds <= 0.0 || !std::isfinite(settings_.snap_distance) ||
             settings_.snap_distance <= 0.0F) {
             throw std::invalid_argument{"Presentation smoothing settings are invalid"};
         }
@@ -51,8 +49,7 @@ public:
         if (!std::isfinite(delta_seconds) || delta_seconds < 0.0) {
             throw std::invalid_argument{"Presentation smoothing delta must be finite and non-negative"};
         }
-        const float decay = static_cast<float>(
-            std::exp2(-delta_seconds / settings_.half_life_seconds));
+        const float decay = static_cast<float>(std::exp2(-delta_seconds / settings_.half_life_seconds));
         offset_x_ *= decay;
         offset_y_ *= decay;
         offset_z_ *= decay;
@@ -70,10 +67,9 @@ public:
         return metrics_;
     }
 
-private:
+  private:
     void update_offset_distance() noexcept {
-        metrics_.current_offset_distance =
-            std::sqrt(offset_x_ * offset_x_ + offset_y_ * offset_y_ + offset_z_ * offset_z_);
+        metrics_.current_offset_distance = std::sqrt(offset_x_ * offset_x_ + offset_y_ * offset_y_ + offset_z_ * offset_z_);
     }
 
     PresentationSmoothingSettings settings_;

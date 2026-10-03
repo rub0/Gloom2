@@ -16,11 +16,11 @@ struct PickupVisual {
 };
 
 class PickupPresentation {
-public:
+  public:
     void update(const PickupView* pickups, uint32 count, float elapsed_seconds);
     [[nodiscard]] PickupVisual visual(uint32 index, PickupKind kind, float presentation_seconds) const;
 
-private:
+  private:
     PickupPhase previous_phase_[factory_pickup_count]{};
     float appearance_age_[factory_pickup_count]{};
     uint32 count_{};

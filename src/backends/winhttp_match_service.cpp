@@ -24,16 +24,19 @@
 namespace gloom::backends {
 namespace {
 
-struct HttpResult { DWORD status{0}; std::string body; };
+struct HttpResult {
+    DWORD status{0};
+    std::string body;
+};
 
 [[nodiscard]] std::wstring widen(const std::string_view text) {
-    if (text.empty()) return {};
-    const int size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text.data(),
-                                         static_cast<int>(text.size()), nullptr, 0);
-    if (size <= 0) throw std::runtime_error{"Invalid UTF-8 in match service configuration"};
+    if (text.empty())
+        return {};
+    const int size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text.data(), static_cast<int>(text.size()), nullptr, 0);
+    if (size <= 0)
+        throw std::runtime_error{"Invalid UTF-8 in match service configuration"};
     std::wstring result(static_cast<std::size_t>(size), L'\0');
-    MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text.data(),
-                        static_cast<int>(text.size()), result.data(), size);
+    MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text.data(), static_cast<int>(text.size()), result.data(), size);
     return result;
 }
 
@@ -41,61 +44,68 @@ struct HttpResult { DWORD status{0}; std::string body; };
     constexpr char hex[] = "0123456789ABCDEF";
     std::string result;
     for (const unsigned char c : value) {
-        if (std::isalnum(c) != 0 || c == '-' || c == '_' || c == '.') result += static_cast<char>(c);
-        else { result += '%'; result += hex[c >> 4U]; result += hex[c & 15U]; }
+        if (std::isalnum(c) != 0 || c == '-' || c == '_' || c == '.')
+            result += static_cast<char>(c);
+        else {
+            result += '%';
+            result += hex[c >> 4U];
+            result += hex[c & 15U];
+        }
     }
     return result;
 }
 
 class WinHttpService final : public gameplay::SliceMatchService {
-public:
-    WinHttpService(std::string url, std::string token, bool reader = false,
-                   std::function<std::expected<std::string, std::string>()> acquire_identity = {})
+  public:
+    WinHttpService(std::string url, std::string token, bool reader = false, std::function<std::expected<std::string, std::string>()> acquire_identity = {})
         : url_{std::move(url)}, token_{std::move(token)}, reader_{reader}, acquire_identity_{std::move(acquire_identity)} {}
 
-    std::expected<void, std::string> store(gameplay::SliceStoredMatch value,
-                                            const std::uint64_t now) override {
-        const auto response = request("PUT", "/matches/" + encode_component(value.advertisement.match_id) +
-            "?now_ms=" + std::to_string(now), serialize(value));
-        if (!response) return std::unexpected{response.error()};
+    std::expected<void, std::string> store(gameplay::SliceStoredMatch value, const std::uint64_t now) override {
+        const auto response = request("PUT", "/matches/" + encode_component(value.advertisement.match_id) + "?now_ms=" + std::to_string(now), serialize(value));
+        if (!response)
+            return std::unexpected{response.error()};
         return {};
     }
-    std::expected<bool, std::string> erase(const std::string_view id,
-                                            const std::string_view instance) override {
-        const auto response = request("DELETE", "/matches/" + encode_component(id) +
-            "?instance_id=" + encode_component(instance), {});
-        if (!response) return std::unexpected{response.error()};
+    std::expected<bool, std::string> erase(const std::string_view id, const std::string_view instance) override {
+        const auto response = request("DELETE", "/matches/" + encode_component(id) + "?instance_id=" + encode_component(instance), {});
+        if (!response)
+            return std::unexpected{response.error()};
         return response->status != 404;
     }
     std::expected<std::vector<gameplay::SliceStoredMatch>, std::string> list() const override {
         const auto response = request("GET", "/matches", {});
-        if (!response) return std::unexpected{response.error()};
+        if (!response)
+            return std::unexpected{response.error()};
         std::vector<gameplay::SliceStoredMatch> result;
         std::istringstream lines{response->body};
         for (std::string line; std::getline(lines, line);) {
-            if (line.empty()) continue;
+            if (line.empty())
+                continue;
             auto item = deserialize(line);
-            if (!item) return std::unexpected{item.error()};
+            if (!item)
+                return std::unexpected{item.error()};
             result.push_back(std::move(*item));
         }
         return result;
     }
-    std::expected<gameplay::SliceStoredMatch, std::string>
-    get(const std::string_view id) const override {
+    std::expected<gameplay::SliceStoredMatch, std::string> get(const std::string_view id) const override {
         const auto response = request("GET", "/matches/" + encode_component(id), {});
-        if (!response) return std::unexpected{response.error()};
+        if (!response)
+            return std::unexpected{response.error()};
         return deserialize(response->body);
     }
 
     [[nodiscard]] std::expected<void, std::string> health() const {
         auto response = request("GET", "/health", {});
-        if (!response) return std::unexpected{response.error()};
+        if (!response)
+            return std::unexpected{response.error()};
         return {};
     }
 
     std::expected<GameJoinTicket, std::string> game_ticket(std::string_view match) const {
         const auto response = send_request("POST", "/game-tickets/" + encode_component(match), {}, token_);
-        if (!response) return std::unexpected{response.error()};
+        if (!response)
+            return std::unexpected{response.error()};
         const auto& body = response->body;
         const auto first = body.find('\t'), second = body.find('\t', first == std::string::npos ? 0 : first + 1);
         if (first == std::string::npos || second == std::string::npos || body.find('\t', second + 1) != std::string::npos || body.size() > 1024)
@@ -106,7 +116,8 @@ public:
             return std::unexpected{"Invalid game ticket response"};
         return result;
     }
-private:
+
+  private:
     static std::string serialize(const gameplay::SliceStoredMatch& item) {
         return gameplay::encode_stored_match(item);
     }
@@ -114,42 +125,49 @@ private:
         return gameplay::decode_stored_match(line);
     }
 
-    std::expected<HttpResult, std::string> request(const std::string_view method,
-                                                   const std::string_view suffix,
-                                                   const std::string_view body) const {
-        if (!reader_) return send_request(method, suffix, body, token_);
-        if (method != "GET") return std::unexpected{"Reader service cannot mutate matches"};
+    std::expected<HttpResult, std::string> request(const std::string_view method, const std::string_view suffix, const std::string_view body) const {
+        if (!reader_)
+            return send_request(method, suffix, body, token_);
+        if (method != "GET")
+            return std::unexpected{"Reader service cannot mutate matches"};
         std::lock_guard lock{reader_mutex_};
         const auto grant = reader_credential_.acquire([&]() -> std::expected<std::string, std::string> {
             const auto identity = acquire_identity_ ? acquire_identity_() : std::expected<std::string, std::string>{token_};
-            if (!identity) return std::unexpected{identity.error()};
+            if (!identity)
+                return std::unexpected{identity.error()};
             const auto exchanged = send_request("POST", "/reader-grants/exchange", {}, *identity);
-            if (!exchanged) return std::unexpected{exchanged.error()};
+            if (!exchanged)
+                return std::unexpected{exchanged.error()};
             return exchanged->body;
         });
-        if (!grant) return std::unexpected{grant.error()};
+        if (!grant)
+            return std::unexpected{grant.error()};
         // No replay on 401/429: revocation and quota errors must remain visible.
         return send_request(method, suffix, body, *grant);
     }
 
-    std::expected<HttpResult, std::string> send_request(const std::string_view method,
-        const std::string_view suffix, const std::string_view body, const std::string_view token) const {
+    std::expected<HttpResult, std::string> send_request(
+        const std::string_view method, const std::string_view suffix, const std::string_view body, const std::string_view token) const {
         if (!(reader_ ? valid_match_identity_credential(token) : valid_match_credential(token)))
             return std::unexpected{"Invalid match service credential"};
         const WinHttpResponse response = winhttp_request(widen(url_).c_str(), widen(suffix).c_str(), widen(method).c_str(),
-            widen("Authorization: Bearer " + std::string{token} + "\r\nContent-Type: text/plain; charset=utf-8").c_str(),
-            body.data(), static_cast<uint32>(body.size()), 4 * 1024 * 1024, L"Gloom/0.1");
-        if (response.error) return std::unexpected{response.error};
+            widen("Authorization: Bearer " + std::string{token} + "\r\nContent-Type: text/plain; charset=utf-8").c_str(), body.data(),
+            static_cast<uint32>(body.size()), 4 * 1024 * 1024, L"Gloom/0.1");
+        if (response.error)
+            return std::unexpected{response.error};
         HttpResult result{.status = response.status};
-        if (response.size) result.body.assign(response.body, response.size);
+        if (response.size)
+            result.body.assign(response.body, response.size);
         free(response.body);
         if (result.status < 200 || result.status >= 300) {
-            if (result.status == 404 && method == "DELETE") return result;
+            if (result.status == 404 && method == "DELETE")
+                return result;
             return std::unexpected{"Match service returned HTTP " + std::to_string(result.status)};
         }
         return result;
     }
-    std::string url_; std::string token_;
+    std::string url_;
+    std::string token_;
     bool reader_{false};
     std::function<std::expected<std::string, std::string>()> acquire_identity_;
     mutable std::mutex reader_mutex_;
@@ -157,16 +175,17 @@ private:
 };
 
 class Connector final : public gameplay::SliceMatchServiceConnector {
-public:
+  public:
     explicit Connector(bool reader = false, std::function<std::expected<std::string, std::string>()> acquire = {})
         : reader_{reader}, acquire_identity_{std::move(acquire)} {}
-    std::expected<std::shared_ptr<gameplay::SliceMatchService>, std::string>
-    connect(const std::string_view url, const std::string_view token) override {
+    std::expected<std::shared_ptr<gameplay::SliceMatchService>, std::string> connect(const std::string_view url, const std::string_view token) override {
         auto service = std::make_shared<WinHttpService>(std::string{url}, std::string{token}, reader_, acquire_identity_);
-        if (auto result = service->health(); !result) return std::unexpected{result.error()};
+        if (auto result = service->health(); !result)
+            return std::unexpected{result.error()};
         return service;
     }
-private:
+
+  private:
     bool reader_;
     std::function<std::expected<std::string, std::string>()> acquire_identity_;
 };
@@ -175,12 +194,10 @@ private:
 std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_service_connector() {
     return std::make_unique<Connector>();
 }
-std::expected<GameJoinTicket, std::string> request_game_ticket(
-    std::string_view url, std::string_view identity, std::string_view match) {
+std::expected<GameJoinTicket, std::string> request_game_ticket(std::string_view url, std::string_view identity, std::string_view match) {
     return WinHttpService{std::string{url}, std::string{identity}, true}.game_ticket(match);
 }
-std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_reader_connector(
-    std::function<std::expected<std::string, std::string>()> acquire) {
+std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_reader_connector(std::function<std::expected<std::string, std::string>()> acquire) {
     return std::make_unique<Connector>(true, std::move(acquire));
 }
 } // namespace gloom::backends
@@ -189,8 +206,11 @@ namespace gloom::backends {
 std::expected<GameJoinTicket, std::string> request_game_ticket(std::string_view, std::string_view, std::string_view) {
     return std::unexpected{"WinHTTP is unavailable"};
 }
-std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_service_connector() { return {}; }
-std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_reader_connector(
-    std::function<std::expected<std::string, std::string>()>) { return {}; }
+std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_service_connector() {
+    return {};
+}
+std::unique_ptr<gameplay::SliceMatchServiceConnector> make_winhttp_match_reader_connector(std::function<std::expected<std::string, std::string>()>) {
+    return {};
+}
 }
 #endif

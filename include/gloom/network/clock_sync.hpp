@@ -21,13 +21,13 @@ struct ClockEstimate {
 // NTP-style four-timestamp estimator. Samples close to the best observed RTT
 // receive more weight, limiting offset bias from asymmetric queueing.
 class ClockSynchronizer final {
-public:
+  public:
     void observe(const ClockExchange& exchange);
     [[nodiscard]] double server_time(double client_time_seconds) const;
     [[nodiscard]] ClockEstimate estimate() const noexcept;
     void reset() noexcept;
 
-private:
+  private:
     ClockEstimate estimate_;
     double best_round_trip_seconds_{0.0};
 };

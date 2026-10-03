@@ -28,12 +28,12 @@ struct JobSystemMetrics {
 };
 
 class TaskGroup final {
-public:
+  public:
     TaskGroup() = default;
 
     [[nodiscard]] bool valid() const noexcept;
 
-private:
+  private:
     struct State;
     explicit TaskGroup(std::shared_ptr<State> state);
 
@@ -43,7 +43,7 @@ private:
 };
 
 class JobSystem final : public Subsystem {
-public:
+  public:
     using Job = std::move_only_function<void()>;
 
     explicit JobSystem(JobSystemSettings settings = {});
@@ -64,11 +64,7 @@ public:
     void schedule(TaskGroup& group, Job job);
     void wait(TaskGroup& group);
 
-    template <typename Function>
-    void parallel_for(TaskGroup& group,
-                      const std::size_t item_count,
-                      const std::size_t grain_size,
-                      Function&& function) {
+    template <typename Function> void parallel_for(TaskGroup& group, const std::size_t item_count, const std::size_t grain_size, Function&& function) {
         if (grain_size == 0) {
             throw std::invalid_argument{"Parallel-for grain size must be greater than zero"};
         }
@@ -76,13 +72,15 @@ public:
         auto shared_function = std::make_shared<FunctionType>(std::forward<Function>(function));
         for (std::size_t begin = 0; begin < item_count; begin += grain_size) {
             const std::size_t end = item_count - begin < grain_size ? item_count : begin + grain_size;
-            schedule(group, [shared_function, begin, end] { (*shared_function)(begin, end); });
+            schedule(group, [shared_function, begin, end] {
+                (*shared_function)(begin, end);
+            });
         }
     }
 
     [[nodiscard]] JobSystemMetrics metrics() const noexcept;
 
-private:
+  private:
     struct Impl;
 
     JobSystemSettings settings_;

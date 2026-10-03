@@ -58,8 +58,7 @@ struct PerformanceProfile {
 };
 
 inline int compare_performance_samples(const void* left, const void* right) {
-    return (*static_cast<const uint64*>(left) > *static_cast<const uint64*>(right)) -
-           (*static_cast<const uint64*>(left) < *static_cast<const uint64*>(right));
+    return (*static_cast<const uint64*>(left) > *static_cast<const uint64*>(right)) - (*static_cast<const uint64*>(left) < *static_cast<const uint64*>(right));
 }
 
 inline void report_performance(PerformanceProfile& profile) {
@@ -67,57 +66,52 @@ inline void report_performance(PerformanceProfile& profile) {
     uint32 over_budget = 0;
     for (uint32 i = 0; i < profile.count; ++i) {
         total += static_cast<double>(profile.samples[i]);
-        if (profile.samples[i] * 200 > profile.frequency) ++over_budget;
+        if (profile.samples[i] * 200 > profile.frequency)
+            ++over_budget;
     }
     qsort(profile.samples, profile.count, sizeof(uint64), compare_performance_samples);
     const double milliseconds = 1000.0 / static_cast<double>(profile.frequency);
     printf("Frame budget: over_5ms=%u/%u\n", over_budget, profile.count);
     printf("Swapchain: effective_mode=%u images=%u; CPU mean flush=%.3f queue_present=%.3f acquire=%.3f fence_wait=%.3f ms\n",
-        backends::vulkan_present.effective_mode, backends::vulkan_present.image_count,
-        profile.swap_stages[0] * milliseconds / profile.count, profile.swap_stages[1] * milliseconds / profile.count,
-        profile.swap_stages[2] * milliseconds / profile.count, profile.swap_stages[3] * milliseconds / profile.count);
+        backends::vulkan_present.effective_mode, backends::vulkan_present.image_count, profile.swap_stages[0] * milliseconds / profile.count,
+        profile.swap_stages[1] * milliseconds / profile.count, profile.swap_stages[2] * milliseconds / profile.count,
+        profile.swap_stages[3] * milliseconds / profile.count);
     if (profile.queue_count) {
         qsort(profile.queue_samples, profile.queue_count, sizeof(uint64), compare_performance_samples);
         printf("Submission completion observed (CPU upper bound): samples=%u p50=%.3f p95=%.3f p99=%.3f max=%.3f ms; peak_in_flight=%llu\n",
             profile.queue_count, profile.queue_samples[profile.queue_count / 2] * milliseconds,
             profile.queue_samples[(profile.queue_count * 95 - 1) / 100] * milliseconds,
-            profile.queue_samples[(profile.queue_count * 99 - 1) / 100] * milliseconds,
-            profile.queue_samples[profile.queue_count - 1] * milliseconds, profile.peak_in_flight);
+            profile.queue_samples[(profile.queue_count * 99 - 1) / 100] * milliseconds, profile.queue_samples[profile.queue_count - 1] * milliseconds,
+            profile.peak_in_flight);
     }
-    printf("Factory benchmark: samples=%u mean=%.3f ms fps=%.2f p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n",
-        profile.count, total * milliseconds / profile.count, profile.count * 1000.0 / (total * milliseconds),
-        profile.samples[profile.count / 2] * milliseconds, profile.samples[(profile.count * 95 - 1) / 100] * milliseconds,
-        profile.samples[(profile.count * 99 - 1) / 100] * milliseconds, profile.samples[profile.count - 1] * milliseconds);
+    printf("Factory benchmark: samples=%u mean=%.3f ms fps=%.2f p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n", profile.count, total * milliseconds / profile.count,
+        profile.count * 1000.0 / (total * milliseconds), profile.samples[profile.count / 2] * milliseconds,
+        profile.samples[(profile.count * 95 - 1) / 100] * milliseconds, profile.samples[(profile.count * 99 - 1) / 100] * milliseconds,
+        profile.samples[profile.count - 1] * milliseconds);
     printf("CPU stages ms: update=%.3f begin=%.3f presentation=%.3f visibility=%.3f lighting=%.3f draw=%.3f end_present=%.3f\n",
-        profile.stages[0] * milliseconds / profile.count, profile.stages[1] * milliseconds / profile.count,
-        profile.stages[2] * milliseconds / profile.count, profile.stages[3] * milliseconds / profile.count,
-        profile.stages[4] * milliseconds / profile.count, profile.stages[5] * milliseconds / profile.count,
+        profile.stages[0] * milliseconds / profile.count, profile.stages[1] * milliseconds / profile.count, profile.stages[2] * milliseconds / profile.count,
+        profile.stages[3] * milliseconds / profile.count, profile.stages[4] * milliseconds / profile.count, profile.stages[5] * milliseconds / profile.count,
         profile.stages[6] * milliseconds / profile.count);
     qsort(profile.present_samples, profile.count, sizeof(uint64), compare_performance_samples);
-    printf("CPU end_present: p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n",
-        profile.present_samples[profile.count / 2] * milliseconds,
-        profile.present_samples[(profile.count * 95 - 1) / 100] * milliseconds,
-        profile.present_samples[(profile.count * 99 - 1) / 100] * milliseconds,
+    printf("CPU end_present: p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n", profile.present_samples[profile.count / 2] * milliseconds,
+        profile.present_samples[(profile.count * 95 - 1) / 100] * milliseconds, profile.present_samples[(profile.count * 99 - 1) / 100] * milliseconds,
         profile.present_samples[profile.count - 1] * milliseconds);
-    printf("CPU animation ms: poses=%.3f skin_bounds=%.3f\n",
-        profile.pose_ticks * milliseconds / profile.count,
+    printf("CPU animation ms: poses=%.3f skin_bounds=%.3f\n", profile.pose_ticks * milliseconds / profile.count,
         profile.skin_bounds_ticks * milliseconds / profile.count);
     if (profile.gpu_count) {
         double gpu_total = 0;
-        for (uint32 i = 0; i < profile.gpu_count; ++i) gpu_total += static_cast<double>(profile.gpu_samples[i]);
+        for (uint32 i = 0; i < profile.gpu_count; ++i)
+            gpu_total += static_cast<double>(profile.gpu_samples[i]);
         qsort(profile.gpu_samples, profile.gpu_count, sizeof(uint64), compare_performance_samples);
-        printf("GPU full render: samples=%u mean=%.3f p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n",
-            profile.gpu_count, gpu_total / profile.gpu_count / 1000000.0,
-            profile.gpu_samples[profile.gpu_count / 2] / 1000000.0,
-            profile.gpu_samples[(profile.gpu_count * 95 - 1) / 100] / 1000000.0,
-            profile.gpu_samples[(profile.gpu_count * 99 - 1) / 100] / 1000000.0,
-            profile.gpu_samples[profile.gpu_count - 1] / 1000000.0);
+        printf("GPU full render: samples=%u mean=%.3f p50=%.3f p95=%.3f p99=%.3f max=%.3f ms\n", profile.gpu_count, gpu_total / profile.gpu_count / 1000000.0,
+            profile.gpu_samples[profile.gpu_count / 2] / 1000000.0, profile.gpu_samples[(profile.gpu_count * 95 - 1) / 100] / 1000000.0,
+            profile.gpu_samples[(profile.gpu_count * 99 - 1) / 100] / 1000000.0, profile.gpu_samples[profile.gpu_count - 1] / 1000000.0);
     }
 #ifdef _WIN32
     PROCESS_MEMORY_COUNTERS_EX memory{};
     if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memory), sizeof(memory)))
-        printf("Process memory: private=%.2f MiB working_set=%.2f MiB peak_working_set=%.2f MiB\n",
-            memory.PrivateUsage / 1048576.0, memory.WorkingSetSize / 1048576.0, memory.PeakWorkingSetSize / 1048576.0);
+        printf("Process memory: private=%.2f MiB working_set=%.2f MiB peak_working_set=%.2f MiB\n", memory.PrivateUsage / 1048576.0,
+            memory.WorkingSetSize / 1048576.0, memory.PeakWorkingSetSize / 1048576.0);
 #endif
 }
 }

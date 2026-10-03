@@ -22,14 +22,12 @@ struct SlicePlayerIdentity {
 };
 
 class SliceIdentityProvider {
-public:
+  public:
     virtual ~SliceIdentityProvider() = default;
-    [[nodiscard]] virtual std::expected<SlicePlayerIdentity, std::string>
-    verify(std::string_view credential) const = 0;
+    [[nodiscard]] virtual std::expected<SlicePlayerIdentity, std::string> verify(std::string_view credential) const = 0;
 };
 
-[[nodiscard]] std::shared_ptr<const SliceIdentityProvider>
-make_development_identity_provider(std::string secret = "gloom-slice");
+[[nodiscard]] std::shared_ptr<const SliceIdentityProvider> make_development_identity_provider(std::string secret = "gloom-slice");
 
 enum class SliceMatchPhase : std::uint8_t { waiting = 0, active = 1, completed = 2 };
 enum class SliceMatchEndReason : std::uint8_t { none = 0, abandonment = 1 };
@@ -57,41 +55,31 @@ struct SliceLobbySettings {
 };
 
 [[nodiscard]] bool valid_development_identity(const SlicePlayerIdentity& identity) noexcept;
-[[nodiscard]] std::string encode_slice_credential(std::string_view secret,
-                                                  const SlicePlayerIdentity& identity);
-[[nodiscard]] std::expected<SlicePlayerIdentity, std::string>
-decode_slice_credential(std::string_view credential, std::string_view expected_secret);
+[[nodiscard]] std::string encode_slice_credential(std::string_view secret, const SlicePlayerIdentity& identity);
+[[nodiscard]] std::expected<SlicePlayerIdentity, std::string> decode_slice_credential(std::string_view credential, std::string_view expected_secret);
 
 [[nodiscard]] network::ProtocolMessage encode_lobby_ready(bool ready);
-[[nodiscard]] std::expected<bool, std::string>
-decode_lobby_ready(const network::ProtocolMessage& message);
-[[nodiscard]] network::ProtocolMessage
-encode_lobby_selection(SlicePlayerSelection selection);
-[[nodiscard]] std::expected<SlicePlayerSelection, std::string>
-decode_lobby_selection(const network::ProtocolMessage& message);
+[[nodiscard]] std::expected<bool, std::string> decode_lobby_ready(const network::ProtocolMessage& message);
+[[nodiscard]] network::ProtocolMessage encode_lobby_selection(SlicePlayerSelection selection);
+[[nodiscard]] std::expected<SlicePlayerSelection, std::string> decode_lobby_selection(const network::ProtocolMessage& message);
 [[nodiscard]] network::ProtocolMessage encode_lobby_state(const SliceLobbyState& state);
-[[nodiscard]] std::expected<SliceLobbyState, std::string>
-decode_lobby_state(const network::ProtocolMessage& message);
+[[nodiscard]] std::expected<SliceLobbyState, std::string> decode_lobby_state(const network::ProtocolMessage& message);
 
 class SliceMatchLobby final {
-public:
+  public:
     explicit SliceMatchLobby(SliceLobbySettings settings);
 
-    [[nodiscard]] std::expected<void, std::string>
-    admit(network::NetworkEntityId entity,
-          const SlicePlayerIdentity& identity,
-          std::uint64_t server_tick);
+    [[nodiscard]] std::expected<void, std::string> admit(network::NetworkEntityId entity, const SlicePlayerIdentity& identity, std::uint64_t server_tick);
     [[nodiscard]] bool can_admit_identity(const SlicePlayerIdentity& identity, bool resume) const;
     [[nodiscard]] bool set_ready(network::NetworkEntityId entity, bool ready);
-    [[nodiscard]] bool set_selection(network::NetworkEntityId entity,
-                                     SlicePlayerSelection selection);
+    [[nodiscard]] bool set_selection(network::NetworkEntityId entity, SlicePlayerSelection selection);
     void disconnected(network::NetworkEntityId entity, std::uint64_t server_tick);
     [[nodiscard]] bool tick(std::uint64_t server_tick);
 
     [[nodiscard]] bool accepts_gameplay(network::NetworkEntityId entity) const noexcept;
     [[nodiscard]] const SliceLobbyState& state() const noexcept;
 
-private:
+  private:
     struct Record {
         SliceLobbyPlayer player;
         std::uint64_t expires_at_tick{0};

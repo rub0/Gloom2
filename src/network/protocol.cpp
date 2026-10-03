@@ -9,48 +9,41 @@
 namespace gloom::network {
 namespace {
 
-constexpr std::array magic{static_cast<std::byte>('G'),
-                           static_cast<std::byte>('L'),
-                           static_cast<std::byte>('O'),
-                           static_cast<std::byte>('M')};
+constexpr std::array magic{static_cast<std::byte>('G'), static_cast<std::byte>('L'), static_cast<std::byte>('O'), static_cast<std::byte>('M')};
 
-template <typename Integer>
-void append_little_endian(std::vector<std::byte>& output, const Integer value) {
+template <typename Integer> void append_little_endian(std::vector<std::byte>& output, const Integer value) {
     static_assert(std::is_unsigned_v<Integer>);
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
         output.push_back(static_cast<std::byte>(value >> (index * 8)));
     }
 }
 
-template <typename Integer>
-[[nodiscard]] Integer read_little_endian(const std::span<const std::byte> input,
-                                         std::size_t& offset) {
+template <typename Integer> [[nodiscard]] Integer read_little_endian(const std::span<const std::byte> input, std::size_t& offset) {
     static_assert(std::is_unsigned_v<Integer>);
     Integer value = 0;
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
-        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++]))
-                 << (index * 8);
+        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++])) << (index * 8);
     }
     return value;
 }
 
 [[nodiscard]] bool valid_kind(const MessageKind kind) noexcept {
     switch (kind) {
-        case MessageKind::client_hello:
-        case MessageKind::server_welcome:
-        case MessageKind::input_command:
-        case MessageKind::snapshot:
-        case MessageKind::event:
-        case MessageKind::disconnect:
-        case MessageKind::clock_request:
-        case MessageKind::clock_response:
-        case MessageKind::event_acknowledgement:
-        case MessageKind::gameplay_snapshot:
-        case MessageKind::lobby_command:
-        case MessageKind::lobby_state:
-        case MessageKind::ability_command:
-        case MessageKind::weapon_command:
-            return true;
+    case MessageKind::client_hello:
+    case MessageKind::server_welcome:
+    case MessageKind::input_command:
+    case MessageKind::snapshot:
+    case MessageKind::event:
+    case MessageKind::disconnect:
+    case MessageKind::clock_request:
+    case MessageKind::clock_response:
+    case MessageKind::event_acknowledgement:
+    case MessageKind::gameplay_snapshot:
+    case MessageKind::lobby_command:
+    case MessageKind::lobby_state:
+    case MessageKind::ability_command:
+    case MessageKind::weapon_command:
+        return true;
     }
     return false;
 }
@@ -61,8 +54,7 @@ std::vector<std::byte> encode_message(const ProtocolMessage& message) {
     if (!valid_kind(message.kind)) {
         throw std::invalid_argument{"Cannot encode an unknown protocol message kind"};
     }
-    if (message.payload.size() > maximum_protocol_payload ||
-        message.payload.size() > std::numeric_limits<std::uint32_t>::max()) {
+    if (message.payload.size() > maximum_protocol_payload || message.payload.size() > std::numeric_limits<std::uint32_t>::max()) {
         throw std::length_error{"Protocol message payload exceeds the configured maximum"};
     }
 
@@ -80,8 +72,7 @@ std::vector<std::byte> encode_message(const ProtocolMessage& message) {
     return output;
 }
 
-std::expected<ProtocolMessage, std::string>
-decode_message(const std::span<const std::byte> encoded, const std::size_t maximum_payload) {
+std::expected<ProtocolMessage, std::string> decode_message(const std::span<const std::byte> encoded, const std::size_t maximum_payload) {
     if (encoded.size() < protocol_header_size) {
         return std::unexpected{"Protocol message is shorter than its header"};
     }

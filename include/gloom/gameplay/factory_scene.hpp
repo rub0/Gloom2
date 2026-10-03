@@ -9,8 +9,13 @@
 #include <vector>
 
 namespace gloom::gameplay {
-struct FactorySpawn { physics::Vec3 position; float yaw{0.0F}; };
-struct FactoryJumper { physics::Vec3 position,force,half_extent; };
+struct FactorySpawn {
+    physics::Vec3 position;
+    float yaw{0.0F};
+};
+struct FactoryJumper {
+    physics::Vec3 position, force, half_extent;
+};
 struct FactoryScene {
     std::uint32_t scene_id{0};
     std::shared_ptr<const render::EnvironmentProbe> environment_probe;
@@ -25,6 +30,5 @@ struct FactoryScene {
 };
 [[nodiscard]] const FactoryScene& original_factory();
 [[nodiscard]] bool inside_factory_jumper(physics::Vec3 position) noexcept;
-[[nodiscard]] network::ReplicationSettings factory_movement_settings(
-    std::function<SliceCharacter(network::NetworkEntityId)> character = {});
+[[nodiscard]] network::ReplicationSettings factory_movement_settings(std::function<SliceCharacter(network::NetworkEntityId)> character = {});
 }

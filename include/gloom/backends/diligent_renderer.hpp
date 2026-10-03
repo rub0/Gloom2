@@ -9,7 +9,7 @@
 namespace gloom::backends {
 
 class DiligentRenderer final : public render::Renderer {
-public:
+  public:
     explicit DiligentRenderer(platform::Window& window, render::RendererSettings settings = {});
     ~DiligentRenderer() override;
 
@@ -41,7 +41,7 @@ public:
     // stalls the GPU only on the requested frame; normal rendering never reads back.
     void capture_next_frame(std::filesystem::path ppm_path);
 
-private:
+  private:
     struct Impl;
 
     void create_scene_resources();

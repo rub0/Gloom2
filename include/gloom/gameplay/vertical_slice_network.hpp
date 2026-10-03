@@ -35,16 +35,13 @@ struct SliceHostMessage : SliceWireMessage {
     network::ConnectionId connection{network::invalid_connection};
 };
 
-[[nodiscard]] network::ProtocolMessage
-encode_slice_snapshot(const SliceSnapshot& snapshot, std::uint32_t acknowledged_input,
-                      std::uint32_t sequence);
-[[nodiscard]] std::expected<SliceSnapshot, std::string>
-decode_slice_snapshot(const network::ProtocolMessage& message);
+[[nodiscard]] network::ProtocolMessage encode_slice_snapshot(const SliceSnapshot& snapshot, std::uint32_t acknowledged_input, std::uint32_t sequence);
+[[nodiscard]] std::expected<SliceSnapshot, std::string> decode_slice_snapshot(const network::ProtocolMessage& message);
 
 // Transport-independent authoritative host adapter. A socket backend only moves
 // SliceHostMessage bytes; admission, ownership and command routing stay here.
 class VerticalSliceRemoteHost final {
-public:
+  public:
     explicit VerticalSliceRemoteHost(bool opponent_ai_enabled = true);
     explicit VerticalSliceRemoteHost(SliceRemoteHostSettings settings);
     ~VerticalSliceRemoteHost();
@@ -53,9 +50,7 @@ public:
 
     void connected(network::ConnectionId connection);
     void disconnected(network::ConnectionId connection);
-    [[nodiscard]] std::vector<SliceHostMessage>
-    receive(network::ConnectionId connection, const network::ProtocolMessage& message,
-            double now_seconds);
+    [[nodiscard]] std::vector<SliceHostMessage> receive(network::ConnectionId connection, const network::ProtocolMessage& message, double now_seconds);
     [[nodiscard]] std::optional<SliceHostMessage> tick();
     [[nodiscard]] std::vector<SliceHostMessage> tick_clients();
 
@@ -66,7 +61,7 @@ public:
     [[nodiscard]] const network::SessionMetrics& session_metrics() const noexcept;
     [[nodiscard]] const SliceLobbyState& lobby() const noexcept;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
@@ -74,16 +69,12 @@ private:
 // Transport-independent remote player adapter. It predicts the controlled
 // entity immediately and reconciles against authoritative gameplay snapshots.
 class VerticalSliceRemoteClient final {
-public:
+  public:
     VerticalSliceRemoteClient();
     explicit VerticalSliceRemoteClient(SlicePlayerIdentity identity);
-    VerticalSliceRemoteClient(SlicePlayerSelection selection,
-                              bool automatic_selection);
-    VerticalSliceRemoteClient(SlicePlayerIdentity identity,
-                              SlicePlayerSelection selection);
-    VerticalSliceRemoteClient(SlicePlayerIdentity identity,
-                              SlicePlayerSelection selection,
-                              bool automatic_selection);
+    VerticalSliceRemoteClient(SlicePlayerSelection selection, bool automatic_selection);
+    VerticalSliceRemoteClient(SlicePlayerIdentity identity, SlicePlayerSelection selection);
+    VerticalSliceRemoteClient(SlicePlayerIdentity identity, SlicePlayerSelection selection, bool automatic_selection);
     ~VerticalSliceRemoteClient();
     VerticalSliceRemoteClient(const VerticalSliceRemoteClient&) = delete;
     VerticalSliceRemoteClient& operator=(const VerticalSliceRemoteClient&) = delete;
@@ -92,8 +83,7 @@ public:
     [[nodiscard]] SliceWireMessage reconnect(std::string credential = "gloom-slice");
     [[nodiscard]] SliceWireMessage begin_with_credential(std::string credential);
     [[nodiscard]] SliceWireMessage reconnect_with_credential(std::string credential);
-    [[nodiscard]] std::optional<SliceWireMessage>
-    receive(const network::ProtocolMessage& message, double now_seconds);
+    [[nodiscard]] std::optional<SliceWireMessage> receive(const network::ProtocolMessage& message, double now_seconds);
     [[nodiscard]] std::vector<SliceWireMessage> create_input(const SliceInput& input);
     [[nodiscard]] bool set_desired_selection(SlicePlayerSelection selection) noexcept;
     [[nodiscard]] std::optional<SliceWireMessage> confirm_selection();
@@ -103,12 +93,11 @@ public:
     [[nodiscard]] bool has_snapshot() const noexcept;
     [[nodiscard]] const SliceSnapshot& snapshot() const noexcept;
     [[nodiscard]] const network::ClientSession& session() const noexcept;
-    [[nodiscard]] const network::ReconciliationMetrics&
-    reconciliation_metrics() const noexcept;
+    [[nodiscard]] const network::ReconciliationMetrics& reconciliation_metrics() const noexcept;
     [[nodiscard]] const SlicePlayerIdentity& identity() const noexcept;
     [[nodiscard]] const SliceLobbyState& lobby() const noexcept;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

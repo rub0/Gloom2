@@ -15,22 +15,19 @@ void expect(const bool condition, const char* message) {
 }
 
 class TestIdentityProvider final : public gloom::gameplay::SliceIdentityProvider {
-public:
+  public:
     mutable std::uint32_t verification_count{0};
 
-    [[nodiscard]] std::expected<gloom::gameplay::SlicePlayerIdentity, std::string>
-    verify(const std::string_view credential) const override {
+    [[nodiscard]] std::expected<gloom::gameplay::SlicePlayerIdentity, std::string> verify(const std::string_view credential) const override {
         ++verification_count;
         if (credential != "opaque-provider-token") {
             return std::unexpected{"Untrusted token"};
         }
-        return gloom::gameplay::SlicePlayerIdentity{
-            .account_id = 9001, .display_name = "Verified"};
+        return gloom::gameplay::SlicePlayerIdentity{.account_id = 9001, .display_name = "Verified"};
     }
 };
 
-[[nodiscard]] gloom::network::ProtocolMessage
-wire(const gloom::network::ProtocolMessage& message) {
+[[nodiscard]] gloom::network::ProtocolMessage wire(const gloom::network::ProtocolMessage& message) {
     const auto decoded = gloom::network::decode_message(gloom::network::encode_message(message));
     if (!decoded) {
         throw std::runtime_error{"Remote slice wire round trip failed"};
@@ -38,11 +35,8 @@ wire(const gloom::network::ProtocolMessage& message) {
     return *decoded;
 }
 
-void admit(gloom::gameplay::VerticalSliceRemoteHost& host,
-           gloom::gameplay::VerticalSliceRemoteClient& client,
-           const gloom::network::ConnectionId connection,
-           const double now,
-           const bool reconnect = false) {
+void admit(gloom::gameplay::VerticalSliceRemoteHost& host, gloom::gameplay::VerticalSliceRemoteClient& client, const gloom::network::ConnectionId connection,
+    const double now, const bool reconnect = false) {
     host.connected(connection);
     const auto hello = reconnect ? client.reconnect() : client.begin();
     auto responses = host.receive(connection, wire(hello.message), now);
@@ -55,15 +49,12 @@ void admit(gloom::gameplay::VerticalSliceRemoteHost& host,
     if (reconnect) {
         return;
     }
-    expect(selection.has_value() &&
-               gloom::gameplay::decode_lobby_selection(selection->message).has_value(),
-           "Remote slice client did not submit its default selection");
+    expect(selection.has_value() && gloom::gameplay::decode_lobby_selection(selection->message).has_value(),
+        "Remote slice client did not submit its default selection");
     static_cast<void>(host.receive(connection, wire(selection->message), now + 0.004));
-    const auto ready = client.receive(
-        wire(gloom::gameplay::encode_lobby_state(host.lobby())), now + 0.005);
-    expect(ready.has_value() &&
-               gloom::gameplay::decode_lobby_ready(ready->message).value_or(false),
-           "Remote slice client did not enter the lobby after selection");
+    const auto ready = client.receive(wire(gloom::gameplay::encode_lobby_state(host.lobby())), now + 0.005);
+    expect(ready.has_value() && gloom::gameplay::decode_lobby_ready(ready->message).value_or(false),
+        "Remote slice client did not enter the lobby after selection");
     static_cast<void>(host.receive(connection, wire(ready->message), now + 0.006));
 }
 
@@ -71,129 +62,125 @@ void test_interactive_selection_ordering() {
     using namespace gloom::gameplay;
     constexpr gloom::network::ConnectionId connection = 71;
     VerticalSliceRemoteHost host{SliceRemoteHostSettings{}};
-    VerticalSliceRemoteClient client{
-        {.account_id = 7071, .display_name = "Chooser"}, {}, false};
+    VerticalSliceRemoteClient client{{.account_id = 7071, .display_name = "Chooser"}, {}, false};
     host.connected(connection);
     auto responses = host.receive(connection, wire(client.begin().message), 0.0);
     expect(responses.size() == 1, "Interactive client admission failed");
     auto request = client.receive(wire(responses.front().message), 0.001);
     expect(request.has_value(), "Interactive client omitted clock request");
     responses = host.receive(connection, wire(request->message), 0.002);
-    expect(responses.size() == 1 &&
-               !client.receive(wire(responses.front().message), 0.003),
-           "Interactive client submitted a selection before confirmation");
+    expect(responses.size() == 1 && !client.receive(wire(responses.front().message), 0.003), "Interactive client submitted a selection before confirmation");
     const SlicePlayerSelection guard{.ability = SliceAbility::guard};
-    expect(client.set_desired_selection(guard) &&
-               client.desired_selection() == guard,
-           "Interactive client could not change its pending loadout");
+    expect(client.set_desired_selection(guard) && client.desired_selection() == guard, "Interactive client could not change its pending loadout");
     const auto selection = client.confirm_selection();
-    expect(selection && decode_lobby_selection(selection->message) == guard,
-           "Interactive confirmation did not emit the chosen loadout");
+    expect(selection && decode_lobby_selection(selection->message) == guard, "Interactive confirmation did not emit the chosen loadout");
     static_cast<void>(host.receive(connection, wire(selection->message), 0.004));
-    expect(!client.set_desired_selection({.ability = SliceAbility::none}) &&
-               !client.confirm_selection(),
-           "Interactive selection changed after confirmation");
+    expect(!client.set_desired_selection({.ability = SliceAbility::none}) && !client.confirm_selection(), "Interactive selection changed after confirmation");
     const auto ready = client.receive(wire(encode_lobby_state(host.lobby())), 0.005);
-    expect(ready && decode_lobby_ready(ready->message).value_or(false),
-           "Interactive client sent ready before authoritative selection confirmation");
+    expect(ready && decode_lobby_ready(ready->message).value_or(false), "Interactive client sent ready before authoritative selection confirmation");
 }
 
 void test_original_factory_network() {
     using namespace gloom::gameplay;
-    VerticalSliceRemoteHost host{SliceRemoteHostSettings{.required_players=1,.original_factory=true}};
+    VerticalSliceRemoteHost host{SliceRemoteHostSettings{.required_players = 1, .original_factory = true}};
     VerticalSliceRemoteClient client;
-    constexpr gloom::network::ConnectionId connection=178;
-    admit(host,client,connection,0.0);
+    constexpr gloom::network::ConnectionId connection = 178;
+    admit(host, client, connection, 0.0);
     // Original digital movement is faster and has inertia. A bounded walk
     // exercises reconciliation without deliberately running into the lava.
-    for (unsigned tick=0;tick<180;++tick) {
-        const auto now=tick/60.0;
-        for (const auto& input:client.create_input({.axis_z=tick<20?-1.F:0.F,.jump=tick==60}))
-            static_cast<void>(host.receive(connection,wire(input.message),now));
-        for (const auto& message:host.tick_clients()) {
-            if (const auto reply=client.receive(wire(message.message),now))
-                static_cast<void>(host.receive(connection,wire(reply->message),now));
+    for (unsigned tick = 0; tick < 180; ++tick) {
+        const auto now = tick / 60.0;
+        for (const auto& input : client.create_input({.axis_z = tick < 20 ? -1.F : 0.F, .jump = tick == 60}))
+            static_cast<void>(host.receive(connection, wire(input.message), now));
+        for (const auto& message : host.tick_clients()) {
+            if (const auto reply = client.receive(wire(message.message), now))
+                static_cast<void>(host.receive(connection, wire(reply->message), now));
         }
     }
-    expect(client.has_snapshot() && client.snapshot().scene_id==original_factory().scene_id,"Factory scene negotiation failed");
-    expect(host.snapshot().player.alive && client.snapshot().player.alive,"Factory remote spawn is not playable");
-    expect(std::abs(client.snapshot().player.position_z-host.snapshot().player.position_z)<.5F &&
-        std::abs(client.snapshot().player.position_y-host.snapshot().player.position_y)<.5F,"Factory prediction and authority diverged");
+    expect(client.has_snapshot() && client.snapshot().scene_id == original_factory().scene_id, "Factory scene negotiation failed");
+    expect(host.snapshot().player.alive && client.snapshot().player.alive, "Factory remote spawn is not playable");
+    expect(std::abs(client.snapshot().player.position_z - host.snapshot().player.position_z) < .5F &&
+               std::abs(client.snapshot().player.position_y - host.snapshot().player.position_y) < .5F,
+        "Factory prediction and authority diverged");
     host.disconnected(connection);
-    admit(host,client,connection,4.0,true);
-    for (unsigned tick=0;tick<10;++tick) for (const auto& message:host.tick_clients())
-        static_cast<void>(client.receive(wire(message.message),4.1+tick/60.0));
-    expect(client.snapshot().scene_id==original_factory().scene_id && host.active_clients()==1,"Factory reconnect changed scene");
+    admit(host, client, connection, 4.0, true);
+    for (unsigned tick = 0; tick < 10; ++tick)
+        for (const auto& message : host.tick_clients())
+            static_cast<void>(client.receive(wire(message.message), 4.1 + tick / 60.0));
+    expect(client.snapshot().scene_id == original_factory().scene_id && host.active_clients() == 1, "Factory reconnect changed scene");
 }
 
 void test_pickup_contention_and_reconnect() {
     using namespace gloom::gameplay;
-    VerticalSliceRemoteHost host{SliceRemoteHostSettings{.original_factory=true}};
-    VerticalSliceRemoteClient first,second;
-    admit(host,first,281,0);admit(host,second,282,0);
-    const auto& defs=original_factory().pickups;
-    const auto found=std::ranges::find(defs,std::string{"Orb4"},&PickupDefinition::name);
-    expect(found!=defs.end(),"Missing shared-range pickup fixture");
-    const auto index=static_cast<std::size_t>(found-defs.begin());
-    const auto p=found->position;
-    bool delay_second_snapshot=true;
-    const auto deliver=[&](double now) {
-        for(const auto& m:host.tick_clients()) {
-            if(delay_second_snapshot && m.connection==282 && m.message.kind==gloom::network::MessageKind::gameplay_snapshot)continue;
-            auto& client=m.connection==281?first:second;
-            if(const auto reply=client.receive(wire(m.message),now))
-                static_cast<void>(host.receive(m.connection,wire(reply->message),now));
+    VerticalSliceRemoteHost host{SliceRemoteHostSettings{.original_factory = true}};
+    VerticalSliceRemoteClient first, second;
+    admit(host, first, 281, 0);
+    admit(host, second, 282, 0);
+    const auto& defs = original_factory().pickups;
+    const auto found = std::ranges::find(defs, std::string{"Orb4"}, &PickupDefinition::name);
+    expect(found != defs.end(), "Missing shared-range pickup fixture");
+    const auto index = static_cast<std::size_t>(found - defs.begin());
+    const auto p = found->position;
+    bool delay_second_snapshot = true;
+    const auto deliver = [&](double now) {
+        for (const auto& m : host.tick_clients()) {
+            if (delay_second_snapshot && m.connection == 282 && m.message.kind == gloom::network::MessageKind::gameplay_snapshot)
+                continue;
+            auto& client = m.connection == 281 ? first : second;
+            if (const auto reply = client.receive(wire(m.message), now))
+                static_cast<void>(host.receive(m.connection, wire(reply->message), now));
         }
     };
-    for(unsigned tick=0;tick<6;++tick)deliver(tick/60.0);
-    for(unsigned tick=0;tick<200;++tick) {
-        const auto aim=[&](auto& client,gloom::network::ConnectionId connection) {
-            const auto& actor=connection==281?host.snapshot().player:host.snapshot().opponent;
-            for(const auto& input:client.create_input({.aim_x=p.x-actor.position_x,.aim_y=p.y-actor.position_y-.9F,.aim_z=p.z-actor.position_z,.fire_secondary=true}))
-                static_cast<void>(host.receive(connection,wire(input.message),.1+tick/60.0));
+    for (unsigned tick = 0; tick < 6; ++tick)
+        deliver(tick / 60.0);
+    for (unsigned tick = 0; tick < 200; ++tick) {
+        const auto aim = [&](auto& client, gloom::network::ConnectionId connection) {
+            const auto& actor = connection == 281 ? host.snapshot().player : host.snapshot().opponent;
+            for (const auto& input : client.create_input(
+                     {.aim_x = p.x - actor.position_x, .aim_y = p.y - actor.position_y - .9F, .aim_z = p.z - actor.position_z, .fire_secondary = true}))
+                static_cast<void>(host.receive(connection, wire(input.message), .1 + tick / 60.0));
         };
-        aim(first,281);aim(second,282);deliver(.1+tick/60.0);
+        aim(first, 281);
+        aim(second, 282);
+        deliver(.1 + tick / 60.0);
     }
-    expect(host.snapshot().pickups[index].phase==PickupPhase::respawning,"Contested pickup did not disappear");
-    expect(host.snapshot().player.life+host.snapshot().opponent.life==2*legacy_default_life+found->reward,"Two clients duplicated/lost life reward");
-    expect(!second.has_snapshot(),"Late initial snapshot fixture received state early");
-    delay_second_snapshot=false;
-    for(unsigned tick=0;tick<3;++tick)deliver(3.5+tick/60.0);
-    expect(first.snapshot().pickups[index].phase==PickupPhase::respawning && second.snapshot().pickups[index].phase==PickupPhase::respawning,"Clients disagree on pickup visibility");
-    host.disconnected(282);admit(host,second,282,4,true);
-    for(unsigned tick=0;tick<6;++tick)deliver(4.1+tick/60.0);
-    expect(second.snapshot().pickups[index].phase==PickupPhase::respawning && second.snapshot().pickups[index].respawn_remaining>0,"Reconnect restored collected pickup");
-    const auto remaining=host.snapshot().pickups[index].respawn_remaining;
-    for(unsigned tick=0;tick<remaining+3U;++tick)deliver(4.3+tick/60.0);
-    expect(host.snapshot().pickups[index].phase==PickupPhase::available &&
-        first.snapshot().pickups[index].phase==PickupPhase::available &&
-        second.snapshot().pickups[index].phase==PickupPhase::available,"Respawn visibility did not reach both clients");
+    expect(host.snapshot().pickups[index].phase == PickupPhase::respawning, "Contested pickup did not disappear");
+    expect(host.snapshot().player.life + host.snapshot().opponent.life == 2 * legacy_default_life + found->reward, "Two clients duplicated/lost life reward");
+    expect(!second.has_snapshot(), "Late initial snapshot fixture received state early");
+    delay_second_snapshot = false;
+    for (unsigned tick = 0; tick < 3; ++tick)
+        deliver(3.5 + tick / 60.0);
+    expect(first.snapshot().pickups[index].phase == PickupPhase::respawning && second.snapshot().pickups[index].phase == PickupPhase::respawning,
+        "Clients disagree on pickup visibility");
+    host.disconnected(282);
+    admit(host, second, 282, 4, true);
+    for (unsigned tick = 0; tick < 6; ++tick)
+        deliver(4.1 + tick / 60.0);
+    expect(second.snapshot().pickups[index].phase == PickupPhase::respawning && second.snapshot().pickups[index].respawn_remaining > 0,
+        "Reconnect restored collected pickup");
+    const auto remaining = host.snapshot().pickups[index].respawn_remaining;
+    for (unsigned tick = 0; tick < remaining + 3U; ++tick)
+        deliver(4.3 + tick / 60.0);
+    expect(host.snapshot().pickups[index].phase == PickupPhase::available && first.snapshot().pickups[index].phase == PickupPhase::available &&
+               second.snapshot().pickups[index].phase == PickupPhase::available,
+        "Respawn visibility did not reach both clients");
 }
 
 void test_injected_verified_identity() {
     using namespace gloom::gameplay;
     constexpr gloom::network::ConnectionId connection = 72;
     const auto provider = std::make_shared<TestIdentityProvider>();
-    VerticalSliceRemoteHost host{SliceRemoteHostSettings{
-        .required_players = 1,
-        .identity_provider = provider}};
-    VerticalSliceRemoteClient client{
-        {.account_id = 1234, .display_name = "UntrustedClaim"}};
+    VerticalSliceRemoteHost host{SliceRemoteHostSettings{.required_players = 1, .identity_provider = provider}};
+    VerticalSliceRemoteClient client{{.account_id = 1234, .display_name = "UntrustedClaim"}};
     host.connected(connection);
-    const auto rejected = host.receive(
-        connection, wire(client.begin_with_credential("invalid-token").message), 0.0);
-    expect(rejected.empty() && host.lobby().players.empty(),
-           "Injected identity provider admitted an invalid opaque token");
+    const auto rejected = host.receive(connection, wire(client.begin_with_credential("invalid-token").message), 0.0);
+    expect(rejected.empty() && host.lobby().players.empty(), "Injected identity provider admitted an invalid opaque token");
 
-    const auto accepted = host.receive(
-        connection,
-        wire(client.begin_with_credential("opaque-provider-token").message), 0.001);
-    expect(accepted.size() == 1 && host.lobby().players.size() == 1 &&
-               host.lobby().players.front().identity.account_id == 9001 &&
+    const auto accepted = host.receive(connection, wire(client.begin_with_credential("opaque-provider-token").message), 0.001);
+    expect(accepted.size() == 1 && host.lobby().players.size() == 1 && host.lobby().players.front().identity.account_id == 9001 &&
                host.lobby().players.front().identity.display_name == "Verified",
-           "Lobby used client-asserted identity instead of the verified principal");
-    expect(provider->verification_count == 2,
-           "Host verified an opaque credential more than once per hello");
+        "Lobby used client-asserted identity instead of the verified principal");
+    expect(provider->verification_count == 2, "Host verified an opaque credential more than once per hello");
 }
 
 void test_two_players_and_reconnect() {
@@ -203,34 +190,23 @@ void test_two_players_and_reconnect() {
     constexpr gloom::network::ConnectionId resumed_connection = 83;
     VerticalSliceRemoteHost host{SliceRemoteHostSettings{}};
     VerticalSliceRemoteClient first{
-        {.account_id = 1001, .display_name = "BerserkerPlayer"},
-        {.character = SliceCharacter::berserker, .ability = SliceAbility::none}};
-    VerticalSliceRemoteClient second{
-        {.account_id = 2002, .display_name = "GuardPlayer"},
-        {.ability = SliceAbility::guard}};
+        {.account_id = 1001, .display_name = "BerserkerPlayer"}, {.character = SliceCharacter::berserker, .ability = SliceAbility::none}};
+    VerticalSliceRemoteClient second{{.account_id = 2002, .display_name = "GuardPlayer"}, {.ability = SliceAbility::guard}};
     admit(host, first, first_connection, 0.0);
     admit(host, second, second_connection, 0.01);
-    expect(host.lobby().phase == SliceMatchPhase::active,
-           "Selections and ready commands did not start the remote lobby");
+    expect(host.lobby().phase == SliceMatchPhase::active, "Selections and ready commands did not start the remote lobby");
     expect(first.session().controlled_entity() == VerticalSliceSimulation::player_entity &&
                second.session().controlled_entity() == VerticalSliceSimulation::opponent_entity,
-           "Two remote clients did not receive distinct combatants");
+        "Two remote clients did not receive distinct combatants");
 
     for (std::uint32_t tick = 0; tick < 120; ++tick) {
-        for (const auto& outgoing :
-             first.create_input({.axis_z = tick < 45 ? -1.0F : 0.0F})) {
-            static_cast<void>(host.receive(first_connection, wire(outgoing.message),
-                                           static_cast<double>(tick) / 60.0));
+        for (const auto& outgoing : first.create_input({.axis_z = tick < 45 ? -1.0F : 0.0F})) {
+            static_cast<void>(host.receive(first_connection, wire(outgoing.message), static_cast<double>(tick) / 60.0));
         }
-        const auto second_view = second.has_snapshot()
-                                     ? second.snapshot()
-                                     : host.snapshot();
-        const float aim_x = second_view.opponent.position_x -
-                            second_view.player.position_x;
-        const float aim_y = second_view.opponent.position_y -
-                            second_view.player.position_y;
-        const float aim_z = second_view.opponent.position_z -
-                            second_view.player.position_z;
+        const auto second_view = second.has_snapshot() ? second.snapshot() : host.snapshot();
+        const float aim_x = second_view.opponent.position_x - second_view.player.position_x;
+        const float aim_y = second_view.opponent.position_y - second_view.player.position_y;
+        const float aim_z = second_view.opponent.position_z - second_view.player.position_z;
         const float aim_length = std::sqrt(aim_x * aim_x + aim_y * aim_y + aim_z * aim_z);
         for (const auto& outgoing : second.create_input({
                  .axis_z = tick < 45 ? -0.5F : 0.0F,
@@ -241,53 +217,39 @@ void test_two_players_and_reconnect() {
                  .use_primary_ability = tick == 10,
                  .use_secondary_ability = tick == 20,
              })) {
-            static_cast<void>(host.receive(second_connection, wire(outgoing.message),
-                                           static_cast<double>(tick) / 60.0));
+            static_cast<void>(host.receive(second_connection, wire(outgoing.message), static_cast<double>(tick) / 60.0));
         }
         for (const auto& snapshot : host.tick_clients()) {
             auto& client = snapshot.connection == first_connection ? first : second;
-            static_cast<void>(client.receive(wire(snapshot.message),
-                                             static_cast<double>(tick + 1) / 60.0));
+            static_cast<void>(client.receive(wire(snapshot.message), static_cast<double>(tick + 1) / 60.0));
         }
     }
 
-    expect(host.active_clients() == 2 && first.has_snapshot() && second.has_snapshot(),
-           "Two remote players did not receive sustained authoritative state");
+    expect(host.active_clients() == 2 && first.has_snapshot() && second.has_snapshot(), "Two remote players did not receive sustained authoritative state");
     expect(first.snapshot().player.entity == VerticalSliceSimulation::player_entity &&
                first.snapshot().opponent.entity == VerticalSliceSimulation::opponent_entity &&
                second.snapshot().player.entity == VerticalSliceSimulation::opponent_entity &&
-               second.snapshot().opponent.entity == VerticalSliceSimulation::player_entity &&
-               first.snapshot().player.character == SliceCharacter::berserker &&
-               second.snapshot().opponent.character == SliceCharacter::berserker &&
-               first.snapshot().player.ability == SliceAbility::none &&
-               second.snapshot().player.ability == SliceAbility::guard &&
-               first.snapshot().opponent.ability == SliceAbility::guard,
-           "Per-client snapshots did not place the controlled combatant first");
-    expect(second.snapshot().player.shield == hound_guard_shield &&
-               second.snapshot().player.secondary_ability==SliceSecondaryAbility::berserker &&
+               second.snapshot().opponent.entity == VerticalSliceSimulation::player_entity && first.snapshot().player.character == SliceCharacter::berserker &&
+               second.snapshot().opponent.character == SliceCharacter::berserker && first.snapshot().player.ability == SliceAbility::none &&
+               second.snapshot().player.ability == SliceAbility::guard && first.snapshot().opponent.ability == SliceAbility::guard,
+        "Per-client snapshots did not place the controlled combatant first");
+    expect(second.snapshot().player.shield == hound_guard_shield && second.snapshot().player.secondary_ability == SliceSecondaryAbility::berserker &&
                second.snapshot().player.secondary_ability_active && host.snapshot().network.authorized_ability_commands == 2,
-           "Guard/Berserker selection was not authorized and replicated over the remote slice");
-    expect(first.snapshot().player.position_z < -2.0F &&
-               second.snapshot().player.position_z < -1.0F &&
-               std::abs(first.snapshot().player.position_z -
-                        second.snapshot().player.position_z) > 0.5F,
-           "Remote combatants did not move independently");
-    expect(first.snapshot().factory_lift.entity == 100 &&
-               second.snapshot().factory_lift.entity == 100 &&
-               first.snapshot().factory_lift.position_y > 0.25F &&
-               std::abs(first.snapshot().factory_lift.position_y -
-                        second.snapshot().factory_lift.position_y) < 0.001F,
-           "Factory kinematic state was not replicated consistently to both clients");
-    expect(second.snapshot().player.kills != 0 && !first.snapshot().player.alive,
-           "The second remote player could not kill the first through authority");
+        "Guard/Berserker selection was not authorized and replicated over the remote slice");
+    expect(first.snapshot().player.position_z < -2.0F && second.snapshot().player.position_z < -1.0F &&
+               std::abs(first.snapshot().player.position_z - second.snapshot().player.position_z) > 0.5F,
+        "Remote combatants did not move independently");
+    expect(first.snapshot().factory_lift.entity == 100 && second.snapshot().factory_lift.entity == 100 && first.snapshot().factory_lift.position_y > 0.25F &&
+               std::abs(first.snapshot().factory_lift.position_y - second.snapshot().factory_lift.position_y) < 0.001F,
+        "Factory kinematic state was not replicated consistently to both clients");
+    expect(second.snapshot().player.kills != 0 && !first.snapshot().player.alive, "The second remote player could not kill the first through authority");
 
     const auto resumed_entity = second.session().controlled_entity();
     host.disconnected(second_connection);
     expect(host.active_clients() == 1, "Disconnected player remained active");
     admit(host, second, resumed_connection, 2.5, true);
-    expect(host.active_clients() == 2 && second.session().controlled_entity() == resumed_entity &&
-               host.session_metrics().resumed == 1,
-           "Remote player did not resume the same authoritative combatant");
+    expect(host.active_clients() == 2 && second.session().controlled_entity() == resumed_entity && host.session_metrics().resumed == 1,
+        "Remote player did not resume the same authoritative combatant");
 
     for (const auto& outgoing : second.create_input({.axis_x = -1.0F})) {
         static_cast<void>(host.receive(resumed_connection, wire(outgoing.message), 2.51));
@@ -297,11 +259,9 @@ void test_two_players_and_reconnect() {
             static_cast<void>(second.receive(wire(snapshot.message), 2.52));
         }
     }
-    expect(host.session_metrics().unauthorized_messages == 0,
-           "Resumed player traffic failed ownership authorization");
-    expect(second.snapshot().player.secondary_ability==SliceSecondaryAbility::berserker &&
-               second.snapshot().player.secondary_ability_active,
-           "Reconnection did not restore the authoritative Berserker state");
+    expect(host.session_metrics().unauthorized_messages == 0, "Resumed player traffic failed ownership authorization");
+    expect(second.snapshot().player.secondary_ability == SliceSecondaryAbility::berserker && second.snapshot().player.secondary_ability_active,
+        "Reconnection did not restore the authoritative Berserker state");
 }
 
 void test_host_abandonment_outcome() {
@@ -320,23 +280,19 @@ void test_host_abandonment_outcome() {
         auto& client = message.connection == first_connection ? first : second;
         static_cast<void>(client.receive(wire(message.message), 0.02));
     }
-    expect(host.lobby().phase == SliceMatchPhase::active,
-           "Remote host did not enter the active lobby phase");
+    expect(host.lobby().phase == SliceMatchPhase::active, "Remote host did not enter the active lobby phase");
 
     host.disconnected(second_connection);
     for (std::uint32_t tick = 0; tick < 4; ++tick) {
         for (const auto& message : host.tick_clients()) {
             if (message.connection == first_connection) {
-                static_cast<void>(first.receive(wire(message.message),
-                                                0.03 + tick / 60.0));
+                static_cast<void>(first.receive(wire(message.message), 0.03 + tick / 60.0));
             }
         }
     }
-    expect(host.lobby().phase == SliceMatchPhase::completed &&
-               host.lobby().end_reason == SliceMatchEndReason::abandonment &&
-               host.lobby().winner_entity == first.session().controlled_entity() &&
-               first.lobby().phase == SliceMatchPhase::completed,
-           "Remote host did not replicate the abandonment outcome");
+    expect(host.lobby().phase == SliceMatchPhase::completed && host.lobby().end_reason == SliceMatchEndReason::abandonment &&
+               host.lobby().winner_entity == first.session().controlled_entity() && first.lobby().phase == SliceMatchPhase::completed,
+        "Remote host did not replicate the abandonment outcome");
 }
 
 void test_adverse_gameplay_link() {
@@ -386,9 +342,7 @@ void test_adverse_gameplay_link() {
             static_cast<void>(client.receive(*decoded, now));
         }
 
-        SliceInput input{.axis_z = tick < 120 ? -1.0F : 0.0F,
-                         .jump = tick == 30,
-                         .fire_primary = tick >= 120};
+        SliceInput input{.axis_z = tick < 120 ? -1.0F : 0.0F, .jump = tick == 30, .fire_primary = tick >= 120};
         const auto& state = client.has_snapshot() ? client.snapshot() : host.snapshot();
         const float x = state.opponent.position_x - state.player.position_x;
         const float y = state.opponent.position_y - state.player.position_y;
@@ -401,15 +355,11 @@ void test_adverse_gameplay_link() {
         }
         for (const auto& outgoing : client.create_input(input)) {
             const auto bytes = gloom::network::encode_message(outgoing.message);
-            upstream.submit({.flow = connection,
-                             .sequence = ++upstream_sequence,
-                             .payload = bytes});
+            upstream.submit({.flow = connection, .sequence = ++upstream_sequence, .payload = bytes});
         }
         if (auto snapshot = host.tick()) {
             const auto bytes = gloom::network::encode_message(snapshot->message);
-            downstream.submit({.flow = connection,
-                               .sequence = ++downstream_sequence,
-                               .payload = bytes});
+            downstream.submit({.flow = connection, .sequence = ++downstream_sequence, .payload = bytes});
         }
 
         const auto& authoritative = host.snapshot();
@@ -420,29 +370,18 @@ void test_adverse_gameplay_link() {
 
     const auto upstream_metrics = upstream.metrics();
     const auto downstream_metrics = downstream.metrics();
-    expect(upstream_metrics.dropped_by_loss > 0 &&
-               downstream_metrics.dropped_by_loss > 0,
-           "Adverse slice link did not exercise packet loss in both directions");
-    expect(upstream_metrics.duplicated_packets > 0 ||
-               downstream_metrics.duplicated_packets > 0,
-           "Adverse slice link did not exercise packet duplication");
-    expect(saw_kill && saw_respawn,
-           "Adverse slice link did not preserve the kill/respawn loop");
-    expect(host.snapshot().player.position_z < -2.0F,
-           "Adverse slice link did not preserve authoritative movement");
-    expect(client.reconciliation_metrics().count > 100,
-           "Adverse slice link did not exercise prediction reconciliation");
-    expect(client.reconciliation_metrics().maximum_distance < 0.75F,
-           "Adverse slice link caused an excessive prediction correction");
-    expect(host.session_metrics().unauthorized_messages == 0,
-           "Adverse slice traffic caused an authorization failure");
+    expect(
+        upstream_metrics.dropped_by_loss > 0 && downstream_metrics.dropped_by_loss > 0, "Adverse slice link did not exercise packet loss in both directions");
+    expect(upstream_metrics.duplicated_packets > 0 || downstream_metrics.duplicated_packets > 0, "Adverse slice link did not exercise packet duplication");
+    expect(saw_kill && saw_respawn, "Adverse slice link did not preserve the kill/respawn loop");
+    expect(host.snapshot().player.position_z < -2.0F, "Adverse slice link did not preserve authoritative movement");
+    expect(client.reconciliation_metrics().count > 100, "Adverse slice link did not exercise prediction reconciliation");
+    expect(client.reconciliation_metrics().maximum_distance < 0.75F, "Adverse slice link caused an excessive prediction correction");
+    expect(host.session_metrics().unauthorized_messages == 0, "Adverse slice traffic caused an authorization failure");
 
-    std::cout << "Adverse slice link: max correction "
-              << client.reconciliation_metrics().maximum_distance
-              << ", accumulated "
-              << client.reconciliation_metrics().accumulated_distance
-              << ", upstream loss " << upstream_metrics.dropped_by_loss
-              << ", downstream loss " << downstream_metrics.dropped_by_loss << '\n';
+    std::cout << "Adverse slice link: max correction " << client.reconciliation_metrics().maximum_distance << ", accumulated "
+              << client.reconciliation_metrics().accumulated_distance << ", upstream loss " << upstream_metrics.dropped_by_loss << ", downstream loss "
+              << downstream_metrics.dropped_by_loss << '\n';
 }
 
 } // namespace
@@ -456,24 +395,18 @@ int main() try {
     VerticalSliceRemoteClient client;
     host.connected(connection);
     auto responses = host.receive(connection, wire(client.begin().message), 0.0);
-    expect(responses.size() == 1 &&
-               responses.front().delivery == gloom::network::Delivery::reliable,
-           "Remote slice host did not admit the client reliably");
+    expect(responses.size() == 1 && responses.front().delivery == gloom::network::Delivery::reliable, "Remote slice host did not admit the client reliably");
     auto clock_request = client.receive(wire(responses.front().message), 0.001);
-    expect(client.active() && clock_request.has_value(),
-           "Remote slice client did not accept its session");
+    expect(client.active() && clock_request.has_value(), "Remote slice client did not accept its session");
     responses = host.receive(connection, wire(clock_request->message), 0.002);
     expect(responses.size() == 1, "Remote slice host did not answer clock synchronization");
     const auto selection = client.receive(wire(responses.front().message), 0.003);
-    expect(selection.has_value() && decode_lobby_selection(selection->message).has_value(),
-           "Remote slice client did not submit its selection");
+    expect(selection.has_value() && decode_lobby_selection(selection->message).has_value(), "Remote slice client did not submit its selection");
     static_cast<void>(host.receive(connection, wire(selection->message), 0.004));
     const auto ready = client.receive(wire(encode_lobby_state(host.lobby())), 0.005);
-    expect(ready.has_value() && decode_lobby_ready(ready->message).value_or(false),
-           "Remote slice client did not become lobby-ready");
+    expect(ready.has_value() && decode_lobby_ready(ready->message).value_or(false), "Remote slice client did not become lobby-ready");
     static_cast<void>(host.receive(connection, wire(ready->message), 0.006));
-    expect(client.session().clock().estimate().samples == 1,
-           "Remote slice clock exchange did not update the estimator");
+    expect(client.session().clock().estimate().samples == 1, "Remote slice clock exchange did not update the estimator");
 
     bool saw_kill = false;
     bool saw_respawn = false;
@@ -481,10 +414,7 @@ int main() try {
     std::uint32_t sent_fire_messages = 0;
     std::uint32_t sent_ability_messages = 0;
     for (std::uint32_t tick = 0; tick < 360; ++tick) {
-        SliceInput input{.axis_z = tick < 45 ? -1.0F : 0.0F,
-                         .jump = tick == 12,
-                         .fire_primary = tick >= 45,
-                         .use_primary_ability = tick == 100};
+        SliceInput input{.axis_z = tick < 45 ? -1.0F : 0.0F, .jump = tick == 12, .fire_primary = tick >= 45, .use_primary_ability = tick == 100};
         const auto& state = client.has_snapshot() ? client.snapshot() : host.snapshot();
         const float x = state.opponent.position_x - state.player.position_x;
         const float y = state.opponent.position_y - state.player.position_y;
@@ -503,21 +433,16 @@ int main() try {
             for (const auto& outgoing : client.create_input(input)) {
                 if (outgoing.message.kind == gloom::network::MessageKind::event) {
                     ++sent_fire_messages;
-                } else if (outgoing.message.kind ==
-                           gloom::network::MessageKind::ability_command) {
+                } else if (outgoing.message.kind == gloom::network::MessageKind::ability_command) {
                     ++sent_ability_messages;
-                    expect(outgoing.delivery == gloom::network::Delivery::reliable,
-                           "One-shot Hound bite was sent unreliably");
+                    expect(outgoing.delivery == gloom::network::Delivery::reliable, "One-shot Hound bite was sent unreliably");
                 }
-                const auto ignored = host.receive(connection, wire(outgoing.message),
-                                                   static_cast<double>(tick) * fixed_delta);
-                expect(ignored.empty(),
-                       "Gameplay command unexpectedly generated a direct response");
+                const auto ignored = host.receive(connection, wire(outgoing.message), static_cast<double>(tick) * fixed_delta);
+                expect(ignored.empty(), "Gameplay command unexpectedly generated a direct response");
             }
         }
         if (auto snapshot = host.tick()) {
-            static_cast<void>(client.receive(wire(snapshot->message),
-                                             static_cast<double>(tick + 1) * fixed_delta));
+            static_cast<void>(client.receive(wire(snapshot->message), static_cast<double>(tick + 1) * fixed_delta));
         }
         const auto& authoritative = host.snapshot();
         saw_kill = saw_kill || authoritative.player.kills != 0;
@@ -526,54 +451,35 @@ int main() try {
     }
 
     expect(client.has_snapshot(), "Remote slice client never received gameplay state");
-    expect(saw_kill && saw_respawn,
-           "Remote authoritative slice did not complete the kill/respawn loop");
-    expect(host.active_clients() == 1 && host.session_metrics().unauthorized_messages == 0,
-           "Remote slice session authorization reported an unexpected failure");
-    expect(client.snapshot().network.reconciliation_count > 0,
-           "Remote slice client did not reconcile prediction");
-    expect(client.reconciliation_metrics().maximum_distance < 0.02F,
-           "Burst delivery caused visible remote prediction corrections");
-    expect(sent_fire_messages > 0 && sent_fire_messages < 20,
-           "Held fire flooded the remote transport instead of respecting cooldown");
-    expect(sent_ability_messages == 1 &&
-               host.snapshot().network.authorized_ability_commands == 1,
-           "Remote Hound bite was not sequenced and authorized exactly once");
-    expect(client.snapshot().player.character == SliceCharacter::hound &&
-               client.snapshot().hud.primary_ability_ready_fraction < 1.0F,
-           "Remote snapshot did not replicate Hound and its ability cooldown");
+    expect(saw_kill && saw_respawn, "Remote authoritative slice did not complete the kill/respawn loop");
+    expect(
+        host.active_clients() == 1 && host.session_metrics().unauthorized_messages == 0, "Remote slice session authorization reported an unexpected failure");
+    expect(client.snapshot().network.reconciliation_count > 0, "Remote slice client did not reconcile prediction");
+    expect(client.reconciliation_metrics().maximum_distance < 0.02F, "Burst delivery caused visible remote prediction corrections");
+    expect(sent_fire_messages > 0 && sent_fire_messages < 20, "Held fire flooded the remote transport instead of respecting cooldown");
+    expect(sent_ability_messages == 1 && host.snapshot().network.authorized_ability_commands == 1,
+        "Remote Hound bite was not sequenced and authorized exactly once");
+    expect(client.snapshot().player.character == SliceCharacter::hound && client.snapshot().hud.primary_ability_ready_fraction < 1.0F,
+        "Remote snapshot did not replicate Hound and its ability cooldown");
 
     auto dead_snapshot = host.snapshot();
     dead_snapshot.player.life = 0.0F;
     dead_snapshot.player.alive = false;
     dead_snapshot.hud.dead = true;
-    static_cast<void>(client.receive(
-        wire(encode_slice_snapshot(dead_snapshot, 0, 10'000)), 6.5));
-    const auto dead_commands = client.create_input({.axis_x = 1.0F,
-                                                     .aim_x = 1.0F,
-                                                     .jump = true,
-                                                     .fire_primary = true});
-    expect(dead_commands.size() == 1,
-           "Dead remote player emitted a fire command");
-    const auto dead_inputs =
-        gloom::network::decode_movement_input_batch(dead_commands.front().message);
-    expect(dead_inputs && dead_inputs->back().axis_x == 0.0F &&
-               dead_inputs->back().axis_z == 0.0F && !dead_inputs->back().jump,
-           "Dead remote player continued local movement prediction");
+    static_cast<void>(client.receive(wire(encode_slice_snapshot(dead_snapshot, 0, 10'000)), 6.5));
+    const auto dead_commands = client.create_input({.axis_x = 1.0F, .aim_x = 1.0F, .jump = true, .fire_primary = true});
+    expect(dead_commands.size() == 1, "Dead remote player emitted a fire command");
+    const auto dead_inputs = gloom::network::decode_movement_input_batch(dead_commands.front().message);
+    expect(dead_inputs && dead_inputs->back().axis_x == 0.0F && dead_inputs->back().axis_z == 0.0F && !dead_inputs->back().jump,
+        "Dead remote player continued local movement prediction");
 
-    auto spoofed = gloom::network::encode_fire_command({.sequence = 10'000,
-                                                         .shooter = 2,
-                                                         .estimated_server_tick =
-                                                             host.snapshot().simulation_tick,
-                                                         .aim_x = 1.0F,
-                                                         .maximum_distance = soul_reaper_range});
+    auto spoofed = gloom::network::encode_fire_command(
+        {.sequence = 10'000, .shooter = 2, .estimated_server_tick = host.snapshot().simulation_tick, .aim_x = 1.0F, .maximum_distance = soul_reaper_range});
     static_cast<void>(host.receive(connection, wire(spoofed), 7.0));
-    expect(host.session_metrics().unauthorized_messages == 1,
-           "Remote slice host accepted a spoofed shooter entity");
+    expect(host.session_metrics().unauthorized_messages == 1, "Remote slice host accepted a spoofed shooter entity");
 
     host.disconnected(connection);
-    expect(host.active_clients() == 0,
-           "Remote slice session remained active after disconnect");
+    expect(host.active_clients() == 0, "Remote slice session remained active after disconnect");
     test_interactive_selection_ordering();
     test_injected_verified_identity();
     test_two_players_and_reconnect();

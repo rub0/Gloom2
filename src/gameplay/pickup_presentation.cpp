@@ -23,7 +23,8 @@ void PickupPresentation::update(const PickupView* const pickups, const uint32 co
     assert(pickups || count == 0);
     assert(count <= factory_pickup_count);
     assert(elapsed_seconds >= 0.0F);
-    if (count == 0) return;
+    if (count == 0)
+        return;
     if (!initialized_) {
         count_ = count;
         for (uint32 i = 0; i < count; ++i) {
@@ -35,8 +36,10 @@ void PickupPresentation::update(const PickupView* const pickups, const uint32 co
     }
     assert(count == count_);
     for (uint32 i = 0; i < count; ++i) {
-        if (previous_phase_[i] == PickupPhase::respawning && pickups[i].phase != PickupPhase::respawning) appearance_age_[i] = 0.0F;
-        else appearance_age_[i] = fminf(appearance_age_[i] + elapsed_seconds, pickup_appearance_duration);
+        if (previous_phase_[i] == PickupPhase::respawning && pickups[i].phase != PickupPhase::respawning)
+            appearance_age_[i] = 0.0F;
+        else
+            appearance_age_[i] = fminf(appearance_age_[i] + elapsed_seconds, pickup_appearance_duration);
         previous_phase_[i] = pickups[i].phase;
     }
 }

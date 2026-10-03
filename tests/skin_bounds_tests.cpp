@@ -10,15 +10,16 @@ void verify_pose(const assets::ImportedPrimitive& primitive, const assets::SkinB
     const render::BoundingSphere bounds = assets::skinned_bounds(prepared, pose);
     for (const assets::ImportedVertex& vertex : primitive.vertices) {
         const render::Vec3 point = assets::skinned_position(vertex, pose);
-        assert(hypotf(hypotf(point.x-reference.center.x, point.y-reference.center.y), point.z-reference.center.z) <= reference.radius + .001F);
-        assert(hypotf(hypotf(point.x-bounds.center.x, point.y-bounds.center.y), point.z-bounds.center.z) <= bounds.radius + .001F);
+        assert(hypotf(hypotf(point.x - reference.center.x, point.y - reference.center.y), point.z - reference.center.z) <= reference.radius + .001F);
+        assert(hypotf(hypotf(point.x - bounds.center.x, point.y - bounds.center.y), point.z - bounds.center.z) <= bounds.radius + .001F);
     }
 }
 
 void verify_rig(const assets::ImportedScene& rig) {
     uint32 checked = 0;
     for (uint32 node = 0; node < rig.nodes.size(); ++node) {
-        if (rig.nodes[node].skin == assets::no_asset_index || rig.nodes[node].mesh == assets::no_asset_index) continue;
+        if (rig.nodes[node].skin == assets::no_asset_index || rig.nodes[node].mesh == assets::no_asset_index)
+            continue;
         const assets::ImportedMesh& mesh = rig.meshes[rig.nodes[node].mesh];
         for (uint32 i = 0; i < mesh.primitive_count; ++i) {
             const assets::ImportedPrimitive& primitive = rig.primitives[mesh.first_primitive + i];
@@ -26,8 +27,10 @@ void verify_rig(const assets::ImportedScene& rig) {
             assets::prepare_skin_bounds(primitive, prepared);
             for (uint32 clip = 0; clip < rig.animations.size(); ++clip) {
                 for (uint32 sample = 0; sample <= 60; ++sample) {
-                    verify_pose(primitive, prepared, *assets::skin_pose(rig, node, assets::pose_worlds(rig,
-                        assets::sample_animation(rig, rig.animations[clip].name, rig.animations[clip].duration * sample / 60.0, false))));
+                    verify_pose(primitive, prepared,
+                        *assets::skin_pose(rig, node,
+                            assets::pose_worlds(
+                                rig, assets::sample_animation(rig, rig.animations[clip].name, rig.animations[clip].duration * sample / 60.0, false))));
                     ++checked;
                 }
             }
@@ -51,8 +54,8 @@ int main() {
         primitive.vertices[0].joints[i] = primitive.vertices[1].joints[i] = static_cast<uint16>(i);
         primitive.vertices[0].weights[i] = .1F;
         primitive.vertices[1].weights[i] = .15F;
-        pose.matrices[i] = assets::rig_matrix({.position = {static_cast<float>(i)-5, -2, 3},
-            .rotation = {0, sinf(i*.2F), 0, cosf(i*.2F)}, .scale = {-1, 2, .5F}});
+        pose.matrices[i] =
+            assets::rig_matrix({.position = {static_cast<float>(i) - 5, -2, 3}, .rotation = {0, sinf(i * .2F), 0, cosf(i * .2F)}, .scale = {-1, 2, .5F}});
     }
     assets::SkinBounds prepared;
     assets::prepare_skin_bounds(primitive, prepared);

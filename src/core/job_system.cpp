@@ -57,9 +57,7 @@ struct JobSystem::Impl {
 
         const auto elapsed = std::chrono::steady_clock::now() - started_at;
         job_execution_nanoseconds.fetch_add(
-            static_cast<std::uint64_t>(
-                std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count()),
-            std::memory_order_relaxed);
+            static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count()), std::memory_order_relaxed);
 
         completed_jobs.fetch_add(1, std::memory_order_relaxed);
         bool group_completed = false;
@@ -68,8 +66,7 @@ struct JobSystem::Impl {
             // Otherwise a completion can notify between the predicate check and the
             // waiter actually sleeping, leaving a reused task group blocked forever.
             const std::scoped_lock lock{item.group->mutex};
-            group_completed =
-                item.group->remaining.fetch_sub(1, std::memory_order_acq_rel) == 1;
+            group_completed = item.group->remaining.fetch_sub(1, std::memory_order_acq_rel) == 1;
         }
         if (group_completed) {
             item.group->completed.notify_all();
@@ -99,7 +96,9 @@ struct JobSystem::Impl {
             WorkItem item;
             {
                 std::unique_lock lock{queue_mutex};
-                work_available.wait(lock, stop_token, [this] { return !queue.empty(); });
+                work_available.wait(lock, stop_token, [this] {
+                    return !queue.empty();
+                });
                 if (queue.empty()) {
                     if (stop_token.stop_requested()) {
                         return;
@@ -121,8 +120,7 @@ bool TaskGroup::valid() const noexcept {
     return static_cast<bool>(state_);
 }
 
-JobSystem::JobSystem(const JobSystemSettings settings)
-    : settings_{settings}, impl_{std::make_unique<Impl>()} {}
+JobSystem::JobSystem(const JobSystemSettings settings) : settings_{settings}, impl_{std::make_unique<Impl>()} {}
 
 JobSystem::~JobSystem() {
     stop();
@@ -142,9 +140,7 @@ void JobSystem::start() {
     }
     const auto hardware_threads = std::thread::hardware_concurrency();
     const std::uint32_t automatic_workers = hardware_threads > 1 ? hardware_threads - 1 : 1;
-    const std::uint32_t worker_count = settings_.worker_threads == 0
-                                           ? automatic_workers
-                                           : settings_.worker_threads;
+    const std::uint32_t worker_count = settings_.worker_threads == 0 ? automatic_workers : settings_.worker_threads;
     if (worker_count == 0) {
         throw std::invalid_argument{"Job system requires at least one worker"};
     }
@@ -155,7 +151,9 @@ void JobSystem::start() {
     }
     impl_->workers.reserve(worker_count);
     for (std::uint32_t index = 0; index < worker_count; ++index) {
-        impl_->workers.emplace_back([this](const std::stop_token token) { impl_->worker_loop(token); });
+        impl_->workers.emplace_back([this](const std::stop_token token) {
+            impl_->worker_loop(token);
+        });
     }
     state_ = SubsystemState::running;
 }
@@ -169,7 +167,9 @@ void JobSystem::stop() noexcept {
     {
         std::unique_lock lock{impl_->queue_mutex};
         impl_->accepting = false;
-        impl_->idle.wait(lock, [this] { return impl_->queue.empty() && impl_->active_jobs == 0; });
+        impl_->idle.wait(lock, [this] {
+            return impl_->queue.empty() && impl_->active_jobs == 0;
+        });
     }
     for (auto& worker : impl_->workers) {
         worker.request_stop();
@@ -207,9 +207,7 @@ void JobSystem::schedule(TaskGroup& group, Job job) {
         }
         impl_->scheduled_jobs.fetch_add(1, std::memory_order_relaxed);
         std::uint64_t peak = impl_->peak_queue_depth.load(std::memory_order_relaxed);
-        while (peak < queue_depth &&
-               !impl_->peak_queue_depth.compare_exchange_weak(
-                   peak, queue_depth, std::memory_order_relaxed)) {
+        while (peak < queue_depth && !impl_->peak_queue_depth.compare_exchange_weak(peak, queue_depth, std::memory_order_relaxed)) {
         }
         impl_->work_available.notify_one();
     } catch (...) {
@@ -238,9 +236,7 @@ void JobSystem::wait(TaskGroup& group) {
     }
     const auto wait_elapsed = std::chrono::steady_clock::now() - wait_started_at;
     impl_->wait_nanoseconds.fetch_add(
-        static_cast<std::uint64_t>(
-            std::chrono::duration_cast<std::chrono::nanoseconds>(wait_elapsed).count()),
-        std::memory_order_relaxed);
+        static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(wait_elapsed).count()), std::memory_order_relaxed);
 
     std::exception_ptr exception;
     {
@@ -259,8 +255,7 @@ JobSystemMetrics JobSystem::metrics() const noexcept {
         .completed_jobs = impl_->completed_jobs.load(std::memory_order_relaxed),
         .caller_executed_jobs = impl_->caller_executed_jobs.load(std::memory_order_relaxed),
         .peak_queue_depth = impl_->peak_queue_depth.load(std::memory_order_relaxed),
-        .job_execution_nanoseconds =
-            impl_->job_execution_nanoseconds.load(std::memory_order_relaxed),
+        .job_execution_nanoseconds = impl_->job_execution_nanoseconds.load(std::memory_order_relaxed),
         .wait_nanoseconds = impl_->wait_nanoseconds.load(std::memory_order_relaxed),
         .worker_threads = static_cast<std::uint32_t>(impl_->workers.size()),
     };

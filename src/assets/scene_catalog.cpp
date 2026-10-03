@@ -10,13 +10,10 @@
 
 namespace gloom::assets {
 
-[[nodiscard]] std::expected<VirtualPath, std::string>
-dependency_source_path(const VirtualPath& source, std::string dependency) {
+[[nodiscard]] std::expected<VirtualPath, std::string> dependency_source_path(const VirtualPath& source, std::string dependency) {
     std::ranges::replace(dependency, '\\', '/');
     const auto separator = source.relative().find_last_of('/');
-    std::string combined = separator == std::string_view::npos
-                               ? std::string{}
-                               : std::string{source.relative().substr(0, separator + 1)};
+    std::string combined = separator == std::string_view::npos ? std::string{} : std::string{source.relative().substr(0, separator + 1)};
     combined += dependency;
     std::vector<std::string> parts;
     std::size_t begin = 0;
@@ -47,11 +44,9 @@ dependency_source_path(const VirtualPath& source, std::string dependency) {
     return VirtualPath::parse(result);
 }
 
-[[nodiscard]] std::expected<VirtualPath, std::string>
-dependency_cooked_path(const VirtualPath& scene, const AssetId id) {
+[[nodiscard]] std::expected<VirtualPath, std::string> dependency_cooked_path(const VirtualPath& scene, const AssetId id) {
     std::array<char, 16> hexadecimal{};
-    const auto conversion =
-        std::to_chars(hexadecimal.data(), hexadecimal.data() + hexadecimal.size(), id.value, 16);
+    const auto conversion = std::to_chars(hexadecimal.data(), hexadecimal.data() + hexadecimal.size(), id.value, 16);
     const auto separator = scene.relative().find_last_of('/');
     std::string result{scene.mount()};
     result += ":/";
@@ -64,10 +59,8 @@ dependency_cooked_path(const VirtualPath& scene, const AssetId id) {
     return VirtualPath::parse(result);
 }
 
-std::expected<DiscoveredSceneCatalog, std::string>
-discover_cooked_scene(const VirtualFileSystem& filesystem,
-                      const VirtualPath& source,
-                      const VirtualPath& cooked) {
+std::expected<DiscoveredSceneCatalog, std::string> discover_cooked_scene(
+    const VirtualFileSystem& filesystem, const VirtualPath& source, const VirtualPath& cooked) {
     const auto envelope = filesystem.read(cooked);
     if (!envelope) {
         return std::unexpected{envelope.error()};
@@ -109,26 +102,25 @@ discover_cooked_scene(const VirtualFileSystem& filesystem,
         }
         const auto dependency = decode_cooked_asset(*dependency_envelope);
         if (!dependency || dependency->id != id || dependency->type != AssetType::texture) {
-            return std::unexpected{dependency ? "Cooked scene dependency is inconsistent"
-                                              : dependency.error()};
+            return std::unexpected{dependency ? "Cooked scene dependency is inconsistent" : dependency.error()};
         }
         result.catalog.add({.id = id,
-                            .type = AssetType::texture,
-                            .source = *dependency_source,
-                            .cooked = *dependency_cooked,
-                            .source_fingerprint = dependency->source_fingerprint});
+            .type = AssetType::texture,
+            .source = *dependency_source,
+            .cooked = *dependency_cooked,
+            .source_fingerprint = dependency->source_fingerprint});
     }
-    if (found.size() != scene_asset->dependencies.size() ||
-        !std::ranges::all_of(scene_asset->dependencies,
-                            [&](const AssetId id) { return found.contains(id); })) {
+    if (found.size() != scene_asset->dependencies.size() || !std::ranges::all_of(scene_asset->dependencies, [&](const AssetId id) {
+            return found.contains(id);
+        })) {
         return std::unexpected{"Cooked scene dependency set does not match its imported images"};
     }
     result.catalog.add({.id = scene_asset->id,
-                        .type = AssetType::scene,
-                        .source = source,
-                        .cooked = cooked,
-                        .source_fingerprint = scene_asset->source_fingerprint,
-                        .dependencies = scene_asset->dependencies});
+        .type = AssetType::scene,
+        .source = source,
+        .cooked = cooked,
+        .source_fingerprint = scene_asset->source_fingerprint,
+        .dependencies = scene_asset->dependencies});
     return result;
 }
 

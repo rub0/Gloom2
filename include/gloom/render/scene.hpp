@@ -80,7 +80,7 @@ struct RenderInstance {
     std::shared_ptr<const SkinPose> previous_pose;
     RenderAssetId arms_mesh;
     bool particle{false};
-    float distortion{0},soft_distance{0};
+    float distortion{0}, soft_distance{0};
     // 0xff keeps the material mode. Presentation effects may force one instance
     // through the blend/additive pass without duplicating its material textures.
     std::uint8_t alpha_mode_override{0xff};
@@ -104,9 +104,7 @@ struct RenderSnapshot {
     const UiDrawData* ui{nullptr};
 };
 
-[[nodiscard]] Transform interpolate(const Transform& previous,
-                                    const Transform& current,
-                                    float alpha) noexcept;
+[[nodiscard]] Transform interpolate(const Transform& previous, const Transform& current, float alpha) noexcept;
 [[nodiscard]] Transform camera_relative_transform(const Camera& camera, Vec3 offset, Vec3 scale);
 // For TRS, inverse-transpose of the linear part is reciprocal scale then rotation.
 [[nodiscard]] Transform normal_transform(const Transform& transform) noexcept;

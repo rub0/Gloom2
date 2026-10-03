@@ -18,15 +18,14 @@
 
 namespace {
 void expect(bool value, const char* message) {
-    if (!value) throw std::runtime_error{message};
+    if (!value)
+        throw std::runtime_error{message};
 }
 std::uint64_t now_ms() {
-    return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count());
+    return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 void certificate(const std::filesystem::path& cert_path, const std::filesystem::path& key_path) {
-    std::unique_ptr<EVP_PKEY, decltype(&EVP_PKEY_free)> key{
-        EVP_PKEY_Q_keygen(nullptr, nullptr, "RSA", 2048), EVP_PKEY_free};
+    std::unique_ptr<EVP_PKEY, decltype(&EVP_PKEY_free)> key{EVP_PKEY_Q_keygen(nullptr, nullptr, "RSA", 2048), EVP_PKEY_free};
     std::unique_ptr<X509, decltype(&X509_free)> cert{X509_new(), X509_free};
     expect(key && cert, "Could not create ephemeral TLS key");
     X509_set_version(cert.get(), 2);
@@ -35,13 +34,11 @@ void certificate(const std::filesystem::path& cert_path, const std::filesystem::
     X509_gmtime_adj(X509_getm_notAfter(cert.get()), 3600);
     X509_set_pubkey(cert.get(), key.get());
     auto* name = X509_get_subject_name(cert.get());
-    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC,
-                              reinterpret_cast<const unsigned char*>("localhost"), -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, reinterpret_cast<const unsigned char*>("localhost"), -1, -1, 0);
     X509_set_issuer_name(cert.get(), name);
     X509V3_CTX context{};
     X509V3_set_ctx(&context, cert.get(), cert.get(), nullptr, nullptr, 0);
-    for (const auto& [nid, value] : {std::pair{NID_basic_constraints, "critical,CA:TRUE"},
-                                   std::pair{NID_subject_alt_name, "DNS:localhost,IP:127.0.0.1"}}) {
+    for (const auto& [nid, value] : {std::pair{NID_basic_constraints, "critical,CA:TRUE"}, std::pair{NID_subject_alt_name, "DNS:localhost,IP:127.0.0.1"}}) {
         auto* ext = X509V3_EXT_conf_nid(nullptr, &context, nid, value);
         expect(ext != nullptr, "Could not create TLS extension");
         X509_add_ext(cert.get(), ext, -1);
@@ -52,16 +49,14 @@ void certificate(const std::filesystem::path& cert_path, const std::filesystem::
     expect(cert_file && PEM_write_bio_X509(cert_file, cert.get()) == 1, "Could not write certificate");
     BIO_free(cert_file);
     auto* key_file = BIO_new_file(key_path.string().c_str(), "w");
-    expect(key_file && PEM_write_bio_PrivateKey(key_file, key.get(), nullptr, nullptr, 0, nullptr, nullptr) == 1,
-           "Could not write private key");
+    expect(key_file && PEM_write_bio_PrivateKey(key_file, key.get(), nullptr, nullptr, 0, nullptr, nullptr) == 1, "Could not write private key");
     BIO_free(key_file);
 }
 
 struct Process {
     HANDLE process{nullptr}, output{nullptr};
     int port{0};
-    Process(const std::filesystem::path& executable, const std::filesystem::path& root,
-            bool startup_failure = false) {
+    Process(const std::filesystem::path& executable, const std::filesystem::path& root, bool startup_failure = false) {
         SECURITY_ATTRIBUTES sa{sizeof(sa), nullptr, TRUE};
         HANDLE writer = nullptr;
         expect(CreatePipe(&output, &writer, &sa, 0) != 0, "CreatePipe failed");
@@ -71,12 +66,13 @@ struct Process {
         startup.dwFlags = STARTF_USESTDHANDLES;
         startup.hStdOutput = startup.hStdError = writer;
         startup.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-        const auto quote = [](const std::filesystem::path& p) { return L"\"" + p.wstring() + L"\""; };
-        std::wstring command = quote(executable) + L" 127.0.0.1 0 " + quote(root / "cert.pem") + L" " +
-            quote(root / "key.pem") + L" " + quote(root / "matches.store") + L" --run-for-ms 10000";
+        const auto quote = [](const std::filesystem::path& p) {
+            return L"\"" + p.wstring() + L"\"";
+        };
+        std::wstring command = quote(executable) + L" 127.0.0.1 0 " + quote(root / "cert.pem") + L" " + quote(root / "key.pem") + L" " +
+                               quote(root / "matches.store") + L" --run-for-ms 10000";
         PROCESS_INFORMATION info{};
-        const auto started = CreateProcessW(nullptr, command.data(), nullptr, nullptr, TRUE,
-                                             CREATE_NO_WINDOW, nullptr, nullptr, &startup, &info);
+        const auto started = CreateProcessW(nullptr, command.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, nullptr, &startup, &info);
         CloseHandle(writer);
         expect(started != 0, "Could not start HTTPS executable");
         process = info.hProcess;
@@ -86,10 +82,12 @@ struct Process {
         while (std::chrono::steady_clock::now() < deadline && line.find('\n') == std::string::npos) {
             DWORD available = 0;
             if (PeekNamedPipe(output, nullptr, 0, nullptr, &available, nullptr) && available) {
-                char buffer[4096]; DWORD count = 0;
+                char buffer[4096];
+                DWORD count = 0;
                 ReadFile(output, buffer, (std::min)(available, DWORD{sizeof(buffer)}), &count, nullptr);
                 line.append(buffer, count);
-            } else std::this_thread::sleep_for(std::chrono::milliseconds{10});
+            } else
+                std::this_thread::sleep_for(std::chrono::milliseconds{10});
         }
         const auto marker = line.find("127.0.0.1:");
         if (startup_failure) {
@@ -114,10 +112,12 @@ struct Process {
     }
     ~Process() {
         if (process) {
-            if (WaitForSingleObject(process, 0) != WAIT_OBJECT_0) TerminateProcess(process, 1);
+            if (WaitForSingleObject(process, 0) != WAIT_OBJECT_0)
+                TerminateProcess(process, 1);
             CloseHandle(process);
         }
-        if (output) CloseHandle(output);
+        if (output)
+            CloseHandle(output);
     }
 };
 
@@ -128,7 +128,8 @@ void grant_policy_tests(const std::filesystem::path& root) {
     auto verifier = [](std::string_view token, std::uint64_t) -> std::expected<MatchVerifiedPrincipal, std::string> {
         if (token == "individual-alice-credential" || token == "rotated-alice-credential")
             return MatchVerifiedPrincipal{"alice", 100'000};
-        if (token == "individual-bob-credential") return MatchVerifiedPrincipal{"bob", 100'000};
+        if (token == "individual-bob-credential")
+            return MatchVerifiedPrincipal{"bob", 100'000};
         return std::unexpected{"sensitive-provider-error-must-stay-private"};
     };
     Grants grants{verifier};
@@ -136,26 +137,19 @@ void grant_policy_tests(const std::filesystem::path& root) {
     auto alice = grants.exchange("individual-alice-credential", 1000, start);
     auto renewal = grants.exchange("rotated-alice-credential", 1000, start);
     auto bob = grants.exchange("individual-bob-credential", 1000, start);
-    expect(alice && renewal && bob && alice->token != renewal->token && alice->lifetime_ms == 60'000,
-           "Grant issuance failed");
+    expect(alice && renewal && bob && alice->token != renewal->token && alice->lifetime_ms == 60'000, "Grant issuance failed");
     for (int i = 0; i < 20; ++i)
-        expect(grants.consume(i % 2 ? alice->token : renewal->token, start) == MatchGrantAccess::allowed,
-               "Principal burst was too small");
-    expect(grants.consume(renewal->token, start) == MatchGrantAccess::throttled,
-           "Multiple grants multiplied principal quota");
-    const auto exhausted_renewal=grants.exchange("rotated-alice-credential",1000,start);
-    expect(exhausted_renewal && grants.consume(exhausted_renewal->token,start)==MatchGrantAccess::throttled,
-           "Renewal reset an exhausted principal quota");
+        expect(grants.consume(i % 2 ? alice->token : renewal->token, start) == MatchGrantAccess::allowed, "Principal burst was too small");
+    expect(grants.consume(renewal->token, start) == MatchGrantAccess::throttled, "Multiple grants multiplied principal quota");
+    const auto exhausted_renewal = grants.exchange("rotated-alice-credential", 1000, start);
+    expect(exhausted_renewal && grants.consume(exhausted_renewal->token, start) == MatchGrantAccess::throttled, "Renewal reset an exhausted principal quota");
     expect(grants.consume(bob->token, start) == MatchGrantAccess::allowed, "Principal quotas were not isolated");
-    expect(grants.consume(alice->token, start + std::chrono::milliseconds{199}) == MatchGrantAccess::throttled,
-           "Principal refilled early");
-    expect(grants.consume(alice->token, start + std::chrono::milliseconds{200}) == MatchGrantAccess::allowed,
-           "Principal did not refill");
+    expect(grants.consume(alice->token, start + std::chrono::milliseconds{199}) == MatchGrantAccess::throttled, "Principal refilled early");
+    expect(grants.consume(alice->token, start + std::chrono::milliseconds{200}) == MatchGrantAccess::allowed, "Principal did not refill");
     expect(grants.consume(alice->token, start + std::chrono::milliseconds{59'999}) == MatchGrantAccess::allowed &&
-           grants.consume(alice->token, start + std::chrono::milliseconds{60'000}) == MatchGrantAccess::invalid,
-           "Grant expiry boundary failed");
-    expect(grants.revoke("alice").has_value() && !grants.exchange("individual-alice-credential", 1000, start),
-           "Revoked principal could exchange again");
+               grants.consume(alice->token, start + std::chrono::milliseconds{60'000}) == MatchGrantAccess::invalid,
+        "Grant expiry boundary failed");
+    expect(grants.revoke("alice").has_value() && !grants.exchange("individual-alice-credential", 1000, start), "Revoked principal could exchange again");
     expect(grants.consume(renewal->token, start) == MatchGrantAccess::invalid, "Revocation missed another grant");
 
     Grants bounded{verifier};
@@ -165,17 +159,19 @@ void grant_policy_tests(const std::filesystem::path& root) {
     expect(!fifth && fifth.error() == 429, "Active grant cap exceeded");
     auto short_lived = bounded.exchange("individual-bob-credential", 99'950, start);
     expect(short_lived && short_lived->lifetime_ms == 50 &&
-           bounded.consume(short_lived->token, start + std::chrono::milliseconds{50}) == MatchGrantAccess::invalid,
-           "Grant outlived trusted identity");
+               bounded.consume(short_lived->token, start + std::chrono::milliseconds{50}) == MatchGrantAccess::invalid,
+        "Grant outlived trusted identity");
     Grants concurrent{verifier};
     const auto token = concurrent.exchange("individual-alice-credential", 1000, start)->token;
     std::atomic_uint successes{0};
     {
         std::vector<std::jthread> workers;
-        for (int i = 0; i < 8; ++i) workers.emplace_back([&] {
-            for (int j = 0; j < 50; ++j)
-                if (concurrent.consume(token, start) == MatchGrantAccess::allowed) ++successes;
-        });
+        for (int i = 0; i < 8; ++i)
+            workers.emplace_back([&] {
+                for (int j = 0; j < 50; ++j)
+                    if (concurrent.consume(token, start) == MatchGrantAccess::allowed)
+                        ++successes;
+            });
     }
     expect(successes == 20, "Concurrent grants exceeded principal quota");
     const auto path = root / "revocation-policy.store";
@@ -184,9 +180,8 @@ void grant_policy_tests(const std::filesystem::path& root) {
         const auto issued = durable.exchange("individual-alice-credential", 1000, start);
         std::filesystem::create_directory(path.string() + ".tmp");
         const auto failed = durable.revoke("alice");
-        expect(!failed && failed.error() == 503 &&
-               durable.consume(issued->token, start) == MatchGrantAccess::invalid,
-               "Failed durable revocation was acknowledged or left access active");
+        expect(!failed && failed.error() == 503 && durable.consume(issued->token, start) == MatchGrantAccess::invalid,
+            "Failed durable revocation was acknowledged or left access active");
         std::filesystem::remove(path.string() + ".tmp");
         expect(durable.revoke("alice").has_value(), "Durable revocation retry failed");
     }
@@ -203,13 +198,19 @@ void grant_policy_tests(const std::filesystem::path& root) {
     expect(!excess && excess.error() == 503, "Principal memory cap exceeded");
     std::ofstream{path, std::ios::trunc} << "corrupt\n";
     bool refused = false;
-    try { Grants corrupt{verifier, path}; } catch (const std::exception&) { refused = true; }
+    try {
+        Grants corrupt{verifier, path};
+    } catch (const std::exception&) {
+        refused = true;
+    }
     expect(refused, "Corrupt revocations did not fail startup");
 
     MatchReaderCredential cache;
     auto time = start;
     unsigned calls = 0;
-    const auto clock = [&] { return time; };
+    const auto clock = [&] {
+        return time;
+    };
     const auto acquire = [&]() -> std::expected<std::string, std::string> {
         ++calls;
         return "gr1_" + std::string(64, static_cast<char>('a' + calls)) + "\t60000";
@@ -220,19 +221,28 @@ void grant_policy_tests(const std::filesystem::path& root) {
     time += std::chrono::milliseconds{1};
     expect(cache.acquire(acquire, clock) != first && calls == 2, "Reader did not renew at deadline");
     time += std::chrono::seconds{59};
-    expect(!cache.acquire([]() -> std::expected<std::string, std::string> {
-        return std::unexpected{"Match service returned HTTP 401"};
-    }, clock), "Reader reused expired grant on renewal failure");
-    for (const auto& bad : {std::string{"malformed"}, "gr1_" + std::string(64, 'a') + "\t60001",
-                           "gr1_" + std::string(64, 'a') + "\t0",
-                           "gr1_" + std::string(64, 'a') + "\t60000\n",
-                           "gr1_" + std::string(64, 'x') + "\t60000"}) {
-        expect(!cache.acquire([&]() -> std::expected<std::string, std::string> { return bad; }, clock),
-               "Malformed grant response accepted");
+    expect(!cache.acquire(
+               []() -> std::expected<std::string, std::string> {
+                   return std::unexpected{"Match service returned HTTP 401"};
+               },
+               clock),
+        "Reader reused expired grant on renewal failure");
+    for (const auto& bad : {std::string{"malformed"}, "gr1_" + std::string(64, 'a') + "\t60001", "gr1_" + std::string(64, 'a') + "\t0",
+             "gr1_" + std::string(64, 'a') + "\t60000\n", "gr1_" + std::string(64, 'x') + "\t60000"}) {
+        expect(!cache.acquire(
+                   [&]() -> std::expected<std::string, std::string> {
+                       return bad;
+                   },
+                   clock),
+            "Malformed grant response accepted");
     }
-    expect(!cache.acquire([&]() -> std::expected<std::string, std::string> {
-        time += std::chrono::seconds{61}; return "gr1_" + std::string(64, 'a') + "\t60000";
-    }, clock), "Slow exchange returned an already expired grant");
+    expect(!cache.acquire(
+               [&]() -> std::expected<std::string, std::string> {
+                   time += std::chrono::seconds{61};
+                   return "gr1_" + std::string(64, 'a') + "\t60000";
+               },
+               clock),
+        "Slow exchange returned an already expired grant");
 }
 }
 
@@ -251,14 +261,15 @@ int main(int argc, char** argv) try {
     std::atomic_uint accepted{0};
     {
         std::vector<std::jthread> workers;
-        for (int i = 0; i < 8; ++i) workers.emplace_back([&] {
-            for (int request = 0; request < 100; ++request)
-                if (concurrent.consume(start)) ++accepted;
-        });
+        for (int i = 0; i < 8; ++i)
+            workers.emplace_back([&] {
+                for (int request = 0; request < 100; ++request)
+                    if (concurrent.consume(start))
+                        ++accepted;
+            });
     }
     expect(accepted == 60, "Concurrent requests exceeded shared burst");
-    const auto root = std::filesystem::temp_directory_path() /
-        ("gloom-https-test-" + std::to_string(GetCurrentProcessId()) + "-" + std::to_string(now_ms()));
+    const auto root = std::filesystem::temp_directory_path() / ("gloom-https-test-" + std::to_string(GetCurrentProcessId()) + "-" + std::to_string(now_ms()));
     std::filesystem::create_directory(root);
     grant_policy_tests(root);
     certificate(root / "cert.pem", root / "key.pem");
@@ -268,30 +279,43 @@ int main(int argc, char** argv) try {
     SetEnvironmentVariableW(L"GLOOM_MATCH_READER_TOKEN", nullptr);
     SetEnvironmentVariableW(L"GLOOM_MATCH_PUBLISHER_TOKEN", nullptr);
     SetEnvironmentVariableW(L"GLOOM_MATCH_IDENTITIES_FILE", nullptr);
-    { Process invalid{argv[1], root, true}; }
+    {
+        Process invalid{argv[1], root, true};
+    }
     SetEnvironmentVariableW(L"GLOOM_MATCH_READER_TOKEN", L"test-reader-only-do-not-deploy");
-    { Process invalid{argv[1], root, true}; }
+    {
+        Process invalid{argv[1], root, true};
+    }
     SetEnvironmentVariableW(L"GLOOM_MATCH_PUBLISHER_TOKEN", L"test-token-only-do-not-deploy");
-    { Process invalid{argv[1], root, true}; }
+    {
+        Process invalid{argv[1], root, true};
+    }
     const auto identities = root / "identities.txt";
     SetEnvironmentVariableW(L"GLOOM_MATCH_IDENTITIES_FILE", identities.c_str());
-    { Process invalid{argv[1], root, true}; }
+    {
+        Process invalid{argv[1], root, true};
+    }
     const auto write_identities = [&](bool malformed = false, bool expiring = false) {
         std::ofstream output{identities, std::ios::binary};
         output << "GLOOM_MATCH_IDENTITIES_V1\n";
         for (const auto* id : {"alice", "bob", "charlie"}) {
-            output << id << '\t' << gloom::backends::match_credential_digest(std::string{"individual-credential-"} + id)
-                   << '\t' << now_ms() + 3'600'000 << '\n';
+            output << id << '\t' << gloom::backends::match_credential_digest(std::string{"individual-credential-"} + id) << '\t' << now_ms() + 3'600'000
+                   << '\n';
         }
-        if (expiring) output << "dave\t" << gloom::backends::match_credential_digest("individual-credential-dave")
-                             << '\t' << now_ms() + 500 << '\n';
-        if (malformed) output << "invalid trailing record\n";
+        if (expiring)
+            output << "dave\t" << gloom::backends::match_credential_digest("individual-credential-dave") << '\t' << now_ms() + 500 << '\n';
+        if (malformed)
+            output << "invalid trailing record\n";
     };
     write_identities(true);
-    { Process invalid{argv[1], root, true}; }
+    {
+        Process invalid{argv[1], root, true};
+    }
     write_identities();
     SetEnvironmentVariableW(L"GLOOM_MATCH_PUBLISHER_TOKEN", L"too-short");
-    { Process invalid{argv[1], root, true}; }
+    {
+        Process invalid{argv[1], root, true};
+    }
     SetEnvironmentVariableW(L"GLOOM_MATCH_PUBLISHER_TOKEN", L"test-token-only-do-not-deploy");
     const httplib::Headers headers{{"Authorization", "Bearer test-token-only-do-not-deploy"}};
     httplib::Headers reader;
@@ -300,13 +324,12 @@ int main(int argc, char** argv) try {
     };
     const auto exchange = [&](httplib::SSLClient& client, std::string_view id) {
         const auto issued = client.Post("/reader-grants/exchange", identity(id), "", "text/plain");
-        expect(issued && issued->status == 200 && issued->body.ends_with("\t60000") &&
-               issued->get_header_value("Cache-Control") == "no-store", "Identity exchange failed");
+        expect(issued && issued->status == 200 && issued->body.ends_with("\t60000") && issued->get_header_value("Cache-Control") == "no-store",
+            "Identity exchange failed");
         return httplib::Headers{{"Authorization", "Bearer " + issued->body.substr(0, issued->body.find('\t'))}};
     };
     gloom::gameplay::SliceStoredMatch record{
-        {.match_id = "test-duel", .instance_id = "server-a", .display_name = "TLS duel",
-         .endpoint = "127.0.0.1:27020"}, now_ms() + 30'000, "server-a:1"};
+        {.match_id = "test-duel", .instance_id = "server-a", .display_name = "TLS duel", .endpoint = "127.0.0.1:27020"}, now_ms() + 30'000, "server-a:1"};
     auto wire = gloom::gameplay::encode_stored_match(record);
     {
         Process host{argv[1], root};
@@ -327,7 +350,8 @@ int main(int argc, char** argv) try {
         expect(response && response->status == 400, "Client selected a principal in exchange body");
         response = client.Post("/reader-grants/exchange?principal=bob", identity("alice"), "", "text/plain");
         expect(response && response->status == 400, "Client selected a principal in exchange query");
-        auto duplicate = identity("alice"); duplicate.emplace("Authorization", "Bearer individual-credential-bob");
+        auto duplicate = identity("alice");
+        duplicate.emplace("Authorization", "Bearer individual-credential-bob");
         response = client.Post("/reader-grants/exchange", duplicate, "", "text/plain");
         expect(response && response->status == 401, "Duplicate exchange authorization accepted");
         write_identities(true);
@@ -386,8 +410,7 @@ int main(int argc, char** argv) try {
         auto impostor = record;
         impostor.advertisement.instance_id = "server-b";
         impostor.mutation_id = "server-b:1";
-        response = client.Put("/matches/test-duel?now_ms=999999999999999", headers,
-                              gloom::gameplay::encode_stored_match(impostor), "text/plain");
+        response = client.Put("/matches/test-duel?now_ms=999999999999999", headers, gloom::gameplay::encode_stored_match(impostor), "text/plain");
         expect(response && response->status == 409, "Client clock bypassed ownership");
         response = client.Put("/matches/test-duel", headers, "broken", "text/plain");
         expect(response && response->status == 400, "Malformed record accepted");
@@ -400,8 +423,7 @@ int main(int argc, char** argv) try {
         auto expiring = record;
         expiring.advertisement.match_id = "expiring";
         expiring.expires_at_ms = now_ms() + 200;
-        response = client.Put("/matches/expiring", headers,
-                              gloom::gameplay::encode_stored_match(expiring), "text/plain");
+        response = client.Put("/matches/expiring", headers, gloom::gameplay::encode_stored_match(expiring), "text/plain");
         expect(response && response->status == 204, "Short lease failed");
         std::this_thread::sleep_for(std::chrono::milliseconds{250});
         response = client.Get("/matches/expiring", headers);
@@ -424,27 +446,31 @@ int main(int argc, char** argv) try {
         response = client.Get("/ready", headers);
         expect(response && response->status == 200, "Readiness did not recover");
         bool throttled = false;
-        auto drained_at=std::chrono::steady_clock::now();
+        auto drained_at = std::chrono::steady_clock::now();
         client.set_keep_alive(true);
         for (int i = 0; i < 150; ++i) {
-            drained_at=std::chrono::steady_clock::now();
+            drained_at = std::chrono::steady_clock::now();
             response = client.Get("/matches", reader);
             expect(response && (response->status == 200 || response->status == 429), "Unexpected reader response");
-            if (response->status == 429) { throttled = true; break; }
+            if (response->status == 429) {
+                throttled = true;
+                break;
+            }
         }
         expect(throttled && response->get_header_value("Retry-After") == "1", "Reader burst not throttled");
         const auto renewed = exchange(client, "alice");
         // TLS exchange/OS scheduling can take >200 ms, legitimately refilling
         // tokens at 5/s. Bound successes by elapsed refill; do not assume zero
         // wall time. The injected-clock check above proves the exact boundary.
-        for(int accepted=0;accepted<150;++accepted) {
-            response=client.Get("/matches",renewed);
-            expect(response && (response->status==200 || response->status==429),"Unexpected renewed reader response");
-            if(response->status==429)break;
-            const auto elapsed=std::chrono::duration<double>(std::chrono::steady_clock::now()-drained_at).count();
-            expect(static_cast<double>(accepted+1)<=std::ceil(elapsed*5.0),"Renewal reset principal quota");
+        for (int accepted = 0; accepted < 150; ++accepted) {
+            response = client.Get("/matches", renewed);
+            expect(response && (response->status == 200 || response->status == 429), "Unexpected renewed reader response");
+            if (response->status == 429)
+                break;
+            const auto elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - drained_at).count();
+            expect(static_cast<double>(accepted + 1) <= std::ceil(elapsed * 5.0), "Renewal reset principal quota");
         }
-        expect(response && response->status==429,"Renewed reader burst was not throttled");
+        expect(response && response->status == 429, "Renewed reader burst was not throttled");
         const auto bob = exchange(client, "bob");
         response = client.Get("/matches", bob);
         expect(response && response->status == 200, "Alice exhausted Bob's quota");
@@ -457,7 +483,10 @@ int main(int argc, char** argv) try {
         for (int i = 0; i < 100; ++i) {
             response = client.Get("/health");
             expect(response && (response->status == 401 || response->status == 429), "Unexpected anonymous response");
-            if (response->status == 429) { throttled = true; break; }
+            if (response->status == 429) {
+                throttled = true;
+                break;
+            }
         }
         expect(throttled, "Unauthenticated burst not throttled");
         response = client.Get("/ready", headers);
@@ -466,7 +495,10 @@ int main(int argc, char** argv) try {
         for (int i = 0; i < 100; ++i) {
             response = client.Post("/reader-grants/exchange", identity("unknown"), "", "text/plain");
             expect(response && (response->status == 401 || response->status == 429), "Unexpected exchange failure");
-            if (response->status == 429) { throttled = true; break; }
+            if (response->status == 429) {
+                throttled = true;
+                break;
+            }
         }
         expect(throttled && response->get_header_value("Retry-After") == "1", "Exchange budget not enforced");
         response = client.Get("/matches", bob);
@@ -497,7 +529,10 @@ int main(int argc, char** argv) try {
         for (int i = 0; i < 100; ++i) {
             response = client.Get("/health", headers);
             expect(response && (response->status == 200 || response->status == 429), "Unexpected publisher response");
-            if (response->status == 429) { throttled = true; break; }
+            if (response->status == 429) {
+                throttled = true;
+                break;
+            }
         }
         expect(throttled, "Publisher burst not throttled");
         response = client.Get("/matches", reader);

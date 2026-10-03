@@ -17,8 +17,7 @@ constexpr std::size_t welcome_payload_size = sizeof(std::uint64_t) * 5;
 constexpr std::size_t clock_request_payload_size = sizeof(std::uint64_t) * 2;
 constexpr std::size_t clock_response_payload_size = sizeof(std::uint64_t) * 4;
 
-template <typename Integer>
-void append_integer(std::vector<std::byte>& output, const Integer value) {
+template <typename Integer> void append_integer(std::vector<std::byte>& output, const Integer value) {
     static_assert(std::is_unsigned_v<Integer>);
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
         output.push_back(static_cast<std::byte>(value >> (index * 8)));
@@ -29,20 +28,16 @@ void append_double(std::vector<std::byte>& output, const double value) {
     append_integer(output, std::bit_cast<std::uint64_t>(value));
 }
 
-template <typename Integer>
-[[nodiscard]] Integer read_integer(const std::span<const std::byte> input,
-                                   std::size_t& offset) {
+template <typename Integer> [[nodiscard]] Integer read_integer(const std::span<const std::byte> input, std::size_t& offset) {
     static_assert(std::is_unsigned_v<Integer>);
     Integer value = 0;
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
-        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++]))
-                 << (index * 8);
+        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++])) << (index * 8);
     }
     return value;
 }
 
-[[nodiscard]] double read_double(const std::span<const std::byte> input,
-                                 std::size_t& offset) {
+[[nodiscard]] double read_double(const std::span<const std::byte> input, std::size_t& offset) {
     return std::bit_cast<double>(read_integer<std::uint64_t>(input, offset));
 }
 
@@ -50,8 +45,7 @@ template <typename Integer>
     return std::isfinite(value) && value >= 0.0;
 }
 
-[[nodiscard]] ProtocolMessage encode_session_event(const std::uint32_t sequence,
-                                                   const std::span<const std::byte> payload) {
+[[nodiscard]] ProtocolMessage encode_session_event(const std::uint32_t sequence, const std::span<const std::byte> payload) {
     ProtocolMessage message;
     message.kind = MessageKind::event;
     message.sequence = sequence;
@@ -64,8 +58,7 @@ template <typename Integer>
 } // namespace
 
 ProtocolMessage encode_client_hello(const ClientHello& hello) {
-    if (hello.client_nonce == 0 || hello.credential.size() >
-                                       std::numeric_limits<std::uint16_t>::max()) {
+    if (hello.client_nonce == 0 || hello.credential.size() > std::numeric_limits<std::uint16_t>::max()) {
         throw std::invalid_argument{"Client hello is invalid"};
     }
     ProtocolMessage message;
@@ -80,8 +73,7 @@ ProtocolMessage encode_client_hello(const ClientHello& hello) {
     return message;
 }
 
-std::expected<ClientHello, std::string>
-decode_client_hello(const ProtocolMessage& message) {
+std::expected<ClientHello, std::string> decode_client_hello(const ProtocolMessage& message) {
     if (message.kind != MessageKind::client_hello || message.payload.size() < hello_fixed_size) {
         return std::unexpected{"Message is not a client hello"};
     }
@@ -89,8 +81,7 @@ decode_client_hello(const ProtocolMessage& message) {
     ClientHello hello;
     hello.client_nonce = read_integer<std::uint64_t>(message.payload, offset);
     hello.resume_token = read_integer<std::uint64_t>(message.payload, offset);
-    const std::size_t credential_size =
-        read_integer<std::uint16_t>(message.payload, offset);
+    const std::size_t credential_size = read_integer<std::uint16_t>(message.payload, offset);
     if (hello.client_nonce == 0 || credential_size != message.payload.size() - offset) {
         return std::unexpected{"Client hello fields are invalid"};
     }
@@ -102,8 +93,7 @@ decode_client_hello(const ProtocolMessage& message) {
 }
 
 ProtocolMessage encode_server_welcome(const ServerWelcome& welcome) {
-    if (welcome.client_nonce == 0 || welcome.session == invalid_session ||
-        welcome.controlled_entity == 0 || welcome.resume_token == 0 ||
+    if (welcome.client_nonce == 0 || welcome.session == invalid_session || welcome.controlled_entity == 0 || welcome.resume_token == 0 ||
         !valid_time(welcome.server_time_seconds)) {
         throw std::invalid_argument{"Server welcome is invalid"};
     }
@@ -119,10 +109,8 @@ ProtocolMessage encode_server_welcome(const ServerWelcome& welcome) {
     return message;
 }
 
-std::expected<ServerWelcome, std::string>
-decode_server_welcome(const ProtocolMessage& message) {
-    if (message.kind != MessageKind::server_welcome ||
-        message.payload.size() != welcome_payload_size) {
+std::expected<ServerWelcome, std::string> decode_server_welcome(const ProtocolMessage& message) {
+    if (message.kind != MessageKind::server_welcome || message.payload.size() != welcome_payload_size) {
         return std::unexpected{"Message is not a server welcome"};
     }
     std::size_t offset = 0;
@@ -134,8 +122,7 @@ decode_server_welcome(const ProtocolMessage& message) {
         .server_tick = message.simulation_tick,
         .server_time_seconds = read_double(message.payload, offset),
     };
-    if (welcome.client_nonce == 0 || welcome.session == invalid_session ||
-        welcome.controlled_entity == 0 || welcome.resume_token == 0 ||
+    if (welcome.client_nonce == 0 || welcome.session == invalid_session || welcome.controlled_entity == 0 || welcome.resume_token == 0 ||
         !valid_time(welcome.server_time_seconds)) {
         return std::unexpected{"Server welcome fields are invalid"};
     }
@@ -154,15 +141,12 @@ ProtocolMessage encode_clock_request(const ClockRequest& request) {
     return message;
 }
 
-std::expected<ClockRequest, std::string>
-decode_clock_request(const ProtocolMessage& message) {
-    if (message.kind != MessageKind::clock_request ||
-        message.payload.size() != clock_request_payload_size) {
+std::expected<ClockRequest, std::string> decode_clock_request(const ProtocolMessage& message) {
+    if (message.kind != MessageKind::clock_request || message.payload.size() != clock_request_payload_size) {
         return std::unexpected{"Message is not a clock request"};
     }
     std::size_t offset = 0;
-    ClockRequest request{.nonce = read_integer<std::uint64_t>(message.payload, offset),
-                         .client_send_seconds = read_double(message.payload, offset)};
+    ClockRequest request{.nonce = read_integer<std::uint64_t>(message.payload, offset), .client_send_seconds = read_double(message.payload, offset)};
     if (request.nonce == 0 || !valid_time(request.client_send_seconds)) {
         return std::unexpected{"Clock request fields are invalid"};
     }
@@ -170,10 +154,8 @@ decode_clock_request(const ProtocolMessage& message) {
 }
 
 ProtocolMessage encode_clock_response(const ClockResponse& response) {
-    if (response.nonce == 0 || !valid_time(response.client_send_seconds) ||
-        !valid_time(response.server_receive_seconds) ||
-        !valid_time(response.server_send_seconds) ||
-        response.server_send_seconds < response.server_receive_seconds) {
+    if (response.nonce == 0 || !valid_time(response.client_send_seconds) || !valid_time(response.server_receive_seconds) ||
+        !valid_time(response.server_send_seconds) || response.server_send_seconds < response.server_receive_seconds) {
         throw std::invalid_argument{"Clock response is invalid"};
     }
     ProtocolMessage message;
@@ -186,10 +168,8 @@ ProtocolMessage encode_clock_response(const ClockResponse& response) {
     return message;
 }
 
-std::expected<ClockResponse, std::string>
-decode_clock_response(const ProtocolMessage& message) {
-    if (message.kind != MessageKind::clock_response ||
-        message.payload.size() != clock_response_payload_size) {
+std::expected<ClockResponse, std::string> decode_clock_response(const ProtocolMessage& message) {
+    if (message.kind != MessageKind::clock_response || message.payload.size() != clock_response_payload_size) {
         return std::unexpected{"Message is not a clock response"};
     }
     std::size_t offset = 0;
@@ -199,26 +179,21 @@ decode_clock_response(const ProtocolMessage& message) {
         .server_receive_seconds = read_double(message.payload, offset),
         .server_send_seconds = read_double(message.payload, offset),
     };
-    if (response.nonce == 0 || !valid_time(response.client_send_seconds) ||
-        !valid_time(response.server_receive_seconds) ||
-        !valid_time(response.server_send_seconds) ||
-        response.server_send_seconds < response.server_receive_seconds) {
+    if (response.nonce == 0 || !valid_time(response.client_send_seconds) || !valid_time(response.server_receive_seconds) ||
+        !valid_time(response.server_send_seconds) || response.server_send_seconds < response.server_receive_seconds) {
         return std::unexpected{"Clock response fields are invalid"};
     }
     return response;
 }
 
-ServerSessionManager::ServerSessionManager(SessionSettings settings)
-    : settings_{std::move(settings)} {
-    if (settings_.maximum_clients == 0 || settings_.maximum_credential_bytes == 0 ||
-        !settings_.authenticate || !settings_.generate_resume_token) {
+ServerSessionManager::ServerSessionManager(SessionSettings settings) : settings_{std::move(settings)} {
+    if (settings_.maximum_clients == 0 || settings_.maximum_credential_bytes == 0 || !settings_.authenticate || !settings_.generate_resume_token) {
         throw std::invalid_argument{"Session settings are invalid"};
     }
 }
 
 void ServerSessionManager::connected(const ConnectionId connection) {
-    if (connection == invalid_connection || pending_connections_.contains(connection) ||
-        find_active(connection) != nullptr) {
+    if (connection == invalid_connection || pending_connections_.contains(connection) || find_active(connection) != nullptr) {
         throw std::invalid_argument{"Connection is invalid or already registered"};
     }
     if (pending_connections_.size() < settings_.maximum_clients * 4)
@@ -229,13 +204,9 @@ bool ServerSessionManager::pending(const ConnectionId connection) const noexcept
     return pending_connections_.contains(connection);
 }
 
-std::expected<ServerWelcome, std::string>
-ServerSessionManager::admit(const ConnectionId connection,
-                            const ClientHello& hello,
-                            const std::uint64_t server_tick,
-                            const double server_time_seconds, std::string authenticated_identity) {
-    if (!pending_connections_.contains(connection) || hello.client_nonce == 0 ||
-        hello.credential.size() > settings_.maximum_credential_bytes ||
+std::expected<ServerWelcome, std::string> ServerSessionManager::admit(const ConnectionId connection, const ClientHello& hello, const std::uint64_t server_tick,
+    const double server_time_seconds, std::string authenticated_identity) {
+    if (!pending_connections_.contains(connection) || hello.client_nonce == 0 || hello.credential.size() > settings_.maximum_credential_bytes ||
         !valid_time(server_time_seconds)) {
         ++metrics_.rejected_protocol;
         return std::unexpected{"Invalid session admission request"};
@@ -249,8 +220,7 @@ ServerSessionManager::admit(const ConnectionId connection,
     if (hello.resume_token != 0) {
         for (auto& [id, record] : sessions_) {
             static_cast<void>(id);
-            if (record.state == State::dormant && record.resume_token == hello.resume_token &&
-                server_tick <= record.expires_at_tick) {
+            if (record.state == State::dormant && record.resume_token == hello.resume_token && server_tick <= record.expires_at_tick) {
                 resumed = &record;
                 break;
             }
@@ -305,8 +275,7 @@ ServerSessionManager::admit(const ConnectionId connection,
     };
 }
 
-void ServerSessionManager::disconnected(const ConnectionId connection,
-                                        const std::uint64_t server_tick) {
+void ServerSessionManager::disconnected(const ConnectionId connection, const std::uint64_t server_tick) {
     pending_connections_.erase(connection);
     if (Record* record = find_active(connection)) {
         record->connection = invalid_connection;
@@ -318,8 +287,7 @@ void ServerSessionManager::disconnected(const ConnectionId connection,
 
 void ServerSessionManager::expire(const std::uint64_t server_tick) {
     for (auto iterator = sessions_.begin(); iterator != sessions_.end();) {
-        if (iterator->second.state == State::dormant &&
-            server_tick > iterator->second.expires_at_tick) {
+        if (iterator->second.state == State::dormant && server_tick > iterator->second.expires_at_tick) {
             iterator = sessions_.erase(iterator);
             ++metrics_.expired;
         } else {
@@ -328,18 +296,14 @@ void ServerSessionManager::expire(const std::uint64_t server_tick) {
     }
 }
 
-std::expected<NetworkEntityId, std::string>
-ServerSessionManager::authorize_input(const ConnectionId connection,
-                                      const ProtocolMessage& message) {
+std::expected<NetworkEntityId, std::string> ServerSessionManager::authorize_input(const ConnectionId connection, const ProtocolMessage& message) {
     Record* record = find_active(connection);
     if (record == nullptr || message.kind != MessageKind::input_command) {
         ++metrics_.unauthorized_messages;
         return std::unexpected{"Connection does not own an input entity"};
     }
     if (message.acknowledged_sequence != 0 &&
-        (!record->replication.has_acknowledged_snapshot ||
-         sequence_more_recent(message.acknowledged_sequence,
-                              record->replication.acknowledged_snapshot))) {
+        (!record->replication.has_acknowledged_snapshot || sequence_more_recent(message.acknowledged_sequence, record->replication.acknowledged_snapshot))) {
         record->replication.acknowledged_snapshot = message.acknowledged_sequence;
         record->replication.has_acknowledged_snapshot = true;
     }
@@ -347,8 +311,7 @@ ServerSessionManager::authorize_input(const ConnectionId connection,
     return record->controlled_entity;
 }
 
-bool ServerSessionManager::authorize_fire(const ConnectionId connection,
-                                          const FireCommand& command) {
+bool ServerSessionManager::authorize_fire(const ConnectionId connection, const FireCommand& command) {
     const Record* record = find_active(connection);
     const bool authorized = record != nullptr && command.shooter == record->controlled_entity;
     if (!authorized) {
@@ -357,15 +320,12 @@ bool ServerSessionManager::authorize_fire(const ConnectionId connection,
     return authorized;
 }
 
-std::optional<NetworkEntityId>
-ServerSessionManager::controlled_entity(const ConnectionId connection) const noexcept {
+std::optional<NetworkEntityId> ServerSessionManager::controlled_entity(const ConnectionId connection) const noexcept {
     const Record* record = find_active(connection);
-    return record == nullptr ? std::nullopt
-                             : std::optional<NetworkEntityId>{record->controlled_entity};
+    return record == nullptr ? std::nullopt : std::optional<NetworkEntityId>{record->controlled_entity};
 }
 
-const SessionReplicationState*
-ServerSessionManager::replication_state(const ConnectionId connection) const noexcept {
+const SessionReplicationState* ServerSessionManager::replication_state(const ConnectionId connection) const noexcept {
     const Record* record = find_active(connection);
     return record == nullptr ? nullptr : &record->replication;
 }
@@ -386,8 +346,7 @@ const SessionMetrics& ServerSessionManager::metrics() const noexcept {
     return metrics_;
 }
 
-ServerSessionManager::Record*
-ServerSessionManager::find_active(const ConnectionId connection) noexcept {
+ServerSessionManager::Record* ServerSessionManager::find_active(const ConnectionId connection) noexcept {
     for (auto& [id, record] : sessions_) {
         static_cast<void>(id);
         if (record.state == State::active && record.connection == connection) {
@@ -397,8 +356,7 @@ ServerSessionManager::find_active(const ConnectionId connection) noexcept {
     return nullptr;
 }
 
-const ServerSessionManager::Record*
-ServerSessionManager::find_active(const ConnectionId connection) const noexcept {
+const ServerSessionManager::Record* ServerSessionManager::find_active(const ConnectionId connection) const noexcept {
     for (const auto& [id, record] : sessions_) {
         static_cast<void>(id);
         if (record.state == State::active && record.connection == connection) {
@@ -421,20 +379,17 @@ std::uint64_t ServerSessionManager::issue_resume_token() {
     throw std::runtime_error{"Resume token generator did not produce a unique token"};
 }
 
-ProtocolMessage ClientSession::begin(std::string credential,
-                                     const std::uint64_t client_nonce) {
+ProtocolMessage ClientSession::begin(std::string credential, const std::uint64_t client_nonce) {
     session_ = invalid_session;
     controlled_entity_ = 0;
     resume_token_ = 0;
     clock_.reset();
     pending_clock_requests_.clear();
     expected_client_nonce_ = client_nonce;
-    return encode_client_hello({.client_nonce = client_nonce,
-                                .credential = std::move(credential)});
+    return encode_client_hello({.client_nonce = client_nonce, .credential = std::move(credential)});
 }
 
-ProtocolMessage ClientSession::reconnect(std::string credential,
-                                         const std::uint64_t client_nonce) {
+ProtocolMessage ClientSession::reconnect(std::string credential, const std::uint64_t client_nonce) {
     if (resume_token_ == 0) {
         throw std::logic_error{"Client has no resumable session"};
     }
@@ -443,9 +398,7 @@ ProtocolMessage ClientSession::reconnect(std::string credential,
     clock_.reset();
     pending_clock_requests_.clear();
     expected_client_nonce_ = client_nonce;
-    return encode_client_hello({.client_nonce = client_nonce,
-                                .resume_token = resume_token_,
-                                .credential = std::move(credential)});
+    return encode_client_hello({.client_nonce = client_nonce, .resume_token = resume_token_, .credential = std::move(credential)});
 }
 
 void ClientSession::accept(const ProtocolMessage& message) {
@@ -464,19 +417,16 @@ ProtocolMessage ClientSession::create_clock_request(const double client_time_sec
     }
     const std::uint64_t nonce = next_clock_nonce_++;
     pending_clock_requests_.emplace(nonce, client_time_seconds);
-    return encode_clock_request({.nonce = nonce,
-                                 .client_send_seconds = client_time_seconds});
+    return encode_clock_request({.nonce = nonce, .client_send_seconds = client_time_seconds});
 }
 
-void ClientSession::receive_clock_response(const ProtocolMessage& message,
-                                           const double client_receive_seconds) {
+void ClientSession::receive_clock_response(const ProtocolMessage& message, const double client_receive_seconds) {
     const auto response = decode_clock_response(message);
     if (!response || !valid_time(client_receive_seconds)) {
         throw std::invalid_argument{"Clock response is malformed"};
     }
     const auto request = pending_clock_requests_.find(response->nonce);
-    if (request == pending_clock_requests_.end() ||
-        request->second != response->client_send_seconds) {
+    if (request == pending_clock_requests_.end() || request->second != response->client_send_seconds) {
         throw std::invalid_argument{"Clock response is unknown or replayed"};
     }
     clock_.observe({
@@ -509,35 +459,27 @@ const ClockSynchronizer& ClientSession::clock() const noexcept {
     return clock_;
 }
 
-ReliableEventSender::ReliableEventSender(ReliableEventSettings settings)
-    : settings_{settings} {
-    if (!std::isfinite(settings_.retry_interval_seconds) ||
-        settings_.retry_interval_seconds <= 0.0 || !std::isfinite(settings_.lifetime_seconds) ||
-        settings_.lifetime_seconds < settings_.retry_interval_seconds ||
-        settings_.maximum_pending == 0 || settings_.duplicate_window == 0) {
+ReliableEventSender::ReliableEventSender(ReliableEventSettings settings) : settings_{settings} {
+    if (!std::isfinite(settings_.retry_interval_seconds) || settings_.retry_interval_seconds <= 0.0 || !std::isfinite(settings_.lifetime_seconds) ||
+        settings_.lifetime_seconds < settings_.retry_interval_seconds || settings_.maximum_pending == 0 || settings_.duplicate_window == 0) {
         throw std::invalid_argument{"Reliable event settings are invalid"};
     }
 }
 
-std::uint32_t ReliableEventSender::queue(const std::span<const std::byte> payload,
-                                         const double now_seconds) {
-    if (payload.empty() || payload.size() + 1 > maximum_protocol_payload ||
-        !valid_time(now_seconds)) {
+std::uint32_t ReliableEventSender::queue(const std::span<const std::byte> payload, const double now_seconds) {
+    if (payload.empty() || payload.size() + 1 > maximum_protocol_payload || !valid_time(now_seconds)) {
         throw std::invalid_argument{"Reliable event is invalid"};
     }
     if (pending_.size() >= settings_.maximum_pending) {
         throw std::length_error{"Reliable event queue is full"};
     }
     std::uint32_t sequence = next_sequence_++;
-    while (sequence == 0 ||
-           std::ranges::any_of(pending_, [sequence](const PendingEvent& event) {
-               return event.sequence == sequence;
-           })) {
+    while (sequence == 0 || std::ranges::any_of(pending_, [sequence](const PendingEvent& event) {
+        return event.sequence == sequence;
+    })) {
         sequence = next_sequence_++;
     }
-    pending_.push_back({.sequence = sequence,
-                        .payload = {payload.begin(), payload.end()},
-                        .queued_seconds = now_seconds});
+    pending_.push_back({.sequence = sequence, .payload = {payload.begin(), payload.end()}, .queued_seconds = now_seconds});
     ++metrics_.queued;
     return sequence;
 }
@@ -553,9 +495,7 @@ std::vector<ProtocolMessage> ReliableEventSender::poll(const double now_seconds)
             ++metrics_.expired;
             continue;
         }
-        const bool due = iterator->transmissions == 0 ||
-                         now_seconds - iterator->last_send_seconds >=
-                             settings_.retry_interval_seconds;
+        const bool due = iterator->transmissions == 0 || now_seconds - iterator->last_send_seconds >= settings_.retry_interval_seconds;
         if (due) {
             messages.push_back(encode_session_event(iterator->sequence, iterator->payload));
             if (iterator->transmissions > 0) {
@@ -571,12 +511,10 @@ std::vector<ProtocolMessage> ReliableEventSender::poll(const double now_seconds)
 }
 
 bool ReliableEventSender::acknowledge(const ProtocolMessage& message) {
-    if (message.kind != MessageKind::event_acknowledgement || !message.payload.empty() ||
-        message.acknowledged_sequence == 0) {
+    if (message.kind != MessageKind::event_acknowledgement || !message.payload.empty() || message.acknowledged_sequence == 0) {
         return false;
     }
-    const auto found = std::ranges::find(pending_, message.acknowledged_sequence,
-                                        &PendingEvent::sequence);
+    const auto found = std::ranges::find(pending_, message.acknowledged_sequence, &PendingEvent::sequence);
     if (found == pending_.end()) {
         return false;
     }
@@ -593,17 +531,14 @@ const ReliableEventMetrics& ReliableEventSender::metrics() const noexcept {
     return metrics_;
 }
 
-ReliableEventReceiver::ReliableEventReceiver(const std::size_t duplicate_window)
-    : duplicate_window_{duplicate_window} {
+ReliableEventReceiver::ReliableEventReceiver(const std::size_t duplicate_window) : duplicate_window_{duplicate_window} {
     if (duplicate_window_ == 0) {
         throw std::invalid_argument{"Reliable event duplicate window must not be empty"};
     }
 }
 
-std::expected<ReceivedSessionEvent, std::string>
-ReliableEventReceiver::receive(const ProtocolMessage& message) {
-    if (message.kind != MessageKind::event || message.sequence == 0 ||
-        message.payload.size() < 2 ||
+std::expected<ReceivedSessionEvent, std::string> ReliableEventReceiver::receive(const ProtocolMessage& message) {
+    if (message.kind != MessageKind::event || message.sequence == 0 || message.payload.size() < 2 ||
         std::to_integer<std::uint8_t>(message.payload.front()) != session_event_subtype) {
         return std::unexpected{"Message is not a reliable session event"};
     }
@@ -628,8 +563,7 @@ ProtocolMessage ReliableEventReceiver::acknowledgement(const std::uint32_t seque
     if (sequence == 0) {
         throw std::invalid_argument{"Cannot acknowledge event sequence zero"};
     }
-    return {.kind = MessageKind::event_acknowledgement,
-            .acknowledged_sequence = sequence};
+    return {.kind = MessageKind::event_acknowledgement, .acknowledged_sequence = sequence};
 }
 
 const ReliableEventMetrics& ReliableEventReceiver::metrics() const noexcept {

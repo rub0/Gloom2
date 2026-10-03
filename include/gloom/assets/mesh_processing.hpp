@@ -22,8 +22,6 @@ struct MeshProcessingSettings {
 
 // Offline-only processing: MikkTSpace tangent splitting, vertex/index
 // optimization, bounds and simplified LOD index streams.
-[[nodiscard]] std::expected<MeshProcessingMetrics, std::string>
-process_imported_primitive(ImportedPrimitive& primitive,
-                           MeshProcessingSettings settings = {});
+[[nodiscard]] std::expected<MeshProcessingMetrics, std::string> process_imported_primitive(ImportedPrimitive& primitive, MeshProcessingSettings settings = {});
 
 } // namespace gloom::assets

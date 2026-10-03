@@ -48,12 +48,12 @@ bool EntityRegistry::destroy(const EntityId entity) {
 }
 
 bool EntityRegistry::alive(const EntityId entity) const noexcept {
-    return entity.valid() && entity.index < slots_.size() &&
-           slots_[entity.index].alive &&
-           slots_[entity.index].generation == entity.generation;
+    return entity.valid() && entity.index < slots_.size() && slots_[entity.index].alive && slots_[entity.index].generation == entity.generation;
 }
 
-std::size_t EntityRegistry::size() const noexcept { return live_entities_; }
+std::size_t EntityRegistry::size() const noexcept {
+    return live_entities_;
+}
 
 void EntityRegistry::clear() {
     std::vector<std::uint32_t> free_indices;

@@ -77,6 +77,33 @@ lobby preflight must reject mismatched resumes/duplicates before any mutation.
 
 Release builds use the equivalent `windows-release` preset.
 
+## C++ readability and format checks
+
+The repository's `.clang-format` uses four-space indentation and a 160-column
+limit. Nonempty functions, conditions and loops use separate lines; include
+order, comments and string contents are preserved. The verified formatter is
+clang-format 19.1.5, already included in the installed Visual Studio toolchain.
+No additional package is required.
+
+CMake finds `clang-format` on PATH or in the selected Visual Studio installation
+and exposes two optional targets:
+
+```powershell
+& "D:\Dev\CMake\bin\cmake.exe" --build --preset windows-release --target gloom_format_check
+& "D:\Dev\CMake\bin\cmake.exe" --build --preset windows-release --target gloom_format
+```
+
+`gloom_format_check` reports formatting differences without changing files.
+`gloom_format` applies the shared style to Gloom's C++ headers, sources,
+applications and tests. Neither target processes dependencies, assets, shaders
+stored in separate files or generated build output. An editor using clang-format
+can read the same configuration automatically.
+
+These checks enforce layout. They do not enforce every semantic rule in
+`AGENTS.md`, such as resource lifetime or avoiding standard-library facilities.
+Compiler warnings remain the existing code-quality gate. No clang-tidy automatic
+rewrites are enabled.
+
 Milestone 53 adds a standalone `gloom_match_service` target and the
 `gloom_match_service_package` distribution target. They link the small match
 storage/HTTPS libraries rather than SDL, Vulkan or game simulation. The build

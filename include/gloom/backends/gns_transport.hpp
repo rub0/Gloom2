@@ -7,7 +7,7 @@
 namespace gloom::backends {
 
 class GnsTransport final : public network::Transport {
-public:
+  public:
     GnsTransport();
     ~GnsTransport() override;
 
@@ -31,7 +31,7 @@ public:
     [[nodiscard]] std::optional<network::ReceivedPacket> receive() override;
     [[nodiscard]] network::TransportMetrics metrics() const noexcept override;
 
-private:
+  private:
     struct Impl;
 
     void require_running() const;

@@ -57,28 +57,17 @@ struct WorldSnapshot {
 inline constexpr std::size_t maximum_movement_input_batch = 32;
 
 [[nodiscard]] ProtocolMessage encode_movement_input(const MovementInput& input);
-[[nodiscard]] std::expected<MovementInput, std::string>
-decode_movement_input(const ProtocolMessage& message);
-[[nodiscard]] ProtocolMessage encode_movement_input_batch(
-    std::span<const MovementInput> inputs);
-[[nodiscard]] std::expected<std::vector<MovementInput>, std::string>
-decode_movement_input_batch(const ProtocolMessage& message);
-[[nodiscard]] ProtocolMessage encode_world_snapshot(const WorldSnapshot& snapshot,
-                                                    std::uint32_t sequence);
-[[nodiscard]] ProtocolMessage encode_world_snapshot_delta(const WorldSnapshot& snapshot,
-                                                          std::uint32_t sequence,
-                                                          const WorldSnapshot& baseline,
-                                                          std::uint32_t baseline_sequence);
-[[nodiscard]] std::expected<WorldSnapshot, std::string>
-decode_world_snapshot(const ProtocolMessage& message,
-                      const WorldSnapshot* baseline = nullptr);
-[[nodiscard]] std::expected<std::uint32_t, std::string>
-world_snapshot_baseline_sequence(const ProtocolMessage& message);
+[[nodiscard]] std::expected<MovementInput, std::string> decode_movement_input(const ProtocolMessage& message);
+[[nodiscard]] ProtocolMessage encode_movement_input_batch(std::span<const MovementInput> inputs);
+[[nodiscard]] std::expected<std::vector<MovementInput>, std::string> decode_movement_input_batch(const ProtocolMessage& message);
+[[nodiscard]] ProtocolMessage encode_world_snapshot(const WorldSnapshot& snapshot, std::uint32_t sequence);
+[[nodiscard]] ProtocolMessage encode_world_snapshot_delta(
+    const WorldSnapshot& snapshot, std::uint32_t sequence, const WorldSnapshot& baseline, std::uint32_t baseline_sequence);
+[[nodiscard]] std::expected<WorldSnapshot, std::string> decode_world_snapshot(const ProtocolMessage& message, const WorldSnapshot* baseline = nullptr);
+[[nodiscard]] std::expected<std::uint32_t, std::string> world_snapshot_baseline_sequence(const ProtocolMessage& message);
 
-[[nodiscard]] MovementState simulate_movement(MovementState state,
-                                              const MovementInput& input,
-                                              double fixed_delta_seconds,
-                                              const struct ReplicationSettings& settings);
+[[nodiscard]] MovementState simulate_movement(
+    MovementState state, const MovementInput& input, double fixed_delta_seconds, const struct ReplicationSettings& settings);
 
 struct ReplicationSettings {
     std::uint32_t tick_rate{60};
@@ -128,36 +117,30 @@ struct SnapshotMetrics {
 };
 
 class AuthoritativeMovementServer final {
-public:
-    AuthoritativeMovementServer(ReplicationSettings settings,
-                                NetworkEntityId controlled_entity);
+  public:
+    AuthoritativeMovementServer(ReplicationSettings settings, NetworkEntityId controlled_entity);
 
     void add_entity(MovementState state);
     void register_client(NetworkEntityId controlled_entity);
     void unregister_client(NetworkEntityId controlled_entity);
     void set_entity_input(NetworkEntityId entity, float axis_x, float axis_z);
-    void teleport_entity(NetworkEntityId entity, float position_x, float position_y,
-                         float position_z);
+    void teleport_entity(NetworkEntityId entity, float position_x, float position_y, float position_z);
     void set_entity_collision_enabled(NetworkEntityId entity, bool enabled);
     void receive(const ProtocolMessage& message);
     void receive(NetworkEntityId controlled_entity, const ProtocolMessage& message);
     [[nodiscard]] std::optional<ProtocolMessage> tick();
-    [[nodiscard]] std::optional<ProtocolMessage>
-    take_snapshot(NetworkEntityId controlled_entity);
+    [[nodiscard]] std::optional<ProtocolMessage> take_snapshot(NetworkEntityId controlled_entity);
     [[nodiscard]] const MovementState& entity(NetworkEntityId id) const;
     [[nodiscard]] WorldSnapshot capture_world_snapshot() const;
     [[nodiscard]] std::uint64_t simulation_tick() const noexcept;
     [[nodiscard]] std::uint32_t acknowledged_input() const noexcept;
-    [[nodiscard]] std::uint32_t
-    acknowledged_input(NetworkEntityId controlled_entity) const;
+    [[nodiscard]] std::uint32_t acknowledged_input(NetworkEntityId controlled_entity) const;
     [[nodiscard]] const InputBatchMetrics& input_metrics() const noexcept;
-    [[nodiscard]] const InputBatchMetrics&
-    input_metrics(NetworkEntityId controlled_entity) const;
+    [[nodiscard]] const InputBatchMetrics& input_metrics(NetworkEntityId controlled_entity) const;
     [[nodiscard]] const SnapshotMetrics& snapshot_metrics() const noexcept;
-    [[nodiscard]] const SnapshotMetrics&
-    snapshot_metrics(NetworkEntityId controlled_entity) const;
+    [[nodiscard]] const SnapshotMetrics& snapshot_metrics(NetworkEntityId controlled_entity) const;
 
-private:
+  private:
     struct ClientReplicationState {
         std::optional<MovementInput> pending_input;
         std::unordered_set<std::uint32_t> pending_input_sequences;
@@ -173,8 +156,7 @@ private:
         std::optional<ProtocolMessage> queued_snapshot;
     };
 
-    [[nodiscard]] ProtocolMessage
-    create_snapshot(NetworkEntityId controlled_entity, ClientReplicationState& client);
+    [[nodiscard]] ProtocolMessage create_snapshot(NetworkEntityId controlled_entity, ClientReplicationState& client);
 
     ReplicationSettings settings_;
     NetworkEntityId controlled_entity_;
@@ -186,18 +168,15 @@ private:
 };
 
 class PredictedMovementClient final {
-public:
-    PredictedMovementClient(ReplicationSettings settings,
-                            NetworkEntityId local_entity,
-                            MovementState initial_state);
+  public:
+    PredictedMovementClient(ReplicationSettings settings, NetworkEntityId local_entity, MovementState initial_state);
 
     [[nodiscard]] ProtocolMessage create_input(float axis_x, float axis_z, bool jump = false, bool dodge = false);
     void receive(const ProtocolMessage& message);
     void set_collision_entities(std::span<const MovementState> entities);
     void reset_local_state(MovementState state);
     [[nodiscard]] const MovementState& local_state() const noexcept;
-    [[nodiscard]] std::optional<SnapshotSample<MovementState>>
-    sample_remote(NetworkEntityId entity, double estimated_server_time_seconds) const;
+    [[nodiscard]] std::optional<SnapshotSample<MovementState>> sample_remote(NetworkEntityId entity, double estimated_server_time_seconds) const;
     [[nodiscard]] std::uint32_t pending_input_count() const noexcept;
     [[nodiscard]] std::uint64_t reconciliation_count() const noexcept;
     [[nodiscard]] float last_correction_distance() const noexcept;
@@ -205,9 +184,8 @@ public:
     [[nodiscard]] const InputBatchMetrics& input_metrics() const noexcept;
     [[nodiscard]] const SnapshotMetrics& snapshot_metrics() const noexcept;
 
-private:
-    [[nodiscard]] MovementState simulate_local(MovementState state,
-                                               const MovementInput& input) const;
+  private:
+    [[nodiscard]] MovementState simulate_local(MovementState state, const MovementInput& input) const;
 
     ReplicationSettings settings_;
     NetworkEntityId local_entity_;

@@ -51,17 +51,13 @@ struct ClockResponse {
 };
 
 [[nodiscard]] ProtocolMessage encode_client_hello(const ClientHello& hello);
-[[nodiscard]] std::expected<ClientHello, std::string>
-decode_client_hello(const ProtocolMessage& message);
+[[nodiscard]] std::expected<ClientHello, std::string> decode_client_hello(const ProtocolMessage& message);
 [[nodiscard]] ProtocolMessage encode_server_welcome(const ServerWelcome& welcome);
-[[nodiscard]] std::expected<ServerWelcome, std::string>
-decode_server_welcome(const ProtocolMessage& message);
+[[nodiscard]] std::expected<ServerWelcome, std::string> decode_server_welcome(const ProtocolMessage& message);
 [[nodiscard]] ProtocolMessage encode_clock_request(const ClockRequest& request);
-[[nodiscard]] std::expected<ClockRequest, std::string>
-decode_clock_request(const ProtocolMessage& message);
+[[nodiscard]] std::expected<ClockRequest, std::string> decode_clock_request(const ProtocolMessage& message);
 [[nodiscard]] ProtocolMessage encode_clock_response(const ClockResponse& response);
-[[nodiscard]] std::expected<ClockResponse, std::string>
-decode_clock_response(const ProtocolMessage& message);
+[[nodiscard]] std::expected<ClockResponse, std::string> decode_clock_response(const ProtocolMessage& message);
 
 struct SessionReplicationState {
     std::uint32_t acknowledged_snapshot{0};
@@ -89,31 +85,25 @@ struct SessionMetrics {
 };
 
 class ServerSessionManager final {
-public:
+  public:
     explicit ServerSessionManager(SessionSettings settings);
 
     void connected(ConnectionId connection);
-    [[nodiscard]] std::expected<ServerWelcome, std::string>
-    admit(ConnectionId connection,
-          const ClientHello& hello,
-          std::uint64_t server_tick,
-          double server_time_seconds, std::string authenticated_identity = {});
+    [[nodiscard]] std::expected<ServerWelcome, std::string> admit(
+        ConnectionId connection, const ClientHello& hello, std::uint64_t server_tick, double server_time_seconds, std::string authenticated_identity = {});
     [[nodiscard]] bool pending(ConnectionId connection) const noexcept;
     void disconnected(ConnectionId connection, std::uint64_t server_tick);
     void expire(std::uint64_t server_tick);
 
-    [[nodiscard]] std::expected<NetworkEntityId, std::string>
-    authorize_input(ConnectionId connection, const ProtocolMessage& message);
+    [[nodiscard]] std::expected<NetworkEntityId, std::string> authorize_input(ConnectionId connection, const ProtocolMessage& message);
     [[nodiscard]] bool authorize_fire(ConnectionId connection, const FireCommand& command);
-    [[nodiscard]] std::optional<NetworkEntityId>
-    controlled_entity(ConnectionId connection) const noexcept;
-    [[nodiscard]] const SessionReplicationState*
-    replication_state(ConnectionId connection) const noexcept;
+    [[nodiscard]] std::optional<NetworkEntityId> controlled_entity(ConnectionId connection) const noexcept;
+    [[nodiscard]] const SessionReplicationState* replication_state(ConnectionId connection) const noexcept;
     [[nodiscard]] std::size_t active_sessions() const noexcept;
     [[nodiscard]] std::size_t dormant_sessions() const noexcept;
     [[nodiscard]] const SessionMetrics& metrics() const noexcept;
 
-private:
+  private:
     enum class State { active, dormant };
     struct Record {
         SessionId session{invalid_session};
@@ -139,14 +129,12 @@ private:
 };
 
 class ClientSession final {
-public:
+  public:
     [[nodiscard]] ProtocolMessage begin(std::string credential, std::uint64_t client_nonce);
-    [[nodiscard]] ProtocolMessage reconnect(std::string credential,
-                                            std::uint64_t client_nonce);
+    [[nodiscard]] ProtocolMessage reconnect(std::string credential, std::uint64_t client_nonce);
     void accept(const ProtocolMessage& message);
     [[nodiscard]] ProtocolMessage create_clock_request(double client_time_seconds);
-    void receive_clock_response(const ProtocolMessage& message,
-                                double client_receive_seconds);
+    void receive_clock_response(const ProtocolMessage& message, double client_receive_seconds);
 
     [[nodiscard]] bool active() const noexcept;
     [[nodiscard]] SessionId session() const noexcept;
@@ -154,7 +142,7 @@ public:
     [[nodiscard]] std::uint64_t resume_token() const noexcept;
     [[nodiscard]] const ClockSynchronizer& clock() const noexcept;
 
-private:
+  private:
     SessionId session_{invalid_session};
     NetworkEntityId controlled_entity_{0};
     std::uint64_t resume_token_{0};
@@ -188,17 +176,16 @@ struct ReceivedSessionEvent {
 };
 
 class ReliableEventSender final {
-public:
+  public:
     explicit ReliableEventSender(ReliableEventSettings settings = {});
 
-    [[nodiscard]] std::uint32_t queue(std::span<const std::byte> payload,
-                                      double now_seconds);
+    [[nodiscard]] std::uint32_t queue(std::span<const std::byte> payload, double now_seconds);
     [[nodiscard]] std::vector<ProtocolMessage> poll(double now_seconds);
     [[nodiscard]] bool acknowledge(const ProtocolMessage& message);
     [[nodiscard]] std::size_t pending() const noexcept;
     [[nodiscard]] const ReliableEventMetrics& metrics() const noexcept;
 
-private:
+  private:
     struct PendingEvent {
         std::uint32_t sequence{0};
         std::vector<std::byte> payload;
@@ -214,15 +201,14 @@ private:
 };
 
 class ReliableEventReceiver final {
-public:
+  public:
     explicit ReliableEventReceiver(std::size_t duplicate_window = 1024);
 
-    [[nodiscard]] std::expected<ReceivedSessionEvent, std::string>
-    receive(const ProtocolMessage& message);
+    [[nodiscard]] std::expected<ReceivedSessionEvent, std::string> receive(const ProtocolMessage& message);
     [[nodiscard]] ProtocolMessage acknowledgement(std::uint32_t sequence) const;
     [[nodiscard]] const ReliableEventMetrics& metrics() const noexcept;
 
-private:
+  private:
     std::size_t duplicate_window_;
     std::deque<std::uint32_t> received_order_;
     std::unordered_set<std::uint32_t> received_;

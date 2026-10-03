@@ -21,10 +21,14 @@ int main() {
     assert(off.technique == TemporalTechnique::disabled && !off.fell_back && off.render_scale == 1.0F && off.history_weight == 0.0F && off.sharpness == 0.0F);
     for (gloom::uint32 missing = 0; missing < 4; ++missing) {
         TemporalCapabilities capabilities = native;
-        if (missing == 0) capabilities.motion_vectors = false;
-        if (missing == 1) capabilities.jittered_camera = false;
-        if (missing == 2) capabilities.history_resources = false;
-        if (missing == 3) capabilities.taa = false;
+        if (missing == 0)
+            capabilities.motion_vectors = false;
+        if (missing == 1)
+            capabilities.jittered_camera = false;
+        if (missing == 2)
+            capabilities.history_resources = false;
+        if (missing == 3)
+            capabilities.taa = false;
         const TemporalSelection fallback = negotiate_temporal_feature({}, capabilities);
         assert(fallback.technique == TemporalTechnique::disabled && fallback.fell_back && fallback.render_scale == 1.0F);
         assert(fallback.history_weight == 0.0F && fallback.sharpness == 0.0F);
@@ -35,7 +39,8 @@ int main() {
         {.enabled = true, .minimum_scale = 0.6F, .target_frame_milliseconds = 10.0F, .scale_step = 0.1F, .settle_frames = 2}, 1.0F};
     assert(fabsf(controller.update(20.0F) - 1.0F) < 0.0001F && fabsf(controller.update(20.0F) - 0.9F) < 0.0001F);
     assert(fabsf(controller.update(20.0F) - 0.9F) < 0.0001F && fabsf(controller.update(20.0F) - 0.8F) < 0.0001F);
-    for (gloom::uint32 sample = 0; sample < 80; ++sample) static_cast<void>(controller.update(2.0F));
+    for (gloom::uint32 sample = 0; sample < 80; ++sample)
+        static_cast<void>(controller.update(2.0F));
     assert(controller.metrics().scale > 0.8F && controller.metrics().scale <= 1.0F && controller.metrics().scale_changes >= 3);
     assert(controller.metrics().overload_samples >= 2 && controller.metrics().headroom_samples > 0);
     puts("Gloom temporal render-feature tests completed successfully.");

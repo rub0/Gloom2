@@ -43,11 +43,9 @@ struct FireResult {
 };
 
 [[nodiscard]] ProtocolMessage encode_fire_command(const FireCommand& command);
-[[nodiscard]] std::expected<FireCommand, std::string>
-decode_fire_command(const ProtocolMessage& message);
+[[nodiscard]] std::expected<FireCommand, std::string> decode_fire_command(const ProtocolMessage& message);
 [[nodiscard]] ProtocolMessage encode_fire_result(const FireResult& result);
-[[nodiscard]] std::expected<FireResult, std::string>
-decode_fire_result(const ProtocolMessage& message);
+[[nodiscard]] std::expected<FireResult, std::string> decode_fire_result(const ProtocolMessage& message);
 
 struct CombatSettings {
     std::size_t history_ticks{60};
@@ -72,7 +70,7 @@ struct CombatMetrics {
 };
 
 class LagCompensatedCombatServer final {
-public:
+  public:
     explicit LagCompensatedCombatServer(CombatSettings settings = {});
 
     void record(WorldSnapshot snapshot);
@@ -80,7 +78,7 @@ public:
     [[nodiscard]] std::size_t history_size() const noexcept;
     [[nodiscard]] const CombatMetrics& metrics() const noexcept;
 
-private:
+  private:
     CombatSettings settings_;
     std::deque<WorldSnapshot> history_;
     std::unordered_map<NetworkEntityId, std::uint32_t> latest_fire_sequences_;

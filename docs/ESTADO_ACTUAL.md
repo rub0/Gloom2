@@ -1,8 +1,15 @@
 # Traspaso de Gloom
 
-Actualizado: 3 de octubre de 2026, hito 108: simplificación Ponytail. H07 terminada en v17; H08 no iniciada.
+Actualizado: 3 de octubre de 2026, hito 109: formato C++ uniforme. H07 terminada en v17; H08 no iniciada.
 
-**Último cambio técnico:** siete recortes aplicados, 839 líneas netas menos,
+**Último cambio técnico:** clang-format configurado y aplicado a 181 archivos;
+183 comprobados y 324.356 tokens conservados. Sangrado de cuatro espacios,
+objetivo de 160 columnas y comprobación repetible `gloom_format_check`.
+Builds Release/Debug completos correctos; pruebas **45/49 y 46/49**, con los
+mismos fallos previos del 108. Vulkan/Hound pasan en ambos. Sin regresiones
+nuevas detectadas. [Informe 109](../reports/readability-109/README.md).
+
+**Hito 108:** siete recortes aplicados, 839 líneas netas menos,
 sin dependencias nuevas. Release 45/49 y Debug 46/49; cuatro fallos previos
 reproducidos con el código del hito 107 (GNS 25 en Release y tres comparaciones
 visuales). Las 64 capturas antes/después pasan con los umbrales existentes;
@@ -102,6 +109,25 @@ Sin push. Actualizar estado e informe y crear commit al cerrar cada hito.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 109 ejecutado: formato C++ uniforme y comprobación de regresiones
+
+`.clang-format` compartido, sin dependencias nuevas: herramienta 19.1.5 de
+Visual Studio ya instalada. Se aplica a C++ propio de include/src/apps/tests;
+181 archivos cambian solo su presentación, 183 revisados. Se conservan los
+324.356 tokens, comentarios y directivas. Includes, literales y shaders raw
+mantienen su contenido; no hay cambios de lógica, lifetime ni parámetros Span.
+
+Objetivos opcionales de CMake: `gloom_format` aplica y `gloom_format_check`
+comprueba sin escribir. Ambos pasan; repetir el formato conserva los hashes
+de los 183 archivos y una muestra mal espaciada se rechaza. Uso en DEVELOPING.
+Builds completos Release/Debug pasan; suites 45/49 y 46/49, únicamente con
+los fallos conocidos del 108. Vulkan, Hound, assets, TLS/identidad, física,
+audio y flujo de UI pasan en ambos. Sin regresiones nuevas detectadas.
+
+Detalle y límites en el [informe 109](../reports/readability-109/README.md).
+H08 no iniciada. Commit local, sin push; resolver con
+`git log -1 --oneline --grep='^hito 109:'`.
 
 ## Hito 108 ejecutado: simplificación Ponytail y comprobación de regresiones
 

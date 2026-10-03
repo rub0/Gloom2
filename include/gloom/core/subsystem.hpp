@@ -10,7 +10,7 @@ enum class SubsystemState {
 };
 
 class Subsystem {
-public:
+  public:
     virtual ~Subsystem() = default;
 
     [[nodiscard]] virtual std::string_view name() const noexcept = 0;
@@ -22,4 +22,3 @@ public:
 };
 
 } // namespace gloom::core
-

@@ -38,7 +38,9 @@ struct BodyId {
 
     std::uint32_t value{invalid_value};
 
-    [[nodiscard]] constexpr bool valid() const noexcept { return value != invalid_value; }
+    [[nodiscard]] constexpr bool valid() const noexcept {
+        return value != invalid_value;
+    }
     friend constexpr bool operator==(BodyId, BodyId) = default;
 };
 
@@ -47,7 +49,9 @@ struct CharacterId {
 
     std::uint32_t value{invalid_value};
 
-    [[nodiscard]] constexpr bool valid() const noexcept { return value != invalid_value; }
+    [[nodiscard]] constexpr bool valid() const noexcept {
+        return value != invalid_value;
+    }
     friend constexpr bool operator==(CharacterId, CharacterId) = default;
 };
 
@@ -146,7 +150,7 @@ struct SimulationStats {
 
 // Backends implement this interface without exposing third-party types.
 class World : public core::Subsystem {
-public:
+  public:
     [[nodiscard]] virtual std::uint64_t instance_generation() const noexcept = 0;
     virtual void simulate(double delta_seconds) = 0;
     [[nodiscard]] virtual BodyId create_body(const BodyDesc& description) = 0;
@@ -154,8 +158,7 @@ public:
     [[nodiscard]] virtual core::EntityId body_owner(BodyId body) const = 0;
     [[nodiscard]] virtual Transform body_transform(BodyId body) const = 0;
     virtual void set_body_transform(BodyId body, Transform transform) = 0;
-    virtual void move_kinematic_body(BodyId body, Transform target,
-                                     float delta_seconds) = 0;
+    virtual void move_kinematic_body(BodyId body, Transform target, float delta_seconds) = 0;
     [[nodiscard]] virtual Vec3 linear_velocity(BodyId body) const = 0;
     virtual void set_linear_velocity(BodyId body, Vec3 velocity) = 0;
     [[nodiscard]] virtual float cast_ray(Vec3 origin, Vec3 direction, float maximum_distance) const = 0;

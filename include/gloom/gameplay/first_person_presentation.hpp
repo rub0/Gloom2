@@ -26,12 +26,17 @@ inline constexpr CookedPresentationSlot original_soul_reaper_presentation{
 };
 
 [[nodiscard]] constexpr CookedPresentationSlot original_weapon_presentation(SliceWeapon weapon) noexcept {
-    switch(weapon){
-    case SliceWeapon::soul_reaper:return original_soul_reaper_presentation;
-    case SliceWeapon::sniper:return {"game:/legacy/sniper.gltf","cache:/legacy/sniper.gasset",1};
-    case SliceWeapon::shotgun:return {"game:/legacy/shotgun.gltf","cache:/legacy/shotgun.gasset",1};
-    case SliceWeapon::minigun:return {"game:/legacy/minigun.gltf","cache:/legacy/minigun.gasset",1};
-    case SliceWeapon::iron_hell_goat:return {"game:/legacy/iron_hell_goat.gltf","cache:/legacy/iron_hell_goat.gasset",1};
+    switch (weapon) {
+    case SliceWeapon::soul_reaper:
+        return original_soul_reaper_presentation;
+    case SliceWeapon::sniper:
+        return {"game:/legacy/sniper.gltf", "cache:/legacy/sniper.gasset", 1};
+    case SliceWeapon::shotgun:
+        return {"game:/legacy/shotgun.gltf", "cache:/legacy/shotgun.gasset", 1};
+    case SliceWeapon::minigun:
+        return {"game:/legacy/minigun.gltf", "cache:/legacy/minigun.gasset", 1};
+    case SliceWeapon::iron_hell_goat:
+        return {"game:/legacy/iron_hell_goat.gltf", "cache:/legacy/iron_hell_goat.gasset", 1};
     }
     return original_soul_reaper_presentation;
 }

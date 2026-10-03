@@ -7,7 +7,7 @@
 namespace gloom::backends {
 
 class PlaceholderSubsystem final : public core::Subsystem {
-public:
+  public:
     explicit PlaceholderSubsystem(std::string name);
 
     [[nodiscard]] std::string_view name() const noexcept override;
@@ -17,10 +17,9 @@ public:
     void tick(double delta_seconds) override;
     void stop() noexcept override;
 
-private:
+  private:
     std::string name_;
     core::SubsystemState state_{core::SubsystemState::stopped};
 };
 
 } // namespace gloom::backends
-

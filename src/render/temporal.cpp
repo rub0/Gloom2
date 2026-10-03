@@ -19,17 +19,15 @@ namespace {
 
 } // namespace
 
-TemporalSelection negotiate_temporal_feature(
-    TemporalSettings requested,
-    const TemporalCapabilities& capabilities) noexcept {
+TemporalSelection negotiate_temporal_feature(TemporalSettings requested, const TemporalCapabilities& capabilities) noexcept {
     requested.render_scale = std::clamp(requested.render_scale, 0.5F, 1.0F);
     requested.history_weight = std::clamp(requested.history_weight, 0.0F, 0.98F);
     TemporalSelection result{.technique = requested.technique,
-                             .render_scale = requested.render_scale,
-                             .history_weight = requested.history_weight,
-                             .sharpness = std::clamp(requested.sharpness, 0.0F, 1.0F)};
-    if (requested.technique == TemporalTechnique::disabled || !capabilities.motion_vectors ||
-        !capabilities.jittered_camera || !capabilities.history_resources || !capabilities.taa) {
+        .render_scale = requested.render_scale,
+        .history_weight = requested.history_weight,
+        .sharpness = std::clamp(requested.sharpness, 0.0F, 1.0F)};
+    if (requested.technique == TemporalTechnique::disabled || !capabilities.motion_vectors || !capabilities.jittered_camera ||
+        !capabilities.history_resources || !capabilities.taa) {
         result.fell_back = requested.technique != TemporalTechnique::disabled;
         result.technique = TemporalTechnique::disabled;
         result.render_scale = 1.0F;
@@ -39,27 +37,20 @@ TemporalSelection negotiate_temporal_feature(
     return result;
 }
 
-DynamicResolutionController::DynamicResolutionController(DynamicResolutionSettings settings,
-                                                         const float initial_scale) noexcept
-    : settings_{settings} {
+DynamicResolutionController::DynamicResolutionController(DynamicResolutionSettings settings, const float initial_scale) noexcept : settings_{settings} {
     settings_.minimum_scale = std::clamp(settings_.minimum_scale, 0.5F, 1.0F);
-    settings_.target_frame_milliseconds =
-        std::clamp(settings_.target_frame_milliseconds, 1.0F, 1000.0F);
+    settings_.target_frame_milliseconds = std::clamp(settings_.target_frame_milliseconds, 1.0F, 1000.0F);
     settings_.scale_step = std::clamp(settings_.scale_step, 0.01F, 0.25F);
     settings_.settle_frames = std::max(1U, settings_.settle_frames);
     reset(initial_scale);
 }
 
 float DynamicResolutionController::update(const float gpu_frame_milliseconds) noexcept {
-    if (!settings_.enabled || !std::isfinite(gpu_frame_milliseconds) ||
-        gpu_frame_milliseconds <= 0.0F) {
+    if (!settings_.enabled || !std::isfinite(gpu_frame_milliseconds) || gpu_frame_milliseconds <= 0.0F) {
         return metrics_.scale;
     }
     metrics_.filtered_frame_milliseconds =
-        has_sample_ ? std::lerp(metrics_.filtered_frame_milliseconds,
-                               gpu_frame_milliseconds,
-                               0.15F)
-                    : gpu_frame_milliseconds;
+        has_sample_ ? std::lerp(metrics_.filtered_frame_milliseconds, gpu_frame_milliseconds, 0.15F) : gpu_frame_milliseconds;
     has_sample_ = true;
     ++frames_since_change_;
     if (frames_since_change_ < settings_.settle_frames) {
@@ -106,17 +97,14 @@ RenderExtent scaled_render_extent(const RenderExtent output, const float scale) 
     };
 }
 
-CameraJitter temporal_jitter(const std::uint64_t frame_index,
-                             const RenderExtent render_extent) noexcept {
+CameraJitter temporal_jitter(const std::uint64_t frame_index, const RenderExtent render_extent) noexcept {
     if (render_extent.width == 0 || render_extent.height == 0) {
         return {};
     }
     const std::uint64_t sample = frame_index % 8U + 1U;
     return {
-        .x = (radical_inverse(sample, 2U) - 0.5F) * 2.0F /
-             static_cast<float>(render_extent.width),
-        .y = (radical_inverse(sample, 3U) - 0.5F) * 2.0F /
-             static_cast<float>(render_extent.height),
+        .x = (radical_inverse(sample, 2U) - 0.5F) * 2.0F / static_cast<float>(render_extent.width),
+        .y = (radical_inverse(sample, 3U) - 0.5F) * 2.0F / static_cast<float>(render_extent.height),
     };
 }
 

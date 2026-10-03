@@ -18,8 +18,7 @@ constexpr std::uint8_t fire_result_subtype = 2;
 constexpr std::size_t fire_command_payload_size = 25;
 constexpr std::size_t fire_result_payload_size = 38;
 
-template <typename Integer>
-void append_integer(std::vector<std::byte>& output, const Integer value) {
+template <typename Integer> void append_integer(std::vector<std::byte>& output, const Integer value) {
     static_assert(std::is_unsigned_v<Integer>);
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
         output.push_back(static_cast<std::byte>(value >> (index * 8)));
@@ -30,13 +29,11 @@ void append_float(std::vector<std::byte>& output, const float value) {
     append_integer(output, std::bit_cast<std::uint32_t>(value));
 }
 
-template <typename Integer>
-[[nodiscard]] Integer read_integer(const std::span<const std::byte> input, std::size_t& offset) {
+template <typename Integer> [[nodiscard]] Integer read_integer(const std::span<const std::byte> input, std::size_t& offset) {
     static_assert(std::is_unsigned_v<Integer>);
     Integer value = 0;
     for (std::size_t index = 0; index < sizeof(Integer); ++index) {
-        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++]))
-                 << (index * 8);
+        value |= static_cast<Integer>(std::to_integer<unsigned int>(input[offset++])) << (index * 8);
     }
     return value;
 }
@@ -57,24 +54,16 @@ template <typename Integer>
     return status >= FireValidationStatus::hit && status <= FireValidationStatus::rejected_invalid;
 }
 
-[[nodiscard]] const MovementState* find_entity(const WorldSnapshot& snapshot,
-                                               const NetworkEntityId entity) noexcept {
+[[nodiscard]] const MovementState* find_entity(const WorldSnapshot& snapshot, const NetworkEntityId entity) noexcept {
     const auto found = std::ranges::find(snapshot.entities, entity, &MovementState::entity);
     return found == snapshot.entities.end() ? nullptr : &*found;
 }
 
 [[nodiscard]] std::optional<float> ray_obstacle_distance(
-    const float origin_x,
-    const float origin_y,
-    const float origin_z,
-    const FireCommand& command,
-    const StaticMovementObstacle& obstacle) noexcept {
+    const float origin_x, const float origin_y, const float origin_z, const FireCommand& command, const StaticMovementObstacle& obstacle) noexcept {
     float minimum_distance = 0.0F;
     float maximum_distance = command.maximum_distance;
-    const auto intersect_axis = [&](const float origin,
-                                    const float direction,
-                                    const float minimum,
-                                    const float maximum) {
+    const auto intersect_axis = [&](const float origin, const float direction, const float minimum, const float maximum) {
         if (std::abs(direction) < 1.0e-6F) {
             return origin >= minimum && origin <= maximum;
         }
@@ -87,30 +76,20 @@ template <typename Integer>
         maximum_distance = std::min(maximum_distance, second);
         return minimum_distance <= maximum_distance;
     };
-    if (!intersect_axis(origin_x, command.aim_x, obstacle.minimum_x, obstacle.maximum_x) ||
-        !intersect_axis(origin_y, command.aim_y, 0.0F, obstacle.top_y) ||
+    if (!intersect_axis(origin_x, command.aim_x, obstacle.minimum_x, obstacle.maximum_x) || !intersect_axis(origin_y, command.aim_y, 0.0F, obstacle.top_y) ||
         !intersect_axis(origin_z, command.aim_z, obstacle.minimum_z, obstacle.maximum_z)) {
         return std::nullopt;
     }
     return minimum_distance;
 }
 
-[[nodiscard]] std::optional<float> ray_sphere_distance(
-    const float origin_x,
-    const float origin_y,
-    const float origin_z,
-    const FireCommand& command,
-    const float center_x,
-    const float center_y,
-    const float center_z,
-    const float radius) noexcept {
+[[nodiscard]] std::optional<float> ray_sphere_distance(const float origin_x, const float origin_y, const float origin_z, const FireCommand& command,
+    const float center_x, const float center_y, const float center_z, const float radius) noexcept {
     const float offset_x = origin_x - center_x;
     const float offset_y = origin_y - center_y;
     const float offset_z = origin_z - center_z;
-    const float projection =
-        offset_x * command.aim_x + offset_y * command.aim_y + offset_z * command.aim_z;
-    const float offset_squared =
-        offset_x * offset_x + offset_y * offset_y + offset_z * offset_z;
+    const float projection = offset_x * command.aim_x + offset_y * command.aim_y + offset_z * command.aim_z;
+    const float offset_squared = offset_x * offset_x + offset_y * offset_y + offset_z * offset_z;
     const float discriminant = projection * projection - (offset_squared - radius * radius);
     if (discriminant < 0.0F) {
         return std::nullopt;
@@ -123,19 +102,10 @@ template <typename Integer>
     return std::max(0.0F, -projection - root);
 }
 
-[[nodiscard]] std::optional<float> ray_vertical_capsule_distance(
-    const float origin_x,
-    const float origin_y,
-    const float origin_z,
-    const FireCommand& command,
-    const float center_x,
-    const float center_y,
-    const float center_z,
-    const float radius,
-    const float half_height) noexcept {
+[[nodiscard]] std::optional<float> ray_vertical_capsule_distance(const float origin_x, const float origin_y, const float origin_z, const FireCommand& command,
+    const float center_x, const float center_y, const float center_z, const float radius, const float half_height) noexcept {
     if (half_height <= 0.0F) {
-        return ray_sphere_distance(origin_x, origin_y, origin_z, command, center_x, center_y,
-                                   center_z, radius);
+        return ray_sphere_distance(origin_x, origin_y, origin_z, command, center_x, center_y, center_z, radius);
     }
 
     const float minimum_y = center_y - half_height;
@@ -155,22 +125,18 @@ template <typename Integer>
             closest = distance;
         }
     };
-    consider(ray_sphere_distance(origin_x, origin_y, origin_z, command, center_x, minimum_y,
-                                 center_z, radius));
-    consider(ray_sphere_distance(origin_x, origin_y, origin_z, command, center_x, maximum_y,
-                                 center_z, radius));
+    consider(ray_sphere_distance(origin_x, origin_y, origin_z, command, center_x, minimum_y, center_z, radius));
+    consider(ray_sphere_distance(origin_x, origin_y, origin_z, command, center_x, maximum_y, center_z, radius));
 
     const float cylinder_a = command.aim_x * command.aim_x + command.aim_z * command.aim_z;
     if (cylinder_a > 1.0e-8F) {
-        const float cylinder_b =
-            2.0F * (offset_x * command.aim_x + offset_z * command.aim_z);
+        const float cylinder_b = 2.0F * (offset_x * command.aim_x + offset_z * command.aim_z);
         const float cylinder_c = radial_squared - radius * radius;
         const float discriminant = cylinder_b * cylinder_b - 4.0F * cylinder_a * cylinder_c;
         if (discriminant >= 0.0F) {
             const float root = std::sqrt(discriminant);
             const float inverse_denominator = 0.5F / cylinder_a;
-            const float distances[2]{(-cylinder_b - root) * inverse_denominator,
-                                     (-cylinder_b + root) * inverse_denominator};
+            const float distances[2]{(-cylinder_b - root) * inverse_denominator, (-cylinder_b + root) * inverse_denominator};
             for (const float distance : distances) {
                 const float hit_y = origin_y + distance * command.aim_y;
                 if (distance >= 0.0F && hit_y >= minimum_y && hit_y <= maximum_y) {
@@ -185,8 +151,8 @@ template <typename Integer>
 } // namespace
 
 ProtocolMessage encode_fire_command(const FireCommand& command) {
-    if (command.shooter == 0 || !valid_direction(command.aim_x, command.aim_y, command.aim_z) ||
-        !std::isfinite(command.maximum_distance) || command.maximum_distance <= 0.0F) {
+    if (command.shooter == 0 || !valid_direction(command.aim_x, command.aim_y, command.aim_z) || !std::isfinite(command.maximum_distance) ||
+        command.maximum_distance <= 0.0F) {
         throw std::invalid_argument{"Fire command is invalid"};
     }
     ProtocolMessage message;
@@ -203,8 +169,7 @@ ProtocolMessage encode_fire_command(const FireCommand& command) {
     return message;
 }
 
-std::expected<FireCommand, std::string>
-decode_fire_command(const ProtocolMessage& message) {
+std::expected<FireCommand, std::string> decode_fire_command(const ProtocolMessage& message) {
     if (message.kind != MessageKind::event || message.payload.size() != fire_command_payload_size) {
         return std::unexpected{"Message is not a fire command"};
     }
@@ -221,18 +186,16 @@ decode_fire_command(const ProtocolMessage& message) {
         .aim_z = read_float(message.payload, offset),
         .maximum_distance = read_float(message.payload, offset),
     };
-    if (command.shooter == 0 || !valid_direction(command.aim_x, command.aim_y, command.aim_z) ||
-        !std::isfinite(command.maximum_distance) || command.maximum_distance <= 0.0F) {
+    if (command.shooter == 0 || !valid_direction(command.aim_x, command.aim_y, command.aim_z) || !std::isfinite(command.maximum_distance) ||
+        command.maximum_distance <= 0.0F) {
         return std::unexpected{"Fire command fields are invalid"};
     }
     return command;
 }
 
 ProtocolMessage encode_fire_result(const FireResult& result) {
-    if (result.shooter == 0 || !valid_status(result.status) || !std::isfinite(result.distance) ||
-        result.distance < 0.0F ||
-        (result.status == FireValidationStatus::hit && result.target == 0) ||
-        (result.status != FireValidationStatus::hit && result.target != 0)) {
+    if (result.shooter == 0 || !valid_status(result.status) || !std::isfinite(result.distance) || result.distance < 0.0F ||
+        (result.status == FireValidationStatus::hit && result.target == 0) || (result.status != FireValidationStatus::hit && result.target != 0)) {
         throw std::invalid_argument{"Fire result is invalid"};
     }
     ProtocolMessage message;
@@ -251,8 +214,7 @@ ProtocolMessage encode_fire_result(const FireResult& result) {
     return message;
 }
 
-std::expected<FireResult, std::string>
-decode_fire_result(const ProtocolMessage& message) {
+std::expected<FireResult, std::string> decode_fire_result(const ProtocolMessage& message) {
     if (message.kind != MessageKind::event || message.payload.size() != fire_result_payload_size) {
         return std::unexpected{"Message is not a fire result"};
     }
@@ -261,43 +223,44 @@ decode_fire_result(const ProtocolMessage& message) {
         return std::unexpected{"Event subtype is not a fire result"};
     }
     FireResult result{.fire_sequence = message.acknowledged_sequence};
-    result.status = static_cast<FireValidationStatus>(
-        read_integer<std::uint8_t>(message.payload, offset));
+    result.status = static_cast<FireValidationStatus>(read_integer<std::uint8_t>(message.payload, offset));
     result.shooter = read_integer<std::uint64_t>(message.payload, offset);
     result.target = read_integer<std::uint64_t>(message.payload, offset);
     result.requested_tick = read_integer<std::uint64_t>(message.payload, offset);
     result.evaluated_tick = read_integer<std::uint64_t>(message.payload, offset);
     result.server_tick = message.simulation_tick;
     result.distance = read_float(message.payload, offset);
-    if (message.sequence != result.fire_sequence || result.shooter == 0 ||
-        !valid_status(result.status) || !std::isfinite(result.distance) || result.distance < 0.0F ||
-        (result.status == FireValidationStatus::hit && result.target == 0) ||
+    if (message.sequence != result.fire_sequence || result.shooter == 0 || !valid_status(result.status) || !std::isfinite(result.distance) ||
+        result.distance < 0.0F || (result.status == FireValidationStatus::hit && result.target == 0) ||
         (result.status != FireValidationStatus::hit && result.target != 0)) {
         return std::unexpected{"Fire result fields are invalid"};
     }
     return result;
 }
 
-LagCompensatedCombatServer::LagCompensatedCombatServer(CombatSettings settings)
-    : settings_{settings} {
-    if (settings_.history_ticks == 0 || !std::isfinite(settings_.hit_radius) ||
-        settings_.hit_radius <= 0.0F || !std::isfinite(settings_.character_center_height) ||
-        settings_.character_center_height < 0.0F || !std::isfinite(settings_.hit_half_height) ||
-        settings_.hit_half_height < 0.0F || !std::isfinite(settings_.maximum_range) ||
-        settings_.maximum_range <= 0.0F ||
-        !std::ranges::all_of(settings_.static_obstacles, [](const auto& obstacle) {
-            return std::isfinite(obstacle.minimum_x) && std::isfinite(obstacle.maximum_x) &&
-                   std::isfinite(obstacle.minimum_z) && std::isfinite(obstacle.maximum_z) &&
-                   std::isfinite(obstacle.top_y) && obstacle.minimum_x < obstacle.maximum_x &&
-                   obstacle.minimum_z < obstacle.maximum_z && obstacle.top_y > 0.0F;
-        })) {
+LagCompensatedCombatServer::LagCompensatedCombatServer(CombatSettings settings) : settings_{settings} {
+    if (settings_.history_ticks == 0 || !std::isfinite(settings_.hit_radius) || settings_.hit_radius <= 0.0F ||
+        !std::isfinite(settings_.character_center_height) || settings_.character_center_height < 0.0F || !std::isfinite(settings_.hit_half_height) ||
+        settings_.hit_half_height < 0.0F || !std::isfinite(settings_.maximum_range) || settings_.maximum_range <= 0.0F ||
+        !std::ranges::all_of(
+            settings_.static_obstacles,
+            [](const auto& obstacle) {
+                return std::isfinite(obstacle.minimum_x) && std::isfinite(obstacle.maximum_x) && std::isfinite(obstacle.minimum_z) &&
+                       std::isfinite(obstacle.maximum_z) && std::isfinite(obstacle.top_y) && obstacle.minimum_x < obstacle.maximum_x &&
+                       obstacle.minimum_z < obstacle.maximum_z && obstacle.top_y > 0.0F;
+            })) {
         throw std::invalid_argument{"Combat settings are invalid"};
     }
     if (settings_.static_mesh) {
-        const auto& mesh=*settings_.static_mesh;
-        if (mesh.indices.empty() || mesh.indices.size()%3 ||
-            !std::ranges::all_of(mesh.indices,[&](auto i){return i<mesh.vertices.size();}) ||
-            !std::ranges::all_of(mesh.vertices,[](auto p){return std::isfinite(p.x)&&std::isfinite(p.y)&&std::isfinite(p.z);}))
+        const auto& mesh = *settings_.static_mesh;
+        if (mesh.indices.empty() || mesh.indices.size() % 3 ||
+            !std::ranges::all_of(mesh.indices,
+                [&](auto i) {
+                    return i < mesh.vertices.size();
+                }) ||
+            !std::ranges::all_of(mesh.vertices, [](auto p) {
+                return std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z);
+            }))
             throw std::invalid_argument{"Combat triangle mesh is invalid"};
     }
 }
@@ -309,8 +272,7 @@ void LagCompensatedCombatServer::record(WorldSnapshot snapshot) {
     std::ranges::sort(snapshot.entities, {}, &MovementState::entity);
     for (std::size_t index = 0; index < snapshot.entities.size(); ++index) {
         const auto& entity = snapshot.entities[index];
-        if (entity.entity == 0 || !std::isfinite(entity.position_x) ||
-            !std::isfinite(entity.position_y) || !std::isfinite(entity.position_z) ||
+        if (entity.entity == 0 || !std::isfinite(entity.position_x) || !std::isfinite(entity.position_y) || !std::isfinite(entity.position_z) ||
             (index > 0 && snapshot.entities[index - 1].entity == entity.entity)) {
             throw std::invalid_argument{"Combat history contains invalid entities"};
         }
@@ -330,17 +292,14 @@ FireResult LagCompensatedCombatServer::validate(const FireCommand& command) {
         .requested_tick = command.estimated_server_tick,
         .server_tick = server_tick,
     };
-    if (history_.empty() || command.shooter == 0 ||
-        !valid_direction(command.aim_x, command.aim_y, command.aim_z) ||
-        !std::isfinite(command.maximum_distance) || command.maximum_distance <= 0.0F ||
-        command.maximum_distance > settings_.maximum_range) {
+    if (history_.empty() || command.shooter == 0 || !valid_direction(command.aim_x, command.aim_y, command.aim_z) || !std::isfinite(command.maximum_distance) ||
+        command.maximum_distance <= 0.0F || command.maximum_distance > settings_.maximum_range) {
         result.status = FireValidationStatus::rejected_invalid;
         ++metrics_.invalid_rejections;
         return result;
     }
     const auto latest = latest_fire_sequences_.find(command.shooter);
-    if (latest != latest_fire_sequences_.end() &&
-        !sequence_more_recent(command.sequence, latest->second)) {
+    if (latest != latest_fire_sequences_.end() && !sequence_more_recent(command.sequence, latest->second)) {
         result.status = FireValidationStatus::rejected_duplicate;
         ++metrics_.duplicate_rejections;
         return result;
@@ -357,8 +316,7 @@ FireResult LagCompensatedCombatServer::validate(const FireCommand& command) {
     }
 
     const std::uint64_t target_tick = std::min(command.estimated_server_tick, server_tick);
-    auto frame = std::ranges::upper_bound(
-        history_, target_tick, {}, &WorldSnapshot::simulation_tick);
+    auto frame = std::ranges::upper_bound(history_, target_tick, {}, &WorldSnapshot::simulation_tick);
     if (frame == history_.begin()) {
         frame = history_.begin();
     } else {
@@ -379,12 +337,11 @@ FireResult LagCompensatedCombatServer::validate(const FireCommand& command) {
     const float origin_y = shooter->position_y + settings_.character_center_height;
     const float origin_z = shooter->position_z;
     float closest_distance = command.maximum_distance;
-    if (settings_.static_mesh) closest_distance=physics::ray_triangle_distance(
-        *settings_.static_mesh,{origin_x,origin_y,origin_z},
-        {command.aim_x,command.aim_y,command.aim_z},closest_distance);
+    if (settings_.static_mesh)
+        closest_distance = physics::ray_triangle_distance(
+            *settings_.static_mesh, {origin_x, origin_y, origin_z}, {command.aim_x, command.aim_y, command.aim_z}, closest_distance);
     for (const auto& obstacle : settings_.static_obstacles) {
-        if (const auto distance = ray_obstacle_distance(
-                origin_x, origin_y, origin_z, command, obstacle)) {
+        if (const auto distance = ray_obstacle_distance(origin_x, origin_y, origin_z, command, obstacle)) {
             closest_distance = std::min(closest_distance, *distance);
         }
     }
@@ -393,10 +350,8 @@ FireResult LagCompensatedCombatServer::validate(const FireCommand& command) {
         if (candidate.entity == command.shooter) {
             continue;
         }
-        const auto entry_distance = ray_vertical_capsule_distance(
-            origin_x, origin_y, origin_z, command, candidate.position_x,
-            candidate.position_y + settings_.character_center_height, candidate.position_z,
-            settings_.hit_radius, settings_.hit_half_height);
+        const auto entry_distance = ray_vertical_capsule_distance(origin_x, origin_y, origin_z, command, candidate.position_x,
+            candidate.position_y + settings_.character_center_height, candidate.position_z, settings_.hit_radius, settings_.hit_half_height);
         if (entry_distance && *entry_distance <= closest_distance) {
             closest_distance = *entry_distance;
             closest_target = candidate.entity;

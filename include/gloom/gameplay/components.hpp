@@ -31,7 +31,7 @@ struct TransformComponent {
 // Stable logical contract for the migrated legacy controller. The backend
 // handle is optional so data-only/client compositions remain backend neutral.
 class CharacterPhysicsComponent final {
-public:
+  public:
     float radius{0.4F};
     float collision_height{1.8F};
     float maximum_slope_radians{0.872664626F};
@@ -42,12 +42,19 @@ public:
     bool provisional_kinematic_proxy{false};
 
     CharacterPhysicsComponent() = default;
-    ~CharacterPhysicsComponent() { release(); }
+    ~CharacterPhysicsComponent() {
+        release();
+    }
     CharacterPhysicsComponent(const CharacterPhysicsComponent&) = delete;
     CharacterPhysicsComponent& operator=(const CharacterPhysicsComponent&) = delete;
-    CharacterPhysicsComponent(CharacterPhysicsComponent&& other) noexcept { move_from(other); }
+    CharacterPhysicsComponent(CharacterPhysicsComponent&& other) noexcept {
+        move_from(other);
+    }
     CharacterPhysicsComponent& operator=(CharacterPhysicsComponent&& other) noexcept {
-        if (this != &other) { release(); move_from(other); }
+        if (this != &other) {
+            release();
+            move_from(other);
+        }
         return *this;
     }
 
@@ -70,23 +77,37 @@ public:
     }
 
     void reset() {
-        if (world_ != nullptr && character_.valid() &&
-            world_->state() == core::SubsystemState::running &&
-            world_->instance_generation() == world_generation_) {
+        if (world_ != nullptr && character_.valid() && world_->state() == core::SubsystemState::running && world_->instance_generation() == world_generation_) {
             world_->destroy_character(character_);
         }
-        world_ = nullptr; character_ = {}; world_generation_ = 0;
+        world_ = nullptr;
+        character_ = {};
+        world_generation_ = 0;
     }
-    [[nodiscard]] bool attached() const noexcept { return character_.valid(); }
-    [[nodiscard]] physics::CharacterId character() const noexcept { return character_; }
+    [[nodiscard]] bool attached() const noexcept {
+        return character_.valid();
+    }
+    [[nodiscard]] physics::CharacterId character() const noexcept {
+        return character_;
+    }
 
-private:
-    void release() noexcept { try { reset(); } catch (...) { world_ = nullptr; character_ = {}; } }
+  private:
+    void release() noexcept {
+        try {
+            reset();
+        } catch (...) {
+            world_ = nullptr;
+            character_ = {};
+        }
+    }
     void move_from(CharacterPhysicsComponent& other) noexcept {
-        radius = other.radius; collision_height = other.collision_height;
+        radius = other.radius;
+        collision_height = other.collision_height;
         maximum_slope_radians = other.maximum_slope_radians;
-        step_up_height = other.step_up_height; step_down_height = other.step_down_height;
-        mass = other.mass; maximum_push_force = other.maximum_push_force;
+        step_up_height = other.step_up_height;
+        step_down_height = other.step_down_height;
+        mass = other.mass;
+        maximum_push_force = other.maximum_push_force;
         provisional_kinematic_proxy = other.provisional_kinematic_proxy;
         world_ = std::exchange(other.world_, nullptr);
         character_ = std::exchange(other.character_, {});
@@ -179,46 +200,28 @@ struct SliceCharacterDesc {
     SlicePlayerSelection selection;
 };
 
-[[nodiscard]] inline core::EntityId
-compose_slice_character(core::EntityRegistry& registry,
-                        const SliceCharacterDesc description) {
+[[nodiscard]] inline core::EntityId compose_slice_character(core::EntityRegistry& registry, const SliceCharacterDesc description) {
     const auto entity = registry.create();
-    registry.emplace<TransformComponent>(
-        entity, TransformComponent{.position_x = description.spawn_x,
-                                   .position_z = description.spawn_z});
+    registry.emplace<TransformComponent>(entity, TransformComponent{.position_x = description.spawn_x, .position_z = description.spawn_z});
     registry.emplace<CharacterPhysicsComponent>(entity);
     registry.emplace<HealthComponent>(entity);
     registry.emplace<ShieldComponent>(entity);
-    registry.emplace<CharacterMovementComponent>(
-        entity, CharacterMovementComponent{.spawn_x = description.spawn_x,
-                                           .spawn_z = description.spawn_z});
+    registry.emplace<CharacterMovementComponent>(entity, CharacterMovementComponent{.spawn_x = description.spawn_x, .spawn_z = description.spawn_z});
     registry.emplace<WeaponComponent>(entity);
     registry.emplace<AbilityComponent>(entity);
-    registry.emplace<CharacterLoadoutComponent>(
-        entity, CharacterLoadoutComponent{.selection = description.selection});
-    registry.emplace<AuthorityComponent>(
-        entity, AuthorityComponent{.network_entity = description.network_entity,
-                                   .connection = description.connection});
+    registry.emplace<CharacterLoadoutComponent>(entity, CharacterLoadoutComponent{.selection = description.selection});
+    registry.emplace<AuthorityComponent>(entity, AuthorityComponent{.network_entity = description.network_entity, .connection = description.connection});
     registry.emplace<ReplicationComponent>(entity);
     registry.emplace<CharacterPresentationComponent>(entity);
     registry.emplace<ScoreComponent>(entity);
     return entity;
 }
 
-[[nodiscard]] inline bool has_complete_character_composition(
-    const core::EntityRegistry& registry, const core::EntityId entity) noexcept {
-    return registry.has<TransformComponent>(entity) &&
-           registry.has<CharacterPhysicsComponent>(entity) &&
-           registry.has<HealthComponent>(entity) &&
-           registry.has<ShieldComponent>(entity) &&
-           registry.has<CharacterMovementComponent>(entity) &&
-           registry.has<WeaponComponent>(entity) &&
-           registry.has<AbilityComponent>(entity) &&
-           registry.has<CharacterLoadoutComponent>(entity) &&
-           registry.has<AuthorityComponent>(entity) &&
-           registry.has<ReplicationComponent>(entity) &&
-           registry.has<CharacterPresentationComponent>(entity) &&
-           registry.has<ScoreComponent>(entity);
+[[nodiscard]] inline bool has_complete_character_composition(const core::EntityRegistry& registry, const core::EntityId entity) noexcept {
+    return registry.has<TransformComponent>(entity) && registry.has<CharacterPhysicsComponent>(entity) && registry.has<HealthComponent>(entity) &&
+           registry.has<ShieldComponent>(entity) && registry.has<CharacterMovementComponent>(entity) && registry.has<WeaponComponent>(entity) &&
+           registry.has<AbilityComponent>(entity) && registry.has<CharacterLoadoutComponent>(entity) && registry.has<AuthorityComponent>(entity) &&
+           registry.has<ReplicationComponent>(entity) && registry.has<CharacterPresentationComponent>(entity) && registry.has<ScoreComponent>(entity);
 }
 
 } // namespace gloom::gameplay

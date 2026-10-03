@@ -67,10 +67,8 @@ struct MaterialUpload {
     RenderAssetId metallic_roughness_texture{builtin_white_texture};
     RenderAssetId normal_texture{builtin_flat_normal_texture};
     MaterialSurface surface;
-    std::array<RenderAssetId, 7> extra_textures{
-        builtin_white_texture, builtin_white_texture, builtin_white_texture,
-        builtin_white_texture, builtin_white_texture, builtin_white_texture,
-        builtin_white_texture};
+    std::array<RenderAssetId, 7> extra_textures{builtin_white_texture, builtin_white_texture, builtin_white_texture, builtin_white_texture,
+        builtin_white_texture, builtin_white_texture, builtin_white_texture};
 };
 
 enum class GpuAssetState : std::uint8_t { missing, queued, resident, failed };
