@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/assets/residency_coordinator.hpp>
 
 #include <gloom/assets/gltf_importer.hpp>
@@ -191,6 +192,7 @@ void AssetResidencyCoordinator::fail(Request& request, std::string error) {
 }
 
 void AssetResidencyCoordinator::update() {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::assets);
     std::vector<std::pair<std::uint64_t, Request*>> queued;
     for (auto& [ticket, request] : requests_) {
         if (request.state == SceneResidencyState::queued) {

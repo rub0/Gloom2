@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/render/particles.hpp>
 #include <simdjson.h>
 #include <algorithm>
@@ -165,6 +166,7 @@ bool ParticleSystem::translate(std::uint64_t owner, Vec3 d) noexcept {
     return found;
 }
 void ParticleSystem::advance(double seconds) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::particles);
     if (!std::isfinite(seconds) || seconds < 0 || seconds > 10)
         throw std::invalid_argument{"Invalid particle timestep"};
     const double end = time_ + seconds;
@@ -217,8 +219,11 @@ void ParticleSystem::clear() noexcept {
 }
 
 std::vector<RenderInstance> ParticleSystem::render(const Camera& camera, std::span<const RenderInstance> materials) const {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::particles);
     std::vector<RenderInstance> result;
     result.reserve(particles_.size());
+    GLOOM_PROFILE_CAPACITY("particles", particles_.size(), particles_.capacity(), sizeof(Particle));
+    GLOOM_PROFILE_CAPACITY("emitters", emitters_.size(), emitters_.capacity(), sizeof(Emitter));
     const auto camera_basis = camera_relative_transform(camera, {}, {1, 1, 1});
     for (const auto& p : particles_) {
         const auto& r = recipes_[p.recipe];

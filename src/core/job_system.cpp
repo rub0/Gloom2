@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/core/job_system.hpp>
 
 #include <algorithm>
@@ -45,6 +46,7 @@ struct JobSystem::Impl {
     std::atomic<std::uint64_t> wait_nanoseconds{0};
 
     void complete(WorkItem& item) noexcept {
+        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
         const auto started_at = std::chrono::steady_clock::now();
         try {
             item.job();
@@ -180,6 +182,9 @@ void JobSystem::stop() noexcept {
 }
 
 TaskGroup JobSystem::create_group() const {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
+    GLOOM_PROFILE_LAYOUT("TaskGroup::State", sizeof(TaskGroup::State), alignof(TaskGroup::State));
+    GLOOM_PROFILE_LAYOUT("JobSystem::WorkItem", sizeof(Impl::WorkItem), alignof(Impl::WorkItem));
     if (state_ != SubsystemState::running) {
         throw std::logic_error{"Job system must be running before creating a task group"};
     }
@@ -187,6 +192,7 @@ TaskGroup JobSystem::create_group() const {
 }
 
 void JobSystem::schedule(TaskGroup& group, Job job) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
     if (!job) {
         throw std::invalid_argument{"Cannot schedule an empty job"};
     }
@@ -217,6 +223,7 @@ void JobSystem::schedule(TaskGroup& group, Job job) {
 }
 
 void JobSystem::wait(TaskGroup& group) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
     if (!group.state_ || group.state_->owner != this) {
         throw std::invalid_argument{"Task group does not belong to this job system"};
     }

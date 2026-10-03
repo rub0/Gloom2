@@ -1,6 +1,9 @@
 # Contrato común de la migración C++
 
 Fecha: 3 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
+112 terminado: [medidas/contratos](../../../reports/cpp-performance-112/README.md),
+193 archivos/52 CTest; siguiente 113. Diagnóstico opcional OFF y bloqueos expresos
+de fronteras fastgltf/Jolt en 117/120/128. Sin excepción autorizada.
 Leer primero el inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [índice](README.md) y solo la ficha elegida.
 No cargar todas las fichas ni el historial. Ponytail full activo: usar lo ya
@@ -79,7 +82,10 @@ Los headers instalados de Jolt confirman `SetContactListener(ContactListener*)`
 y `CharacterVirtual::SetListener(CharacterContactListener*)`. No es una hipótesis
 de estilo: el comportamiento actual depende de esos callbacks.
 
-112 debe demostrar una alternativa sin herencia propia que conserve filtros,
+El probe del 112 confirma filtros incorporados y un caso simple con dos workers,
+pero no demuestra equivalencia completa de listeners. fastgltf también exige STL
+en su API de parsing. Ambos bloqueos están documentados con versión/API/prueba.
+112 debía demostrar una alternativa sin herencia propia que conserve filtros,
 eventos entered/stayed/exited y multithreading. Si no la hay, el cierre literal
 de 120/128 requiere una decisión expresa del usuario sobre esa incompatibilidad.
 El plan no concede la excepción, no cambia Jolt ni elimina eventos. El bloqueo

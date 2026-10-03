@@ -1,4 +1,5 @@
 #pragma once
+#include <gloom/core/allocation_profile.hpp>
 
 #include <cstddef>
 #include <concepts>
@@ -40,7 +41,9 @@ class EntityRegistry final {
     void clear();
 
     template <typename Component, typename... Arguments> Component& emplace(EntityId entity, Arguments&&... arguments) {
+        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
         using Value = std::remove_cvref_t<Component>;
+        GLOOM_PROFILE_LAYOUT(__FUNCSIG__, sizeof(Value), alignof(Value));
         static_assert(std::same_as<Component, Value>, "Component type must be an unqualified value type");
         require_alive(entity);
         auto& values = pool<Value>().values;
@@ -61,6 +64,7 @@ class EntityRegistry final {
     }
 
     template <typename Component> [[nodiscard]] Component* get(EntityId entity) noexcept {
+        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
         using Value = std::remove_cvref_t<Component>;
         if (!alive(entity)) {
             return nullptr;
@@ -74,6 +78,7 @@ class EntityRegistry final {
     }
 
     template <typename Component> [[nodiscard]] const Component* get(EntityId entity) const noexcept {
+        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
         using Value = std::remove_cvref_t<Component>;
         if (!alive(entity)) {
             return nullptr;

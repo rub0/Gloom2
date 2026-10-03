@@ -6,6 +6,14 @@ Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 1 archivo propietario a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
+## Bloqueo concreto registrado en 112
+
+**No iniciado; cierre bloqueado** para la frontera externa, pendiente de decisión
+expresa del usuario o alternativa equivalente demostrada. El cierre literal depende de resolver las fronteras fastgltf/Jolt, no de renombrar o esconder sus usos en vendor.
+[Evidencia y probe](../../../reports/cpp-performance-112/compatibilidad.md).
+No se aplica excepción por ausencia de respuesta. Conservar eventos/formatos y
+dependencias; no marcar cerrado mientras esa condición siga pendiente.
+
 ## Evidencia de partida
 
 Hoy solo las fuentes/pruebas focalizadas del 110 tienen no excepciones/RTTI; existen 188 archivos C++ propios y 50 CTest. Cambiar flags antes de

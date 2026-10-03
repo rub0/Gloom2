@@ -1,15 +1,15 @@
 # Hito 112: Base reproducible, costes y contratos de propiedad
 
-Estado: **no iniciado**. Depende de: **111**.
+Estado: **terminado**. Depende de: **111**.
 Objetivo: **Medición y diseño verificable**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
-7 archivos propietarios a este hito. Los cambios de firmas incluyen
+12 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
 ## Evidencia de partida
 
 El 110 mide visibilidad/iluminación, pero no asignaciones completas de poses, grupos, partículas o snapshots. Persisten opciones /EHsc en varios
-targets; Array construye toda la capacidad y no admite directamente tipos sin constructor por defecto. Jolt exige interfaces virtuales para filtros y
+targets; Array construye toda la capacidad y no admite directamente tipos sin constructor por defecto. Jolt permite filtros incorporados pero exige interfaces virtuales para
 listeners; fastgltf y Diligent exponen tipos propios que requieren comprobar la frontera con STL.
 
 Entradas principales verificadas (no es una lista exhaustiva de callers):
@@ -32,6 +32,26 @@ Entradas principales verificadas (no es una lista exhaustiva de callers):
 - [tests/storage_tests.cpp](../../../tests/storage_tests.cpp)
 
 Además se adaptan todos los callers afectados por firmas/lifetime, aunque tengan otro responsable de cierre.
+
+## Resultado verificado del 112
+
+[Informe](../../../reports/cpp-performance-112/README.md): diagnóstico opcional OFF,
+28 pasadas Factory/Hound, control de cuatro workers, capturas/componentes/capacidades
+y contratos concretos. Builds completos Release/Debug y suites actualizadas;
+los fallos y límites de presupuesto se conservan, no se relajan.
+117/120/128 tienen bloqueos externos explícitos pendientes de decisión; la ficha
+112 admite esa salida de investigación. No se concede ninguna excepción.
+
+Nuevos archivos propietarios del 112:
+
+- [include/gloom/core/allocation_profile.hpp](../../../include/gloom/core/allocation_profile.hpp)
+- [src/core/allocation_profile.cpp](../../../src/core/allocation_profile.cpp)
+- [src/core/allocation_new.cpp](../../../src/core/allocation_new.cpp)
+- [tests/allocation_profile_tests.cpp](../../../tests/allocation_profile_tests.cpp)
+- [tests/dependency_contract_tests.cpp](../../../tests/dependency_contract_tests.cpp)
+
+Herramienta: [measure_cpp_baseline.py](../../../tools/perf/measure_cpp_baseline.py).
+El trabajo de abajo se conserva como contrato de esta ficha. 113 no iniciado.
 
 ## Trabajo concreto, en orden
 

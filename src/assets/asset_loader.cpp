@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/assets/asset_loader.hpp>
 
 #include <array>
@@ -19,6 +20,7 @@ AsyncAssetLoader::~AsyncAssetLoader() {
 }
 
 std::shared_future<AssetLoadResult> AsyncAssetLoader::request(const AssetId id) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::assets);
     std::scoped_lock lock{mutex_};
     ++metrics_.requests;
     if (const auto found = requests_.find(id); found != requests_.end()) {

@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/render/visibility.hpp>
 
 #include <assert.h>
@@ -92,6 +93,7 @@ int VisibilitySystem::compare_indices(const void* left, const void* right) {
 }
 
 void VisibilitySystem::build(PreparedVisibility& result, const Camera& camera, const float aspect_ratio, Span<const RenderInstance> instances) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::visibility);
     const uint64 started = performance_clock();
     assert(aspect_ratio > 0.0F && isfinite(aspect_ratio));
     assert(instances.empty() ||
@@ -183,6 +185,8 @@ void VisibilitySystem::build(PreparedVisibility& result, const Camera& camera, c
         ++result.batches[batch_count - 1].instance_count;
     }
     result.batches.resize(batch_count);
+    GLOOM_PROFILE_CAPACITY("visible_instances", visible_count, result.instances.capacity(), sizeof(RenderInstance));
+    GLOOM_PROFILE_CAPACITY("visibility_indices", visible_indices_.size(), visible_indices_.capacity(), sizeof(VisibleIndex));
     result.metrics.visible_instances = visible_count;
     result.metrics.culled_instances = instances.size() - visible_count;
     result.metrics.batches = batch_count;

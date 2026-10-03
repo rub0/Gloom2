@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/render/lighting.hpp>
 
 #include <assert.h>
@@ -39,6 +40,7 @@ ClusteredLightingBuilder::ClusteredLightingBuilder(const LightingSettings settin
 
 void ClusteredLightingBuilder::build(PreparedLighting& result, const Camera& camera, const float aspect_ratio, Span<const PointLight> lights,
     const DirectionalLight& directional, const EnvironmentLighting& environment) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::lighting);
     const uint64 started = performance_clock();
     assert(aspect_ratio > 0.0F && isfinite(aspect_ratio) && camera.near_plane > 0.0F && camera.far_plane > camera.near_plane);
     assert(

@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/core/entity.hpp>
 
 namespace gloom::core {
@@ -13,6 +14,7 @@ void advance_generation(std::uint32_t& generation) noexcept {
 } // namespace
 
 EntityId EntityRegistry::create() {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
     std::uint32_t index = 0;
     if (free_indices_.empty()) {
         if (slots_.size() >= EntityId::invalid_index) {
@@ -27,10 +29,12 @@ EntityId EntityRegistry::create() {
     auto& slot = slots_[index];
     slot.alive = true;
     ++live_entities_;
+    GLOOM_PROFILE_CAPACITY("entity_slots", slots_.size(), slots_.capacity(), sizeof(Slot));
     return {.index = index, .generation = slot.generation};
 }
 
 bool EntityRegistry::destroy(const EntityId entity) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
     if (!alive(entity)) {
         return false;
     }
@@ -56,6 +60,7 @@ std::size_t EntityRegistry::size() const noexcept {
 }
 
 void EntityRegistry::clear() {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
     std::vector<std::uint32_t> free_indices;
     free_indices.reserve(slots_.size());
     for (std::size_t index = 0; index < slots_.size(); ++index) {

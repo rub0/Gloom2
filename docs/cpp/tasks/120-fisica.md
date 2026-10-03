@@ -6,6 +6,14 @@ Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 6 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
+## Bloqueo concreto registrado en 112
+
+**No iniciado; cierre bloqueado** para la frontera externa, pendiente de decisión
+expresa del usuario o alternativa equivalente demostrada. Los tres filtros tienen sustitutos incorporados equivalentes; los dos listeners virtuales conservan eventos que polling simple no demuestra.
+[Evidencia y probe](../../../reports/cpp-performance-112/compatibilidad.md).
+No se aplica excepción por ausencia de respuesta. Conservar eventos/formatos y
+dependencias; no marcar cerrado mientras esa condición siga pendiente.
+
 ## Evidencia de partida
 
 JoltWorld implementa World virtual/PIMPL y usa mapas para cuerpos/contactos, arrays temporales de eventos y consultas de CharacterVirtual. Cinco

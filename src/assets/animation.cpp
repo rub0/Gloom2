@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/assets/animation.hpp>
 #include <assert.h>
 #include <math.h>
@@ -100,6 +101,7 @@ bool valid_animations(const ImportedScene& scene) {
 }
 
 LocalPose rest_pose(const ImportedScene& scene) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::poses);
     LocalPose result;
     result.reserve(scene.nodes.size());
     for (const auto& node : scene.nodes)
@@ -108,6 +110,7 @@ LocalPose rest_pose(const ImportedScene& scene) {
 }
 
 LocalPose sample_animation(const ImportedScene& scene, std::string_view name, double seconds, bool loop) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::poses);
     if (!std::isfinite(seconds))
         throw std::invalid_argument{"Invalid animation time"};
     auto pose = rest_pose(scene);
@@ -137,6 +140,7 @@ LocalPose sample_animation(const ImportedScene& scene, std::string_view name, do
 }
 
 LocalPose blend_poses(const LocalPose& a, const LocalPose& b, float weight) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::poses);
     if (a.size() != b.size() || !std::isfinite(weight))
         throw std::invalid_argument{"Invalid pose blend"};
     const float t = std::clamp(weight, 0.0F, 1.0F);
@@ -149,6 +153,7 @@ LocalPose blend_poses(const LocalPose& a, const LocalPose& b, float weight) {
 }
 
 std::vector<RigMatrix> pose_worlds(const ImportedScene& scene, const LocalPose& pose) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::poses);
     if (pose.size() != scene.nodes.size())
         throw std::invalid_argument{"Pose/rig size mismatch"};
     std::vector<std::uint32_t> parents(pose.size(), no_asset_index), queue;
@@ -174,6 +179,7 @@ std::vector<RigMatrix> pose_worlds(const ImportedScene& scene, const LocalPose& 
 }
 
 std::shared_ptr<render::SkinPose> skin_pose(const ImportedScene& scene, std::uint32_t mesh_node, const std::vector<RigMatrix>& worlds) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::poses);
     if (worlds.size() != scene.nodes.size() || mesh_node >= scene.nodes.size() || scene.nodes[mesh_node].skin >= scene.skins.size())
         throw std::invalid_argument{"Invalid skin pose binding"};
     auto result = std::make_shared<render::SkinPose>();
@@ -231,6 +237,7 @@ void prepare_skin_bounds(const ImportedPrimitive& primitive, SkinBounds& bounds)
 }
 
 render::BoundingSphere skinned_bounds(const SkinBounds& bounds, const render::SkinPose& pose) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::bounds);
     assert(bounds.joint_count <= pose.matrices.size());
     if (!bounds.joint_count)
         return {.radius = .001F};
@@ -262,6 +269,7 @@ render::BoundingSphere skinned_bounds(const SkinBounds& bounds, const render::Sk
 }
 
 render::BoundingSphere skinned_bounds(const ImportedPrimitive& primitive, const render::SkinPose& pose) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::bounds);
     render::Vec3 lo{1e30F, 1e30F, 1e30F}, hi{-1e30F, -1e30F, -1e30F};
     for (const auto& v : primitive.vertices) {
         const auto p = skinned_position(v, pose);

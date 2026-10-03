@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #include <gloom/backends/diligent_renderer.hpp>
 #include <gloom/render/lighting.hpp>
 #include <gloom/render/temporal.hpp>
@@ -1933,6 +1934,7 @@ void DiligentRenderer::resize(const std::uint32_t width, const std::uint32_t hei
 }
 
 void DiligentRenderer::begin_frame() {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::renderer);
     impl_->ui.vertices.clear();
     impl_->frame_metrics.draw_calls = 0;
     impl_->frame_metrics.skin_maps = 0;
@@ -2020,6 +2022,7 @@ void DiligentRenderer::begin_frame() {
 }
 
 void DiligentRenderer::draw(const render::RenderSnapshot& snapshot) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::renderer);
     if (snapshot.ui) {
         if (snapshot.ui->vertices.size() > 65536)
             throw std::invalid_argument{"UI draw list exceeds capacity"};
@@ -2446,6 +2449,7 @@ void DiligentRenderer::capture_next_frame(std::filesystem::path path) {
 }
 
 void DiligentRenderer::end_frame() {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::renderer);
     if (state_ != core::SubsystemState::running) {
         throw std::logic_error{"Diligent renderer must be running before end_frame"};
     }

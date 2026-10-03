@@ -6,6 +6,14 @@ Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 19 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
+## Bloqueo concreto registrado en 112
+
+**No iniciado; cierre bloqueado** para la frontera externa, pendiente de decisión
+expresa del usuario o alternativa equivalente demostrada. fastgltf 0.9 exige std::filesystem::path para loadGltf y variantes; leer bytes con API C no elimina ese argumento.
+[Evidencia y probe](../../../reports/cpp-performance-112/compatibilidad.md).
+No se aplica excepción por ausencia de respuesta. Conservar eventos/formatos y
+dependencias; no marcar cerrado mientras esa condición siga pendiente.
+
 ## Evidencia de partida
 
 VirtualPath/VFS/catalog/ImportedScene/CookedAsset usan strings, filesystem, expected, vectores y mapas. AssetRecord contiene VirtualPath sin

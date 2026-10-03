@@ -77,6 +77,9 @@ int main() try {
     expect(metrics.job_execution_nanoseconds > 0, "Job execution time was not recorded");
     expect(metrics.wait_nanoseconds > 0, "Task-group wait time was not recorded");
     jobs.stop();
+#ifdef GLOOM_ALLOCATION_PROFILE
+    gloom::allocation_profile_report(0);
+#endif
 
     std::cout << "Gloom job-system tests completed successfully.\n";
     return 0;

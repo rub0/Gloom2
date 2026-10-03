@@ -988,6 +988,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     }
     gloom::PerformanceProfile profile;
     while (true) {
+#ifdef GLOOM_ALLOCATION_PROFILE
+        if (performance_test && profile.warmup == 120 && profile.count == 0)
+            gloom::allocation_profile_reset();
+        gloom::allocation_profile_window(performance_test && profile.warmup >= 120);
+#endif
         const gloom::uint64 profile_start = gloom::performance_clock();
         if (!window_view->poll_events())
             break;
@@ -1939,6 +1944,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                     (smoke_test && renderer_view->asset_state(streaming_smoke_texture) != gloom::render::GpuAssetState::resident))) {
             throw std::runtime_error{"Built-in GPU assets did not become resident"};
         }
+#ifdef GLOOM_ALLOCATION_PROFILE
+        gloom::AllocationScope allocation_snapshots{gloom::AllocationPhase::snapshots};
+#endif
         complete_instances = render_instances;
         if (vertical_slice) {
             const gloom::gameplay::SliceSnapshot& state = current_slice_snapshot();
@@ -2292,6 +2300,13 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                     }
             }
         }
+        GLOOM_PROFILE_CAPACITY("render_instances", render_instances.size(), render_instances.capacity(), sizeof(gloom::render::RenderInstance));
+        GLOOM_PROFILE_CAPACITY("complete_instances", complete_instances.size(), complete_instances.capacity(), sizeof(gloom::render::RenderInstance));
+        GLOOM_PROFILE_CAPACITY(
+            "previous_animated_instances", previous_animated_instances.size(), previous_animated_instances.capacity(), sizeof(gloom::render::RenderInstance));
+#ifdef GLOOM_ALLOCATION_PROFILE
+        allocation_snapshots.finish();
+#endif
         const auto source_instances = std::span<const gloom::render::RenderInstance>{complete_instances};
         const float render_aspect = drawable_size.second == 0 ? 1.0F : static_cast<float>(drawable_size.first) / static_cast<float>(drawable_size.second);
         const gloom::uint64 profile_visibility = gloom::performance_clock();
@@ -2355,6 +2370,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         if (review_ready && !animation_review && review_frames % 32 == 31)
             renderer_view->capture_next_frame(review_output / (std::string{review_view.name} + ".ppm"));
         renderer_view->end_frame();
+#ifdef GLOOM_ALLOCATION_PROFILE
+        gloom::allocation_profile_window(false);
+#endif
         if (performance_test) {
             if (profile_ready && profile.warmup == 119) {
                 profile.initial_evictions = renderer_view->residency_metrics().evictions;
@@ -2465,6 +2483,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                                                                              : performance_two_full  ? "1 TPS + 1 FPS with HUD/audio/fire"
                                                                                                                      : "1 TPS + 1 FPS legacy benchmark");
         gloom::report_performance(profile);
+#ifdef GLOOM_ALLOCATION_PROFILE
+        gloom::allocation_profile_report(profile.count);
+#endif
         printf("Audio output: %s; drawable=%ux%u; windowed\n", performance_audio_device && game_audio && game_audio->device_available() ? "SDL device" : "null",
             window_view->drawable_size().first, window_view->drawable_size().second);
         const gloom::render::FrameRenderMetrics metrics = renderer_view->frame_metrics();

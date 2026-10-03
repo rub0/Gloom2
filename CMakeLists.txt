@@ -56,11 +56,17 @@ foreach(unused_target IN ITEMS
 endforeach()
 
 option(GLOOM_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+option(GLOOM_ALLOCATION_PROFILE "Enable the Windows allocation diagnostic (excluded from normal timing builds)" OFF)
+if(GLOOM_ALLOCATION_PROFILE AND NOT WIN32)
+    message(FATAL_ERROR "The allocation diagnostic currently measures the Windows baseline only")
+endif()
 
 # Migrated sources compile without exceptions/RTTI while legacy subsystems migrate.
 set_source_files_properties(
     src/core/clock.cpp src/render/visibility.cpp src/render/lighting.cpp
     tests/storage_tests.cpp tests/visibility_tests.cpp tests/lighting_tests.cpp
+    src/core/allocation_profile.cpp src/core/allocation_new.cpp tests/allocation_profile_tests.cpp
+    tests/dependency_contract_tests.cpp
     PROPERTIES COMPILE_OPTIONS
     "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
 
@@ -77,6 +83,26 @@ if(GLOOM_CLANG_FORMAT)
     add_custom_target(gloom_format_check
         COMMAND "${GLOOM_CLANG_FORMAT}" --dry-run --Werror ${GLOOM_FORMAT_SOURCES}
         COMMENT "Checking Gloom C++ formatting" VERBATIM)
+endif()
+
+if(BUILD_TESTING AND WIN32)
+    add_executable(gloom_allocation_profile_tests tests/allocation_profile_tests.cpp
+        src/core/allocation_profile.cpp src/core/allocation_new.cpp src/core/clock.cpp)
+    target_include_directories(gloom_allocation_profile_tests PRIVATE include)
+    target_compile_features(gloom_allocation_profile_tests PRIVATE cxx_std_23)
+    target_compile_definitions(gloom_allocation_profile_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
+    add_test(NAME gloom.allocation_profile COMMAND gloom_allocation_profile_tests)
+    set_tests_properties(gloom.allocation_profile PROPERTIES TIMEOUT 15)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(gloom_dependency_contract_tests tests/dependency_contract_tests.cpp)
+    target_include_directories(gloom_dependency_contract_tests PRIVATE include "${diligentcore_SOURCE_DIR}")
+    target_compile_features(gloom_dependency_contract_tests PRIVATE cxx_std_23)
+    target_link_libraries(gloom_dependency_contract_tests PRIVATE Jolt::Jolt fastgltf::fastgltf
+        Diligent-PublicBuildSettings GameNetworkingSockets::GameNetworkingSockets)
+    add_test(NAME gloom.dependency_contract COMMAND gloom_dependency_contract_tests)
+    set_tests_properties(gloom.dependency_contract PROPERTIES TIMEOUT 15)
 endif()
 
 add_library(gloom_engine STATIC
@@ -134,6 +160,10 @@ target_include_directories(gloom_engine
 )
 
 target_compile_features(gloom_engine PUBLIC cxx_std_23)
+if(GLOOM_ALLOCATION_PROFILE)
+    target_sources(gloom_engine PRIVATE src/core/allocation_profile.cpp)
+    target_compile_definitions(gloom_engine PUBLIC GLOOM_ALLOCATION_PROFILE=1)
+endif()
 target_compile_definitions(gloom_engine PRIVATE GLOOM_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(gloom_engine PRIVATE simdjson::simdjson)
 add_library(gloom_match_storage STATIC
@@ -231,6 +261,9 @@ else()
 endif()
 
 add_executable(gloom apps/gloom/main.cpp apps/gloom/desktop.cpp)
+if(GLOOM_ALLOCATION_PROFILE)
+    target_sources(gloom PRIVATE src/core/allocation_new.cpp)
+endif()
 if(MSVC)
     target_compile_options(gloom PRIVATE /utf-8)
 endif()

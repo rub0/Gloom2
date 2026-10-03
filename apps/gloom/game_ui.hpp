@@ -1,3 +1,4 @@
+#include <gloom/core/allocation_profile.hpp>
 #pragma once
 #include <gloom/render/ui.hpp>
 #include <gloom/gameplay/vertical_slice.hpp>
@@ -48,6 +49,7 @@ class GameUi {
     GameUiAction draw(unsigned width, unsigned height, const platform::InputState& input, const gameplay::SliceSnapshot& s,
         const gameplay::SliceLobbyState* lobby, bool hosting, bool loaded, bool connected, bool reconnecting, bool selection_confirmed, std::size_t selection,
         std::string_view endpoint, std::string_view error, float review_fps = -1) {
+        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::ui);
         canvas.begin(width, height, input);
         GameUiAction action;
         const bool playing = !hosting && (!lobby || (lobby->phase == gameplay::SliceMatchPhase::active && connected));

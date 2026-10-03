@@ -6,6 +6,11 @@ Base: `5b96a911b69528b7381116ce817af7bdef0dbcc3`. 188 archivos versionados propi
 AGENTS anidados ni archivos shader independientes versionados; HLSL embebido
 en DiligentRenderer se trata en 119. Build/cache/vcpkg no son código propio.
 
+Actualización 112: **193 archivos propios, 35.412 líneas y 52 CTest**.
+Los cinco archivos nuevos tienen responsable 112; líneas de las tablas actualizadas
+al workspace del 112. Las señales de búsqueda siguientes conservan su base 110.
+`tools/perf/measure_cpp_baseline.py` es herramienta no C++ del 112.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |
@@ -37,7 +42,7 @@ una firma del hito activo; esa edición no cierra su migración completa. Las fi
 128/129/130 revisan transversalmente todo. Actualizar esta lista si se crean/eliminan
 archivos; cero archivos nuevos sin responsable al cerrar 128.
 
-### 112: [Base reproducible, costes y contratos de propiedad](112-base-y-contratos.md) — 7 archivos
+### 112: [Base reproducible, costes y contratos de propiedad](112-base-y-contratos.md) — 12 archivos
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
@@ -49,6 +54,12 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/core/clock.cpp](../../../src/core/clock.cpp) | 29 | Sin coincidencia lexical |
 | [tests/storage_tests.cpp](../../../tests/storage_tests.cpp) | 113 | Sin coincidencia lexical |
 
+| [include/gloom/core/allocation_profile.hpp](../../../include/gloom/core/allocation_profile.hpp) | 44 | Sin coincidencia lexical propia |
+| [src/core/allocation_profile.cpp](../../../src/core/allocation_profile.cpp) | 137 | Sin coincidencia lexical propia |
+| [src/core/allocation_new.cpp](../../../src/core/allocation_new.cpp) | 23 | Sin coincidencia lexical propia |
+| [tests/allocation_profile_tests.cpp](../../../tests/allocation_profile_tests.cpp) | 72 | Sin coincidencia lexical propia |
+| [tests/dependency_contract_tests.cpp](../../../tests/dependency_contract_tests.cpp) | 96 | Sin coincidencia lexical propia |
+
 ### 113: [Poses y animación sin temporales por frame](113-poses.md) — 8 archivos
 
 | Archivo | Líneas | Señales |
@@ -56,7 +67,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [apps/gloom/animation_review.hpp](../../../apps/gloom/animation_review.hpp) | 51 | STL, auto |
 | [include/gloom/assets/animation.hpp](../../../include/gloom/assets/animation.hpp) | 36 | STL, owners |
 | [include/gloom/gameplay/character_animation.hpp](../../../include/gloom/gameplay/character_animation.hpp) | 28 | STL |
-| [src/assets/animation.cpp](../../../src/assets/animation.cpp) | 274 | STL, auto, exceptions, maps, owners |
+| [src/assets/animation.cpp](../../../src/assets/animation.cpp) | 282 | STL, auto, exceptions, maps, owners |
 | [src/gameplay/character_animation.cpp](../../../src/gameplay/character_animation.cpp) | 236 | STL, auto, exceptions |
 | [tests/animation_network_tests.cpp](../../../tests/animation_network_tests.cpp) | 220 | STL, auto, exceptions, owners |
 | [tests/animation_vfx_tests.cpp](../../../tests/animation_vfx_tests.cpp) | 263 | STL, auto, exceptions |
@@ -66,9 +77,9 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [include/gloom/core/job_system.hpp](../../../include/gloom/core/job_system.hpp) | 91 | STL, auto, exceptions, owners, virtual, pimpl |
-| [src/core/job_system.cpp](../../../src/core/job_system.cpp) | 264 | STL, auto, exceptions, owners, pimpl |
-| [tests/job_system_tests.cpp](../../../tests/job_system_tests.cpp) | 86 | STL, auto, exceptions |
+| [include/gloom/core/job_system.hpp](../../../include/gloom/core/job_system.hpp) | 100 | STL, auto, exceptions, owners, virtual, pimpl |
+| [src/core/job_system.cpp](../../../src/core/job_system.cpp) | 271 | STL, auto, exceptions, owners, pimpl |
+| [tests/job_system_tests.cpp](../../../tests/job_system_tests.cpp) | 89 | STL, auto, exceptions |
 
 ### 115: [Partículas y efectos con salida persistente](115-particulas.md) — 4 archivos
 
@@ -77,14 +88,14 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/gameplay/combat_effects.hpp](../../../include/gloom/gameplay/combat_effects.hpp) | 28 | STL |
 | [include/gloom/render/particles.hpp](../../../include/gloom/render/particles.hpp) | 67 | STL |
 | [src/gameplay/combat_effects.cpp](../../../src/gameplay/combat_effects.cpp) | 93 | STL, auto |
-| [src/render/particles.cpp](../../../src/render/particles.cpp) | 258 | STL, auto, exceptions, maps |
+| [src/render/particles.cpp](../../../src/render/particles.cpp) | 263 | STL, auto, exceptions, maps |
 
 ### 116: [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) — 3 archivos
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [include/gloom/core/entity.hpp](../../../include/gloom/core/entity.hpp) | 155 | STL, auto, exceptions, RTTI, maps, owners, virtual |
-| [src/core/entity.cpp](../../../src/core/entity.cpp) | 85 | STL, auto, exceptions |
+| [include/gloom/core/entity.hpp](../../../include/gloom/core/entity.hpp) | 160 | STL, auto, exceptions, RTTI, maps, owners, virtual |
+| [src/core/entity.cpp](../../../src/core/entity.cpp) | 90 | STL, auto, exceptions |
 | [tests/entity_tests.cpp](../../../tests/entity_tests.cpp) | 93 | STL, auto, exceptions |
 
 ### 117: [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) — 19 archivos
@@ -118,8 +129,8 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/assets/asset_loader.hpp](../../../include/gloom/assets/asset_loader.hpp) | 58 | STL, maps |
 | [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 92 | STL, maps, owners |
 | [include/gloom/assets/scene_gpu_bridge.hpp](../../../include/gloom/assets/scene_gpu_bridge.hpp) | 35 | STL |
-| [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 104 | STL, auto, exceptions, owners |
-| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 463 | STL, auto, exceptions, owners |
+| [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 106 | STL, auto, exceptions, owners |
+| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 465 | STL, auto, exceptions, owners |
 | [src/assets/scene_gpu_bridge.cpp](../../../src/assets/scene_gpu_bridge.cpp) | 123 | STL, auto |
 
 ### 119: [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) — 21 archivos
@@ -136,11 +147,11 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/render/shadow_visibility.hpp](../../../include/gloom/render/shadow_visibility.hpp) | 23 | Sin coincidencia lexical |
 | [include/gloom/render/temporal.hpp](../../../include/gloom/render/temporal.hpp) | 87 | STL |
 | [include/gloom/render/visibility.hpp](../../../include/gloom/render/visibility.hpp) | 61 | Sin coincidencia lexical |
-| [src/backends/diligent_renderer.cpp](../../../src/backends/diligent_renderer.cpp) | 2665 | STL, auto, exceptions, maps, owners, pimpl |
-| [src/render/lighting.cpp](../../../src/render/lighting.cpp) | 152 | Sin coincidencia lexical |
+| [src/backends/diligent_renderer.cpp](../../../src/backends/diligent_renderer.cpp) | 2669 | STL, auto, exceptions, maps, owners, pimpl |
+| [src/render/lighting.cpp](../../../src/render/lighting.cpp) | 154 | Sin coincidencia lexical |
 | [src/render/scene.cpp](../../../src/render/scene.cpp) | 108 | STL, auto, exceptions |
 | [src/render/temporal.cpp](../../../src/render/temporal.cpp) | 111 | STL |
-| [src/render/visibility.cpp](../../../src/render/visibility.cpp) | 192 | Sin coincidencia lexical |
+| [src/render/visibility.cpp](../../../src/render/visibility.cpp) | 196 | Sin coincidencia lexical |
 | [tests/gpu_asset_tests.cpp](../../../tests/gpu_asset_tests.cpp) | 57 | STL, auto, exceptions |
 | [tests/lighting_tests.cpp](../../../tests/lighting_tests.cpp) | 70 | Sin coincidencia lexical |
 | [tests/material_render_tests.cpp](../../../tests/material_render_tests.cpp) | 134 | STL, auto, exceptions |
@@ -280,7 +291,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | --- | ---: | --- |
 | [apps/gloom/desktop.cpp](../../../apps/gloom/desktop.cpp) | 457 | STL, auto, exceptions, owners |
 | [apps/gloom/desktop.hpp](../../../apps/gloom/desktop.hpp) | 21 | STL, owners |
-| [apps/gloom/game_ui.hpp](../../../apps/gloom/game_ui.hpp) | 265 | STL, auto |
+| [apps/gloom/game_ui.hpp](../../../apps/gloom/game_ui.hpp) | 267 | STL, auto |
 | [include/gloom/render/ui.hpp](../../../include/gloom/render/ui.hpp) | 72 | STL, maps |
 | [src/render/ui.cpp](../../../src/render/ui.cpp) | 250 | STL, auto, exceptions |
 | [tests/ui_tests.cpp](../../../tests/ui_tests.cpp) | 99 | STL, auto, exceptions |
@@ -289,7 +300,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2687 | STL, auto, exceptions, owners |
+| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2708 | STL, auto, exceptions, owners |
 | [apps/gloom/visual_review.hpp](../../../apps/gloom/visual_review.hpp) | 61 | STL |
 | [apps/gloom_scene_viewer/main.cpp](../../../apps/gloom_scene_viewer/main.cpp) | 140 | STL, auto, exceptions |
 | [include/gloom/backends/placeholder.hpp](../../../include/gloom/backends/placeholder.hpp) | 25 | STL, virtual |

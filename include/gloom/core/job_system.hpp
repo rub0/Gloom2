@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gloom/core/subsystem.hpp>
+#include <gloom/core/allocation_profile.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -62,6 +63,13 @@ class JobSystem final : public Subsystem {
 
     [[nodiscard]] TaskGroup create_group() const;
     void schedule(TaskGroup& group, Job job);
+#ifdef GLOOM_ALLOCATION_PROFILE
+    template <typename Function> void schedule(TaskGroup& group, Function&& function) {
+        GLOOM_PROFILE_LAYOUT(__FUNCSIG__, sizeof(Function), alignof(Function));
+        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
+        schedule(group, Job{static_cast<Function&&>(function)});
+    }
+#endif
     void wait(TaskGroup& group);
 
     template <typename Function> void parallel_for(TaskGroup& group, const std::size_t item_count, const std::size_t grain_size, Function&& function) {
@@ -69,6 +77,7 @@ class JobSystem final : public Subsystem {
             throw std::invalid_argument{"Parallel-for grain size must be greater than zero"};
         }
         using FunctionType = std::decay_t<Function>;
+        GLOOM_PROFILE_LAYOUT(__FUNCSIG__, sizeof(FunctionType), alignof(FunctionType));
         auto shared_function = std::make_shared<FunctionType>(std::forward<Function>(function));
         for (std::size_t begin = 0; begin < item_count; begin += grain_size) {
             const std::size_t end = item_count - begin < grain_size ? item_count : begin + grain_size;
