@@ -680,6 +680,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     }
     gloom::render::VisibilitySystem visibility{*jobs_view};
     gloom::render::ClusteredLightingBuilder lighting_builder;
+    gloom::render::PreparedVisibility visible;
+    gloom::render::PreparedLighting lighting;
     std::vector point_lights{
         gloom::render::PointLight{.position = {-2.5F, 3.0F, -1.0F}, .range = 7.0F, .color = {1.0F, 0.20F, 0.08F}, .intensity = 18.0F},
         gloom::render::PointLight{.position = {2.5F, 2.0F, 1.5F}, .range = 6.0F, .color = {0.08F, 0.35F, 1.0F}, .intensity = 16.0F},
@@ -2294,7 +2296,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         const float render_aspect = drawable_size.second == 0 ? 1.0F : static_cast<float>(drawable_size.first) / static_cast<float>(drawable_size.second);
         const gloom::uint64 profile_visibility = gloom::performance_clock();
         const auto performance_visibility_started = std::chrono::steady_clock::now();
-        const auto visible = visibility.build(camera, render_aspect, source_instances);
+        visibility.build(visible, camera, render_aspect, {source_instances.data(), source_instances.size()});
         benchmark_visible_skinned = 0;
         if (performance_full)
             for (const gloom::render::RenderInstance& instance : visible.instances)
@@ -2313,7 +2315,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - performance_visibility_started).count());
         const gloom::uint64 profile_lighting = gloom::performance_clock();
         const auto performance_lighting_started = std::chrono::steady_clock::now();
-        const auto lighting = lighting_builder.build(camera, render_aspect, point_lights,
+        lighting_builder.build(lighting, camera, render_aspect, {point_lights.data(), point_lights.size()},
             vertical_slice && original_factory ? gloom::render::DirectionalLight{.intensity = 1.08F} : gloom::render::DirectionalLight{},
             vertical_slice ? gloom::render::EnvironmentLighting{.sky_radiance = {0.20F, 0.24F, 0.30F},
                                  .ground_radiance = {0.08F, 0.075F, 0.07F},

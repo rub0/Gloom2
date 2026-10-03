@@ -42,7 +42,8 @@ int main(int argc, char** argv) try {
                 std::byte{10}, std::byte{255}, std::byte{255}, std::byte{255}, std::byte{255}, std::byte{255}, std::byte{0}}}}});
     render::ClusteredLightingBuilder builder;
     render::Camera camera{.position = {0, 0, -4}, .target = {0, 0, 0}};
-    const auto lights = builder.build(camera, 1, {}, render::DirectionalLight{.direction = {-.4F, -.6F, .6F}, .intensity = 4, .casts_shadows = true});
+    render::PreparedLighting lights;
+    builder.build(lights, camera, 1, {}, render::DirectionalLight{.direction = {-.4F, -.6F, .6F}, .intensity = 4, .casts_shadows = true});
     const auto light_view = lights.view();
     auto capture = [&](const char* name, render::MaterialUpload material, bool reverse = false, bool second = false) {
         material.id = {102};

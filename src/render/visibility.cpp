@@ -1,9 +1,8 @@
 #include <gloom/render/visibility.hpp>
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <stdexcept>
+#include <assert.h>
+#include <math.h>
+#include <stdlib.h>
 
 namespace gloom::render {
 namespace {
@@ -24,7 +23,7 @@ namespace {
     return {left.y * right.z - left.z * right.y, left.z * right.x - left.x * right.z, left.x * right.y - left.y * right.x};
 }
 [[nodiscard]] float length(const Vec3 value) noexcept {
-    return std::sqrt(dot(value, value));
+    return sqrtf(dot(value, value));
 }
 [[nodiscard]] Vec3 normalize(const Vec3 value) noexcept {
     const float magnitude = length(value);
@@ -44,7 +43,7 @@ struct WorldSphere {
 [[nodiscard]] WorldSphere world_sphere(const RenderInstance& instance) noexcept {
     const Vec3 scaled{instance.local_bounds.center.x * instance.transform.scale.x, instance.local_bounds.center.y * instance.transform.scale.y,
         instance.local_bounds.center.z * instance.transform.scale.z};
-    const float maximum_scale = std::max({std::abs(instance.transform.scale.x), std::abs(instance.transform.scale.y), std::abs(instance.transform.scale.z)});
+    const float maximum_scale = fmaxf(fabsf(instance.transform.scale.x), fmaxf(fabsf(instance.transform.scale.y), fabsf(instance.transform.scale.z)));
     return {.center = add(instance.transform.position, rotate(instance.transform.rotation, scaled)), .radius = instance.local_bounds.radius * maximum_scale};
 }
 
@@ -67,32 +66,42 @@ struct Frustum {
     }
     const float horizontal = dot(relative, frustum.right);
     const float vertical = dot(relative, frustum.up);
-    const float horizontal_radius = sphere.radius * std::sqrt(1.0F + frustum.tangent_x * frustum.tangent_x);
-    const float vertical_radius = sphere.radius * std::sqrt(1.0F + frustum.tangent_y * frustum.tangent_y);
-    return std::abs(horizontal) <= depth * frustum.tangent_x + horizontal_radius && std::abs(vertical) <= depth * frustum.tangent_y + vertical_radius;
+    const float horizontal_radius = sphere.radius * sqrtf(1.0F + frustum.tangent_x * frustum.tangent_x);
+    const float vertical_radius = sphere.radius * sqrtf(1.0F + frustum.tangent_y * frustum.tangent_y);
+    return fabsf(horizontal) <= depth * frustum.tangent_x + horizontal_radius && fabsf(vertical) <= depth * frustum.tangent_y + vertical_radius;
 }
 
 } // namespace
 
 RenderSnapshot PreparedVisibility::snapshot() const noexcept {
-    return {.camera = camera, .instances = instances, .batches = batches};
+    return {.camera = camera, .instances = {instances.data(), instances.size()}, .batches = {batches.data(), batches.size()}};
 }
 
 VisibilitySystem::VisibilitySystem(core::JobSystem& jobs, const VisibilitySettings settings) : jobs_{jobs}, settings_{settings} {
-    if (settings_.instances_per_job == 0 || settings_.lod1_distance_in_radii <= 0.0F || settings_.lod2_distance_in_radii <= settings_.lod1_distance_in_radii) {
-        throw std::invalid_argument{"Visibility settings are invalid"};
-    }
+    assert(settings_.instances_per_job > 0 && settings_.lod1_distance_in_radii > 0.0F && settings_.lod2_distance_in_radii > settings_.lod1_distance_in_radii);
 }
 
-PreparedVisibility VisibilitySystem::build(const Camera& camera, const float aspect_ratio, const std::span<const RenderInstance> instances) {
-    const auto started = std::chrono::steady_clock::now();
-    if (!(aspect_ratio > 0.0F) || !std::isfinite(aspect_ratio)) {
-        throw std::invalid_argument{"Visibility aspect ratio must be positive"};
-    }
+int VisibilitySystem::compare_indices(const void* left, const void* right) {
+    const VisibleIndex& a = *static_cast<const VisibleIndex*>(left);
+    const VisibleIndex& b = *static_cast<const VisibleIndex*>(right);
+    if (a.material.value != b.material.value)
+        return a.material.value < b.material.value ? -1 : 1;
+    if (a.mesh.value != b.mesh.value)
+        return a.mesh.value < b.mesh.value ? -1 : 1;
+    return a.source < b.source ? -1 : a.source > b.source ? 1 : 0;
+}
+
+void VisibilitySystem::build(PreparedVisibility& result, const Camera& camera, const float aspect_ratio, Span<const RenderInstance> instances) {
+    const uint64 started = performance_clock();
+    assert(aspect_ratio > 0.0F && isfinite(aspect_ratio));
+    assert(instances.empty() ||
+           reinterpret_cast<uint64>(instances.values) >=
+               reinterpret_cast<uint64>(result.instances.data()) + result.instances.capacity() * sizeof(RenderInstance) ||
+           reinterpret_cast<uint64>(instances.values) + instances.size() * sizeof(RenderInstance) <= reinterpret_cast<uint64>(result.instances.data()));
     const Vec3 forward = normalize(subtract(camera.target, camera.position));
     const Vec3 right = normalize(cross(camera.up, forward));
     const Vec3 up = cross(forward, right);
-    const float tangent_y = std::tan(camera.vertical_field_of_view_radians * 0.5F);
+    const float tangent_y = tanf(camera.vertical_field_of_view_radians * 0.5F);
     const Frustum frustum{.position = camera.position,
         .right = right,
         .up = up,
@@ -101,72 +110,83 @@ PreparedVisibility VisibilitySystem::build(const Camera& camera, const float asp
         .far_plane = camera.far_plane,
         .tangent_x = tangent_y * aspect_ratio,
         .tangent_y = tangent_y};
+    const size_t job_count = (instances.size() + settings_.instances_per_job - 1U) / settings_.instances_per_job;
+    visible_indices_.reserve(instances.size());
+    visible_indices_.resize(instances.size());
+    job_outputs_.reserve(job_count);
+    job_outputs_.resize(job_count);
+    result.camera = camera;
+    result.metrics = {.submitted_instances = instances.size(), .culling_jobs = job_count};
 
-    const std::size_t job_count = (instances.size() + settings_.instances_per_job - 1U) / settings_.instances_per_job;
-    std::vector<std::vector<RenderInstance>> visible_by_job(job_count);
-    std::vector<std::array<std::uint64_t, 3>> lod_by_job(job_count);
-    auto group = jobs_.create_group();
-    for (std::size_t job = 0; job < job_count; ++job) {
-        const std::size_t begin = job * settings_.instances_per_job;
-        const std::size_t end = std::min(begin + settings_.instances_per_job, instances.size());
-        jobs_.schedule(group, [&, job, begin, end] {
-            auto& output = visible_by_job[job];
-            output.reserve(end - begin);
-            for (std::size_t index = begin; index < end; ++index) {
-                RenderInstance instance = instances[index];
-                const auto sphere = world_sphere(instance);
-                if (!visible(frustum, sphere)) {
+    struct CullJob {
+        const Frustum* frustum;
+        Span<const RenderInstance> instances;
+        VisibleIndex* indices;
+        JobOutput* output;
+        VisibilitySettings settings;
+        size_t begin, end;
+
+        void operator()() const {
+            *output = {};
+            for (size_t index = begin; index < end; ++index) {
+                const RenderInstance& instance = instances[index];
+                const WorldSphere sphere = world_sphere(instance);
+                if (!visible(*frustum, sphere))
                     continue;
-                }
-                const float distance_in_radii = length(subtract(sphere.center, camera.position)) / std::max(sphere.radius, 1.0e-4F);
-                std::size_t lod = 0;
-                if (instance.lod_count > 2 && distance_in_radii >= settings_.lod2_distance_in_radii) {
+                const float distance_in_radii = length(subtract(sphere.center, frustum->position)) / fmaxf(sphere.radius, 1.0e-4F);
+                uint32 lod = 0;
+                if (instance.lod_count > 2 && distance_in_radii >= settings.lod2_distance_in_radii)
                     lod = 2;
-                } else if (instance.lod_count > 1 && distance_in_radii >= settings_.lod1_distance_in_radii) {
+                else if (instance.lod_count > 1 && distance_in_radii >= settings.lod1_distance_in_radii)
                     lod = 1;
-                }
-                if (instance.lod_meshes[lod].value != 0) {
-                    instance.mesh = instance.lod_meshes[lod];
-                }
-                ++lod_by_job[job][lod];
-                output.push_back(instance);
+                indices[begin + output->count++] = {
+                    .source = index, .mesh = instance.lod_meshes[lod].value ? instance.lod_meshes[lod] : instance.mesh, .material = instance.material};
+                ++output->lod_instances[lod];
             }
-        });
-    }
-    if (job_count != 0) {
+        }
+    };
+
+    if (job_count) {
+        core::TaskGroup group = jobs_.create_group();
+        for (size_t job = 0; job < job_count; ++job) {
+            const size_t begin = job * settings_.instances_per_job;
+            jobs_.schedule(group, CullJob{.frustum = &frustum,
+                                      .instances = instances,
+                                      .indices = visible_indices_.data(),
+                                      .output = &job_outputs_[job],
+                                      .settings = settings_,
+                                      .begin = begin,
+                                      .end = instances.size() - begin < settings_.instances_per_job ? instances.size() : begin + settings_.instances_per_job});
+        }
         jobs_.wait(group);
     }
-
-    PreparedVisibility result{.camera = camera};
-    result.metrics.submitted_instances = instances.size();
-    result.metrics.culling_jobs = job_count;
-    for (std::size_t job = 0; job < job_count; ++job) {
-        result.instances.insert(result.instances.end(), visible_by_job[job].begin(), visible_by_job[job].end());
-        for (std::size_t lod = 0; lod < 3; ++lod) {
-            result.metrics.lod_instances[lod] += lod_by_job[job][lod];
-        }
+    size_t visible_count = 0;
+    for (size_t job = 0; job < job_count; ++job) {
+        for (size_t index = 0; index < job_outputs_[job].count; ++index)
+            visible_indices_[visible_count++] = visible_indices_[job * settings_.instances_per_job + index];
+        for (uint32 lod = 0; lod < 3; ++lod)
+            result.metrics.lod_instances[lod] += job_outputs_[job].lod_instances[lod];
     }
-    std::ranges::sort(result.instances, [](const RenderInstance& left, const RenderInstance& right) {
-        return left.material.value < right.material.value || (left.material == right.material && left.mesh.value < right.mesh.value);
-    });
-    for (std::size_t first = 0; first < result.instances.size();) {
-        std::size_t end = first + 1U;
-        while (end < result.instances.size() && result.instances[end].mesh == result.instances[first].mesh &&
-               result.instances[end].material == result.instances[first].material) {
-            ++end;
-        }
-        result.batches.push_back({.mesh = result.instances[first].mesh,
-            .material = result.instances[first].material,
-            .first_instance = static_cast<std::uint32_t>(first),
-            .instance_count = static_cast<std::uint32_t>(end - first)});
-        first = end;
+    if (visible_count > 1)
+        qsort(visible_indices_.data(), visible_count, sizeof(VisibleIndex), compare_indices);
+    result.instances.reserve(visible_count);
+    result.instances.resize(visible_count);
+    result.batches.reserve(visible_count);
+    result.batches.resize(visible_count);
+    size_t batch_count = 0;
+    for (size_t index = 0; index < visible_count; ++index) {
+        const VisibleIndex& selected = visible_indices_[index];
+        result.instances[index] = instances[selected.source];
+        result.instances[index].mesh = selected.mesh;
+        if (index == 0 || selected.mesh != visible_indices_[index - 1].mesh || selected.material != visible_indices_[index - 1].material)
+            result.batches[batch_count++] = {.mesh = selected.mesh, .material = selected.material, .first_instance = static_cast<uint32>(index)};
+        ++result.batches[batch_count - 1].instance_count;
     }
-    result.metrics.visible_instances = result.instances.size();
-    result.metrics.culled_instances = instances.size() - result.instances.size();
-    result.metrics.batches = result.batches.size();
-    result.metrics.build_nanoseconds =
-        static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - started).count());
-    return result;
+    result.batches.resize(batch_count);
+    result.metrics.visible_instances = visible_count;
+    result.metrics.culled_instances = instances.size() - visible_count;
+    result.metrics.batches = batch_count;
+    result.metrics.build_nanoseconds = (performance_clock() - started) * 1000000000ULL / clock_frequency_;
 }
 
 } // namespace gloom::render

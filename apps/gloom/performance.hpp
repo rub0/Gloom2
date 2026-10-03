@@ -1,5 +1,6 @@
 #pragma once
 #include <gloom/core/types.hpp>
+#include <gloom/core/clock.hpp>
 #include <gloom/backends/vulkan_present.hpp>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,19 +15,6 @@
 #endif
 
 namespace gloom {
-// Diagnostic clock; no allocations or output in the measured interval.
-inline uint64 performance_clock() {
-#ifdef _WIN32
-    LARGE_INTEGER counter;
-    QueryPerformanceCounter(&counter);
-    return static_cast<uint64>(counter.QuadPart);
-#else
-    timespec counter;
-    clock_gettime(CLOCK_MONOTONIC, &counter);
-    return static_cast<uint64>(counter.tv_sec) * 1000000000ULL + static_cast<uint64>(counter.tv_nsec);
-#endif
-}
-
 struct PerformanceProfile {
     uint64 samples[360]{};
     uint64 gpu_samples[360]{};

@@ -1,8 +1,25 @@
 # Traspaso de Gloom
 
-Actualizado: 3 de octubre de 2026, hito 109: formato C++ uniforme. H07 terminada en v17; H08 no iniciada.
+Actualizado: 3 de octubre de 2026, hito 110: primera migración C++ y buffers reutilizables. H07 terminada en v17; H08 no iniciada.
 
-**Último cambio técnico:** clang-format configurado y aplicado a 181 archivos;
+**Último cambio técnico:** visibilidad e iluminación con `Span`/`Array` propios,
+resultados reutilizados por el llamador e índices de visibilidad ordenados antes
+de copiar las instancias aceptadas. Reloj nativo compartido; implementaciones y
+pruebas focalizadas sin `auto`, lambdas, excepciones ni RTTI. Renderer conservado.
+Factory Release 1080p, tres pasadas antes/después: medianas CPU **36→27 µs**
+visibilidad y **38→18 µs** iluminación; frame **2,338→2,337 ms**, sin mejora
+significativa de FPS. Iluminación calentada: 1.000 llamadas, cero `new/new[]`.
+Release **46/50**, Debug **47/50**, solo fallos heredados del 109. Las 13 capturas
+antes/después pasan los umbrales existentes; no son todas idénticas píxel a píxel.
+[Informe 110](../reports/cpp-performance-110/README.md).
+
+**Migración C++ pendiente:** scene/poses, sonda de entorno, JobSystem y otros
+módulos aún usan STL/shared_ptr/excepciones/RTTI. No afirmar cumplimiento global
+de AGENTS.md. Siguiente frente: registro de entidades y después jobs/poses;
+`FixedFunction` se añadirá con su consumidor real, JobSystem. No cambiar renderer
+ni pasar indiscriminadamente identificadores pequeños/Span por referencia.
+
+**Hito 109:** clang-format configurado y aplicado a 181 archivos;
 183 comprobados y 324.356 tokens conservados. Sangrado de cuatro espacios,
 objetivo de 160 columnas y comprobación repetible `gloom_format_check`.
 Builds Release/Debug completos correctos; pruebas **45/49 y 46/49**, con los
@@ -109,6 +126,30 @@ Sin push. Actualizar estado e informe y crear commit al cerrar cada hito.
 - Protocolo actual **22**; replica habilidad primaria/secundaria, cooldown, estado,
   factor de Flash y racha de bajas. Documentos históricos que indican protocolos 15–21 describen entregas
   previas.
+
+## Hito 110 ejecutado: primera migración C++ y buffers reutilizables
+
+Base `973f5de`. `Span`, `Array` con reserva explícita y reloj nativo propios.
+Resultados caller-owned reutilizados por juego/viewer; lifetime de las vistas
+documentado. Visibilidad conserva scratch por trabajo, ordena registros triviales
+y copia solo instancias aceptadas una vez. Iluminación calcula límites una vez
+y reutiliza rangos como contadores/cursor, conservando prioridad y saturación.
+Implementaciones y pruebas sin uso directo de STL; seis fuentes se compilan
+sin excepciones/RTTI, manteniendo los módulos heredados para migración posterior.
+
+Medianas de tres pasadas Factory 1080p: 36→27 µs y 38→18 µs; frame completo
+2,338→2,337 ms, sin ganancia significativa de FPS. Contenido/LODs/batches/draws
+conservados. 1.000 llamadas de iluminación calentada sin `new/new[]`; visibilidad
+todavía usa los grupos/trabajos del JobSystem heredado. No afirmar cero heap global.
+
+Builds completos Release/Debug. Suites 46/50 y 47/50, únicamente fallos previos.
+Storage, jobs, render_scene, visibilidad e iluminación focalizados pasan;
+Vulkan/Hound pasan en ambos. Las 13 capturas antes/después pasan el comparador,
+con diferencias completas registradas y referencias intactas. Formato verificado.
+Detalle, mediciones y límites en el [informe 110](../reports/cpp-performance-110/README.md).
+Migración global no terminada; registro de entidades es el siguiente frente.
+H08 no iniciada. Commit local, sin push; resolver con
+`git log -1 --oneline --grep='^hito 110:'`.
 
 ## Hito 109 ejecutado: formato C++ uniforme y comprobación de regresiones
 

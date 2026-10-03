@@ -1,11 +1,8 @@
 #pragma once
 
 #include <gloom/render/scene.hpp>
-
-#include <cstdint>
-#include <span>
-#include <vector>
-#include <memory>
+#include <gloom/core/array.hpp>
+#include <gloom/core/clock.hpp>
 
 namespace gloom::render {
 
@@ -24,8 +21,8 @@ struct PointLight {
 };
 
 struct EnvironmentProbe {
-    std::uint32_t size{0};
-    std::uint32_t mip_levels{0};
+    uint32 size{0};
+    uint32 mip_levels{0};
     // Face-major (+X,-X,+Y,-Y,+Z,-Z), then mip-major linear HDR RGBA.
     std::vector<std::array<float, 4>> radiance;
 };
@@ -40,14 +37,14 @@ struct EnvironmentLighting {
 };
 
 struct LightClusterRange {
-    std::uint32_t first_light{0};
-    std::uint32_t light_count{0};
+    uint32 first_light{0};
+    uint32 light_count{0};
 };
 
 struct LightClusterGrid {
-    std::uint32_t width{16};
-    std::uint32_t height{9};
-    std::uint32_t depth{24};
+    uint32 width{16};
+    uint32 height{9};
+    uint32 depth{24};
     float near_plane{0.1F};
     float far_plane{500.0F};
 };
@@ -56,49 +53,60 @@ struct ClusteredLightingView {
     DirectionalLight directional;
     EnvironmentLighting environment;
     LightClusterGrid grid;
-    std::span<const PointLight> point_lights;
-    std::span<const LightClusterRange> clusters;
-    std::span<const std::uint32_t> light_indices;
+    Span<const PointLight> point_lights;
+    Span<const LightClusterRange> clusters;
+    Span<const uint32> light_indices;
 };
 
 struct LightingMetrics {
-    std::uint64_t input_lights{0};
-    std::uint64_t active_lights{0};
-    std::uint64_t clusters{0};
-    std::uint64_t light_references{0};
-    std::uint64_t saturated_clusters{0};
-    std::uint64_t build_nanoseconds{0};
+    uint64 input_lights{0};
+    uint64 active_lights{0};
+    uint64 clusters{0};
+    uint64 light_references{0};
+    uint64 saturated_clusters{0};
+    uint64 build_nanoseconds{0};
 };
 
 struct PreparedLighting {
     DirectionalLight directional;
     EnvironmentLighting environment;
     LightClusterGrid grid;
-    std::vector<PointLight> point_lights;
-    std::vector<LightClusterRange> clusters;
-    std::vector<std::uint32_t> light_indices;
+    Array<PointLight> point_lights;
+    Array<LightClusterRange> clusters;
+    Array<uint32> light_indices;
     LightingMetrics metrics;
 
     [[nodiscard]] ClusteredLightingView view() const noexcept;
 };
 
 struct LightingSettings {
-    std::uint32_t grid_width{16};
-    std::uint32_t grid_height{9};
-    std::uint32_t grid_depth{24};
-    std::uint32_t maximum_lights{256};
-    std::uint32_t maximum_lights_per_cluster{64};
+    uint32 grid_width{16};
+    uint32 grid_height{9};
+    uint32 grid_depth{24};
+    uint32 maximum_lights{256};
+    uint32 maximum_lights_per_cluster{64};
 };
 
 class ClusteredLightingBuilder final {
   public:
     explicit ClusteredLightingBuilder(LightingSettings settings = {});
 
-    [[nodiscard]] PreparedLighting build(const Camera& camera, float aspect_ratio, std::span<const PointLight> lights, DirectionalLight directional = {},
-        EnvironmentLighting environment = {}) const;
+    // Caller owns the result; views remain valid until it is rebuilt/destroyed.
+    // Input lights must not alias result.point_lights.
+    // Do not build concurrently on this builder.
+    void build(PreparedLighting& result, const Camera& camera, float aspect_ratio, Span<const PointLight> lights, const DirectionalLight& directional = {},
+        const EnvironmentLighting& environment = {});
 
   private:
     LightingSettings settings_;
+    struct LightBounds {
+        uint32 minimum_x{0}, maximum_x{0};
+        uint32 minimum_y{0}, maximum_y{0};
+        uint32 minimum_z{0}, maximum_z{0};
+        bool visible{false};
+    };
+    Array<LightBounds> light_bounds_;
+    uint64 clock_frequency_{performance_frequency()};
 };
 
 } // namespace gloom::render

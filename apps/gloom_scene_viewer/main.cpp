@@ -60,6 +60,8 @@ int main(const int argument_count, const char* const* arguments) try {
         gloom::assets::AssetResidencyCoordinator residency{jobs, loader, discovered->catalog, renderer};
         gloom::render::VisibilitySystem visibility{jobs};
         gloom::render::ClusteredLightingBuilder lighting_builder;
+        gloom::render::PreparedVisibility visible;
+        gloom::render::PreparedLighting lighting;
         const std::array point_lights{
             gloom::render::PointLight{.position = {-3.0F, 4.0F, -2.0F}, .range = 10.0F, .color = {1.0F, 0.25F, 0.08F}, .intensity = 20.0F},
             gloom::render::PointLight{.position = {3.0F, 2.5F, 2.0F}, .range = 8.0F, .color = {0.08F, 0.35F, 1.0F}, .intensity = 18.0F},
@@ -103,9 +105,9 @@ int main(const int argument_count, const char* const* arguments) try {
                 scene ? std::span<const gloom::render::RenderInstance>{stress_instances} : std::span<const gloom::render::RenderInstance>{};
             const gloom::render::Camera camera{.position = {7.0F, 5.0F, -9.0F}, .target = {0.0F, 1.0F, 0.0F}};
             const float aspect = drawable.second == 0 ? 1.0F : static_cast<float>(drawable.first) / static_cast<float>(drawable.second);
-            const auto visible = visibility.build(camera, aspect, instances);
+            visibility.build(visible, camera, aspect, {instances.data(), instances.size()});
             last_visibility = visible.metrics;
-            const auto lighting = lighting_builder.build(camera, aspect, point_lights);
+            lighting_builder.build(lighting, camera, aspect, {point_lights.data(), point_lights.size()});
             const auto lighting_view = lighting.view();
             auto snapshot = visible.snapshot();
             snapshot.lighting = &lighting_view;

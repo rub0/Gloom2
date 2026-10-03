@@ -57,6 +57,13 @@ endforeach()
 
 option(GLOOM_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
+# Migrated sources compile without exceptions/RTTI while legacy subsystems migrate.
+set_source_files_properties(
+    src/core/clock.cpp src/render/visibility.cpp src/render/lighting.cpp
+    tests/storage_tests.cpp tests/visibility_tests.cpp tests/lighting_tests.cpp
+    PROPERTIES COMPILE_OPTIONS
+    "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
+
 find_program(GLOOM_CLANG_FORMAT NAMES clang-format
     HINTS "${CMAKE_GENERATOR_INSTANCE}/VC/Tools/Llvm/bin")
 if(GLOOM_CLANG_FORMAT)
@@ -73,6 +80,7 @@ if(GLOOM_CLANG_FORMAT)
 endif()
 
 add_library(gloom_engine STATIC
+    src/core/clock.cpp
     src/audio/mixer.cpp
     src/backends/sdl_audio.cpp
     src/gameplay/audio_events.cpp
@@ -450,6 +458,7 @@ if(BUILD_TESTING)
         "gloom_tests|tests/engine_tests.cpp|gloom.unit"
         "gloom_job_tests|tests/job_system_tests.cpp|gloom.jobs"
         "gloom_entity_tests|tests/entity_tests.cpp|gloom.entities"
+        "gloom_storage_tests|tests/storage_tests.cpp|gloom.storage"
         "gloom_physics_tests|tests/physics_tests.cpp|gloom.physics"
         "gloom_render_scene_tests|tests/render_scene_tests.cpp|gloom.render_scene"
         "gloom_gpu_asset_tests|tests/gpu_asset_tests.cpp|gloom.gpu_assets"
