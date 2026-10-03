@@ -88,6 +88,10 @@ el JobSystem heredado: no se afirma cero asignaciones para esa etapa completa.
 
 ## Alcance pendiente
 
+Plan de continuación formalizado después en el
+[hito 111](../cpp-performance-111/README.md); su
+[índice 112–130](../../docs/cpp/tasks/README.md) sustituye el orden provisional de este apartado.
+
 Es la primera etapa de la migración. Scene/RenderInstance, sonda de entorno,
 JobSystem y otros módulos aún contienen STL/shared_ptr, excepciones y RTTI.
 La salida al RenderSnapshot existente usa su vista de compatibilidad sin copia.

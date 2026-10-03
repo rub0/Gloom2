@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 3 de octubre de 2026, hito 110: primera migración C++ y buffers reutilizables. H07 terminada en v17; H08 no iniciada.
+Actualizado: 3 de octubre de 2026, hito 111: investigación y plan formal C++. H07 terminada en v17; H08 no iniciada.
 
 **Último cambio técnico:** visibilidad e iluminación con `Span`/`Array` propios,
 resultados reutilizados por el llamador e índices de visibilidad ordenados antes
@@ -13,11 +13,21 @@ Release **46/50**, Debug **47/50**, solo fallos heredados del 109. Las 13 captur
 antes/después pasan los umbrales existentes; no son todas idénticas píxel a píxel.
 [Informe 110](../reports/cpp-performance-110/README.md).
 
-**Migración C++ pendiente:** scene/poses, sonda de entorno, JobSystem y otros
-módulos aún usan STL/shared_ptr/excepciones/RTTI. No afirmar cumplimiento global
-de AGENTS.md. Siguiente frente: registro de entidades y después jobs/poses;
-`FixedFunction` se añadirá con su consumidor real, JobSystem. No cambiar renderer
-ni pasar indiscriminadamente identificadores pequeños/Span por referencia.
+**Hito 111 terminado: plan C++ investigado y formalizado.**
+[Índice de 19 hitos, 112–130](cpp/tasks/README.md) y
+[informe 111](../reports/cpp-performance-111/README.md).
+188 archivos propios/50 CTest inventariados, responsables de cierre y fichas con
+dependencias, propiedad, pruebas y medidas. **Todos los 112–130 no iniciados**;
+siguiente **112: base reproducible, costes y contratos**. No hay nuevas medidas
+ni cambios técnicos en el 111; el resultado técnico y los datos del 110 siguen vigentes.
+
+**Para una tarea C++ nueva:** leer este inicio, AGENTS.md, el índice anterior,
+`docs/cpp/tasks/CONTEXTO.md` y solo la ficha elegida. No cargar el inventario
+completo o todas las fichas salvo investigación necesaria. No iniciar el siguiente
+hito sin encargo. No afirmar cumplimiento global: persisten usos heredados.
+Callbacks Jolt/herencia propia: incompatibilidad concreta a resolver en 112
+antes de cerrar 120/128, sin excepción asumida ni cambio de motor.
+No cambiar renderer ni pasar IDs pequeños/Span indiscriminadamente por referencia.
 
 **Hito 109:** clang-format configurado y aplicado a 181 archivos;
 183 comprobados y 324.356 tokens conservados. Sangrado de cuatro espacios,
