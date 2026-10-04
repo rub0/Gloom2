@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gloom/render/material_surface.hpp>
+#include <gloom/core/matrix.hpp>
 
 #include <array>
 #include <cstddef>
@@ -74,7 +75,7 @@ struct ImportedImage {
 
 struct ImportedNode {
     std::string name;
-    std::array<float, 16> local_transform{};
+    Matrix4 local_transform{};
     std::uint32_t mesh{no_asset_index};
     std::vector<std::uint32_t> children;
     std::uint32_t skin{no_asset_index};
@@ -83,7 +84,7 @@ struct ImportedNode {
 struct ImportedSkin {
     std::string name;
     std::vector<std::uint32_t> joints;
-    std::vector<std::array<float, 16>> inverse_bind_matrices;
+    std::vector<Matrix4> inverse_bind_matrices;
 };
 
 enum class AnimationPath : std::uint8_t { translation, rotation, scale };

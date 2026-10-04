@@ -1,9 +1,9 @@
 # Hito 113: Poses y animación sin temporales por frame
 
-Estado: **no iniciado**. Depende de: **112**.
+Estado: **terminado**, 4 de octubre de 2026. Depende de: **112**.
 Objetivo: **CPU, memoria y propiedad**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
-8 archivos propietarios a este hito. Los cambios de firmas incluyen
+11 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
 ## Evidencia de partida
@@ -75,6 +75,23 @@ migrada. Informar ahorro CPU real aunque FPS no cambie.
 Entregar informe `reports/cpp-performance-113/README.md`, actualizar esta
 ficha/índice y estado; commit local `hito 113: resultado concreto`, verificado
 con hash y workspace. Si un contrato no se satisface, documentar bloqueo; no cerrar.
+
+## Resultado verificado
+
+[Informe 113](../../../reports/cpp-performance-113/README.md): rig preparado una
+vez, salidas propias reutilizadas y dos slots de skin por actor/enlace. Cero new
+en poses/bounds en siete pasadas instrumentadas; cuatro rigs reales × dos actores
+× 1.000 y control concurrente/growth/enlace. Comparación numérica de 3.495.720
+floats y 1.200 frames + siete vistas alineadas con el comparador común.
+Builds completos y comprobaciones finales correctos; suites 49/53 Release y
+50/53 Debug con los mismos fallos heredados. Véanse tiempos, scopes y limitaciones
+en el informe; no certifica FPS ni cumplimiento global.
+
+Los tres archivos nuevos son Matrix4, CombatantView y pose_storage. Los tests
+mixtos conservan piezas heredadas de importer/partículas/red para 117/115/122 y
+128. Scene y matemática transitiva siguen en 119; residencia en 118. Se migra
+su uso de poses sin declarar esos módulos cerrados. Los bloqueos 117/120/128
+siguen sin autorización nueva. Commit local obligatorio según AGENTS; sin push.
 
 ## Encargo para ejecutarlo aisladamente
 

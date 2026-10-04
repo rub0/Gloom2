@@ -85,9 +85,11 @@ void GameplayAudioEvents::observe(
                 if (impact < -2.F * legacy_unit_scale / legacy_motion_step)
                     emit(Cue::land_grunt);
             }
+            bool same_ammunition = true;
+            for (size_t weapon = 0; weapon < slice_weapon_count; ++weapon)
+                same_ammunition &= a.ammunition[weapon] == b.ammunition[weapon];
             const bool fire = input.fire_primary || input.fire_secondary;
-            if (fire && !fire_[i] && b.weapon != SliceWeapon::soul_reaper && b.ammunition[static_cast<std::size_t>(b.weapon)] == 0 &&
-                a.ammunition == b.ammunition)
+            if (fire && !fire_[i] && b.weapon != SliceWeapon::soul_reaper && b.ammunition[static_cast<std::size_t>(b.weapon)] == 0 && same_ammunition)
                 emit(Cue::no_ammo);
             fire_[i] = fire;
         } else {

@@ -1038,17 +1038,13 @@ struct VerticalSliceSimulation::Impl {
             .aim_pitch = combatant.weapon->aim_pitch,
             .shot_sequence = combatant.weapon->shot_sequence,
             .shot_tick = combatant.weapon->shot_tick,
-            .shot_impact = combatant.weapon->shot_impact,
+            .shot_impact = {combatant.weapon->shot_impact[0], combatant.weapon->shot_impact[1], combatant.weapon->shot_impact[2]},
             .shot_hit = combatant.weapon->shot_hit,
             .shot_contact = combatant.weapon->shot_contact,
             .shot_explosion = combatant.weapon->shot_explosion,
-            .ammunition =
-                [&] {
-                    std::array<std::uint16_t, slice_weapon_count> value{};
-                    for (std::size_t i = 0; i < value.size(); ++i)
-                        value[i] = combatant.weapon->arsenal.ammo(static_cast<SliceWeapon>(i));
-                    return value;
-                }(),
+            .ammunition = {combatant.weapon->arsenal.ammo(SliceWeapon::soul_reaper), combatant.weapon->arsenal.ammo(SliceWeapon::sniper),
+                combatant.weapon->arsenal.ammo(SliceWeapon::shotgun), combatant.weapon->arsenal.ammo(SliceWeapon::minigun),
+                combatant.weapon->arsenal.ammo(SliceWeapon::iron_hell_goat)},
             .owned_weapons =
                 [&] {
                     std::uint8_t value = 0;

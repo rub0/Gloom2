@@ -1,4 +1,6 @@
 #include <gloom/assets/animation.hpp>
+#include <gloom/assets/rig.hpp>
+#include <string.h>
 #include <gloom/assets/scene_gpu_bridge.hpp>
 #include <gloom/gameplay/combat_effects.hpp>
 #include <gloom/gameplay/vertical_slice_network.hpp>
@@ -22,6 +24,25 @@ template <class F> void rejects(F f) {
     }
     check(rejected, "Malformed data accepted");
 }
+gloom::Array<gloom::assets::RigMatrix> evaluated_worlds(const gloom::assets::AnimationRig& rig, const char* name, double time) {
+    gloom::assets::LocalPose local;
+    local.reserve(rig.nodes.size());
+    local.resize(rig.nodes.size());
+    gloom::Array<gloom::assets::RigMatrix> worlds;
+    worlds.reserve(local.size());
+    worlds.resize(local.size());
+    gloom::assets::sample_animation(rig, name, time, {local.data(), local.size()});
+    gloom::assets::pose_worlds(rig, {local.data(), local.size()}, {worlds.data(), worlds.size()});
+    return worlds;
+}
+bool same_worlds(gloom::Span<const gloom::assets::RigMatrix> a, gloom::Span<const gloom::assets::RigMatrix> b) {
+    if (a.size() != b.size())
+        return false;
+    for (size_t i = 0; i < a.size(); ++i)
+        if (!(a[i] == b[i]))
+            return false;
+    return true;
+}
 float distance(gloom::render::Vec3 a, gloom::render::Vec3 b) {
     return std::hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 }
@@ -34,21 +55,28 @@ int main() try {
         if (!imported)
             throw std::runtime_error{imported.error()};
         const auto& rig = *imported;
+        assets::AnimationRig runtime;
+        check(assets::prepare_animation_rig(rig, runtime), "Invalid prepared animation rig");
         check(assets::valid_animations(rig), "Converted animations invalid");
         check(rig.animations.size() == (std::string_view{name} == "shadow" ? 0 : 4), "Original clips lost or fabricated");
         const auto encoded = assets::encode_imported_scene(rig);
         const auto decoded = assets::decode_imported_scene(encoded);
         check(decoded && decoded->animations.size() == rig.animations.size(), "Clips lost during serialization");
-        const auto bind = assets::skin_pose(rig, 1, *assets::bind_node_transforms(rig));
+        render::SkinPose bind;
+        assets::prepare_skin_pose(runtime, 1, bind);
+        const Array<assets::RigMatrix> bind_worlds = evaluated_worlds(runtime, "", 0);
+        assets::skin_pose(runtime, 1, {bind_worlds.data(), bind_worlds.size()}, bind);
         for (const auto& v : rig.primitives[0].vertices)
-            check(distance(assets::skinned_position(v, *bind), {v.position[0], v.position[1], v.position[2]}) < .002F,
+            check(distance(assets::skinned_position(v, bind), {v.position[0], v.position[1], v.position[2]}) < .002F,
                 "Eight-weight bind skin differs from static mesh");
+        assets::AnimationRig decoded_runtime;
+        check(assets::prepare_animation_rig(*decoded, decoded_runtime), "Invalid decoded animation rig");
         for (const auto& clip : rig.animations) {
             check(clip.channels.size() == 129, "Ogre channels lost");
-            const auto before = assets::pose_worlds(rig, assets::sample_animation(rig, clip.name, .13));
-            const auto after = assets::pose_worlds(*decoded, assets::sample_animation(*decoded, clip.name, .13));
-            check(before == after, "Clip serialization changed evaluation");
-            const auto looping = assets::pose_worlds(rig, assets::sample_animation(rig, clip.name, .13 + clip.duration));
+            const Array<assets::RigMatrix> before = evaluated_worlds(runtime, clip.name.c_str(), .13);
+            const Array<assets::RigMatrix> after = evaluated_worlds(decoded_runtime, clip.name.c_str(), .13);
+            check(same_worlds({before.data(), before.size()}, {after.data(), after.size()}), "Clip serialization changed evaluation");
+            const Array<assets::RigMatrix> looping = evaluated_worlds(runtime, clip.name.c_str(), .13 + clip.duration);
             for (std::size_t i = 0; i < before.size(); ++i)
                 for (std::size_t k = 0; k < 16; ++k)
                     check(std::abs(looping[i][k] - before[i][k]) < .0001F, "Loop wrap changed pose");
@@ -89,18 +117,20 @@ int main() try {
             .facing_x = 0,
             .facing_z = 1,
             .character = std::string_view{name} == "shadow" ? gameplay::SliceCharacter::shadow : gameplay::SliceCharacter::archangel};
-        auto frame = animator.update(rig, view, 1.0 / 60);
+        gameplay::CharacterAnimationFrame frame = animator.update(runtime, view, 1.0 / 60);
         check(frame.cut, "First pose retained motion history");
-        const auto first = assets::skin_pose(rig, 1, frame.worlds);
+        render::SkinPose first;
+        assets::prepare_skin_pose(runtime, 1, first);
+        assets::skin_pose(runtime, 1, frame.worlds, first);
         for (int i = 0; i < 40; ++i)
-            frame = animator.update(rig, view, 1.0 / 60);
+            frame = animator.update(runtime, view, 1.0 / 60);
         check(!frame.cut, "Continuous motion reset history");
-        const auto animated = assets::skin_pose(rig, 1, frame.worlds);
+        const render::SkinPose& animated = frame.skins[1];
         float deformation = 0;
-        const auto bounds = assets::skinned_bounds(rig.primitives[0], *animated);
+        const auto bounds = assets::skinned_bounds(rig.primitives[0], animated);
         for (const auto& v : rig.primitives[0].vertices) {
-            const auto p = assets::skinned_position(v, *animated);
-            deformation = std::max(deformation, distance(p, assets::skinned_position(v, *first)));
+            const auto p = assets::skinned_position(v, animated);
+            deformation = std::max(deformation, distance(p, assets::skinned_position(v, first)));
             check(distance(p, bounds.center) <= bounds.radius + .001F, "Animated bounds lost a vertex");
         }
         check(deformation > .01F, "Character animation did not deform the recovered mesh");
@@ -109,30 +139,40 @@ int main() try {
         for (int fps : {30, 60, 144}) {
             gameplay::CharacterAnimator timed;
             for (int i = 0; i < fps * 2; ++i)
-                frame = timed.update(rig, view, 1.0 / fps, false, false, true);
+                frame = timed.update(runtime, view, 1.0 / fps, false, false, true);
             check(distance(frame.left_grip, {.20F, 1.18F, .49F}) < .08F, "FPS hand cannot reach weapon");
-            if (timed_reference.empty())
-                timed_reference = frame.local;
-            else {
-                const auto reference_world = assets::pose_worlds(rig, timed_reference);
+            if (timed_reference.size() == 0) {
+                timed_reference.reserve(frame.local.size());
+                timed_reference.resize(frame.local.size());
+                for (size_t i = 0; i < frame.local.size(); ++i)
+                    timed_reference[i] = frame.local[i];
+            } else {
+                Array<assets::RigMatrix> reference_world;
+                reference_world.reserve(timed_reference.size());
+                reference_world.resize(timed_reference.size());
+                assets::pose_worlds(runtime, {timed_reference.data(), timed_reference.size()}, {reference_world.data(), reference_world.size()});
                 for (std::size_t n = 0; n < frame.worlds.size(); ++n)
                     for (std::size_t k = 0; k < 16; ++k)
                         check(std::abs(reference_world[n][k] - frame.worlds[n][k]) < .002F, "Pose changes with render frequency");
             }
         }
         view.position_x = 20;
-        check(animator.update(rig, view, 1.0 / 60).cut, "Teleport retained skin history");
+        check(animator.update(runtime, view, 1.0 / 60).cut, "Teleport retained skin history");
         view.alive = false;
-        check(animator.update(rig, view, 1.0 / 60).cut, "Death retained skin history");
+        check(animator.update(runtime, view, 1.0 / 60).cut, "Death retained skin history");
         for (int i = 0; i < 60; ++i)
-            frame = animator.update(rig, view, 1.0 / 60);
-        const auto corpse = frame.worlds;
+            frame = animator.update(runtime, view, 1.0 / 60);
+        Array<assets::RigMatrix> corpse;
+        corpse.reserve(frame.worlds.size());
+        corpse.resize(frame.worlds.size());
+        for (size_t i = 0; i < frame.worlds.size(); ++i)
+            corpse[i] = frame.worlds[i];
         for (int i = 0; i < 60; ++i)
-            frame = animator.update(rig, view, 1.0 / 60);
-        check(corpse == frame.worlds, "Corpse kept looping idle after its death animation");
+            frame = animator.update(runtime, view, 1.0 / 60);
+        check(same_worlds({corpse.data(), corpse.size()}, frame.worlds), "Corpse kept looping idle after its death animation");
         view.alive = true;
         ++view.deaths;
-        check(animator.update(rig, view, 1.0 / 60).cut, "Respawn retained skin history");
+        check(animator.update(runtime, view, 1.0 / 60).cut, "Respawn retained skin history");
         const auto uploads = assets::build_gpu_scene_uploads(rig, {123});
         check(uploads.primitives[0].arms_mesh.value != 0, "No original FPS arm geometry");
         check(uploads.meshes.back().vertices[0].weights == rig.primitives[0].vertices[0].weights, "GPU bridge dropped bone weights");
@@ -211,6 +251,8 @@ int main() try {
         render::ParticleSystem p{bad};
     });
     const auto rig = assets::import_gltf(root / "characters/original/archangel.gltf");
+    assets::AnimationRig runtime;
+    check(rig && assets::prepare_animation_rig(*rig, runtime), "Invalid effects animation rig");
     gameplay::CharacterAnimator animator;
     gameplay::CombatEffects events;
     render::ParticleSystem p{recipes};
@@ -220,7 +262,7 @@ int main() try {
         .character = gameplay::SliceCharacter::archangel,
         .ability = gameplay::SliceAbility::diamond_skin,
         .secondary_ability = gameplay::SliceSecondaryAbility::life_dome};
-    auto frame = animator.update(*rig, v, .01);
+    const gameplay::CharacterAnimationFrame& frame = animator.update(runtime, v, .01);
     events.observe(p, v, frame, {}, 100, true);
     v.shot_sequence = 1;
     v.shot_tick = 101;

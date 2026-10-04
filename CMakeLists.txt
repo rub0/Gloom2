@@ -67,8 +67,14 @@ set_source_files_properties(
     tests/storage_tests.cpp tests/visibility_tests.cpp tests/lighting_tests.cpp
     src/core/allocation_profile.cpp src/core/allocation_new.cpp tests/allocation_profile_tests.cpp
     tests/dependency_contract_tests.cpp
+    src/assets/animation.cpp src/gameplay/character_animation.cpp tests/skin_bounds_tests.cpp
+    tests/pose_storage_tests.cpp
     PROPERTIES COMPILE_OPTIONS
     "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
+
+if(MSVC)
+    set_property(SOURCE tests/skin_bounds_tests.cpp APPEND PROPERTY COMPILE_OPTIONS /wd4530)
+endif()
 
 find_program(GLOOM_CLANG_FORMAT NAMES clang-format
     HINTS "${CMAKE_GENERATOR_INSTANCE}/VC/Tools/Llvm/bin")
@@ -93,6 +99,13 @@ if(BUILD_TESTING AND WIN32)
     target_compile_definitions(gloom_allocation_profile_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
     add_test(NAME gloom.allocation_profile COMMAND gloom_allocation_profile_tests)
     set_tests_properties(gloom.allocation_profile PROPERTIES TIMEOUT 15)
+    add_executable(gloom_pose_storage_tests tests/pose_storage_tests.cpp src/core/allocation_new.cpp
+        src/core/allocation_profile.cpp src/core/clock.cpp src/assets/animation.cpp src/gameplay/character_animation.cpp src/render/scene.cpp)
+    target_include_directories(gloom_pose_storage_tests PRIVATE include)
+    target_compile_features(gloom_pose_storage_tests PRIVATE cxx_std_23)
+    target_compile_definitions(gloom_pose_storage_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
+    add_test(NAME gloom.pose_storage COMMAND gloom_pose_storage_tests)
+    set_tests_properties(gloom.pose_storage PROPERTIES TIMEOUT 15)
 endif()
 
 if(BUILD_TESTING)
@@ -565,6 +578,10 @@ if(BUILD_TESTING)
     add_test(NAME gloom.animation_vfx COMMAND gloom_animation_vfx_tests)
     add_executable(gloom_skin_bounds_tests tests/skin_bounds_tests.cpp)
     target_link_libraries(gloom_skin_bounds_tests PRIVATE gloom_asset_pipeline)
+    if(WIN32)
+        target_sources(gloom_skin_bounds_tests PRIVATE src/core/allocation_profile.cpp src/core/allocation_new.cpp src/core/clock.cpp)
+        target_compile_definitions(gloom_skin_bounds_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
+    endif()
     target_compile_definitions(gloom_skin_bounds_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
     if(MSVC)
         target_compile_options(gloom_skin_bounds_tests PRIVATE /UNDEBUG)

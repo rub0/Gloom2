@@ -15,6 +15,21 @@ template <typename T> class Array {
     }
     Array(const Array&) = delete;
     Array& operator=(const Array&) = delete;
+    Array(Array&& other) noexcept : values_{other.values_}, count_{other.count_}, capacity_{other.capacity_} {
+        other.values_ = nullptr;
+        other.count_ = other.capacity_ = 0;
+    }
+    Array& operator=(Array&& other) noexcept {
+        if (this == &other)
+            return *this;
+        delete[] values_;
+        values_ = other.values_;
+        count_ = other.count_;
+        capacity_ = other.capacity_;
+        other.values_ = nullptr;
+        other.count_ = other.capacity_ = 0;
+        return *this;
+    }
 
     void reserve(size_t capacity) {
         if (capacity <= capacity_)

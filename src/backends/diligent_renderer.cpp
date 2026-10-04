@@ -836,7 +836,7 @@ void DiligentRenderer::Impl::bind_skin(const render::RenderInstance& instance, D
         assert(pose.matrices.size() <= 256 && pose.normal_matrices.size() == pose.matrices.size());
         const render::SkinPose* previous =
             instance.previous_pose && instance.has_previous_transform && instance.previous_pose->matrices.size() == pose.matrices.size()
-                ? instance.previous_pose.get()
+                ? instance.previous_pose
                 : &pose;
         uint32 cached = 0;
         // ponytail: linear cache for small scenes; excess poses stream without imposing a scene limit.

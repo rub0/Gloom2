@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gloom/gameplay/slice_selection.hpp>
+#include <gloom/gameplay/combatant_view.hpp>
 #include <gloom/gameplay/legacy_pickups.hpp>
 #include <gloom/network/movement_replication.hpp>
 #include <gloom/physics/world.hpp>
@@ -13,7 +13,6 @@
 
 namespace gloom::gameplay {
 
-inline constexpr float legacy_default_life = 120.0F;
 inline constexpr float legacy_maximum_life = 250.0F;
 inline constexpr float legacy_maximum_shield = 150.0F;
 inline constexpr float legacy_shield_absorption = 0.70F;
@@ -87,47 +86,6 @@ struct VerticalSliceSettings {
     bool opponent_ai_enabled{true};
     physics::World* authoritative_physics{nullptr};
     bool original_factory{false};
-};
-
-struct CombatantView {
-    network::NetworkEntityId entity{0};
-    float position_x{0.0F};
-    float position_y{0.0F};
-    float position_z{0.0F};
-    float velocity_x{0.0F};
-    float velocity_y{0.0F};
-    float velocity_z{0.0F};
-    float life{legacy_default_life};
-    float shield{0.0F};
-    float respawn_remaining_seconds{0.0F};
-    float facing_x{1.0F};
-    float facing_z{0.0F};
-    std::uint32_t kills{0};
-    std::uint32_t deaths{0};
-    std::uint32_t current_spree{0};
-    SliceCharacter character{SliceCharacter::hound};
-    SliceWeapon weapon{SliceWeapon::soul_reaper};
-    SliceAbility ability{SliceAbility::bite};
-    SliceSecondaryAbility secondary_ability{SliceSecondaryAbility::berserker};
-    bool primary_ability_active{false};
-    bool secondary_ability_active{false};
-    float flash_factor{0.0F};
-    bool alive{true};
-    bool grounded{true};
-    bool air_dodge_available{false};
-    float aim_pitch{0};
-    std::uint32_t shot_sequence{0};
-    std::uint64_t shot_tick{0};
-    std::array<float, 3> shot_impact{};
-    bool shot_hit{false};
-    bool shot_contact{false};
-    bool shot_explosion{false};
-    std::array<std::uint16_t, slice_weapon_count> ammunition{};
-    std::uint8_t owned_weapons{1};
-    float weapon_charge_fraction{0};
-    std::uint16_t damage_modifier_ticks{};
-    std::uint16_t cooldown_modifier_ticks{};
-    bool audio_guiding{};
 };
 
 struct SliceHud {

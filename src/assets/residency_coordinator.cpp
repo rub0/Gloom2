@@ -19,7 +19,7 @@
 namespace gloom::assets {
 namespace {
 
-using Matrix = std::array<float, 16>;
+using Matrix = Matrix4;
 
 [[nodiscard]] Matrix multiply(const Matrix& left, const Matrix& right) noexcept {
     Matrix result{};
@@ -386,6 +386,16 @@ void AssetResidencyCoordinator::update() {
                 fail(request, prepared.error());
                 continue;
             }
+            request.resident = ResidentScene{
+                .asset = request.asset,
+                .generation = request.generation,
+                .instances = std::move(prepared->instances),
+                .bind_rig = std::move(prepared->bind_rig),
+            };
+            if (request.resident->bind_rig && !prepare_animation_rig(*request.resident->bind_rig, request.resident->animation_rig, request.generation)) {
+                fail(request, "Invalid animation rig");
+                continue;
+            }
             request.resources = prepared->resources;
             for (const auto resource : request.resources) {
                 auto [reference, inserted] = resource_references_.try_emplace(resource, 0);
@@ -412,12 +422,6 @@ void AssetResidencyCoordinator::update() {
                     renderer_.enqueue(std::move(material));
                 }
             }
-            request.resident = ResidentScene{
-                .asset = request.asset,
-                .generation = request.generation,
-                .instances = std::move(prepared->instances),
-                .bind_rig = std::move(prepared->bind_rig),
-            };
             request.state = SceneResidencyState::uploading;
         }
 

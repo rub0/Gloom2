@@ -1,6 +1,15 @@
 #include <gloom/assets/gltf_importer.hpp>
 #include <gloom/assets/rig.hpp>
 #include <gloom/assets/animation.hpp>
+#include <gloom/core/allocation_profile.hpp>
+#include <math.h>
+#include <string.h>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 #if defined(GLOOM_GLTF_IMPORTER)
 #include <gloom/assets/mesh_processing.hpp>
@@ -1083,3 +1092,260 @@ std::expected<ImportedScene, std::string> decode_imported_scene(const std::span<
 #endif
 
 } // namespace gloom::assets
+
+#if !defined(GLOOM_GLTF_IMPORTER)
+namespace gloom::assets {
+namespace {
+bool animation_name_contains(Span<const char> name, const char* part) {
+    for (size_t i = 0; i + strlen(part) <= name.size(); ++i)
+        if (memcmp(name.data() + i, part, strlen(part)) == 0)
+            return true;
+    return false;
+}
+bool hierarchy(const ImportedScene& scene, Array<PreparedNode>& nodes, Array<uint32>& order) {
+    if (scene.nodes.size() > ~0U)
+        return false;
+    nodes.reserve(scene.nodes.size());
+    nodes.resize(scene.nodes.size());
+    order.reserve(scene.nodes.size());
+    order.resize(scene.nodes.size());
+    for (uint32 i = 0; i < scene.nodes.size(); ++i)
+        for (uint32 child : scene.nodes[i].children) {
+            if (child >= nodes.size() || nodes[child].parent != no_animation_index)
+                return false;
+            nodes[child].parent = i;
+        }
+    size_t count = 0;
+    for (uint32 i = 0; i < nodes.size(); ++i)
+        if (nodes[i].parent == no_animation_index)
+            order[count++] = i;
+    for (size_t head = 0; head < count; ++head)
+        for (uint32 child : scene.nodes[order[head]].children)
+            order[count++] = child;
+    return count == nodes.size();
+}
+bool valid_trs(const RigMatrix& m) {
+    for (float v : m)
+        if (!isfinite(v))
+            return false;
+    const float d = m[0] * (m[5] * m[10] - m[9] * m[6]) - m[4] * (m[1] * m[10] - m[9] * m[2]) + m[8] * (m[1] * m[6] - m[5] * m[2]);
+    return isfinite(d) && fabsf(d) >= 1e-12F && hypot(hypot(m[0], m[1]), m[2]) >= 1e-8 && hypot(hypot(m[4], m[5]), m[6]) >= 1e-8 &&
+           hypot(hypot(m[8], m[9]), m[10]) >= 1e-8;
+}
+bool clips_valid(const ImportedScene& scene) {
+    if (scene.animations.size() > 256)
+        return false;
+    size_t keys = 0;
+    for (size_t c = 0; c < scene.animations.size(); ++c) {
+        const AnimationClip& clip = scene.animations[c];
+        if (clip.name.empty() || !isfinite(clip.duration) || clip.duration <= 0 || clip.duration > 3600 || clip.channels.empty() ||
+            clip.channels.size() > scene.nodes.size() * 3)
+            return false;
+        for (size_t j = 0; j < c; ++j)
+            if (scene.animations[j].name.size() == clip.name.size() && memcmp(scene.animations[j].name.data(), clip.name.data(), clip.name.size()) == 0)
+                return false;
+        for (size_t j = 0; j < clip.channels.size(); ++j) {
+            const AnimationChannel& channel = clip.channels[j];
+            if (channel.node >= scene.nodes.size() || channel.path > AnimationPath::scale || channel.interpolation > AnimationInterpolation::step ||
+                channel.times.empty() || channel.times.size() != channel.values.size())
+                return false;
+            for (size_t k = 0; k < j; ++k)
+                if (clip.channels[k].node == channel.node && clip.channels[k].path == channel.path)
+                    return false;
+            keys += channel.times.size();
+            if (keys > 1'000'000 || !valid_trs(scene.nodes[channel.node].local_transform))
+                return false;
+            const RigMatrix rebuilt = rig_matrix(rig_transform(scene.nodes[channel.node].local_transform));
+            for (size_t k = 0; k < 16; ++k)
+                if (fabsf(scene.nodes[channel.node].local_transform[k] - rebuilt[k]) > 1e-3F)
+                    return false;
+            float previous = -1;
+            for (size_t k = 0; k < channel.times.size(); ++k) {
+                const float t = channel.times[k];
+                if (!isfinite(t) || t < 0 || t <= previous || t > clip.duration)
+                    return false;
+                previous = t;
+                for (float v : channel.values[k])
+                    if (!isfinite(v))
+                        return false;
+                if (channel.path == AnimationPath::rotation &&
+                    fabsf(channel.values[k][0] * channel.values[k][0] + channel.values[k][1] * channel.values[k][1] +
+                          channel.values[k][2] * channel.values[k][2] + channel.values[k][3] * channel.values[k][3] - 1) > 1e-3F)
+                    return false;
+                if (channel.path == AnimationPath::scale && (channel.values[k][0] < 1e-4F || channel.values[k][1] < 1e-4F || channel.values[k][2] < 1e-4F))
+                    return false;
+            }
+        }
+    }
+    return true;
+}
+}
+bool valid_animations(const ImportedScene& scene) {
+    if (scene.animations.empty())
+        return true;
+    Array<PreparedNode> nodes;
+    Array<uint32> order;
+    if (!hierarchy(scene, nodes, order) || !clips_valid(scene))
+        return false;
+    Array<RigMatrix> worlds;
+    worlds.reserve(nodes.size());
+    worlds.resize(nodes.size());
+    for (uint32 i : order) {
+        worlds[i] =
+            nodes[i].parent == no_animation_index ? scene.nodes[i].local_transform : rig_multiply(worlds[nodes[i].parent], scene.nodes[i].local_transform);
+        for (float value : worlds[i])
+            if (!isfinite(value))
+                return false;
+    }
+    return true;
+}
+bool prepare_animation_rig(const ImportedScene& scene, AnimationRig& rig, uint64 generation) {
+    // The importer still owns legacy containers until 117; copy once here, never per frame.
+    AnimationRig prepared;
+    if (scene.nodes.empty() || !hierarchy(scene, prepared.nodes, prepared.order) || !clips_valid(scene) || !valid_bind_rigs(scene))
+        return false;
+    size_t bytes = 0;
+    for (const ImportedNode& node : scene.nodes) {
+        if (!valid_trs(node.local_transform))
+            return false;
+        bytes += node.name.size() + 1;
+    }
+    for (const AnimationClip& clip : scene.animations)
+        bytes += clip.name.size() + 1;
+    if (bytes > ~0U)
+        return false;
+    prepared.names.reserve(bytes);
+    prepared.names.resize(bytes);
+    prepared.rest.reserve(scene.nodes.size());
+    prepared.rest.resize(scene.nodes.size());
+    size_t cursor = 0;
+    for (size_t i = 0; i < scene.nodes.size(); ++i) {
+        prepared.nodes[i].name = static_cast<uint32>(cursor);
+        prepared.nodes[i].name_length = static_cast<uint32>(scene.nodes[i].name.size());
+        prepared.nodes[i].skin = scene.nodes[i].skin;
+        memcpy(prepared.names.data() + cursor, scene.nodes[i].name.c_str(), scene.nodes[i].name.size() + 1);
+        // Importer-owned strings retain their full length, including embedded zero bytes.
+        prepared.nodes[i].finger_rotation = animation_name_contains({scene.nodes[i].name.data(), scene.nodes[i].name.size()}, "Finger")
+                                                ? (animation_name_contains({scene.nodes[i].name.data(), scene.nodes[i].name.size()}, " R ") ? .6F : -.6F)
+                                                : 0;
+        cursor += scene.nodes[i].name.size() + 1;
+        prepared.rest[i] = rig_transform(scene.nodes[i].local_transform);
+    }
+    prepared.bind_worlds.reserve(prepared.nodes.size());
+    prepared.bind_worlds.resize(prepared.nodes.size());
+    pose_worlds(prepared, {prepared.rest.data(), prepared.rest.size()}, {prepared.bind_worlds.data(), prepared.bind_worlds.size()});
+    for (const RigMatrix& world : prepared.bind_worlds)
+        if (!valid_trs(world))
+            return false;
+    prepared.clips.reserve(scene.animations.size());
+    prepared.clips.resize(scene.animations.size());
+    for (size_t i = 0; i < scene.animations.size(); ++i) {
+        PreparedClip& clip = prepared.clips[i];
+        const AnimationClip& source = scene.animations[i];
+        clip.name = static_cast<uint32>(cursor);
+        clip.name_length = static_cast<uint32>(source.name.size());
+        memcpy(prepared.names.data() + cursor, source.name.c_str(), source.name.size() + 1);
+        cursor += source.name.size() + 1;
+        clip.duration = source.duration;
+        clip.channels.reserve(source.channels.size());
+        clip.channels.resize(source.channels.size());
+        for (size_t j = 0; j < source.channels.size(); ++j) {
+            PreparedChannel& channel = clip.channels[j];
+            channel.node = source.channels[j].node;
+            channel.path = static_cast<uint8>(source.channels[j].path);
+            channel.interpolation = static_cast<uint8>(source.channels[j].interpolation);
+            channel.keys.reserve(source.channels[j].times.size());
+            channel.keys.resize(source.channels[j].times.size());
+            for (size_t k = 0; k < channel.keys.size(); ++k)
+                channel.keys[k] = {.time = source.channels[j].times[k],
+                    .value = {
+                        source.channels[j].values[k][0], source.channels[j].values[k][1], source.channels[j].values[k][2], source.channels[j].values[k][3]}};
+        }
+    }
+    prepared.skins.reserve(scene.skins.size());
+    prepared.skins.resize(scene.skins.size());
+    for (size_t i = 0; i < scene.skins.size(); ++i) {
+        PreparedSkin& skin = prepared.skins[i];
+        skin.joints.reserve(scene.skins[i].joints.size());
+        skin.joints.resize(scene.skins[i].joints.size());
+        skin.inverse_bind.reserve(skin.joints.size());
+        skin.inverse_bind.resize(skin.joints.size());
+        for (size_t j = 0; j < skin.joints.size(); ++j) {
+            skin.joints[j] = scene.skins[i].joints[j];
+            skin.inverse_bind[j] = scene.skins[i].inverse_bind_matrices[j];
+            if (!valid_trs(skin.inverse_bind[j]))
+                return false;
+        }
+    }
+    prepared.bounds.reserve(scene.primitives.size());
+    prepared.bounds.resize(scene.primitives.size());
+    for (size_t i = 0; i < scene.primitives.size(); ++i) {
+        for (const ImportedVertex& vertex : scene.primitives[i].vertices) {
+            for (float value : vertex.position)
+                if (!isfinite(value))
+                    return false;
+            for (uint32 j = 0; j < 8; ++j)
+                if (!isfinite(vertex.weights[j]) || vertex.weights[j] < 0 || (vertex.weights[j] > 0 && vertex.joints[j] >= 256))
+                    return false;
+        }
+        prepare_skin_bounds(scene.primitives[i], prepared.bounds[i]);
+    }
+    prepared.generation = generation;
+    static int64 identity = 0;
+#ifdef _WIN32
+    prepared.identity = static_cast<uint64>(InterlockedIncrement64(&identity));
+#else
+    prepared.identity = static_cast<uint64>(__atomic_add_fetch(&identity, 1, __ATOMIC_RELAXED));
+#endif
+    rig = static_cast<AnimationRig&&>(prepared);
+    return true;
+}
+render::Vec3 skinned_position(const ImportedVertex& v, const render::SkinPose& pose) {
+    render::Vec3 p{};
+    for (size_t i = 0; i < 8; ++i)
+        if (v.weights[i] > 0) {
+            const RigMatrix& m = pose.matrices[v.joints[i]];
+            const float w = v.weights[i];
+            p.x += w * (m[0] * v.position[0] + m[4] * v.position[1] + m[8] * v.position[2] + m[12]);
+            p.y += w * (m[1] * v.position[0] + m[5] * v.position[1] + m[9] * v.position[2] + m[13]);
+            p.z += w * (m[2] * v.position[0] + m[6] * v.position[1] + m[10] * v.position[2] + m[14]);
+        }
+    return p;
+}
+
+void prepare_skin_bounds(const ImportedPrimitive& primitive, SkinBounds& bounds) {
+    bounds = {};
+    for (const ImportedVertex& vertex : primitive.vertices) {
+        float weight_sum = 0;
+        for (uint32 i = 0; i < 8; ++i) {
+            assert(vertex.weights[i] >= 0);
+            if (vertex.weights[i] == 0)
+                continue;
+            assert(vertex.joints[i] < 256);
+            SkinBounds::Joint& joint = bounds.joints[vertex.joints[i]];
+            joint.minimum = {
+                fminf(joint.minimum.x, vertex.position[0]), fminf(joint.minimum.y, vertex.position[1]), fminf(joint.minimum.z, vertex.position[2])};
+            joint.maximum = {
+                fmaxf(joint.maximum.x, vertex.position[0]), fmaxf(joint.maximum.y, vertex.position[1]), fmaxf(joint.maximum.z, vertex.position[2])};
+            if (bounds.joint_count <= vertex.joints[i])
+                bounds.joint_count = vertex.joints[i] + 1;
+            weight_sum += vertex.weights[i];
+        }
+        bounds.minimum_weight_sum = fminf(bounds.minimum_weight_sum, weight_sum);
+        bounds.maximum_weight_sum = fmaxf(bounds.maximum_weight_sum, weight_sum);
+    }
+}
+
+render::BoundingSphere skinned_bounds(const ImportedPrimitive& primitive, const render::SkinPose& pose) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::bounds);
+    render::Vec3 lo{1e30F, 1e30F, 1e30F}, hi{-1e30F, -1e30F, -1e30F};
+    for (const ImportedVertex& v : primitive.vertices) {
+        const render::Vec3 p = skinned_position(v, pose);
+        lo = {fminf(lo.x, p.x), fminf(lo.y, p.y), fminf(lo.z, p.z)};
+        hi = {fmaxf(hi.x, p.x), fmaxf(hi.y, p.y), fmaxf(hi.z, p.z)};
+    }
+    return {.center = {(lo.x + hi.x) * .5F, (lo.y + hi.y) * .5F, (lo.z + hi.z) * .5F},
+        .radius = static_cast<float>(hypot(hypot(hi.x - lo.x, hi.y - lo.y), hi.z - lo.z)) * .5F + 1e-3F};
+}
+} // namespace gloom::assets
+#endif

@@ -3,6 +3,7 @@
 #include <gloom/gameplay/vertical_slice_network.hpp>
 #include <gloom/gameplay/combat_effects.hpp>
 #include <gloom/assets/animation.hpp>
+#include <gloom/assets/gltf_importer.hpp>
 #include <chrono>
 #include <thread>
 #include <iostream>
@@ -99,6 +100,8 @@ void clients(const std::string& external) {
     render::ParticleSystem particles{render::load_particle_recipes(std::filesystem::path{GLOOM_TEST_ASSETS} / "effects/recipes.json")};
     gameplay::CharacterAnimator animator;
     const auto rig = assets::import_gltf(std::filesystem::path{GLOOM_TEST_ASSETS} / "characters/original/archangel.gltf");
+    assets::AnimationRig animation_rig;
+    require(rig && assets::prepare_animation_rig(*rig, animation_rig), "Invalid client animation rig");
     const auto start = std::chrono::steady_clock::now();
     std::uint64_t last_tick = 0, last_event_count = 0;
     auto next_input = start;
@@ -149,7 +152,7 @@ void clients(const std::string& external) {
         if (first.has_snapshot() && first.snapshot().simulation_tick != last_tick && (!reconnecting || hello_a)) {
             const auto& s = first.snapshot();
             last_tick = s.simulation_tick;
-            const auto frame = animator.update(*rig, s.player, 1.0 / 60);
+            const gameplay::CharacterAnimationFrame& frame = animator.update(animation_rig, s.player, 1.0 / 60);
             effects.observe(particles, s.player, frame, {}, last_tick, true);
             particles.advance(1.0 / 60);
             if (reconnecting && first.active() && first.lobby().phase == gameplay::SliceMatchPhase::active && ++resumed > 10) {

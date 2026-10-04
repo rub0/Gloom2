@@ -2,6 +2,7 @@
 
 #include <gloom/assets/asset_loader.hpp>
 #include <gloom/assets/gltf_importer.hpp>
+#include <gloom/assets/animation.hpp>
 #include <gloom/core/job_system.hpp>
 #include <gloom/render/renderer.hpp>
 
@@ -35,6 +36,7 @@ struct ResidentScene {
     std::uint64_t generation{0};
     std::vector<render::RenderInstance> instances;
     std::shared_ptr<const ImportedScene> bind_rig;
+    AnimationRig animation_rig;
 };
 
 struct ResidencyCoordinatorSettings {

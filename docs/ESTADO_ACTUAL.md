@@ -1,26 +1,35 @@
 # Traspaso de Gloom
 
-Actualizado: 3 de octubre de 2026, **hito 112 terminado**. H07 terminada en v17; H08 no iniciada.
+Actualizado: 4 de octubre de 2026, **hito 113 terminado**. H07 terminada en v17; H08 no iniciada.
 
-**Último resultado: base C++ medida y contratos concretos.**
-[Informe 112](../reports/cpp-performance-112/README.md): diagnóstico opcional OFF,
-28 pasadas Factory/Hound, contadores probados en cuatro workers, tamaños de jobs,
-componentes/capacidades y ownership/caducidad por operación. Poses: **210/710 new
-por frame Factory/Hound**; snapshots **10/40**. No son asignaciones globales del proceso.
-Inline candidato jobs **80/8**; capturas de carga **152/304 bytes** deben ir a contextos
-estables. Renderer y contenido conservados. No se atribuye mejora de FPS; las
-series base y normal final contienen incumplimientos de p99/máximo H06 que se
-mantienen registrados. Builds completos correctos; Release **48/52**, Debug **49/52**,
-solo los mismos fallos heredados del 110. Las dos pruebas nuevas pasan en ambos.
+**Último resultado: poses persistentes por actor.**
+[Informe 113](../reports/cpp-performance-113/README.md): rig preparado una vez,
+scratch propio y dos paletas de skin por enlace, sin shared_ptr de poses.
+Diagnóstico: **210/710 → 0 new por frame Factory/Hound en poses**, bounds cero;
+cuatro rigs reales, incluido v17, × dos actores × 1.000 sin nuevas asignaciones.
+No son asignaciones globales del proceso ni bytes vivos.
+Skin anterior inmutable durante los consumidores CPU; GPU copia y conserva su
+lifetime existente. IDs de actor/vida de rig/nodo impiden heredar historial ajeno.
 
-**Siguiente: 113, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
-193 archivos propios/52 CTest inventariados. La investigación 112 confirma filtros
-Jolt incorporados, pero polling simple no demuestra equivalencia de listeners.
+1.200 frames animados y siete vistas estáticas pasan el comparador común con
+calentamiento/fase temporal iguales. Comparaciones iniciales sin alinear fallaron
+y están documentadas; renderer, contenido, referencias y umbrales conservados.
+Comparación numérica: 3.495.720 floats, clips/cortes idénticos, máximo 0,000164.
+Builds completos correctos; Release **49/53**, Debug **50/53**, mismos fallos
+heredados. Pruebas finales de enlaces, crecimiento y runtime pasan.
+[Medidas](../reports/cpp-performance-113/medidas.md); sin atribuir mejora global de FPS.
+CPU poses + bounds: mediana **0,138 → 0,081 ms Factory (-41,3 %)** y
+**0,636 → 0,5805 ms Hound (-8,7 %)** en la serie normal final.
+
+**Siguiente: 114, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
+196 archivos propios/53 CTest inventariados. Persisten bloques legacy en tests
+mixtos de partículas/importer/red y headers de renderer; cierre según dueños y 128.
 Jolt listeners virtuales/fastgltf filesystem STL chocan con AGENTS: **cierre de
 117/120/128 bloqueado en esas fronteras**, pendiente de decisión expresa o
 alternativa equivalente. Se solicitó excepción mínima y no se ha autorizado.
-[Evidencia](../reports/cpp-performance-112/compatibilidad.md). Esto no bloquea 113.
-Push solicitado de entrada: 111 `517b16c` enviado a origin/main; cierre 112 local.
+[Evidencia 112](../reports/cpp-performance-112/compatibilidad.md).
+Push de entrada anterior: 111 `517b16c` enviado a origin/main; cierres 112/113 locales.
+Verificar commit 113: `rtk git log -1 --oneline --grep='^hito 113:'`.
 
 **Para una tarea C++ nueva:** leer este inicio, AGENTS.md, el índice anterior,
 `docs/cpp/tasks/CONTEXTO.md` y solo la ficha elegida. No cargar el inventario

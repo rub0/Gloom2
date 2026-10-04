@@ -1,22 +1,12 @@
 #pragma once
 
 #include <gloom/assets/gltf_importer.hpp>
+#include <gloom/assets/animation.hpp>
 #include <algorithm>
 #include <cmath>
 #include <optional>
 
 namespace gloom::assets {
-using RigMatrix = std::array<float, 16>;
-
-inline RigMatrix rig_multiply(const RigMatrix& a, const RigMatrix& b) {
-    RigMatrix result{};
-    for (std::size_t c = 0; c < 4; ++c)
-        for (std::size_t r = 0; r < 4; ++r)
-            for (std::size_t k = 0; k < 4; ++k)
-                result[c * 4 + r] += a[k * 4 + r] * b[c * 4 + k];
-    return result;
-}
-
 // Iterative evaluation bounds stack use and rejects cycles/multiple parents.
 inline std::optional<std::vector<RigMatrix>> bind_node_transforms(const ImportedScene& scene) {
     std::vector<std::uint32_t> parents(scene.nodes.size(), no_asset_index), queue;

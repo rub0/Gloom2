@@ -1,6 +1,8 @@
 #pragma once
 
 #include <gloom/render/gpu_assets.hpp>
+#include <gloom/core/array.hpp>
+#include <gloom/core/matrix.hpp>
 
 #include <array>
 #include <cstdint>
@@ -54,8 +56,8 @@ struct BoundingSphere {
 
 struct SkinPose {
     // Column-major asset matrices, equivalent to row-major transposed HLSL matrices.
-    std::vector<std::array<float, 16>> matrices;
-    std::vector<std::array<float, 16>> normal_matrices;
+    Array<Matrix4> matrices;
+    Array<Matrix4> normal_matrices;
 };
 
 struct RenderInstance {
@@ -76,8 +78,11 @@ struct RenderInstance {
     bool casts_shadow{true};
     std::uint32_t source_node{~0U};
     std::uint32_t source_primitive{~0U};
-    std::shared_ptr<const SkinPose> pose;
-    std::shared_ptr<const SkinPose> previous_pose;
+    // Animator-owned views, valid through end_frame; drawing copies matrices into GPU frame storage.
+    const SkinPose* pose{nullptr};
+    const SkinPose* previous_pose{nullptr};
+    uint64 animation_actor{0};
+    uint64 animation_generation{0};
     RenderAssetId arms_mesh;
     bool particle{false};
     float distortion{0}, soft_distance{0};

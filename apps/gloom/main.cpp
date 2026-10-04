@@ -904,15 +904,6 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     gloom::uint64 performance_skin_bounds_ticks = 0;
     gloom::uint32 benchmark_animated_tps = 0;
     gloom::uint32 benchmark_weapon_mask = 0;
-    struct BoundsCacheEntry {
-        gloom::assets::AssetId asset{};
-        gloom::uint64 generation{0};
-        gloom::uint32 primitive{0};
-        gloom::assets::SkinBounds bounds;
-    };
-    // Fixed cache avoids frame allocations; larger scenes retain the exact vertex path.
-    static BoundsCacheEntry bounds_cache[64];
-    gloom::uint32 bounds_cache_count = 0;
     double slice_accumulator = 0.0;
     bool slice_saw_kill = false;
     bool slice_saw_respawn = false;
@@ -1986,9 +1977,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             performance_pose_ticks = 0;
             performance_skin_bounds_ticks = 0;
             const auto append = [&](const gloom::assets::ResidentScene& scene, const gloom::render::Transform& parent, bool fps,
-                                    const gloom::gameplay::CharacterAnimationFrame* frame, bool cut) {
-                const gloom::uint64 first_instance = current.size();
-                for (auto instance : scene.instances) {
+                                    const gloom::gameplay::CharacterAnimationFrame* frame, bool cut, gloom::uint64 actor, gloom::uint64 generation) {
+                for (gloom::render::RenderInstance instance : scene.instances) {
+                    instance.animation_actor = actor;
+                    instance.animation_generation = generation;
                     if (frame && scene.bind_rig) {
                         const gloom::uint64 skin_started = performance_test ? gloom::performance_clock() : 0;
                         if (fps) {
@@ -2003,38 +1995,23 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                             instance.lod_count = 1;
                             instance.lod_meshes = {};
                         }
-                        const auto& rig = *scene.bind_rig;
                         instance.transform = gloom::assets::rig_transform(frame->worlds[instance.source_node]);
-                        gloom::uint64 sibling = first_instance;
-                        while (sibling < current.size() && current[sibling].source_node != instance.source_node)
-                            ++sibling;
-                        instance.pose = sibling < current.size() ? current[sibling].pose : gloom::assets::skin_pose(rig, instance.source_node, frame->worlds);
-                        gloom::uint32 bound = 0;
-                        while (bound < bounds_cache_count &&
-                               (bounds_cache[bound].asset != scene.asset || bounds_cache[bound].primitive != instance.source_primitive))
-                            ++bound;
-                        if (bound < 64) {
-                            if (bound == bounds_cache_count || bounds_cache[bound].generation != scene.generation) {
-                                bounds_cache[bound].asset = scene.asset;
-                                bounds_cache[bound].generation = scene.generation;
-                                bounds_cache[bound].primitive = instance.source_primitive;
-                                gloom::assets::prepare_skin_bounds(rig.primitives[instance.source_primitive], bounds_cache[bound].bounds);
-                                if (bound == bounds_cache_count)
-                                    ++bounds_cache_count;
-                            }
-                            instance.local_bounds = gloom::assets::skinned_bounds(bounds_cache[bound].bounds, *instance.pose);
-                        } else
-                            instance.local_bounds = gloom::assets::skinned_bounds(rig.primitives[instance.source_primitive], *instance.pose);
+                        if (frame->skins[instance.source_node].matrices.size()) {
+                            instance.pose = &frame->skins[instance.source_node];
+                            instance.local_bounds = gloom::assets::skinned_bounds(scene.animation_rig.bounds[instance.source_primitive], *instance.pose);
+                            ++benchmark_skinned_instances;
+                        }
                         if (performance_test)
                             performance_skin_bounds_ticks += gloom::performance_clock() - skin_started;
-                        ++benchmark_skinned_instances;
                     }
                     instance.transform = gloom::render::attach_transform(parent, instance.transform);
                     instance.view_model = fps;
                     instance.casts_shadow = !fps;
-                    const auto i = current.size();
-                    instance.has_previous_transform = !cut && i < previous_animated_instances.size() && previous_animated_instances[i].mesh == instance.mesh &&
-                                                      previous_animated_instances[i].view_model == fps;
+                    const gloom::uint64 i = current.size();
+                    instance.has_previous_transform =
+                        !cut && i < previous_animated_instances.size() && previous_animated_instances[i].mesh == instance.mesh &&
+                        previous_animated_instances[i].view_model == fps && previous_animated_instances[i].animation_actor == actor &&
+                        previous_animated_instances[i].animation_generation == generation && previous_animated_instances[i].source_node == instance.source_node;
                     if (instance.has_previous_transform) {
                         instance.previous_transform = previous_animated_instances[i].transform;
                         instance.previous_pose = previous_animated_instances[i].pose;
@@ -2066,22 +2043,19 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         combatant.facing_z = -forward.z;
                         combatant.alive = true;
                     }
-                    gloom::gameplay::CharacterAnimationFrame frame;
                     const gloom::uint64 pose_started = performance_test ? gloom::performance_clock() : 0;
-                    if (performance_hound && !hound_budget) {
-                        frame.local = gloom::assets::sample_animation(*opponent_scene->bind_rig, "Hound16_joint_check", presentation_seconds + i * .1);
-                        frame.worlds = gloom::assets::pose_worlds(*opponent_scene->bind_rig, frame.local);
-                        frame.cut = false;
-                    } else
-                        frame = performance_eight ? benchmark_animators[i].update(*opponent_scene->bind_rig, combatant, elapsed)
-                                                  : opponent_animator.update(*opponent_scene->bind_rig, combatant, elapsed);
+                    gloom::gameplay::CharacterAnimator& animator = performance_eight ? benchmark_animators[i] : opponent_animator;
+                    const gloom::gameplay::CharacterAnimationFrame& frame =
+                        performance_hound && !hound_budget
+                            ? animator.sample(opponent_scene->animation_rig, combatant.entity, "Hound16_joint_check", presentation_seconds + i * .1)
+                            : animator.update(opponent_scene->animation_rig, combatant, elapsed);
                     if (performance_test)
                         performance_pose_ticks += gloom::performance_clock() - pose_started;
                     const float yaw = atan2f(combatant.facing_x, combatant.facing_z);
                     const gloom::render::Transform parent{
                         .position = {combatant.position_x, combatant.position_y, combatant.position_z}, .rotation = {0, sinf(yaw * .5F), 0, cosf(yaw * .5F)}};
                     const gloom::uint64 first_tps = current.size();
-                    append(*opponent_scene, parent, false, &frame, frame.cut);
+                    append(*opponent_scene, parent, false, &frame, frame.cut, frame.actor, frame.identity);
                     if (performance_full && profile_ready && profile.warmup >= 120 && current.size() > first_tps && current[first_tps].pose &&
                         current[first_tps].previous_pose && current[first_tps].pose->matrices.size() == current[first_tps].previous_pose->matrices.size() &&
                         memcmp(current[first_tps].pose->matrices.data(), current[first_tps].previous_pose->matrices.data(),
@@ -2091,7 +2065,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         combat_effects.observe(particles, combatant, frame, parent, slice.simulation_tick, false);
                     const gloom::assets::ResidentScene* weapon_scene = hound_budget ? resident_weapon(combatant.weapon) : opponent_weapon_scene;
                     if (weapon_scene && combatant.alive && (!performance_hound || hound_budget)) {
-                        append(*weapon_scene, gloom::render::attach_transform(parent, frame.weapon), false, nullptr, frame.cut);
+                        append(*weapon_scene, gloom::render::attach_transform(parent, frame.weapon), false, nullptr, frame.cut, frame.actor, frame.identity);
                         if (profile_ready && profile.warmup >= 120)
                             benchmark_weapon_mask |= 1U << static_cast<gloom::uint32>(combatant.weapon);
                     }
@@ -2099,7 +2073,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             }
             if (local_weapon_scene && local_scene && local_scene->bind_rig) {
                 const gloom::uint64 pose_started = performance_test ? gloom::performance_clock() : 0;
-                const auto frame = local_animator.update(*local_scene->bind_rig, slice.player, elapsed, false, false, true);
+                const gloom::gameplay::CharacterAnimationFrame& frame =
+                    local_animator.update(local_scene->animation_rig, slice.player, elapsed, false, false, true);
                 if (performance_test)
                     performance_pose_ticks += gloom::performance_clock() - pose_started;
                 const auto parent = gloom::render::camera_relative_transform(camera, {.039F, -1.106F, .355F}, {.70F, .70F, .70F});
@@ -2108,8 +2083,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                                                                  slice.player.ability == gloom::gameplay::SliceAbility::guard))) {
                     complete_instances[base + 12].transform.scale = {};
                     complete_instances[base + 13].transform.scale = {};
-                    append(*local_scene, parent, true, &frame, frame.cut);
-                    append(*local_weapon_scene, gloom::render::attach_transform(parent, frame.weapon), true, nullptr, frame.cut);
+                    append(*local_scene, parent, true, &frame, frame.cut, frame.actor, frame.identity);
+                    append(*local_weapon_scene, gloom::render::attach_transform(parent, frame.weapon), true, nullptr, frame.cut, frame.actor, frame.identity);
                 }
             }
             for (const auto& combatant : std::array{slice.player, slice.opponent}) {
@@ -2171,7 +2146,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             current_transforms.reserve(64);
             const auto append = [&](const gloom::assets::ResidentScene& scene, const gloom::render::Transform& parent, bool first_person,
                                     gloom::render::Color tint = gloom::render::Color{}) {
-                for (auto instance : scene.instances) {
+                for (gloom::render::RenderInstance instance : scene.instances) {
                     instance.transform = gloom::render::attach_transform(parent, instance.transform);
                     const auto i = current_transforms.size();
                     instance.has_previous_transform = previous_original_character == slice.opponent.character && i < previous_original_transforms.size();
@@ -2205,16 +2180,14 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                         : gloom::render::Color{};
                 append(*character_scene, parent, false, tint);
                 if (weapon_scene && slice.opponent.alive && character_scene->bind_rig) {
-                    const auto& rig = *character_scene->bind_rig;
-                    const auto matrices = gloom::assets::bind_node_transforms(rig);
-                    for (std::size_t i = 0; matrices && i < rig.nodes.size(); ++i)
-                        if (rig.nodes[i].name == "Bip001 R Hand") {
-                            const auto& hand = (*matrices)[i];
-                            // Grip offset is art metadata; it never relocates an authoritative ray.
-                            const gloom::render::Transform grip{.position = {hand[12] - .035F, hand[13] - .07F, hand[14] + .12F}, .scale = {.43F, .43F, .43F}};
-                            append(*weapon_scene, gloom::render::attach_transform(parent, grip), false);
-                            break;
-                        }
+                    const gloom::assets::AnimationRig& rig = character_scene->animation_rig;
+                    const gloom::uint32 joint = gloom::assets::animation_node(rig, "Bip001 R Hand");
+                    if (joint < rig.nodes.size()) {
+                        const gloom::assets::RigMatrix& hand = rig.bind_worlds[joint];
+                        // Grip offset is art metadata; it never relocates an authoritative ray.
+                        const gloom::render::Transform grip{.position = {hand[12] - .035F, hand[13] - .07F, hand[14] + .12F}, .scale = {.43F, .43F, .43F}};
+                        append(*weapon_scene, gloom::render::attach_transform(parent, grip), false);
+                    }
                 }
             }
             const bool hide_weapon_for_ability = slice.hud.primary_ability_active && (slice.player.ability == gloom::gameplay::SliceAbility::bite ||
