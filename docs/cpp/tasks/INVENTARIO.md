@@ -18,6 +18,12 @@ conservan su base 110, excepto el resultado propio de la ruta de poses.
 Los tests mixtos del 113 conservan bloques legacy de 115/117/122; sus dueños y el
 cierre transversal 128 deben terminarlos. Un cierre de poses no certifica esos bloques.
 
+Actualización 114: **197 archivos propios, 36,393 líneas y 53 CTest**.
+FixedFunction pertenece al 114, que pasa a cuatro archivos propietarios.
+Scheduler y prueba propia cerrados; datos/futuros de assets siguen en 117/118.
+Las señales restantes conservan su base histórica; las líneas reflejan el workspace final.
+`tools/perf/measure_job_batches.py` es herramienta no C++ del 114.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |
@@ -83,13 +89,14 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/gameplay/combatant_view.hpp](../../../include/gloom/gameplay/combatant_view.hpp) | 48 | Sin coincidencia lexical propia |
 | [tests/pose_storage_tests.cpp](../../../tests/pose_storage_tests.cpp) | 163 | Sin coincidencia lexical propia |
 
-### 114: [JobSystem y FixedFunction con grupos reutilizables](114-jobs.md) — 3 archivos
+### 114: [JobSystem y FixedFunction con grupos reutilizables](114-jobs.md) — 4 archivos
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [include/gloom/core/job_system.hpp](../../../include/gloom/core/job_system.hpp) | 100 | STL, auto, exceptions, owners, virtual, pimpl |
-| [src/core/job_system.cpp](../../../src/core/job_system.cpp) | 271 | STL, auto, exceptions, owners, pimpl |
-| [tests/job_system_tests.cpp](../../../tests/job_system_tests.cpp) | 89 | STL, auto, exceptions |
+| [include/gloom/core/job_system.hpp](../../../include/gloom/core/job_system.hpp) | 110 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
+| [include/gloom/core/fixed_function.hpp](../../../include/gloom/core/fixed_function.hpp) | 108 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
+| [src/core/job_system.cpp](../../../src/core/job_system.cpp) | 200 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
+| [tests/job_system_tests.cpp](../../../tests/job_system_tests.cpp) | 313 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
 
 ### 115: [Partículas y efectos con salida persistente](115-particulas.md) — 4 archivos
 
@@ -128,7 +135,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/assets/scene_catalog.cpp](../../../src/assets/scene_catalog.cpp) | 127 | STL, auto, maps, virtual |
 | [src/assets/texture_asset.cpp](../../../src/assets/texture_asset.cpp) | 230 | STL, auto, owners |
 | [src/gameplay/factory_scene.cpp](../../../src/gameplay/factory_scene.cpp) | 250 | STL, auto, exceptions, owners |
-| [tests/asset_pipeline_tests.cpp](../../../tests/asset_pipeline_tests.cpp) | 477 | STL, auto, exceptions, maps, virtual |
+| [tests/asset_pipeline_tests.cpp](../../../tests/asset_pipeline_tests.cpp) | 550 | STL, auto, exceptions, maps, virtual |
 | [tests/character_restoration_tests.cpp](../../../tests/character_restoration_tests.cpp) | 114 | STL, auto, exceptions |
 | [tests/factory_restoration_tests.cpp](../../../tests/factory_restoration_tests.cpp) | 147 | STL, auto, exceptions |
 
@@ -137,10 +144,10 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
 | [include/gloom/assets/asset_loader.hpp](../../../include/gloom/assets/asset_loader.hpp) | 58 | STL, maps |
-| [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 94 | STL, maps, owners |
+| [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 96 | STL, maps, owners |
 | [include/gloom/assets/scene_gpu_bridge.hpp](../../../include/gloom/assets/scene_gpu_bridge.hpp) | 35 | STL |
-| [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 106 | STL, auto, exceptions, owners |
-| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 469 | STL, auto, exceptions, owners |
+| [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 121 | STL, auto, exceptions, owners |
+| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 475 | STL, auto, exceptions, owners |
 | [src/assets/scene_gpu_bridge.cpp](../../../src/assets/scene_gpu_bridge.cpp) | 123 | STL, auto |
 
 ### 119: [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) — 21 archivos
@@ -310,9 +317,9 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2681 | STL, auto, exceptions, owners |
+| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2700 | STL, auto, exceptions, owners |
 | [apps/gloom/visual_review.hpp](../../../apps/gloom/visual_review.hpp) | 61 | STL |
-| [apps/gloom_scene_viewer/main.cpp](../../../apps/gloom_scene_viewer/main.cpp) | 140 | STL, auto, exceptions |
+| [apps/gloom_scene_viewer/main.cpp](../../../apps/gloom_scene_viewer/main.cpp) | 143 | STL, auto, exceptions |
 | [include/gloom/backends/placeholder.hpp](../../../include/gloom/backends/placeholder.hpp) | 25 | STL, virtual |
 | [include/gloom/backends/sdl_window.hpp](../../../include/gloom/backends/sdl_window.hpp) | 42 | STL, owners, virtual, pimpl |
 | [include/gloom/core/engine.hpp](../../../include/gloom/core/engine.hpp) | 24 | STL, owners |

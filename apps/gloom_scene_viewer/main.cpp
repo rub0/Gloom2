@@ -50,7 +50,10 @@ int main(const int argument_count, const char* const* arguments) try {
     gloom::core::JobSystem jobs;
     gloom::backends::SdlWindow window{{.title = "Gloom cooked-scene viewer", .width = 1280, .height = 720, .resizable = true}};
     gloom::backends::DiligentRenderer renderer{window, {.texture_compression_bc = argument_count != 8}};
-    jobs.start();
+    if (const char* error = jobs.start()) {
+        fprintf(stderr, "%s\n", error);
+        return 1;
+    }
     window.start();
     renderer.start();
     printf("Texture path: %s.\n", renderer.capabilities().texture_compression_bc ? "BC5/BC7" : "RGBA8");

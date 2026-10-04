@@ -5,7 +5,6 @@
 
 #include <cstdint>
 #include <future>
-#include <mutex>
 #include <unordered_map>
 
 namespace gloom::assets {
@@ -50,7 +49,8 @@ class AsyncAssetLoader final {
     const VirtualFileSystem& filesystem_;
     const AssetCatalog& catalog_;
     core::TaskGroup tasks_;
-    mutable std::mutex mutex_;
+    struct LoadContext;
+    mutable SRWLOCK mutex_{SRWLOCK_INIT};
     std::unordered_map<AssetId, std::shared_future<AssetLoadResult>, AssetIdHash> requests_;
     AssetLoaderMetrics metrics_;
 };

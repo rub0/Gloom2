@@ -8,12 +8,12 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
-#include <cmath>
+#include <math.h>
 #include <expected>
 #include <future>
 #include <limits>
 #include <memory>
-#include <stdexcept>
+#include <stdlib.h>
 #include <unordered_set>
 
 namespace gloom::assets {
@@ -23,9 +23,9 @@ using Matrix = Matrix4;
 
 [[nodiscard]] Matrix multiply(const Matrix& left, const Matrix& right) noexcept {
     Matrix result{};
-    for (std::size_t column = 0; column < 4; ++column) {
-        for (std::size_t row = 0; row < 4; ++row) {
-            for (std::size_t inner = 0; inner < 4; ++inner) {
+    for (size_t column = 0; column < 4; ++column) {
+        for (size_t row = 0; row < 4; ++row) {
+            for (size_t inner = 0; inner < 4; ++inner) {
                 result[column * 4 + row] += left[inner * 4 + row] * right[column * 4 + inner];
             }
         }
@@ -38,18 +38,15 @@ using Matrix = Matrix4;
 }
 
 [[nodiscard]] render::Transform decompose(const Matrix& matrix) noexcept {
-    const auto length = [](const float x, const float y, const float z) {
-        return std::sqrt(x * x + y * y + z * z);
-    };
-    float scale_x = length(matrix[0], matrix[1], matrix[2]);
-    const float scale_y = length(matrix[4], matrix[5], matrix[6]);
-    const float scale_z = length(matrix[8], matrix[9], matrix[10]);
+    float scale_x = sqrtf(matrix[0] * matrix[0] + matrix[1] * matrix[1] + matrix[2] * matrix[2]);
+    const float scale_y = sqrtf(matrix[4] * matrix[4] + matrix[5] * matrix[5] + matrix[6] * matrix[6]);
+    const float scale_z = sqrtf(matrix[8] * matrix[8] + matrix[9] * matrix[9] + matrix[10] * matrix[10]);
     const float determinant = matrix[0] * (matrix[5] * matrix[10] - matrix[6] * matrix[9]) - matrix[4] * (matrix[1] * matrix[10] - matrix[2] * matrix[9]) +
                               matrix[8] * (matrix[1] * matrix[6] - matrix[2] * matrix[5]);
     if (determinant < 0.0F) {
         scale_x = -scale_x;
     }
-    const float inverse_x = std::abs(scale_x) > 1.0e-7F ? 1.0F / scale_x : 0.0F;
+    const float inverse_x = fabsf(scale_x) > 1.0e-7F ? 1.0F / scale_x : 0.0F;
     const float inverse_y = scale_y > 1.0e-7F ? 1.0F / scale_y : 0.0F;
     const float inverse_z = scale_z > 1.0e-7F ? 1.0F / scale_z : 0.0F;
     const float m00 = matrix[0] * inverse_x;
@@ -64,16 +61,16 @@ using Matrix = Matrix4;
     render::Quaternion rotation;
     const float trace = m00 + m11 + m22;
     if (trace > 0.0F) {
-        const float factor = std::sqrt(trace + 1.0F) * 2.0F;
+        const float factor = sqrtf(trace + 1.0F) * 2.0F;
         rotation = {(m21 - m12) / factor, (m02 - m20) / factor, (m10 - m01) / factor, 0.25F * factor};
     } else if (m00 > m11 && m00 > m22) {
-        const float factor = std::sqrt(1.0F + m00 - m11 - m22) * 2.0F;
+        const float factor = sqrtf(1.0F + m00 - m11 - m22) * 2.0F;
         rotation = {0.25F * factor, (m01 + m10) / factor, (m02 + m20) / factor, (m21 - m12) / factor};
     } else if (m11 > m22) {
-        const float factor = std::sqrt(1.0F + m11 - m00 - m22) * 2.0F;
+        const float factor = sqrtf(1.0F + m11 - m00 - m22) * 2.0F;
         rotation = {(m01 + m10) / factor, 0.25F * factor, (m12 + m21) / factor, (m02 - m20) / factor};
     } else {
-        const float factor = std::sqrt(1.0F + m22 - m00 - m11) * 2.0F;
+        const float factor = sqrtf(1.0F + m22 - m00 - m11) * 2.0F;
         rotation = {(m02 + m20) / factor, (m12 + m21) / factor, 0.25F * factor, (m10 - m01) / factor};
     }
     return {
@@ -83,9 +80,18 @@ using Matrix = Matrix4;
     };
 }
 
-[[nodiscard]] bool path_ends_with(std::string_view path, std::string uri) {
-    std::ranges::replace(uri, '\\', '/');
-    return path.size() >= uri.size() && path.substr(path.size() - uri.size()) == uri;
+[[nodiscard]] bool path_ends_with(std::string_view path, const std::string& uri) {
+    if (path.size() < uri.size())
+        return false;
+    for (size_t index = 0; index < uri.size(); ++index)
+        if (path[path.size() - uri.size() + index] != (uri[index] == '\\' ? '/' : uri[index]))
+            return false;
+    return true;
+}
+int compare_resource(const void* left, const void* right) {
+    const uint64 a = static_cast<const render::RenderAssetId*>(left)->value;
+    const uint64 b = static_cast<const render::RenderAssetId*>(right)->value;
+    return a < b ? -1 : a > b ? 1 : 0;
 }
 
 } // namespace
@@ -111,16 +117,124 @@ struct AssetResidencyCoordinator::Request {
     std::string error;
 };
 
+// Preparation owns decoded data independently of Request. Reload/cancel can discard
+// the future while the context finishes; completion never reads or publishes into Request.
+// ImportedScene/GpuSceneUploads and cached futures keep their legacy representation until 117/118.
+struct AssetResidencyCoordinator::PreparationContext {
+    ImportedScene scene;
+    std::vector<CookedAsset> dependencies;
+    std::vector<AssetRecord> dependency_records;
+    AssetId scene_id;
+    bool use_bc{false};
+    std::promise<std::expected<PreparedScene, std::string>> promise;
+
+    bool matches(uint32 texture, Span<const uint8> images) const {
+        return texture < scene.textures.size() && scene.textures[texture].image < images.size() && images[scene.textures[texture].image];
+    }
+    const char* visit(uint32 index, const Matrix& parent, PreparedScene& prepared, Span<uint8> visiting) const {
+        if (index >= scene.nodes.size() || visiting[index])
+            return "Scene node hierarchy contains a cycle";
+        visiting[index] = 1;
+        const ImportedNode& node = scene.nodes[index];
+        const Matrix world = multiply(parent, node.local_transform);
+        if (node.mesh != no_asset_index) {
+            if (node.mesh >= scene.meshes.size())
+                return "Scene node references an invalid mesh";
+            const ImportedMesh& mesh = scene.meshes[node.mesh];
+            for (uint32 primitive = 0; primitive < mesh.primitive_count; ++primitive) {
+                const uint32 primitive_index = mesh.first_primitive + primitive;
+                if (primitive_index >= prepared.gpu.primitives.size())
+                    return "Scene mesh range is invalid";
+                const GpuScenePrimitive& binding = prepared.gpu.primitives[primitive_index];
+                prepared.instances.push_back({.mesh = binding.mesh,
+                    .material = binding.material,
+                    .transform = decompose(world),
+                    .local_bounds = binding.bounds,
+                    .lod_meshes = binding.lod_meshes,
+                    .lod_count = binding.lod_count,
+                    .source_node = index,
+                    .source_primitive = primitive_index,
+                    .arms_mesh = binding.arms_mesh});
+            }
+        }
+        for (uint32 child : node.children)
+            if (const char* error = visit(child, world, prepared, visiting))
+                return error;
+        visiting[index] = 0;
+        return nullptr;
+    }
+    void operator()() noexcept {
+        PreparedScene prepared;
+        Array<render::RenderAssetId> image_assets;
+        Array<uint8> matched, visiting;
+        image_assets.reserve(scene.images.size());
+        image_assets.resize(scene.images.size());
+        matched.reserve(scene.images.size());
+        matched.resize(scene.images.size());
+        for (size_t dependency = 0; dependency < dependencies.size(); ++dependency) {
+            const render::RenderAssetId gpu_id{dependencies[dependency].id.value};
+            for (size_t image = 0; image < scene.images.size(); ++image) {
+                matched[image] = path_ends_with(dependency_records[dependency].source.relative(), scene.images[image].external_uri);
+                if (matched[image])
+                    image_assets[image] = gpu_id;
+            }
+            bool used_as_normal = false, used_as_color_or_data = false;
+            for (const ImportedMaterial& material : scene.materials) {
+                used_as_normal = used_as_normal || matches(material.normal_texture, {matched.data(), matched.size()});
+                used_as_color_or_data = used_as_color_or_data || matches(material.base_color_texture, {matched.data(), matched.size()}) ||
+                                        matches(material.metallic_roughness_texture, {matched.data(), matched.size()});
+                for (uint32 texture : material.extra_textures)
+                    used_as_color_or_data = used_as_color_or_data || matches(texture, {matched.data(), matched.size()});
+            }
+            const TextureTranscodeTarget target =
+                use_bc ? used_as_normal && !used_as_color_or_data ? TextureTranscodeTarget::bc5 : TextureTranscodeTarget::bc7 : TextureTranscodeTarget::rgba8;
+            decltype(decode_texture_ktx2(gpu_id, dependencies[dependency].payload, target)) upload =
+                decode_texture_ktx2(gpu_id, dependencies[dependency].payload, target);
+            if (!upload) {
+                promise.set_value(std::unexpected{upload.error()});
+                return;
+            }
+            prepared.resources.push_back(gpu_id);
+            prepared.textures.push_back(static_cast<render::TextureUpload&&>(*upload));
+        }
+        prepared.gpu = build_gpu_scene_uploads(scene, scene_id, {image_assets.data(), image_assets.size()});
+        for (const render::MeshUpload& mesh : prepared.gpu.meshes)
+            prepared.resources.push_back(mesh.id);
+        for (const render::MaterialUpload& material : prepared.gpu.materials)
+            prepared.resources.push_back(material.id);
+        const uint32 scene_index = scene.default_scene == no_asset_index ? 0 : scene.default_scene;
+        if (!scene.scenes.empty() && scene_index >= scene.scenes.size()) {
+            promise.set_value(std::unexpected{"Scene selects an invalid root set"});
+            return;
+        }
+        visiting.reserve(scene.nodes.size());
+        visiting.resize(scene.nodes.size());
+        if (!scene.scenes.empty())
+            for (uint32 root : scene.scenes[scene_index].roots)
+                if (const char* error = visit(root, identity_matrix(), prepared, {visiting.data(), visiting.size()})) {
+                    promise.set_value(std::unexpected{error});
+                    return;
+                }
+        if (prepared.resources.size() > 1)
+            qsort(prepared.resources.data(), prepared.resources.size(), sizeof(render::RenderAssetId), compare_resource);
+        size_t count = 0;
+        for (size_t index = 0; index < prepared.resources.size(); ++index)
+            if (!count || prepared.resources[index] != prepared.resources[count - 1])
+                prepared.resources[count++] = prepared.resources[index];
+        prepared.resources.resize(count);
+        if (!scene.skins.empty() || !scene.animations.empty())
+            prepared.bind_rig = std::make_shared<ImportedScene>(static_cast<ImportedScene&&>(scene));
+        promise.set_value(static_cast<PreparedScene&&>(prepared));
+    }
+};
+
 AssetResidencyCoordinator::AssetResidencyCoordinator(
     core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, render::Renderer& renderer, const ResidencyCoordinatorSettings settings)
     : jobs_{jobs}, loader_{loader}, catalog_{catalog}, renderer_{renderer}, settings_{settings}, preparation_tasks_{jobs.create_group()} {}
 
 AssetResidencyCoordinator::~AssetResidencyCoordinator() {
     if (preparation_tasks_.valid()) {
-        try {
-            jobs_.wait(preparation_tasks_);
-        } catch (...) {
-        }
+        jobs_.wait(preparation_tasks_);
     }
     for (auto& [ticket, request] : requests_) {
         static_cast<void>(ticket);
@@ -264,119 +378,13 @@ void AssetResidencyCoordinator::update() {
             if (dependency_error) {
                 continue;
             }
-            auto promise = std::make_shared<std::promise<std::expected<PreparedScene, std::string>>>();
-            request.preparation_future = promise->get_future().share();
-            const auto scene_id = request.asset;
-            const bool use_bc = renderer_.capabilities().texture_compression_bc;
-            jobs_.schedule(preparation_tasks_, [promise, scene = std::move(*decoded_scene), dependencies = std::move(dependencies),
-                                                   dependency_records = std::move(dependency_records), scene_id, use_bc]() mutable {
-                try {
-                    PreparedScene prepared;
-                    std::vector<render::RenderAssetId> image_assets(scene.images.size());
-                    for (std::size_t dependency = 0; dependency < dependencies.size(); ++dependency) {
-                        const render::RenderAssetId gpu_id{dependencies[dependency].id.value};
-                        std::vector<std::size_t> matched_images;
-                        for (std::size_t image = 0; image < scene.images.size(); ++image) {
-                            if (path_ends_with(dependency_records[dependency].source.relative(), scene.images[image].external_uri)) {
-                                image_assets[image] = gpu_id;
-                                matched_images.push_back(image);
-                            }
-                        }
-                        const auto matches = [&](const std::uint32_t texture_index) {
-                            if (texture_index >= scene.textures.size()) {
-                                return false;
-                            }
-                            const auto image = scene.textures[texture_index].image;
-                            return std::ranges::find(matched_images, image) != matched_images.end();
-                        };
-                        bool used_as_normal = false;
-                        bool used_as_color_or_data = false;
-                        for (const auto& material : scene.materials) {
-                            used_as_normal = used_as_normal || matches(material.normal_texture);
-                            used_as_color_or_data = used_as_color_or_data || matches(material.base_color_texture) ||
-                                                    matches(material.metallic_roughness_texture) || std::ranges::any_of(material.extra_textures, matches);
-                        }
-                        const bool is_normal_only = used_as_normal && !used_as_color_or_data;
-                        const auto target =
-                            use_bc ? (is_normal_only ? TextureTranscodeTarget::bc5 : TextureTranscodeTarget::bc7) : TextureTranscodeTarget::rgba8;
-                        auto upload = decode_texture_ktx2(gpu_id, dependencies[dependency].payload, target);
-                        if (!upload) {
-                            promise->set_value(std::unexpected{upload.error()});
-                            return;
-                        }
-                        prepared.resources.push_back(gpu_id);
-                        prepared.textures.push_back(std::move(*upload));
-                    }
-                    prepared.gpu = build_gpu_scene_uploads(scene, scene_id, image_assets);
-                    for (const auto& mesh : prepared.gpu.meshes) {
-                        prepared.resources.push_back(mesh.id);
-                    }
-                    for (const auto& material : prepared.gpu.materials) {
-                        prepared.resources.push_back(material.id);
-                    }
-
-                    const auto scene_index = scene.default_scene == no_asset_index ? std::uint32_t{0} : scene.default_scene;
-                    if (!scene.scenes.empty() && scene_index >= scene.scenes.size()) {
-                        promise->set_value(std::unexpected{"Scene selects an invalid root set"});
-                        return;
-                    }
-                    std::vector<bool> visiting(scene.nodes.size());
-                    const auto visit = [&](const auto& self, const std::uint32_t node_index, const Matrix& parent) -> std::expected<void, std::string> {
-                        if (node_index >= scene.nodes.size() || visiting[node_index]) {
-                            return std::unexpected{"Scene node hierarchy contains a cycle"};
-                        }
-                        visiting[node_index] = true;
-                        const auto& node = scene.nodes[node_index];
-                        const Matrix world = multiply(parent, node.local_transform);
-                        if (node.mesh != no_asset_index) {
-                            if (node.mesh >= scene.meshes.size()) {
-                                return std::unexpected{"Scene node references an invalid mesh"};
-                            }
-                            const auto& mesh = scene.meshes[node.mesh];
-                            for (std::uint32_t primitive = 0; primitive < mesh.primitive_count; ++primitive) {
-                                const auto primitive_index = mesh.first_primitive + primitive;
-                                if (primitive_index >= prepared.gpu.primitives.size()) {
-                                    return std::unexpected{"Scene mesh range is invalid"};
-                                }
-                                const auto binding = prepared.gpu.primitives[primitive_index];
-                                prepared.instances.push_back({
-                                    .mesh = binding.mesh,
-                                    .material = binding.material,
-                                    .transform = decompose(world),
-                                    .local_bounds = binding.bounds,
-                                    .lod_meshes = binding.lod_meshes,
-                                    .lod_count = binding.lod_count,
-                                    .source_node = node_index,
-                                    .source_primitive = primitive_index,
-                                    .arms_mesh = binding.arms_mesh,
-                                });
-                            }
-                        }
-                        for (const auto child : node.children) {
-                            if (auto result = self(self, child, world); !result) {
-                                return result;
-                            }
-                        }
-                        visiting[node_index] = false;
-                        return {};
-                    };
-                    if (!scene.scenes.empty()) {
-                        for (const auto root : scene.scenes[scene_index].roots) {
-                            if (auto result = visit(visit, root, identity_matrix()); !result) {
-                                promise->set_value(std::unexpected{result.error()});
-                                return;
-                            }
-                        }
-                    }
-                    std::ranges::sort(prepared.resources, {}, &render::RenderAssetId::value);
-                    prepared.resources.erase(std::ranges::unique(prepared.resources).begin(), prepared.resources.end());
-                    if (!scene.skins.empty() || !scene.animations.empty())
-                        prepared.bind_rig = std::make_shared<ImportedScene>(std::move(scene));
-                    promise->set_value(std::move(prepared));
-                } catch (const std::exception& error) {
-                    promise->set_value(std::unexpected{error.what()});
-                }
-            });
+            PreparationContext* context = new PreparationContext{.scene = static_cast<ImportedScene&&>(*decoded_scene),
+                .dependencies = static_cast<decltype(dependencies)&&>(dependencies),
+                .dependency_records = static_cast<decltype(dependency_records)&&>(dependency_records),
+                .scene_id = request.asset,
+                .use_bc = renderer_.capabilities().texture_compression_bc};
+            request.preparation_future = context->promise.get_future().share();
+            jobs_.schedule(preparation_tasks_, core::JobSystem::Job{context});
             request.state = SceneResidencyState::preparing;
         }
 
@@ -446,9 +454,7 @@ void AssetResidencyCoordinator::update() {
 
 SceneResidencyState AssetResidencyCoordinator::state(const SceneTicket ticket) const {
     const auto found = requests_.find(ticket.value);
-    if (found == requests_.end()) {
-        throw std::out_of_range{"Unknown scene residency ticket"};
-    }
+    assert(found != requests_.end());
     return found->second.state;
 }
 

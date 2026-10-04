@@ -67,6 +67,7 @@ class AssetResidencyCoordinator final {
     void reload(SceneTicket ticket);
     void update();
 
+    // ticket must come from this coordinator's request_scene; unknown tickets assert.
     [[nodiscard]] SceneResidencyState state(SceneTicket ticket) const;
     [[nodiscard]] const ResidentScene* scene(SceneTicket ticket) const noexcept;
     [[nodiscard]] std::string_view error(SceneTicket ticket) const noexcept;
@@ -74,6 +75,7 @@ class AssetResidencyCoordinator final {
 
   private:
     struct PreparedScene;
+    struct PreparationContext;
     struct Request;
 
     void release_resources(Request& request);

@@ -1,35 +1,43 @@
 # Traspaso de Gloom
 
-Actualizado: 4 de octubre de 2026, **hito 113 terminado**. H07 terminada en v17; H08 no iniciada.
+Actualizado: 4 de octubre de 2026, **hito 114 terminado**. H07 terminada en v17; H08 no iniciada.
 
-**Último resultado: poses persistentes por actor.**
-[Informe 113](../reports/cpp-performance-113/README.md): rig preparado una vez,
-scratch propio y dos paletas de skin por enlace, sin shared_ptr de poses.
-Diagnóstico: **210/710 → 0 new por frame Factory/Hound en poses**, bounds cero;
-cuatro rigs reales, incluido v17, × dos actores × 1.000 sin nuevas asignaciones.
-No son asignaciones globales del proceso ni bytes vivos.
-Skin anterior inmutable durante los consumidores CPU; GPU copia y conserva su
-lifetime existente. IDs de actor/vida de rig/nodo impiden heredar historial ajeno.
+**Último resultado: trabajos nativos y capturas inline.**
+[Informe 114](../reports/cpp-performance-114/README.md): JobSystem sin STL,
+herencia/PIMPL/excepciones/RTTI; grupos estables caller-owned, FixedFunction
+void() 80/8 y cola reservada de 256 con asistencia al saturar. Arranque con
+error/rollback inmediato; cierre drena descendientes y une los hilos.
+Todos los callers adaptados, cancel/reload con contextos de vida estable.
+Los datos/futuros legacy de assets pertenecen todavía a 117/118.
 
-1.200 frames animados y siete vistas estáticas pasan el comparador común con
-calentamiento/fase temporal iguales. Comparaciones iniciales sin alinear fallaron
-y están documentadas; renderer, contenido, referencias y umbrales conservados.
-Comparación numérica: 3.495.720 floats, clips/cortes idénticos, máximo 0,000164.
-Builds completos correctos; Release **49/53**, Debug **50/53**, mismos fallos
-heredados. Pruebas finales de enlaces, crecimiento y runtime pasan.
-[Medidas](../reports/cpp-performance-113/medidas.md); sin atribuir mejora global de FPS.
-CPU poses + bounds: mediana **0,138 → 0,081 ms Factory (-41,3 %)** y
-**0,636 → 0,5805 ms Hound (-8,7 %)** en la serie normal final.
+Diagnóstico: jobs **3/4 → 0 new por frame Factory/Hound**, 344/416 → 0 bytes.
+Mil rondas/6.000 trabajos, grupos nuevos y reutilizados, cero asignaciones propias
+con uno y cuatro workers. No son cero heap global ni bytes vivos. Lotes normales
+mejoran mediana/p95; espera acumulada con cuatro workers aumenta, documentada.
+Sin mejora global de FPS atribuida. Serie Hound: p99 <4 ms y 345,26 MiB;
+picos >5 ms en ambas versiones (1/1.440 antes, 3/1.440 después): no recertifica H06.
+[Medidas y límites](../reports/cpp-performance-114/medidas.md).
 
-**Siguiente: 114, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
-196 archivos propios/53 CTest inventariados. Persisten bloques legacy en tests
-mixtos de partículas/importer/red y headers de renderer; cierre según dueños y 128.
+Builds completos/formato correctos; Debug **50/53**, Release **49/53**.
+Mismos fallos heredados: tres comparadores visuales, GNS 25 solo Release.
+Jobs, assets, visibilidad, Vulkan y Hound pasan. Siete vistas estáticas alineadas
+antes/después pasan; máximo por canal en 1280×720 de 1/255. Referencias y umbrales
+conservados. Renderer, contenido y política de vida GPU conservados.
+
+**Siguiente: 115, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
+197 archivos propios/53 CTest inventariados. Persisten bloques legacy según
+sus dueños y cierre 128; no afirmar cumplimiento global de C++.
 Jolt listeners virtuales/fastgltf filesystem STL chocan con AGENTS: **cierre de
 117/120/128 bloqueado en esas fronteras**, pendiente de decisión expresa o
 alternativa equivalente. Se solicitó excepción mínima y no se ha autorizado.
 [Evidencia 112](../reports/cpp-performance-112/compatibilidad.md).
-Push de entrada anterior: 111 `517b16c` enviado a origin/main; cierres 112/113 locales.
-Verificar commit 113: `rtk git log -1 --oneline --grep='^hito 113:'`.
+112 `268db47` y 113 `8b96c71` subidos a origin/main por este encargo.
+Cierre 114 local, sin push; verificar: `rtk git log -1 --oneline --grep='^hito 114:'`.
+
+**113:** poses persistentes por actor; diagnóstico 210/710 → 0 new/frame en poses,
+bounds cero. Rig preparado una vez, scratch y paletas propias; CPU poses+bounds
+0,138 → 0,081 ms Factory y 0,636 → 0,5805 ms Hound. 1.200 frames animados y siete
+vistas alineadas pasan; números/límites en el [informe 113](../reports/cpp-performance-113/README.md).
 
 **Para una tarea C++ nueva:** leer este inicio, AGENTS.md, el índice anterior,
 `docs/cpp/tasks/CONTEXTO.md` y solo la ficha elegida. No cargar el inventario

@@ -463,9 +463,13 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     }
     const bool automated_graphics = smoke_test || network_scene_smoke || vertical_slice_smoke || vulkan_sync_stress || visual_review || performance_test;
 
+    gloom::core::JobSystem jobs{gloom::core::JobSystemSettings{.worker_threads = 2}};
+    if (const char* error = jobs.start()) {
+        fprintf(stderr, "%s\n", error);
+        return 1;
+    }
+    gloom::core::JobSystem* jobs_view = &jobs;
     gloom::core::Engine engine;
-    auto jobs = std::make_unique<gloom::core::JobSystem>(gloom::core::JobSystemSettings{.worker_threads = 2});
-    auto* jobs_view = jobs.get();
     auto window = std::make_unique<gloom::backends::SdlWindow>(gloom::platform::WindowDesc{
         .title = vertical_slice ? vertical_slice_host ? "Gloom authoritative slice host" : "Gloom - Factory - WASD, Space, fire LMB, Ability Q/RMB"
                  : network_demo ? "Gloom Network Lab - blue: predicted local, orange: interpolated remote"
@@ -518,7 +522,6 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     auto physics = std::make_unique<gloom::backends::JoltWorld>();
     auto* physics_view = physics.get();
 
-    engine.add(std::move(jobs));
     engine.add(std::move(window));
     engine.add(std::move(renderer));
     engine.add(std::move(physics));
@@ -884,8 +887,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     constexpr std::size_t slice_instance_count = 18;
     render_instances.reserve(visual_bodies.size() + (network_demo ? 2 : 0) + (vertical_slice ? slice_instance_count : 0));
     render_instances.resize(visual_bodies.size() + (network_demo ? 2 : 0) + (vertical_slice ? slice_instance_count : 0));
-    auto physics_to_render_group = jobs_view->create_group();
-    auto snapshot_group = jobs_view->create_group();
+    gloom::core::TaskGroup physics_to_render_group = jobs_view->create_group();
+    gloom::core::TaskGroup snapshot_group = jobs_view->create_group();
 
     auto previous_frame = std::chrono::steady_clock::now();
     auto drawable_size = window_view->drawable_size();
@@ -1701,30 +1704,45 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 visual.current.position = {lift.position_x, lift.position_y, lift.position_z};
             }
             if (physics_stats.last_sub_steps > 0) {
-                jobs_view->parallel_for(physics_to_render_group, visual_bodies.size(), 3, [&](const std::size_t begin, const std::size_t end) {
-                    for (std::size_t index = begin; index < end; ++index) {
-                        auto& visual = visual_bodies[index];
-                        if (visual.body.valid()) {
-                            visual.previous = visual.current;
-                            visual.current = to_render_transform(physics_view->body_transform(visual.body), visual.current.scale);
+                struct PhysicsToRender {
+                    gloom::Span<VisualBody> bodies;
+                    gloom::backends::JoltWorld* physics;
+                    void operator()(size_t begin, size_t end) const noexcept {
+                        for (size_t index = begin; index < end; ++index) {
+                            VisualBody& visual = bodies[index];
+                            if (visual.body.valid()) {
+                                visual.previous = visual.current;
+                                visual.current = to_render_transform(physics->body_transform(visual.body), visual.current.scale);
+                            }
                         }
                     }
-                });
+                } transform_jobs{.bodies = {visual_bodies.data(), visual_bodies.size()}, .physics = physics_view};
+                jobs_view->parallel_for(physics_to_render_group, visual_bodies.size(), 3, transform_jobs);
                 jobs_view->wait(physics_to_render_group);
             }
-            jobs_view->parallel_for(snapshot_group, visual_bodies.size(), 3, [&](const std::size_t begin, const std::size_t end) {
-                for (std::size_t index = begin; index < end; ++index) {
-                    const auto& visual = visual_bodies[index];
-                    const auto previous_render_transform = render_instances[index].transform;
-                    render_instances[index] = {
-                        .mesh = visual.mesh,
-                        .transform = gloom::render::interpolate(visual.previous, visual.current, static_cast<float>(physics_stats.interpolation_alpha)),
-                        .previous_transform = previous_render_transform,
-                        .has_previous_transform = frame_count != 0,
-                        .color = visual.color,
-                    };
+            struct BuildSnapshot {
+                gloom::Span<const VisualBody> bodies;
+                gloom::Span<gloom::render::RenderInstance> instances;
+                float alpha;
+                bool has_previous;
+                void operator()(size_t begin, size_t end) const noexcept {
+                    for (size_t index = begin; index < end; ++index) {
+                        const VisualBody& visual = bodies[index];
+                        const gloom::render::Transform previous = instances[index].transform;
+                        instances[index] = {
+                            .mesh = visual.mesh,
+                            .transform = gloom::render::interpolate(visual.previous, visual.current, alpha),
+                            .previous_transform = previous,
+                            .has_previous_transform = has_previous,
+                            .color = visual.color,
+                        };
+                    }
                 }
-            });
+            } snapshot_jobs{.bodies = {visual_bodies.data(), visual_bodies.size()},
+                .instances = {render_instances.data(), render_instances.size()},
+                .alpha = static_cast<float>(physics_stats.interpolation_alpha),
+                .has_previous = frame_count != 0};
+            jobs_view->parallel_for(snapshot_group, visual_bodies.size(), 3, snapshot_jobs);
             jobs_view->wait(snapshot_group);
             if (network_demo) {
                 const auto character = physics_view->character_state(local_character);
@@ -2562,6 +2580,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     factory_filesystem.reset();
     if (desktop_session && !ui_return_to_menu)
         desktop_session->quit = true;
+    jobs.stop();
     engine.stop();
 
     if (!performance_test || profile.count == 360)

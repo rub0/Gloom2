@@ -3,8 +3,6 @@
 
 #include <array>
 #include <chrono>
-#include <exception>
-#include <memory>
 #include <utility>
 
 namespace gloom::assets {
@@ -13,72 +11,87 @@ AsyncAssetLoader::AsyncAssetLoader(core::JobSystem& jobs, const VirtualFileSyste
     : jobs_{jobs}, filesystem_{filesystem}, catalog_{catalog}, tasks_{jobs.create_group()} {}
 
 AsyncAssetLoader::~AsyncAssetLoader() {
-    try {
-        wait();
-    } catch (...) {
-    }
+    wait();
 }
 
-std::shared_future<AssetLoadResult> AsyncAssetLoader::request(const AssetId id) {
-    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::assets);
-    std::scoped_lock lock{mutex_};
-    ++metrics_.requests;
-    if (const auto found = requests_.find(id); found != requests_.end()) {
-        ++metrics_.cache_hits;
-        return found->second;
-    }
-
-    const AssetRecord* catalog_record = catalog_.find(id);
-    auto promise = std::make_shared<std::promise<AssetLoadResult>>();
-    auto future = promise->get_future().share();
-    requests_.emplace(id, future);
-    if (catalog_record == nullptr) {
-        ++metrics_.failed;
-        promise->set_value(placeholder(id, AssetType::binary, "Asset is absent from the catalog"));
-        return future;
-    }
-    const AssetRecord record = *catalog_record;
-    jobs_.schedule(tasks_, [this, promise, record] {
+// Cold asset data/results retain their existing format until 117/118. The scheduler
+// owns this stable context; it never borrows a cache entry or an initializer-list span.
+struct AsyncAssetLoader::LoadContext {
+    AsyncAssetLoader* loader;
+    AssetRecord record;
+    std::promise<AssetLoadResult> promise;
+    void operator()() noexcept {
         AssetLoadResult result;
-        const auto encoded = filesystem_.read(record.cooked);
+        decltype(loader->filesystem_.read(record.cooked)) encoded = loader->filesystem_.read(record.cooked);
         if (!encoded) {
             result = placeholder(record.id, record.type, encoded.error());
         } else {
-            const auto decoded = decode_cooked_asset(*encoded);
+            decltype(decode_cooked_asset(*encoded)) decoded = decode_cooked_asset(*encoded);
             if (!decoded) {
                 result = placeholder(record.id, record.type, decoded.error());
             } else if (decoded->id != record.id || decoded->type != record.type || decoded->source_fingerprint != record.source_fingerprint ||
                        decoded->dependencies != record.dependencies) {
                 result = placeholder(record.id, record.type, "Cooked asset does not match its catalog record");
             } else {
-                result = {.state = AssetLoadState::ready, .asset = std::move(*decoded)};
+                result = {.state = AssetLoadState::ready, .asset = static_cast<CookedAsset&&>(*decoded)};
             }
         }
-        {
-            const std::scoped_lock result_lock{mutex_};
-            if (result.state == AssetLoadState::ready) {
-                ++metrics_.loaded;
-                metrics_.bytes_loaded += result.asset.payload.size();
-            } else {
-                ++metrics_.failed;
-            }
-        }
-        promise->set_value(std::move(result));
-    });
+        AcquireSRWLockExclusive(&loader->mutex_);
+        if (result.state == AssetLoadState::ready) {
+            ++loader->metrics_.loaded;
+            loader->metrics_.bytes_loaded += result.asset.payload.size();
+        } else
+            ++loader->metrics_.failed;
+        ReleaseSRWLockExclusive(&loader->mutex_);
+        promise.set_value(static_cast<AssetLoadResult&&>(result));
+    }
+};
+
+std::shared_future<AssetLoadResult> AsyncAssetLoader::request(const AssetId id) {
+    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::assets);
+    AcquireSRWLockExclusive(&mutex_);
+    ++metrics_.requests;
+    const decltype(requests_)::iterator found = requests_.find(id);
+    if (found != requests_.end()) {
+        ++metrics_.cache_hits;
+        std::shared_future<AssetLoadResult> future = found->second;
+        ReleaseSRWLockExclusive(&mutex_);
+        return future;
+    }
+    const AssetRecord* record = catalog_.find(id);
+    if (!record) {
+        std::promise<AssetLoadResult> promise;
+        std::shared_future<AssetLoadResult> future = promise.get_future().share();
+        requests_.emplace(id, future);
+        ++metrics_.failed;
+        promise.set_value(placeholder(id, AssetType::binary, "Asset is absent from the catalog"));
+        ReleaseSRWLockExclusive(&mutex_);
+        return future;
+    }
+    LoadContext* context = new LoadContext{.loader = this, .record = *record};
+    std::shared_future<AssetLoadResult> future = context->promise.get_future().share();
+    requests_.emplace(id, future);
+    // A saturated queue may execute another loader job here. Never hold the cache lock
+    // across schedule, or assistance would deadlock trying to publish that job's result.
+    ReleaseSRWLockExclusive(&mutex_);
+    jobs_.schedule(tasks_, core::JobSystem::Job{context});
     return future;
 }
 
 bool AsyncAssetLoader::invalidate(const AssetId id) {
-    std::scoped_lock lock{mutex_};
-    const auto found = requests_.find(id);
+    AcquireSRWLockExclusive(&mutex_);
+    const decltype(requests_)::iterator found = requests_.find(id);
     if (found == requests_.end()) {
+        ReleaseSRWLockExclusive(&mutex_);
         return true;
     }
     if (found->second.wait_for(std::chrono::seconds{0}) != std::future_status::ready) {
+        ReleaseSRWLockExclusive(&mutex_);
         return false;
     }
     requests_.erase(found);
     ++metrics_.invalidations;
+    ReleaseSRWLockExclusive(&mutex_);
     return true;
 }
 
@@ -89,8 +102,10 @@ void AsyncAssetLoader::wait() {
 }
 
 AssetLoaderMetrics AsyncAssetLoader::metrics() const noexcept {
-    const std::scoped_lock lock{mutex_};
-    return metrics_;
+    AcquireSRWLockShared(&mutex_);
+    const AssetLoaderMetrics result = metrics_;
+    ReleaseSRWLockShared(&mutex_);
+    return result;
 }
 
 AssetLoadResult AsyncAssetLoader::placeholder(const AssetId id, const AssetType type, std::string error) {

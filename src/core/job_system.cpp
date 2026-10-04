@@ -1,271 +1,200 @@
-#include <gloom/core/allocation_profile.hpp>
 #include <gloom/core/job_system.hpp>
-
-#include <algorithm>
-#include <atomic>
-#include <condition_variable>
-#include <chrono>
-#include <deque>
-#include <exception>
-#include <mutex>
-#include <stdexcept>
-#include <thread>
-#include <vector>
+#include <gloom/core/clock.hpp>
+#include <stdio.h>
 
 namespace gloom::core {
-
-struct TaskGroup::State {
-    explicit State(const JobSystem* group_owner) : owner{group_owner} {}
-
-    const JobSystem* owner;
-    std::atomic<std::uint64_t> remaining{0};
-    std::mutex mutex;
-    std::condition_variable completed;
-    std::exception_ptr first_exception;
+namespace {
+struct Execution {
+    JobSystem* system;
+    TaskGroup* group;
+    Execution* previous;
 };
-
-struct JobSystem::Impl {
-    struct WorkItem {
-        std::shared_ptr<TaskGroup::State> group;
-        Job job;
-    };
-
-    std::mutex queue_mutex;
-    std::condition_variable_any work_available;
-    std::condition_variable idle;
-    std::deque<WorkItem> queue;
-    std::vector<std::jthread> workers;
-    bool accepting{false};
-    std::uint64_t active_jobs{0};
-
-    std::atomic<std::uint64_t> scheduled_jobs{0};
-    std::atomic<std::uint64_t> completed_jobs{0};
-    std::atomic<std::uint64_t> caller_executed_jobs{0};
-    std::atomic<std::uint64_t> peak_queue_depth{0};
-    std::atomic<std::uint64_t> job_execution_nanoseconds{0};
-    std::atomic<std::uint64_t> wait_nanoseconds{0};
-
-    void complete(WorkItem& item) noexcept {
-        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
-        const auto started_at = std::chrono::steady_clock::now();
-        try {
-            item.job();
-        } catch (...) {
-            const std::scoped_lock lock{item.group->mutex};
-            if (!item.group->first_exception) {
-                item.group->first_exception = std::current_exception();
-            }
-        }
-
-        const auto elapsed = std::chrono::steady_clock::now() - started_at;
-        job_execution_nanoseconds.fetch_add(
-            static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count()), std::memory_order_relaxed);
-
-        completed_jobs.fetch_add(1, std::memory_order_relaxed);
-        bool group_completed = false;
-        {
-            // The condition must change while holding the same mutex used by wait().
-            // Otherwise a completion can notify between the predicate check and the
-            // waiter actually sleeping, leaving a reused task group blocked forever.
-            const std::scoped_lock lock{item.group->mutex};
-            group_completed = item.group->remaining.fetch_sub(1, std::memory_order_acq_rel) == 1;
-        }
-        if (group_completed) {
-            item.group->completed.notify_all();
-        }
-        {
-            const std::scoped_lock lock{queue_mutex};
-            --active_jobs;
-            if (queue.empty() && active_jobs == 0) {
-                idle.notify_all();
-            }
-        }
-    }
-
-    [[nodiscard]] bool take_one(WorkItem& item) {
-        const std::scoped_lock lock{queue_mutex};
-        if (queue.empty()) {
-            return false;
-        }
-        item = std::move(queue.front());
-        queue.pop_front();
-        ++active_jobs;
-        return true;
-    }
-
-    void worker_loop(const std::stop_token stop_token) {
-        while (true) {
-            WorkItem item;
-            {
-                std::unique_lock lock{queue_mutex};
-                work_available.wait(lock, stop_token, [this] {
-                    return !queue.empty();
-                });
-                if (queue.empty()) {
-                    if (stop_token.stop_requested()) {
-                        return;
-                    }
-                    continue;
-                }
-                item = std::move(queue.front());
-                queue.pop_front();
-                ++active_jobs;
-            }
-            complete(item);
-        }
-    }
-};
-
-TaskGroup::TaskGroup(std::shared_ptr<State> state) : state_{std::move(state)} {}
-
-bool TaskGroup::valid() const noexcept {
-    return static_cast<bool>(state_);
+thread_local Execution* executing = nullptr;
+bool executing_in(JobSystem* system) {
+    for (Execution* frame = executing; frame; frame = frame->previous)
+        if (frame->system == system)
+            return true;
+    return false;
 }
-
-JobSystem::JobSystem(const JobSystemSettings settings) : settings_{settings}, impl_{std::make_unique<Impl>()} {}
-
+uint64 nanoseconds(uint64 ticks) {
+    return static_cast<uint64>(ticks * (1000000000.0 / performance_frequency()));
+}
+}
 JobSystem::~JobSystem() {
     stop();
 }
-
-std::string_view JobSystem::name() const noexcept {
-    return "core.jobs";
+const char* JobSystem::start() {
+    assert(!running_ && !active_ && !queued_ && settings_.queue_capacity > 0);
+    SYSTEM_INFO info{};
+    GetSystemInfo(&info);
+    const uint32 count = settings_.worker_threads ? settings_.worker_threads : info.dwNumberOfProcessors > 1 ? info.dwNumberOfProcessors - 1 : 1;
+    queue_.reserve(settings_.queue_capacity);
+    queue_.resize(settings_.queue_capacity);
+    workers_.reserve(count);
+    workers_.resize(0);
+    GLOOM_PROFILE_LAYOUT("FixedFunction", sizeof(Job), alignof(Job));
+    GLOOM_PROFILE_LAYOUT("WorkItem", sizeof(WorkItem), alignof(WorkItem));
+    GLOOM_PROFILE_LAYOUT("TaskGroup", sizeof(TaskGroup), alignof(TaskGroup));
+    GLOOM_PROFILE_CAPACITY("JobSystem queue", 0, queue_.size(), sizeof(WorkItem));
+    metrics_ = {};
+    head_ = 0;
+    draining_ = exiting_ = false;
+    ++generation_;
+    running_ = true;
+    for (uint32 index = 0; index < count; ++index) {
+        HANDLE worker = CreateThread(nullptr, 0, worker_entry, this, 0, nullptr);
+        if (!worker) {
+            sprintf_s(start_error_, "JobSystem CreateThread failed (Windows error %lu)", GetLastError());
+            stop();
+            return start_error_;
+        }
+        workers_.resize(index + 1);
+        workers_[index] = worker;
+    }
+    metrics_.worker_threads = count;
+    return nullptr;
 }
-
-SubsystemState JobSystem::state() const noexcept {
-    return state_;
+TaskGroup JobSystem::create_group() {
+    AcquireSRWLockExclusive(&lock_);
+    assert(running_ && (!draining_ || executing_in(this)));
+    const uint64 generation = generation_;
+    ReleaseSRWLockExclusive(&lock_);
+    return TaskGroup{this, generation};
 }
-
-void JobSystem::start() {
-    if (state_ == SubsystemState::running) {
-        throw std::logic_error{"Job system is already running"};
-    }
-    const auto hardware_threads = std::thread::hardware_concurrency();
-    const std::uint32_t automatic_workers = hardware_threads > 1 ? hardware_threads - 1 : 1;
-    const std::uint32_t worker_count = settings_.worker_threads == 0 ? automatic_workers : settings_.worker_threads;
-    if (worker_count == 0) {
-        throw std::invalid_argument{"Job system requires at least one worker"};
-    }
-
-    {
-        const std::scoped_lock lock{impl_->queue_mutex};
-        impl_->accepting = true;
-    }
-    impl_->workers.reserve(worker_count);
-    for (std::uint32_t index = 0; index < worker_count; ++index) {
-        impl_->workers.emplace_back([this](const std::stop_token token) {
-            impl_->worker_loop(token);
-        });
-    }
-    state_ = SubsystemState::running;
+void JobSystem::validate_locked(const TaskGroup& group) const {
+    assert(group.owner_ == this && group.generation_ == generation_);
+    static_cast<void>(group);
 }
-
-void JobSystem::tick([[maybe_unused]] const double delta_seconds) {}
-
-void JobSystem::stop() noexcept {
-    if (state_ == SubsystemState::stopped) {
-        return;
-    }
-    {
-        std::unique_lock lock{impl_->queue_mutex};
-        impl_->accepting = false;
-        impl_->idle.wait(lock, [this] {
-            return impl_->queue.empty() && impl_->active_jobs == 0;
-        });
-    }
-    for (auto& worker : impl_->workers) {
-        worker.request_stop();
-    }
-    impl_->work_available.notify_all();
-    impl_->workers.clear();
-    state_ = SubsystemState::stopped;
+bool JobSystem::take_locked(WorkItem& item) {
+    if (!queued_)
+        return false;
+    item = static_cast<WorkItem&&>(queue_[head_]);
+    head_ = (head_ + 1) % queue_.size();
+    --queued_;
+    ++active_;
+    return true;
 }
-
-TaskGroup JobSystem::create_group() const {
-    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
-    GLOOM_PROFILE_LAYOUT("TaskGroup::State", sizeof(TaskGroup::State), alignof(TaskGroup::State));
-    GLOOM_PROFILE_LAYOUT("JobSystem::WorkItem", sizeof(Impl::WorkItem), alignof(Impl::WorkItem));
-    if (state_ != SubsystemState::running) {
-        throw std::logic_error{"Job system must be running before creating a task group"};
-    }
-    return TaskGroup{std::make_shared<TaskGroup::State>(this)};
+void JobSystem::execute(WorkItem& item, bool assisted) {
+#ifdef GLOOM_ALLOCATION_PROFILE
+    AllocationScope allocation{AllocationPhase::jobs};
+#endif
+    const uint64 started = performance_clock();
+    Execution frame{.system = this, .group = item.group, .previous = executing};
+    executing = &frame;
+    item.job();
+    // Destruction is part of completion: borrowed contexts may expire as wait returns.
+    item.job.reset();
+    executing = frame.previous;
+#ifdef GLOOM_ALLOCATION_PROFILE
+    allocation.finish(); // Publish completion after the diagnostic scope has also drained.
+#endif
+    AcquireSRWLockExclusive(&lock_);
+    metrics_.job_execution_nanoseconds += nanoseconds(performance_clock() - started);
+    ++metrics_.completed_jobs;
+    if (assisted)
+        ++metrics_.caller_executed_jobs;
+    --item.group->pending_;
+    --active_;
+    WakeAllConditionVariable(&changed_);
+    ReleaseSRWLockExclusive(&lock_);
+    item.group = nullptr;
 }
-
 void JobSystem::schedule(TaskGroup& group, Job job) {
     GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
-    if (!job) {
-        throw std::invalid_argument{"Cannot schedule an empty job"};
+    assert(job);
+    AcquireSRWLockExclusive(&lock_);
+    validate_locked(group);
+    assert(running_ && (!draining_ || executing_in(this)));
+    while (queued_ == queue_.size()) {
+        WorkItem item;
+        take_locked(item);
+        ReleaseSRWLockExclusive(&lock_);
+        execute(item, true);
+        AcquireSRWLockExclusive(&lock_);
     }
-    if (!group.state_ || group.state_->owner != this) {
-        throw std::invalid_argument{"Task group does not belong to this job system"};
-    }
-
-    group.state_->remaining.fetch_add(1, std::memory_order_relaxed);
-    try {
-        std::uint64_t queue_depth = 0;
-        {
-            const std::scoped_lock lock{impl_->queue_mutex};
-            if (!impl_->accepting) {
-                throw std::logic_error{"Job system is not accepting work"};
-            }
-            impl_->queue.push_back({group.state_, std::move(job)});
-            queue_depth = impl_->queue.size();
-        }
-        impl_->scheduled_jobs.fetch_add(1, std::memory_order_relaxed);
-        std::uint64_t peak = impl_->peak_queue_depth.load(std::memory_order_relaxed);
-        while (peak < queue_depth && !impl_->peak_queue_depth.compare_exchange_weak(peak, queue_depth, std::memory_order_relaxed)) {
-        }
-        impl_->work_available.notify_one();
-    } catch (...) {
-        group.state_->remaining.fetch_sub(1, std::memory_order_relaxed);
-        throw;
-    }
+    ++group.pending_;
+    queue_[(head_ + queued_) % queue_.size()] = WorkItem{.group = &group, .job = static_cast<Job&&>(job)};
+    ++queued_;
+    ++metrics_.scheduled_jobs;
+    if (queued_ > metrics_.peak_queue_depth)
+        metrics_.peak_queue_depth = queued_;
+    // Wake waiters too: nested wait can assist newly published work.
+    WakeAllConditionVariable(&changed_);
+    WakeConditionVariable(&work_available_);
+    ReleaseSRWLockExclusive(&lock_);
 }
-
 void JobSystem::wait(TaskGroup& group) {
-    GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
-    if (!group.state_ || group.state_->owner != this) {
-        throw std::invalid_argument{"Task group does not belong to this job system"};
+    for (Execution* frame = executing; frame; frame = frame->previous)
+        assert(frame->group != &group);
+    const uint64 started = performance_clock();
+    AcquireSRWLockExclusive(&lock_);
+    validate_locked(group);
+    while (group.pending_) {
+        WorkItem item;
+        if (take_locked(item)) {
+            ReleaseSRWLockExclusive(&lock_);
+            execute(item, true);
+            AcquireSRWLockExclusive(&lock_);
+        } else
+            SleepConditionVariableSRW(&changed_, &lock_, INFINITE, 0);
     }
-
-    const auto wait_started_at = std::chrono::steady_clock::now();
-    while (group.state_->remaining.load(std::memory_order_acquire) != 0) {
-        Impl::WorkItem item;
-        if (impl_->take_one(item)) {
-            impl_->caller_executed_jobs.fetch_add(1, std::memory_order_relaxed);
-            impl_->complete(item);
-            continue;
-        }
-        std::unique_lock lock{group.state_->mutex};
-        group.state_->completed.wait(lock, [&group] {
-            return group.state_->remaining.load(std::memory_order_acquire) == 0;
-        });
-    }
-    const auto wait_elapsed = std::chrono::steady_clock::now() - wait_started_at;
-    impl_->wait_nanoseconds.fetch_add(
-        static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(wait_elapsed).count()), std::memory_order_relaxed);
-
-    std::exception_ptr exception;
-    {
-        const std::scoped_lock lock{group.state_->mutex};
-        exception = group.state_->first_exception;
-        group.state_->first_exception = nullptr;
-    }
-    if (exception) {
-        std::rethrow_exception(exception);
+    metrics_.wait_nanoseconds += nanoseconds(performance_clock() - started);
+    ReleaseSRWLockExclusive(&lock_);
+}
+DWORD WINAPI JobSystem::worker_entry(void* context) {
+    static_cast<JobSystem*>(context)->worker_loop();
+    return 0;
+}
+void JobSystem::worker_loop() {
+    AcquireSRWLockExclusive(&lock_);
+    for (;;) {
+        WorkItem item;
+        if (take_locked(item)) {
+            ReleaseSRWLockExclusive(&lock_);
+            execute(item, false);
+            AcquireSRWLockExclusive(&lock_);
+        } else if (exiting_) {
+            ReleaseSRWLockExclusive(&lock_);
+            return;
+        } else
+            SleepConditionVariableSRW(&work_available_, &lock_, INFINITE, 0);
     }
 }
-
+void JobSystem::stop() noexcept {
+    assert(!executing_in(this));
+    AcquireSRWLockExclusive(&lock_);
+    if (!running_) {
+        ReleaseSRWLockExclusive(&lock_);
+        return;
+    }
+    draining_ = true;
+    while (queued_ || active_) {
+        WorkItem item;
+        if (take_locked(item)) {
+            ReleaseSRWLockExclusive(&lock_);
+            execute(item, true);
+            AcquireSRWLockExclusive(&lock_);
+        } else
+            SleepConditionVariableSRW(&changed_, &lock_, INFINITE, 0);
+    }
+    exiting_ = true;
+    WakeAllConditionVariable(&changed_);
+    WakeAllConditionVariable(&work_available_);
+    ReleaseSRWLockExclusive(&lock_);
+    for (HANDLE worker : workers_) {
+        WaitForSingleObject(worker, INFINITE);
+        CloseHandle(worker);
+    }
+    workers_.resize(0);
+    AcquireSRWLockExclusive(&lock_);
+    running_ = false;
+    metrics_.worker_threads = 0;
+    ReleaseSRWLockExclusive(&lock_);
+}
 JobSystemMetrics JobSystem::metrics() const noexcept {
-    return {
-        .scheduled_jobs = impl_->scheduled_jobs.load(std::memory_order_relaxed),
-        .completed_jobs = impl_->completed_jobs.load(std::memory_order_relaxed),
-        .caller_executed_jobs = impl_->caller_executed_jobs.load(std::memory_order_relaxed),
-        .peak_queue_depth = impl_->peak_queue_depth.load(std::memory_order_relaxed),
-        .job_execution_nanoseconds = impl_->job_execution_nanoseconds.load(std::memory_order_relaxed),
-        .wait_nanoseconds = impl_->wait_nanoseconds.load(std::memory_order_relaxed),
-        .worker_threads = static_cast<std::uint32_t>(impl_->workers.size()),
-    };
+    AcquireSRWLockShared(&lock_);
+    const JobSystemMetrics result = metrics_;
+    ReleaseSRWLockShared(&lock_);
+    return result;
 }
-
-} // namespace gloom::core
+}

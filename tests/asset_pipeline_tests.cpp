@@ -28,6 +28,36 @@ void expect(const bool condition, const char* message) {
     }
 }
 
+// Native RAII gate: test failures must release the worker before owner destructors drain.
+struct PausedWorker {
+    gloom::core::JobSystem& jobs;
+    gloom::core::TaskGroup group;
+    HANDLE entered, released;
+    struct BlockWorker {
+        HANDLE entered, released;
+        void operator()() const noexcept {
+            SetEvent(entered);
+            WaitForSingleObject(released, INFINITE);
+        }
+    };
+    explicit PausedWorker(gloom::core::JobSystem& system)
+        : jobs{system}, group{jobs.create_group()}, entered{CreateEventW(nullptr, TRUE, FALSE, nullptr)},
+          released{CreateEventW(nullptr, TRUE, FALSE, nullptr)} {
+        expect(entered && released, "Could not initialize worker gate");
+        jobs.schedule(group, BlockWorker{.entered = entered, .released = released});
+        expect(WaitForSingleObject(entered, 5000) == WAIT_OBJECT_0, "Worker did not enter gate");
+    }
+    void release() {
+        SetEvent(released);
+        jobs.wait(group);
+    }
+    ~PausedWorker() {
+        release();
+        CloseHandle(entered);
+        CloseHandle(released);
+    }
+};
+
 class TemporaryDirectory final {
   public:
     TemporaryDirectory() {
@@ -381,8 +411,8 @@ void test_gltf_cooking_and_async_loading() {
     }
     expect(!gloom::assets::decode_texture_ktx2({.value = 0x45}, {}), "Empty KTX2 payload was accepted");
 
-    gloom::core::JobSystem jobs{{.worker_threads = 2}};
-    jobs.start();
+    gloom::core::JobSystem jobs{{.worker_threads = 1, .queue_capacity = 1}};
+    expect(jobs.start() == nullptr, "JobSystem initialization failed");
     {
         gloom::assets::AsyncAssetLoader loader{jobs, filesystem, catalog};
         const auto scene_future = loader.request(cooked->scene.id);
@@ -456,6 +486,49 @@ void test_gltf_cooking_and_async_loading() {
             expect(
                 coordinator_metrics.requested == 3 && coordinator_metrics.cancelled == 3 && coordinator_metrics.reloaded == 1 && coordinator_metrics.ready == 3,
                 "Residency coordinator metrics are incorrect");
+
+            {
+                PausedWorker pause{jobs};
+                const gloom::assets::SceneTicket cancelled = coordinator.request_scene(cooked->scene.id);
+                coordinator.update();
+                expect(coordinator.state(cancelled) == gloom::assets::SceneResidencyState::preparing, "Preparation was not held in the queue");
+                coordinator.cancel(cancelled);
+                coordinator.reload(cancelled);
+                // Capacity one forces execution of the discarded generation. Reload also
+                // invalidates cached files, so explicitly assist those reads before preparation.
+                for (gloom::uint32 attempt = 0; attempt < 10 && coordinator.state(cancelled) != gloom::assets::SceneResidencyState::preparing; ++attempt) {
+                    coordinator.update();
+                    loader.wait();
+                }
+                expect(coordinator.state(cancelled) == gloom::assets::SceneResidencyState::preparing, "Reload did not enqueue a new preparation");
+                coordinator.cancel(cancelled);
+                const gloom::uint64 uploads_before = renderer.mesh_uploads + renderer.texture_uploads + renderer.material_uploads;
+                pause.release();
+                coordinator.update();
+                expect(coordinator.state(cancelled) == gloom::assets::SceneResidencyState::cancelled && coordinator.scene(cancelled) == nullptr &&
+                           renderer.mesh_uploads + renderer.texture_uploads + renderer.material_uploads == uploads_before,
+                    "Discarded preparation published assets into a cancelled generation");
+            }
+            {
+                PausedWorker pause{jobs};
+                gloom::assets::AssetId last;
+                for (gloom::uint32 index = 0; index < 100; ++index) {
+                    gloom::assets::AssetRecord record = cooked->scene;
+                    char path[96];
+                    snprintf(path, sizeof(path), "game:/models/saturation-%u.gltf", index);
+                    decltype(gloom::assets::VirtualPath::parse(path)) parsed = gloom::assets::VirtualPath::parse(path);
+                    expect(parsed.has_value(), "Invalid saturation fixture path");
+                    record.source = *parsed;
+                    record.id = gloom::assets::make_asset_id(record.source, record.type);
+                    last = record.id;
+                    catalog.add(record);
+                    static_cast<void>(loader.request(record.id));
+                }
+                pause.release();
+                loader.wait();
+                expect(loader.request(last).get().state == gloom::assets::AssetLoadState::error_placeholder,
+                    "Invalid external asset lost its explicit result during saturation");
+            }
         }
         renderer.stop();
     }

@@ -1,9 +1,9 @@
 # Hito 114: JobSystem y FixedFunction con grupos reutilizables
 
-Estado: **no iniciado**. Depende de: **112 y 113, por secuencia del plan**.
+Estado: **terminado, 4 de octubre de 2026**. Depende de: **112 y 113, terminados**.
 Objetivo: **Asignaciones, sincronización y cumplimiento C++**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
-3 archivos propietarios a este hito. Los cambios de firmas incluyen
+4 archivos propietarios a este hito, incluido FixedFunction. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
 ## Evidencia de partida
@@ -24,11 +24,34 @@ Entradas principales verificadas (no es una lista exhaustiva de callers):
 
 ## Archivos responsables de cierre
 
+- [include/gloom/core/fixed_function.hpp](../../../include/gloom/core/fixed_function.hpp)
 - [include/gloom/core/job_system.hpp](../../../include/gloom/core/job_system.hpp)
 - [src/core/job_system.cpp](../../../src/core/job_system.cpp)
 - [tests/job_system_tests.cpp](../../../tests/job_system_tests.cpp)
 
 Además se adaptan todos los callers afectados por firmas/lifetime, aunque tengan otro responsable de cierre.
+
+## Resultado ejecutado
+
+[Informe](../../../reports/cpp-performance-114/README.md) y
+[medidas completas](../../../reports/cpp-performance-114/medidas.md).
+FixedFunction void() 80/8, 104 bytes completos; grupos estables caller-owned,
+sin pool ni asignación; cola 256×112 bytes, asistencia al saturar, hilos/lock y
+dos condiciones Win32. Arranque devuelve error y revierte creación parcial;
+stop drena descendientes y une handles. Todos los callers adaptados.
+Datos, cache y futuros legacy de assets conservan dueño 117/118; se cierran
+scheduler/capturas, no se certifica cumplimiento global de esos formatos.
+
+Mil rondas con grupos nuevos/reutilizados, 6.000 jobs, cero new/bytes con uno y
+cuatro workers. Factory/Hound: jobs 3/4 → 0 new/frame; ahorro del 110 separado.
+Saturación forzada, múltiples productores, captura movible/destrucción, espera
+anidada, cancel/reload, descendientes, reinicio y tres asserts Debug comprobados.
+Arranque parcial falla controladamente y recupera; cinco capturas no soportadas
+rechazan en compilación. Builds y formato correctos; Debug 50/53, Release 49/53,
+fallos heredados descritos por causa. Siete vistas alineadas pasan.
+No se afirma mejora global de FPS ni cumplimiento de H06 en todas las pasadas.
+Commit local de cierre: `rtk git log -1 --oneline --grep='^hito 114:'`.
+112/113 subidos por encargo; 114 sin push, 115 no iniciado.
 
 ## Trabajo concreto, en orden
 

@@ -128,7 +128,7 @@ void VisibilitySystem::build(PreparedVisibility& result, const Camera& camera, c
         VisibilitySettings settings;
         size_t begin, end;
 
-        void operator()() const {
+        void operator()() const noexcept {
             *output = {};
             for (size_t index = begin; index < end; ++index) {
                 const RenderInstance& instance = instances[index];

@@ -1,14 +1,16 @@
 # Plan de optimización y migración C++ de Gloom
 
 Formalizado en el **hito 111**, 3 de octubre de 2026. Código investigado: `5b96a91`
-(110). **17 hitos pendientes, 114–130; 112 y 113 terminados**, con fichas, dependencias, contratos,
-medidas y pruebas. Base 111: 188 archivos/50 CTest; actual 113: 196 archivos/53 CTest.
+(110). **16 hitos pendientes, 115–130; 112–114 terminados**, con fichas, dependencias, contratos,
+medidas y pruebas. Base 111: 188 archivos/50 CTest; actual 114: 197 archivos/53 CTest.
 El 128 revisa todo el código además de su prueba de captura; 129/130 son
 transversales y no tienen archivos propietarios nuevos.
 
 Para empezar: leer inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [CONTEXTO](CONTEXTO.md) y **solo la ficha del hito**.
-El siguiente es **114**, no iniciado. El [113](../../../reports/cpp-performance-113/README.md)
+El siguiente es **115**, no iniciado. El [114](../../../reports/cpp-performance-114/README.md)
+cierra scheduler/capturas con trabajos nativos, grupos estables y cero asignaciones
+por frame en esa ruta. El [113](../../../reports/cpp-performance-113/README.md)
 cierra poses persistentes con medidas y validación. El [112](../../../reports/cpp-performance-112/README.md)
 añade medición/contratos y probe de compatibilidad; no promete mejora de FPS.
 Renderer y contenido conservados. Decisión externa pendiente en 117/120/128.
@@ -17,7 +19,7 @@ Renderer y contenido conservados. Decisión externa pendiente en 117/120/128.
 | --- | --- | --- | --- | ---: |
 | 112 | [Base reproducible, costes y contratos de propiedad](112-base-y-contratos.md) | 111 | Terminado | 12 |
 | 113 | [Poses y animación sin temporales por frame](113-poses.md) | 112 | Terminado | 11 |
-| 114 | [JobSystem y FixedFunction con grupos reutilizables](114-jobs.md) | 112 y 113, por secuencia del plan | No iniciado | 3 |
+| 114 | [JobSystem y FixedFunction con grupos reutilizables](114-jobs.md) | 112 y 113, por secuencia del plan | Terminado | 4 |
 | 115 | [Partículas y efectos con salida persistente](115-particulas.md) | 113 y 114 | No iniciado | 4 |
 | 116 | [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) | 112 y 115 por secuencia | No iniciado | 3 |
 | 117 | [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) | 113, 114 y 116 | No iniciado; cierre bloqueado | 19 |

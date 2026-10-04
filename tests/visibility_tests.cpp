@@ -26,7 +26,7 @@ gloom::render::RenderInstance instance(const float x, const float z) {
 
 int main() {
     gloom::core::JobSystem jobs{{.worker_threads = 2}};
-    jobs.start();
+    require(jobs.start() == nullptr, "JobSystem initialization failed");
     gloom::render::VisibilitySystem visibility{jobs, {.instances_per_job = 2, .lod1_distance_in_radii = 30.0F, .lod2_distance_in_radii = 80.0F}};
     const gloom::render::Camera camera{.position = {0.0F, 0.0F, 0.0F}, .target = {0.0F, 0.0F, 1.0F}, .near_plane = 0.1F, .far_plane = 200.0F};
     const gloom::render::RenderInstance instances[]{

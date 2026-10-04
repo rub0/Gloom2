@@ -68,12 +68,15 @@ set_source_files_properties(
     src/core/allocation_profile.cpp src/core/allocation_new.cpp tests/allocation_profile_tests.cpp
     tests/dependency_contract_tests.cpp
     src/assets/animation.cpp src/gameplay/character_animation.cpp tests/skin_bounds_tests.cpp
-    tests/pose_storage_tests.cpp
+    tests/pose_storage_tests.cpp src/core/job_system.cpp tests/job_system_tests.cpp
+    src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
     PROPERTIES COMPILE_OPTIONS
     "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
 
 if(MSVC)
-    set_property(SOURCE tests/skin_bounds_tests.cpp APPEND PROPERTY COMPILE_OPTIONS /wd4530)
+    # Legacy data/future headers remain owned by 117/118; these consumers do not unwind.
+    set_property(SOURCE tests/skin_bounds_tests.cpp src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
+        APPEND PROPERTY COMPILE_OPTIONS /wd4530)
 endif()
 
 find_program(GLOOM_CLANG_FORMAT NAMES clang-format
@@ -106,6 +109,17 @@ if(BUILD_TESTING AND WIN32)
     target_compile_definitions(gloom_pose_storage_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
     add_test(NAME gloom.pose_storage COMMAND gloom_pose_storage_tests)
     set_tests_properties(gloom.pose_storage PROPERTIES TIMEOUT 15)
+    # The job contract always measures its own allocations, independently of the runtime option.
+    add_executable(gloom_job_tests tests/job_system_tests.cpp src/core/job_system.cpp
+        src/core/allocation_profile.cpp src/core/allocation_new.cpp src/core/clock.cpp)
+    target_include_directories(gloom_job_tests PRIVATE include)
+    target_compile_features(gloom_job_tests PRIVATE cxx_std_23)
+    target_compile_definitions(gloom_job_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
+    if(MSVC)
+        target_compile_options(gloom_job_tests PRIVATE /W4 /WX /permissive-)
+    endif()
+    add_test(NAME gloom.jobs COMMAND gloom_job_tests)
+    set_tests_properties(gloom.jobs PROPERTIES TIMEOUT 15)
 endif()
 
 if(BUILD_TESTING)
@@ -502,7 +516,6 @@ if(BUILD_TESTING)
     endif()
     foreach(test IN ITEMS
         "gloom_tests|tests/engine_tests.cpp|gloom.unit"
-        "gloom_job_tests|tests/job_system_tests.cpp|gloom.jobs"
         "gloom_entity_tests|tests/entity_tests.cpp|gloom.entities"
         "gloom_storage_tests|tests/storage_tests.cpp|gloom.storage"
         "gloom_physics_tests|tests/physics_tests.cpp|gloom.physics"

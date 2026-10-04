@@ -1,100 +1,110 @@
 #pragma once
-
-#include <gloom/core/subsystem.hpp>
+#include <gloom/core/array.hpp>
+#include <gloom/core/fixed_function.hpp>
 #include <gloom/core/allocation_profile.hpp>
-
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <stdexcept>
-#include <type_traits>
-#include <utility>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 
 namespace gloom::core {
-
 struct JobSystemSettings {
-    // Zero selects hardware_concurrency - 1, with at least one worker.
-    std::uint32_t worker_threads{0};
+    // Zero selects native logical processor count minus one, with at least one worker.
+    uint32 worker_threads{0};
+    // Hito 112 startup peak: 102. Saturation assists instead of allocating or dropping work.
+    uint32 queue_capacity{256};
 };
-
 struct JobSystemMetrics {
-    std::uint64_t scheduled_jobs{0};
-    std::uint64_t completed_jobs{0};
-    std::uint64_t caller_executed_jobs{0};
-    std::uint64_t peak_queue_depth{0};
-    std::uint64_t job_execution_nanoseconds{0};
-    std::uint64_t wait_nanoseconds{0};
-    std::uint32_t worker_threads{0};
+    uint64 scheduled_jobs{0};
+    uint64 completed_jobs{0};
+    uint64 caller_executed_jobs{0};
+    uint64 peak_queue_depth{0};
+    uint64 job_execution_nanoseconds{0};
+    uint64 wait_nanoseconds{0};
+    uint32 worker_threads{0};
 };
-
-class TaskGroup final {
+class JobSystem;
+// Caller-owned stable address: no pool, allocation or group capacity limit. The system
+// outlives groups; drain before destroying one. Never wait on an executing ancestor group.
+// Restart invalidates old groups. Join external producers before wait/stop; distinct
+// producer threads may schedule into the same live group. Jobs can enqueue descendants.
+class TaskGroup {
   public:
     TaskGroup() = default;
-
-    [[nodiscard]] bool valid() const noexcept;
+    ~TaskGroup() {
+        assert(pending_ == 0);
+    }
+    TaskGroup(const TaskGroup&) = delete;
+    TaskGroup& operator=(const TaskGroup&) = delete;
+    [[nodiscard]] bool valid() const noexcept {
+        return owner_ != nullptr;
+    }
 
   private:
-    struct State;
-    explicit TaskGroup(std::shared_ptr<State> state);
-
-    std::shared_ptr<State> state_;
-
+    TaskGroup(JobSystem* owner, uint64 generation) : owner_{owner}, generation_{generation} {}
+    JobSystem* owner_{nullptr};
+    uint64 generation_{0};
+    uint64 pending_{0}; // Protected by owner's lock, including completion and wait predicates.
     friend class JobSystem;
 };
-
-class JobSystem final : public Subsystem {
+class JobSystem {
   public:
-    using Job = std::move_only_function<void()>;
-
-    explicit JobSystem(JobSystemSettings settings = {});
-    ~JobSystem() override;
-
+    using Job = FixedFunction;
+    explicit JobSystem(JobSystemSettings settings = {}) : settings_{settings} {}
+    ~JobSystem();
     JobSystem(const JobSystem&) = delete;
     JobSystem& operator=(const JobSystem&) = delete;
-    JobSystem(JobSystem&&) = delete;
-    JobSystem& operator=(JobSystem&&) = delete;
-
-    [[nodiscard]] std::string_view name() const noexcept override;
-    [[nodiscard]] SubsystemState state() const noexcept override;
-    void start() override;
-    void tick(double delta_seconds) override;
-    void stop() noexcept override;
-
-    [[nodiscard]] TaskGroup create_group() const;
+    // Null means success; otherwise a native thread initialization error. Start/stop are
+    // externally serialized. stop drains work and descendants scheduled by executing jobs.
+    [[nodiscard]] const char* start();
+    void stop() noexcept;
+    [[nodiscard]] TaskGroup create_group();
     void schedule(TaskGroup& group, Job job);
-#ifdef GLOOM_ALLOCATION_PROFILE
-    template <typename Function> void schedule(TaskGroup& group, Function&& function) {
-        GLOOM_PROFILE_LAYOUT(__FUNCSIG__, sizeof(Function), alignof(Function));
-        GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::jobs);
-        schedule(group, Job{static_cast<Function&&>(function)});
-    }
-#endif
     void wait(TaskGroup& group);
-
-    template <typename Function> void parallel_for(TaskGroup& group, const std::size_t item_count, const std::size_t grain_size, Function&& function) {
-        if (grain_size == 0) {
-            throw std::invalid_argument{"Parallel-for grain size must be greater than zero"};
-        }
-        using FunctionType = std::decay_t<Function>;
-        GLOOM_PROFILE_LAYOUT(__FUNCSIG__, sizeof(FunctionType), alignof(FunctionType));
-        auto shared_function = std::make_shared<FunctionType>(std::forward<Function>(function));
-        for (std::size_t begin = 0; begin < item_count; begin += grain_size) {
-            const std::size_t end = item_count - begin < grain_size ? item_count : begin + grain_size;
-            schedule(group, [shared_function, begin, end] {
-                (*shared_function)(begin, end);
-            });
+    // Named callable and everything it observes live through wait(group). Temporaries
+    // deliberately cannot bind: parallel_for enqueues borrowed ranges.
+    template <typename Function> void parallel_for(TaskGroup& group, size_t item_count, size_t grain_size, Function& function) {
+        assert(grain_size > 0);
+        struct RangeJob {
+            Function* function;
+            size_t begin, end;
+            void operator()() noexcept {
+                (*function)(begin, end);
+            }
+        };
+        static_assert(noexcept(function(size_t{}, size_t{})), "Parallel-for invocation must not throw");
+        for (size_t begin = 0; begin < item_count;) {
+            const size_t end = item_count - begin < grain_size ? item_count : begin + grain_size;
+            schedule(group, RangeJob{.function = &function, .begin = begin, .end = end});
+            begin = end;
         }
     }
-
     [[nodiscard]] JobSystemMetrics metrics() const noexcept;
 
   private:
-    struct Impl;
-
+    struct WorkItem {
+        TaskGroup* group{nullptr};
+        Job job;
+    };
+    static DWORD WINAPI worker_entry(void* context);
+    void worker_loop();
+    bool take_locked(WorkItem& item);
+    void execute(WorkItem& item, bool assisted);
+    void validate_locked(const TaskGroup& group) const;
     JobSystemSettings settings_;
-    std::unique_ptr<Impl> impl_;
-    SubsystemState state_{SubsystemState::stopped};
+    // ponytail: one protected queue; split queues only if measured contention warrants it.
+    mutable SRWLOCK lock_{SRWLOCK_INIT};
+    CONDITION_VARIABLE changed_{CONDITION_VARIABLE_INIT};
+    CONDITION_VARIABLE work_available_{CONDITION_VARIABLE_INIT};
+    Array<WorkItem> queue_;
+    Array<HANDLE> workers_;
+    size_t head_{0}, queued_{0};
+    uint64 active_{0}, generation_{0};
+    bool running_{false}, draining_{false}, exiting_{false};
+    JobSystemMetrics metrics_;
+    char start_error_[128]{};
 };
-
-} // namespace gloom::core
+}
