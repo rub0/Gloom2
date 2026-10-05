@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 5 de octubre de 2026, **hito 131 terminado: setup de Hound**.
-Último hito C++: 115. H07 terminada en v17; H08 no iniciada.
+Actualizado: 5 de octubre de 2026, **hito C++ 116 terminado**.
+Setup Hound 131 conservado. H07 terminada en v17; H08 no iniciada.
 
 **Nuevo workspace canónico de Hound, preparado para Meshy MCP futuro.**
 [Entrada y estructura](../assets-source/hound/README.md) ·
@@ -14,36 +14,40 @@ individuales pendientes, trabajo/exportes y plan/prompt Meshy documentados.
 **waiting for turnaround completion; do not call MCP yet.** No generación,
 recortes ni ejecución MCP. Próximo paso: preparar/revisar las cuatro vistas
 contra el master y las notas. V16/v17, rig/acción y exportaciones conservados.
-El 131 evita ocupar los números 116–130 del plan C++, que no se han ejecutado.
+El 131 conserva los números 116–130 para el plan C++; 116 terminado, 117–130 pendientes.
 Commit local del 131; resolver con `rtk git log -1 --oneline --grep='^hito 131:'`.
-Sin push; C++ 116 y H08 continúan pendientes.
+Sin push; H08 continúa pendiente. El 116 se detalla abajo.
 
-**Último resultado: partículas y efectos con salida persistente.**
-[Informe 115](../reports/cpp-performance-115/README.md): ParticleSystem añade
-directamente al Array de escena del llamador; materiales por Span por valor.
-Recetas/partículas/emisores propios, recipe resuelto una vez por emisor y dos
-estados de combate persistentes. Errores externos al cargar; precondiciones
-por assert; fuentes/prueba nativa sin STL directo, excepciones/RTTI.
-Chronología, RNG, vida/owner, saturación, métricas y materiales conservados.
-Array evita reescribir valores triviales al vaciar; recursos/regrowth verificados.
+**Último resultado C++: registro de entidades nativo y estable.**
+[Informe 116](../reports/cpp-performance-116/README.md): 18 IDs explícitos,
+páginas de ocho slots por tipo; crecimiento sin mover los doce punteros de
+Combatant. Sin mapas, RTTI, pool virtual o excepciones en el registro.
+Objetos construidos solo al ocupar slot; destrucción inmediata exactamente una
+vez; clear conserva páginas/free list e invalida handles. Registro no copiable
+ni movible; EntityId de 8 bytes por valor, Span por valor.
+Composición/replicación y callers adaptados; LegacyArsenal, World/Subsystem y
+WorldSnapshot conservan dueño 120/122/127, sin cumplimiento global declarado.
 
-Diagnóstico: partículas **1 → 0 new por frame Factory/Hound**. Mil update/render
-a capacidad 2.048 y mil eventos: cero asignaciones propias, con control positivo
-de crecimiento. No son cero heap global ni bytes vivos. Estrés normal de cinco
-pasadas: mediana **48,8 → 37,2 µs**; efectos con dispersión documentada.
-Sin ganancia global de FPS atribuida. Serie integrada normal: p99 Hound <4 ms,
-0/1.440 >5 ms en ambas versiones y residencia 345,26 MiB. No elimina los picos
-históricos del 114 ni sustituye H06. [Medidas](../reports/cpp-performance-115/medidas.md).
+Mil ciclos con 8/64/1.024 personajes: **cero new/bytes propios** en reutilización,
+con control positivo frío. Con 1.024: get4 **153,125 → 8,594 ns por entidad**,
+componer/destruir **1.435,059 → 113,867 ns**, cinco pasadas normales. Memoria del
+registro lleno, incluidos objeto y heap medido: **1.233.067 → 786.328 bytes
+(-36,23 %)**. Vacío conserva más memoria para no asignar al recomponer;
+no son bytes RSS ni heap global. [Medidas y límites](../reports/cpp-performance-116/medidas.md).
+Serie integrada sin mejora de FPS atribuida ni regresión detectada. Hound mantiene
+p99<4 ms, 0/1.440 >5 ms en ambas series y 345,26 MiB; no sustituye H06.
+Builds completos/formato correctos; Debug **51/54**, Release **50/54**:
+mismos tres comparadores visuales heredados y GNS 25 solo Release.
+Entidades, física, simulación/replicación, combate, movimiento, Vulkan y Hound pasan.
+1.200 capturas alineadas y 172 grupos pasan contra 115, máximo de canal 1/255;
+detalles en el informe. Renderer/recursos/referencias/umbrales intactos.
 
-49.080 registros/583.108 valores comparados contra 114, máximo delta 4,8e-7;
-identidades/orden/métricas/eventos iguales. 1.200 capturas alineadas pasan, 41
-eventos/cero dropped; máximo por canal completo 1/255. Alineación de revisión
-como 113/114; referencias/umbrales conservados. Renderer/recursos/vida GPU intactos.
-Builds completos/formato correctos; Debug **51/54**, Release **50/54**.
-Mismos fallos heredados: tres comparadores visuales y GNS 25 solo Release.
-Storage, partículas, animación/VFX, combat, materiales, Vulkan y Hound pasan.
+**115:** partículas/efectos nativos con salida de escena persistente, 1 → 0 new
+por frame; estrés 2.048 mediana 48,8 → 37,2 µs, sin FPS global atribuido.
+1.200 capturas alineadas, identidades/eventos/métricas conservados.
+[Informe 115](../reports/cpp-performance-115/README.md).
 
-**Siguiente del plan C++: 116, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
+**Siguiente del plan C++: 117, no iniciado; cierre bloqueado en fastgltf.** [Índice 112–130](cpp/tasks/README.md).
 198 archivos propios/54 CTest inventariados. Diagnóstico opcional OFF, recompilado.
 Persisten headers/bloques legacy según dueños 117/119/122 y cierre transversal
 128; no afirmar cumplimiento global de C++. Jolt listeners virtuales/fastgltf
@@ -52,8 +56,8 @@ fronteras**, pendiente de decisión expresa o alternativa equivalente.
 Se solicitó excepción mínima y no se ha autorizado.
 [Evidencia 112](../reports/cpp-performance-112/compatibilidad.md).
 112 `268db47` y 113 `8b96c71` subidos a origin/main por el encargo anterior.
-114 `892463a` y cierre 115 locales, sin push; verificar:
-`rtk git log -1 --oneline --grep='^hito 115:'`.
+114 `892463a`, 115 `4cf8af8`, 131 `2b98e83` y cierre 116 locales, sin push; verificar:
+`rtk git log -1 --oneline --grep='^hito 116:'`.
 
 **114:** JobSystem nativo, FixedFunction inline 80/8, grupos caller-owned estables,
 cola 256 con asistencia y drain de descendientes. Jobs 3/4 → 0 new/frame,

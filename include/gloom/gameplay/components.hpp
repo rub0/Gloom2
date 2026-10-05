@@ -7,19 +7,17 @@
 #include <gloom/network/transport.hpp>
 #include <gloom/physics/world.hpp>
 
-#include <cstdint>
-#include <array>
-#include <utility>
-
 namespace gloom::gameplay {
 
 // Gameplay policy attached to a logical entity. Collision detection belongs to
 // a physics TriggerComponent; this component only describes the consequence.
 struct DamageVolumeComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::damage_volume;
     float damage_per_second{60.0F};
 };
 
 struct TransformComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::transform;
     float position_x{0.0F};
     float position_y{0.0F};
     float position_z{0.0F};
@@ -32,6 +30,7 @@ struct TransformComponent {
 // handle is optional so data-only/client compositions remain backend neutral.
 class CharacterPhysicsComponent final {
   public:
+    static constexpr core::ComponentType component_id = core::ComponentType::character_physics;
     float radius{0.4F};
     float collision_height{1.8F};
     float maximum_slope_radians{0.872664626F};
@@ -93,12 +92,7 @@ class CharacterPhysicsComponent final {
 
   private:
     void release() noexcept {
-        try {
-            reset();
-        } catch (...) {
-            world_ = nullptr;
-            character_ = {};
-        }
+        reset();
     }
     void move_from(CharacterPhysicsComponent& other) noexcept {
         radius = other.radius;
@@ -109,26 +103,32 @@ class CharacterPhysicsComponent final {
         mass = other.mass;
         maximum_push_force = other.maximum_push_force;
         provisional_kinematic_proxy = other.provisional_kinematic_proxy;
-        world_ = std::exchange(other.world_, nullptr);
-        character_ = std::exchange(other.character_, {});
-        world_generation_ = std::exchange(other.world_generation_, 0);
+        world_ = other.world_;
+        character_ = other.character_;
+        world_generation_ = other.world_generation_;
+        other.world_ = nullptr;
+        other.character_ = {};
+        other.world_generation_ = 0;
     }
     physics::World* world_{nullptr};
     physics::CharacterId character_;
-    std::uint64_t world_generation_{0};
+    uint64 world_generation_{0};
 };
 
 struct HealthComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::health;
     float life{120.0F};
-    std::uint32_t respawn_remaining{0};
-    std::uint32_t deaths{0};
+    uint32 respawn_remaining{0};
+    uint32 deaths{0};
 };
 
 struct ShieldComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::shield;
     float value{0.0F};
 };
 
 struct CharacterMovementComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::movement;
     float spawn_x{0.0F};
     float spawn_z{0.0F};
     float spawn_y{0.0F};
@@ -137,12 +137,13 @@ struct CharacterMovementComponent {
 };
 
 struct WeaponComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::weapon;
     LegacyArsenal arsenal;
-    std::uint32_t cooldown_remaining{0};
-    std::uint32_t next_fire_sequence{1};
-    std::uint32_t shot_sequence{0};
-    std::uint64_t shot_tick{0};
-    std::array<float, 3> shot_impact{};
+    uint32 cooldown_remaining{0};
+    uint32 next_fire_sequence{1};
+    uint32 shot_sequence{0};
+    uint64 shot_tick{0};
+    float shot_impact[3]{};
     bool shot_hit{false};
     bool shot_contact{false};
     bool shot_explosion{false};
@@ -151,45 +152,51 @@ struct WeaponComponent {
 };
 
 struct AbilityComponent {
-    std::uint32_t cooldown_remaining{0};
-    std::uint32_t active_remaining{0};
-    std::uint32_t secondary_cooldown_remaining{0};
-    std::uint32_t secondary_active_remaining{0};
-    std::uint32_t next_sequence{1};
+    static constexpr core::ComponentType component_id = core::ComponentType::ability;
+    uint32 cooldown_remaining{0};
+    uint32 active_remaining{0};
+    uint32 secondary_cooldown_remaining{0};
+    uint32 secondary_active_remaining{0};
+    uint32 next_sequence{1};
     bool hit_consumed{false};
     float flash_factor{0.0F};
 };
 
 struct CharacterLoadoutComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::loadout;
     SlicePlayerSelection selection;
 };
 
-enum class ComponentAuthority : std::uint8_t {
+enum class ComponentAuthority : uint8 {
     server,
     predicted_owner,
     interpolated_remote,
 };
 
 struct AuthorityComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::authority;
     network::NetworkEntityId network_entity{0};
     network::ConnectionId connection{network::invalid_connection};
     ComponentAuthority mode{ComponentAuthority::server};
 };
 
 struct ReplicationComponent {
-    std::uint64_t simulation_tick{0};
-    std::uint64_t last_received_tick{0};
-    std::uint32_t acknowledged_input{0};
+    static constexpr core::ComponentType component_id = core::ComponentType::replication;
+    uint64 simulation_tick{0};
+    uint64 last_received_tick{0};
+    uint32 acknowledged_input{0};
     bool grounded{true};
 };
 
 struct CharacterPresentationComponent {
-    std::uint32_t hit_marker_ticks{0};
+    static constexpr core::ComponentType component_id = core::ComponentType::presentation;
+    uint32 hit_marker_ticks{0};
 };
 
 struct ScoreComponent {
-    std::uint32_t kills{0};
-    std::uint32_t current_spree{0};
+    static constexpr core::ComponentType component_id = core::ComponentType::score;
+    uint32 kills{0};
+    uint32 current_spree{0};
 };
 
 struct SliceCharacterDesc {
@@ -200,8 +207,8 @@ struct SliceCharacterDesc {
     SlicePlayerSelection selection;
 };
 
-[[nodiscard]] inline core::EntityId compose_slice_character(core::EntityRegistry& registry, const SliceCharacterDesc description) {
-    const auto entity = registry.create();
+[[nodiscard]] inline core::EntityId compose_slice_character(core::EntityRegistry& registry, const SliceCharacterDesc& description) {
+    const core::EntityId entity = registry.create();
     registry.emplace<TransformComponent>(entity, TransformComponent{.position_x = description.spawn_x, .position_z = description.spawn_z});
     registry.emplace<CharacterPhysicsComponent>(entity);
     registry.emplace<HealthComponent>(entity);

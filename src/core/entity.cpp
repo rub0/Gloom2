@@ -1,90 +1,71 @@
-#include <gloom/core/allocation_profile.hpp>
 #include <gloom/core/entity.hpp>
 
 namespace gloom::core {
 namespace {
-
-void advance_generation(std::uint32_t& generation) noexcept {
-    ++generation;
-    if (generation == 0) {
+void advance_generation(uint32& generation) noexcept {
+    if (++generation == 0)
         generation = 1;
-    }
 }
-
-} // namespace
-
+}
+EntityRegistry::~EntityRegistry() {
+    for (Pool& pool : pools_)
+        if (pool.clear)
+            pool.clear(pool, true);
+}
+void EntityRegistry::reserve(size_t entities) {
+    assert(entities < EntityId::invalid_index);
+    slots_.reserve(entities);
+    free_indices_.reserve(slots_.capacity());
+}
 EntityId EntityRegistry::create() {
     GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
-    std::uint32_t index = 0;
-    if (free_indices_.empty()) {
-        if (slots_.size() >= EntityId::invalid_index) {
-            throw std::overflow_error{"Entity registry exhausted its identifier space"};
-        }
-        index = static_cast<std::uint32_t>(slots_.size());
-        slots_.push_back({});
+    uint32 index;
+    if (free_indices_.size()) {
+        index = free_indices_[free_indices_.size() - 1];
+        free_indices_.resize(free_indices_.size() - 1);
     } else {
-        index = free_indices_.back();
-        free_indices_.pop_back();
+        assert(slots_.size() < EntityId::invalid_index);
+        index = static_cast<uint32>(slots_.size());
+        if (slots_.size() == slots_.capacity())
+            reserve(slots_.size() + 1);
+        slots_.push_back({});
     }
-    auto& slot = slots_[index];
-    slot.alive = true;
+    slots_[index].alive = true;
     ++live_entities_;
     GLOOM_PROFILE_CAPACITY("entity_slots", slots_.size(), slots_.capacity(), sizeof(Slot));
-    return {.index = index, .generation = slot.generation};
+    return {.index = index, .generation = slots_[index].generation};
 }
-
-bool EntityRegistry::destroy(const EntityId entity) {
+bool EntityRegistry::destroy(EntityId entity) noexcept {
     GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
-    if (!alive(entity)) {
+    if (!alive(entity))
         return false;
-    }
-    free_indices_.reserve(free_indices_.size() + 1);
-    for (auto& [type, components] : component_pools_) {
-        static_cast<void>(type);
-        components->erase(entity.index);
-    }
-    auto& slot = slots_[entity.index];
-    slot.alive = false;
-    advance_generation(slot.generation);
+    for (Pool& pool : pools_)
+        if (pool.erase)
+            pool.erase(pool, entity.index);
+    slots_[entity.index].alive = false;
+    advance_generation(slots_[entity.index].generation);
     free_indices_.push_back(entity.index);
     --live_entities_;
     return true;
 }
-
-bool EntityRegistry::alive(const EntityId entity) const noexcept {
+bool EntityRegistry::alive(EntityId entity) const noexcept {
     return entity.valid() && entity.index < slots_.size() && slots_[entity.index].alive && slots_[entity.index].generation == entity.generation;
 }
-
-std::size_t EntityRegistry::size() const noexcept {
+size_t EntityRegistry::size() const noexcept {
     return live_entities_;
 }
-
-void EntityRegistry::clear() {
+void EntityRegistry::clear() noexcept {
     GLOOM_PROFILE_SCOPE(::gloom::AllocationPhase::entities);
-    std::vector<std::uint32_t> free_indices;
-    free_indices.reserve(slots_.size());
-    for (std::size_t index = 0; index < slots_.size(); ++index) {
-        free_indices.push_back(static_cast<std::uint32_t>(index));
+    for (Pool& pool : pools_)
+        if (pool.clear)
+            pool.clear(pool, false);
+    free_indices_.resize(0);
+    for (uint32 index = 0; index < slots_.size(); ++index) {
+        if (slots_[index].alive)
+            advance_generation(slots_[index].generation);
+        slots_[index].alive = false;
+        free_indices_.push_back(index);
     }
-    for (auto& [type, components] : component_pools_) {
-        static_cast<void>(type);
-        components->clear();
-    }
-    for (std::size_t index = 0; index < slots_.size(); ++index) {
-        auto& slot = slots_[index];
-        if (slot.alive) {
-            advance_generation(slot.generation);
-        }
-        slot.alive = false;
-    }
-    free_indices_.swap(free_indices);
     live_entities_ = 0;
 }
-
-void EntityRegistry::require_alive(const EntityId entity) const {
-    if (!alive(entity)) {
-        throw std::invalid_argument{"Component operation requires a live entity"};
-    }
-}
-
 } // namespace gloom::core

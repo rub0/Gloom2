@@ -71,6 +71,7 @@ set_source_files_properties(
     tests/pose_storage_tests.cpp src/core/job_system.cpp tests/job_system_tests.cpp
     src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
     src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
+    src/core/entity.cpp tests/entity_tests.cpp
     PROPERTIES COMPILE_OPTIONS
     "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
 
@@ -78,6 +79,7 @@ if(MSVC)
     # Legacy data/future headers remain owned by 117/118; these consumers do not unwind.
     set_property(SOURCE tests/skin_bounds_tests.cpp src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
         src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
+        tests/entity_tests.cpp
         APPEND PROPERTY COMPILE_OPTIONS /wd4530)
 endif()
 
@@ -558,6 +560,15 @@ if(BUILD_TESTING)
         target_link_libraries(${target} PRIVATE gloom_engine)
         add_test(NAME ${name} COMMAND ${target})
     endforeach()
+
+    target_sources(gloom_entity_tests PRIVATE src/core/entity.cpp src/core/allocation_profile.cpp src/core/allocation_new.cpp)
+    target_compile_definitions(gloom_entity_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
+    if(MSVC)
+        target_compile_options(gloom_entity_tests PRIVATE /W4 /WX /permissive-)
+        # Intentional 64-byte alignment fixture and page padding.
+        set_property(SOURCE tests/entity_tests.cpp APPEND PROPERTY COMPILE_OPTIONS /wd4324)
+    endif()
+    set_tests_properties(gloom.entities PROPERTIES TIMEOUT 60)
 
     set_tests_properties(gloom.vertical_slice_transport PROPERTIES LABELS network TIMEOUT 15)
 

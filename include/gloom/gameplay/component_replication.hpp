@@ -2,24 +2,19 @@
 
 #include <gloom/gameplay/components.hpp>
 
-#include <span>
-#include <stdexcept>
-
 namespace gloom::gameplay {
 
 struct ComponentSnapshotApplyResult {
-    std::size_t applied{0};
-    std::size_t ignored_authoritative{0};
-    std::size_t missing{0};
+    size_t applied{0};
+    size_t ignored_authoritative{0};
+    size_t missing{0};
 };
 
 [[nodiscard]] inline network::MovementState movement_state_from_components(const core::EntityRegistry& registry, const core::EntityId entity) {
-    const auto* transform = registry.get<TransformComponent>(entity);
-    const auto* authority = registry.get<AuthorityComponent>(entity);
-    const auto* replication = registry.get<ReplicationComponent>(entity);
-    if (transform == nullptr || authority == nullptr || replication == nullptr) {
-        throw std::logic_error{"Replicated entity is missing transform, authority or replication"};
-    }
+    const TransformComponent* transform = registry.get<TransformComponent>(entity);
+    const AuthorityComponent* authority = registry.get<AuthorityComponent>(entity);
+    const ReplicationComponent* replication = registry.get<ReplicationComponent>(entity);
+    assert(transform && authority && replication);
     return {.entity = authority->network_entity,
         .simulation_tick = replication->simulation_tick,
         .position_x = transform->position_x,
@@ -31,12 +26,12 @@ struct ComponentSnapshotApplyResult {
         .grounded = replication->grounded};
 }
 
-[[nodiscard]] inline network::WorldSnapshot capture_component_snapshot(const core::EntityRegistry& registry, const std::span<const core::EntityId> entities,
-    const std::uint64_t simulation_tick, const std::uint32_t acknowledged_input = 0) {
+[[nodiscard]] inline network::WorldSnapshot capture_component_snapshot(
+    const core::EntityRegistry& registry, const Span<const core::EntityId> entities, const uint64 simulation_tick, const uint32 acknowledged_input = 0) {
     network::WorldSnapshot snapshot{.simulation_tick = simulation_tick, .acknowledged_input = acknowledged_input};
     snapshot.entities.reserve(entities.size());
-    for (const auto entity : entities) {
-        auto state = movement_state_from_components(registry, entity);
+    for (const core::EntityId entity : entities) {
+        network::MovementState state = movement_state_from_components(registry, entity);
         state.simulation_tick = simulation_tick;
         snapshot.entities.push_back(state);
     }
@@ -46,21 +41,21 @@ struct ComponentSnapshotApplyResult {
 // Applies received state according to component ownership. Server-owned entities
 // cannot be overwritten. A predicted owner is reconciled only when explicitly
 // requested; interpolated remotes always consume newer snapshots.
-[[nodiscard]] inline ComponentSnapshotApplyResult apply_component_snapshot(core::EntityRegistry& registry, const std::span<const core::EntityId> entities,
+[[nodiscard]] inline ComponentSnapshotApplyResult apply_component_snapshot(core::EntityRegistry& registry, const Span<const core::EntityId> entities,
     const network::WorldSnapshot& snapshot, const bool reconcile_predicted_owner = false) {
     ComponentSnapshotApplyResult result;
-    for (const auto& state : snapshot.entities) {
+    for (const network::MovementState& state : snapshot.entities) {
         core::EntityId logical;
-        for (const auto candidate : entities) {
-            const auto* authority = registry.get<AuthorityComponent>(candidate);
+        for (const core::EntityId candidate : entities) {
+            const AuthorityComponent* authority = registry.get<AuthorityComponent>(candidate);
             if (authority != nullptr && authority->network_entity == state.entity) {
                 logical = candidate;
                 break;
             }
         }
-        auto* authority = registry.get<AuthorityComponent>(logical);
-        auto* transform = registry.get<TransformComponent>(logical);
-        auto* replication = registry.get<ReplicationComponent>(logical);
+        AuthorityComponent* authority = registry.get<AuthorityComponent>(logical);
+        TransformComponent* transform = registry.get<TransformComponent>(logical);
+        ReplicationComponent* replication = registry.get<ReplicationComponent>(logical);
         if (authority == nullptr || transform == nullptr || replication == nullptr) {
             ++result.missing;
             continue;

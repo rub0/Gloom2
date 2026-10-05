@@ -1,14 +1,16 @@
 # Plan de optimización y migración C++ de Gloom
 
 Formalizado en el **hito 111**, 3 de octubre de 2026. Código investigado: `5b96a91`
-(110). **15 hitos pendientes, 116–130; 112–115 terminados**, con fichas, dependencias, contratos,
-medidas y pruebas. Base 111: 188 archivos/50 CTest; actual 115: 198 archivos/54 CTest.
+(110). **14 hitos pendientes, 117–130; 112–116 terminados**, con fichas, dependencias, contratos,
+medidas y pruebas. Base 111: 188 archivos/50 CTest; actual 116: 198 archivos/54 CTest.
 El 128 revisa todo el código además de su prueba de captura; 129/130 son
 transversales y no tienen archivos propietarios nuevos.
 
 Para empezar: leer inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [CONTEXTO](CONTEXTO.md) y **solo la ficha del hito**.
-El siguiente es **116**, no iniciado. El [115](../../../reports/cpp-performance-115/README.md)
+El siguiente es **117**, no iniciado; su cierre mantiene el bloqueo fastgltf.
+El [116](../../../reports/cpp-performance-116/README.md) cierra el registro nativo,
+punteros estables y reutilización sin asignaciones, con medidas CPU/memoria. El [115](../../../reports/cpp-performance-115/README.md)
 cierra partículas/efectos con salida persistente, cero asignaciones por frame
 y comparación numérica/visual antes-después. El [114](../../../reports/cpp-performance-114/README.md)
 cierra scheduler/capturas con trabajos nativos, grupos estables y cero asignaciones
@@ -23,7 +25,7 @@ Renderer y contenido conservados. Decisión externa pendiente en 117/120/128.
 | 113 | [Poses y animación sin temporales por frame](113-poses.md) | 112 | Terminado | 11 |
 | 114 | [JobSystem y FixedFunction con grupos reutilizables](114-jobs.md) | 112 y 113, por secuencia del plan | Terminado | 4 |
 | 115 | [Partículas y efectos con salida persistente](115-particulas.md) | 113 y 114 | Terminado | 5 |
-| 116 | [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) | 112 y 115 por secuencia | No iniciado | 3 |
+| 116 | [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) | 112 y 115 por secuencia | Terminado | 3 |
 | 117 | [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) | 113, 114 y 116 | No iniciado; cierre bloqueado | 19 |
 | 118 | [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) | 114 y 117 | No iniciado | 6 |
 | 119 | [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) | 113, 117 y 118 | No iniciado | 21 |

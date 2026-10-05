@@ -1,10 +1,33 @@
 # Hito 116: EntityRegistry sin mapas ni RTTI y con direcciones seguras
 
-Estado: **no iniciado**. Depende de: **112 y 115 por secuencia**.
+Estado: **terminado**, 5 de octubre de 2026. Dependencias **112 y 115 terminadas**.
+[Informe y medidas](../../../reports/cpp-performance-116/README.md).
 Objetivo: **Localidad, memoria y reglas C++**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 3 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
+
+## Resultado ejecutado
+
+Tabla de 18 IDs explícitos y páginas de ocho slots por tipo. Las páginas no
+se mueven al crecer sus tablas; punteros válidos hasta remove/destroy/clear o
+destrucción del registro. Objetos construidos solo en slots ocupados y destruidos
+una vez; buffers/free list/páginas reutilizados al vaciar. Copy/move del registro
+deshabilitados, EntityId mantiene 8 bytes y generación no cero. Sin mapas, RTTI,
+pool virtual ni excepciones; precondiciones por assert, consultas caducadas útiles.
+
+Doce caches de composición conservados al crecer a 1.024; simulación/replicación
+y cuerpos físicos pasan sus pruebas. 1.000 ciclos con 8/64/1.024: cero new/bytes
+propios, crecimiento frío detectado. Get4 con 1.024: 153,125 → 8,594 ns por entidad;
+componer/destruir 1.435,059 → 113,867 ns. Registro lleno: -36,23 % de memoria medida,
+incluido sizeof registro. Clear retiene más bytes para reutilizar, documentado.
+Sin mejora global de FPS atribuida; serie integrada mantiene Hound.
+Builds/formato correctos, Release 50/54 y Debug 51/54: fallos heredados por causa.
+1.200 capturas alineadas y 172 grupos pasan contra 115, máximo de canal 1/255;
+renderer, recursos, referencias y umbrales conservados.
+LegacyArsenal/World/WorldSnapshot siguen bajo 120/122/127; no cumplimiento global.
+Siguiente 117 no iniciado; bloqueo conocido conservado. Cierre local sin push:
+`rtk git log -1 --oneline --grep='^hito 116:'`.
 
 ## Evidencia de partida
 

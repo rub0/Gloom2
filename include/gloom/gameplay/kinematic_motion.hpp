@@ -13,6 +13,7 @@ namespace gloom::gameplay {
 // Deterministic ping-pong motion. All timing is expressed in simulation ticks,
 // making the same phase reproducible on authority and presentation clients.
 struct KinematicMotionComponent {
+    static constexpr core::ComponentType component_id = core::ComponentType::kinematic_motion;
     physics::Vec3 start;
     physics::Vec3 end;
     std::uint32_t travel_ticks{120};

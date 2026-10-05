@@ -68,7 +68,7 @@ int main() try {
     composed_transform->velocity_z = -2.0F;
     composed_replication->grounded = false;
     const std::array composed_entities{composed_hound};
-    const auto component_snapshot = capture_component_snapshot(composition_registry, composed_entities, 42, 9);
+    const auto component_snapshot = capture_component_snapshot(composition_registry, {composed_entities.data(), composed_entities.size()}, 42, 9);
     expect(component_snapshot.entities.size() == 1 && component_snapshot.entities.front().entity == 77 &&
                component_snapshot.entities.front().position_x == 4.0F && !component_snapshot.entities.front().grounded,
         "Component-derived snapshot lost authority, transform or grounded state");
@@ -76,13 +76,13 @@ int main() try {
     auto received_snapshot = component_snapshot;
     received_snapshot.simulation_tick = 43;
     received_snapshot.entities.front().position_x = 8.0F;
-    const auto applied = apply_component_snapshot(composition_registry, composed_entities, received_snapshot);
+    const auto applied = apply_component_snapshot(composition_registry, {composed_entities.data(), composed_entities.size()}, received_snapshot);
     expect(applied.applied == 1 && composed_transform->position_x == 8.0F && composed_replication->last_received_tick == 43,
         "Remote component authority did not apply a newer snapshot");
     composition_registry.get<AuthorityComponent>(composed_hound)->mode = ComponentAuthority::server;
     received_snapshot.simulation_tick = 44;
     received_snapshot.entities.front().position_x = 12.0F;
-    const auto rejected = apply_component_snapshot(composition_registry, composed_entities, received_snapshot);
+    const auto rejected = apply_component_snapshot(composition_registry, {composed_entities.data(), composed_entities.size()}, received_snapshot);
     expect(rejected.ignored_authoritative == 1 && composed_transform->position_x == 8.0F, "A received snapshot overwrote server-authoritative component state");
 
     SlicePresentationFeedback feedback;

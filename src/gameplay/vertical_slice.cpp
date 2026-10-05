@@ -177,10 +177,9 @@ struct VerticalSliceSimulation::Impl {
     };
 
     [[nodiscard]] Combatant compose_character(const network::NetworkEntityId network_entity, const network::ConnectionId connection, const float spawn_x) {
-        const auto entity = compose_slice_character(logical_entities, {.network_entity = network_entity, .connection = connection, .spawn_x = spawn_x});
-        if (!has_complete_character_composition(logical_entities, entity)) {
-            throw std::logic_error{"Incomplete slice character composition"};
-        }
+        const core::EntityId entity =
+            compose_slice_character(logical_entities, {.network_entity = network_entity, .connection = connection, .spawn_x = spawn_x});
+        assert(has_complete_character_composition(logical_entities, entity));
         return {.logical_entity = entity,
             .transform = logical_entities.get<TransformComponent>(entity),
             .physics = logical_entities.get<CharacterPhysicsComponent>(entity),
@@ -395,14 +394,13 @@ struct VerticalSliceSimulation::Impl {
     }
 
     [[nodiscard]] network::WorldSnapshot component_world_snapshot() const {
-        std::array<core::EntityId, 2> entities{};
+        core::EntityId entities[2]{};
         std::size_t count = 0;
         if (player.health->respawn_remaining == 0)
             entities[count++] = player.logical_entity;
         if (opponent.health->respawn_remaining == 0)
             entities[count++] = opponent.logical_entity;
-        return capture_component_snapshot(
-            logical_entities, std::span{entities.data(), count}, movement_server->simulation_tick(), movement_server->acknowledged_input());
+        return capture_component_snapshot(logical_entities, {entities, count}, movement_server->simulation_tick(), movement_server->acknowledged_input());
     }
 
     [[nodiscard]] KinematicMechanismView factory_lift_view() const {
@@ -570,8 +568,9 @@ struct VerticalSliceSimulation::Impl {
             shooter.weapon->shot_sequence = command.sequence;
             shooter.weapon->shot_tick = movement_server->simulation_tick();
             const auto position = component_movement(shooter);
-            shooter.weapon->shot_impact = {position.position_x + aim_x * result->distance, position.position_y + 0.9F + aim_y * result->distance,
-                position.position_z + aim_z * result->distance};
+            shooter.weapon->shot_impact[0] = position.position_x + aim_x * result->distance;
+            shooter.weapon->shot_impact[1] = position.position_y + 0.9F + aim_y * result->distance;
+            shooter.weapon->shot_impact[2] = position.position_z + aim_z * result->distance;
             shooter.weapon->shot_hit = result->status == network::FireValidationStatus::hit;
             shooter.weapon->shot_contact = shooter.weapon->shot_hit || result->distance < maximum_distance;
             shooter.weapon->shot_explosion = false;
@@ -744,7 +743,9 @@ struct VerticalSliceSimulation::Impl {
                 damaged = apply_damage(owner, target, p.damage);
             owner.weapon->shot_sequence = owner.weapon->next_fire_sequence++;
             owner.weapon->shot_tick = movement_server->simulation_tick();
-            owner.weapon->shot_impact = {p.x, p.y, p.z};
+            owner.weapon->shot_impact[0] = p.x;
+            owner.weapon->shot_impact[1] = p.y;
+            owner.weapon->shot_impact[2] = p.z;
             owner.weapon->shot_hit = damaged;
             owner.weapon->shot_contact = true;
             owner.weapon->shot_explosion = p.explosion > 0;

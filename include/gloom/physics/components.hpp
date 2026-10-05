@@ -13,6 +13,10 @@ namespace gloom::physics {
 // while keeping their lifetime rules identical.
 template <MotionType Motion, bool Sensor> class BasicBodyComponent final {
   public:
+    static constexpr core::ComponentType component_id = Sensor                              ? core::ComponentType::trigger
+                                                        : Motion == MotionType::static_body ? core::ComponentType::static_body
+                                                        : Motion == MotionType::dynamic     ? core::ComponentType::dynamic_body
+                                                                                            : core::ComponentType::kinematic_body;
     BasicBodyComponent(World& world, const core::EntityId entity, BodyDesc description) : world_{&world}, entity_{entity} {
         if (!entity.valid()) {
             throw std::invalid_argument{"Physics component requires a valid logical entity"};

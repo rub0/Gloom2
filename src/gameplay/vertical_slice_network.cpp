@@ -1035,7 +1035,7 @@ std::optional<SliceWireMessage> VerticalSliceRemoteClient::receive(const network
             decoded->player.entity, movement.entities.front());
     }
     const std::array component_entities{impl_->local_logical, impl_->remote_logical};
-    static_cast<void>(apply_component_snapshot(impl_->logical_entities, component_entities, movement, true));
+    static_cast<void>(apply_component_snapshot(impl_->logical_entities, {component_entities.data(), component_entities.size()}, movement, true));
     const bool respawned = impl_->received_snapshot && impl_->snapshot.hud.dead && !decoded->hud.dead;
     impl_->prediction->receive(network::encode_world_snapshot(movement, message.sequence));
     if (respawned) {

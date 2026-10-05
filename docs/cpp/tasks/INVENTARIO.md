@@ -32,6 +32,12 @@ Array sigue bajo 112; append/push y limpieza trivial se adaptan en 115, con
 contratos de recursos/regrowth verificados. Las líneas reflejan el workspace
 final; las señales fuera del módulo conservan su base histórica.
 
+Actualización 116: **198 archivos propios, 36,801 líneas y 54 CTest**.
+Registro/prueba propios cerrados, sin archivos ni targets CTest nuevos.
+Composición/replicación directa adaptadas; adapters físicos reciben IDs.
+LegacyArsenal, World/Subsystem y WorldSnapshot conservan dueños 120/122/127.
+Las líneas se actualizan al workspace final; señales históricas fuera del módulo.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |
@@ -120,9 +126,9 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [include/gloom/core/entity.hpp](../../../include/gloom/core/entity.hpp) | 160 | STL, auto, exceptions, RTTI, maps, owners, virtual |
-| [src/core/entity.cpp](../../../src/core/entity.cpp) | 90 | STL, auto, exceptions |
-| [tests/entity_tests.cpp](../../../tests/entity_tests.cpp) | 93 | STL, auto, exceptions |
+| [include/gloom/core/entity.hpp](../../../include/gloom/core/entity.hpp) | 155 | Sin coincidencia lexical propia; sin excepciones/RTTI |
+| [src/core/entity.cpp](../../../src/core/entity.cpp) | 71 | Sin coincidencia lexical propia; sin excepciones/RTTI |
+| [tests/entity_tests.cpp](../../../tests/entity_tests.cpp) | 190 | Sin coincidencia lexical propia; sin excepciones/RTTI |
 
 ### 117: [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) — 19 archivos
 
@@ -190,7 +196,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
 | [include/gloom/backends/jolt_world.hpp](../../../include/gloom/backends/jolt_world.hpp) | 64 | STL, owners, virtual, pimpl |
-| [include/gloom/physics/components.hpp](../../../include/gloom/physics/components.hpp) | 97 | STL, exceptions |
+| [include/gloom/physics/components.hpp](../../../include/gloom/physics/components.hpp) | 101 | STL, exceptions |
 | [include/gloom/physics/triangle_query.hpp](../../../include/gloom/physics/triangle_query.hpp) | 40 | STL, auto |
 | [include/gloom/physics/world.hpp](../../../include/gloom/physics/world.hpp) | 177 | STL, owners, virtual |
 | [src/backends/jolt_world.cpp](../../../src/backends/jolt_world.cpp) | 848 | STL, auto, exceptions, maps, owners, virtual, pimpl |
@@ -220,11 +226,11 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [apps/gloom_slice_server/main.cpp](../../../apps/gloom_slice_server/main.cpp) | 180 | STL, auto, exceptions, owners |
 | [include/gloom/backends/gns_transport.hpp](../../../include/gloom/backends/gns_transport.hpp) | 43 | STL, owners, virtual, pimpl |
 | [include/gloom/gameplay/character_presentation.hpp](../../../include/gloom/gameplay/character_presentation.hpp) | 79 | STL |
-| [include/gloom/gameplay/component_replication.hpp](../../../include/gloom/gameplay/component_replication.hpp) | 90 | STL, auto, exceptions |
-| [include/gloom/gameplay/components.hpp](../../../include/gloom/gameplay/components.hpp) | 227 | STL, auto, exceptions |
+| [include/gloom/gameplay/component_replication.hpp](../../../include/gloom/gameplay/component_replication.hpp) | 85 | STL, auto, exceptions |
+| [include/gloom/gameplay/components.hpp](../../../include/gloom/gameplay/components.hpp) | 234 | STL, auto, exceptions |
 | [include/gloom/gameplay/first_person.hpp](../../../include/gloom/gameplay/first_person.hpp) | 33 | Sin coincidencia lexical |
 | [include/gloom/gameplay/first_person_presentation.hpp](../../../include/gloom/gameplay/first_person_presentation.hpp) | 50 | STL |
-| [include/gloom/gameplay/kinematic_motion.hpp](../../../include/gloom/gameplay/kinematic_motion.hpp) | 71 | STL, exceptions |
+| [include/gloom/gameplay/kinematic_motion.hpp](../../../include/gloom/gameplay/kinematic_motion.hpp) | 72 | STL, exceptions |
 | [include/gloom/gameplay/legacy_arsenal.hpp](../../../include/gloom/gameplay/legacy_arsenal.hpp) | 117 | STL |
 | [include/gloom/gameplay/legacy_movement.hpp](../../../include/gloom/gameplay/legacy_movement.hpp) | 34 | Sin coincidencia lexical |
 | [include/gloom/gameplay/legacy_pickups.hpp](../../../include/gloom/gameplay/legacy_pickups.hpp) | 51 | STL |
@@ -250,7 +256,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/gameplay/legacy_pickups.cpp](../../../src/gameplay/legacy_pickups.cpp) | 117 | STL, auto, exceptions |
 | [src/gameplay/match_lobby.cpp](../../../src/gameplay/match_lobby.cpp) | 361 | STL, auto, exceptions, owners, virtual |
 | [src/gameplay/pickup_presentation.cpp](../../../src/gameplay/pickup_presentation.cpp) | 52 | Sin coincidencia lexical |
-| [src/gameplay/vertical_slice.cpp](../../../src/gameplay/vertical_slice.cpp) | 1343 | STL, auto, exceptions, owners, pimpl |
+| [src/gameplay/vertical_slice.cpp](../../../src/gameplay/vertical_slice.cpp) | 1344 | STL, auto, exceptions, owners, pimpl |
 | [src/gameplay/vertical_slice_network.cpp](../../../src/gameplay/vertical_slice_network.cpp) | 1209 | STL, auto, exceptions, maps, owners, pimpl |
 | [src/network/clock_sync.cpp](../../../src/network/clock_sync.cpp) | 49 | STL, exceptions |
 | [src/network/combat.cpp](../../../src/network/combat.cpp) | 381 | STL, auto, exceptions |
