@@ -8,7 +8,21 @@ Hound es un humanoide bípedo robusto de Gloom, no un perro ni un robot cuadrúp
 Dirección: fantasía oscura/industria pesada como Unreal Tournament 3, con un toque
 de claridad de formas/materiales de Overwatch 2; conservar la identidad original.
 
-Referencias visuales, en este orden:
+Canon visual declarado por el usuario el 5 de octubre de 2026:
+[Hound_master.jpg](../../../../assets-source/hound/ref/Hound_master.jpg), con
+[notas completas](../../../../assets-source/hound/docs/hound_notes.md).
+Para nuevas imágenes/modelos/materiales, este master y las notas son la autoridad
+del nuevo encargo. [Setup y estado](../../../../assets-source/hound/README.md).
+La segunda lámina adjunta se conserva; cuatro vistas individuales pendientes.
+Meshy MCP no ejecutado: **waiting for turnaround completion; do not call MCP yet**.
+
+La producción v17 y la escultura aprobada v16 siguen en sus rutas del índice;
+no se han reevaluado ni modificado en este setup. Sus aprobaciones previas se conservan.
+Las decisiones y referencias siguientes describen esa producción anterior;
+cualquier diferencia con el nuevo master debe documentarse en una tarea futura
+antes de modificar la malla existente.
+
+Referencias visuales históricas de la producción previa, en este orden:
 1. [Concept original elegido](../../characters/hound-original-concept.jpg).
 2. [Boceto 01 aprobado](../hound-concept-v01.png).
 3. [Diseño 3D v02 aprobado](../blockout-v02/README.md), especialmente hombros/capucha/manos.

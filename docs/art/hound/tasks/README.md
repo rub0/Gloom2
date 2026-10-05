@@ -1,7 +1,24 @@
 # Hound — tareas pendientes sin historial de conversación
 
-2 de octubre de 2026 · Índice del hito 90, actualizado con H07/v17, hito 107. Alcance: terminar **este Hound**,
+5 de octubre de 2026 · Índice del hito 90, actualizado con H07/v17 y setup canónico del hito 131. Alcance: terminar **este Hound**,
 desde el pase artístico v08 hasta su integración jugable. No es el backlog del motor.
+
+## Setup canónico adicional — hito 131
+
+El encargo del 05/10 declara el nuevo [Hound_master.jpg](../../../../assets-source/hound/ref/Hound_master.jpg)
+canon visual aprobado. [Workspace](../../../../assets-source/hound/README.md),
+[notas completas](../../../../assets-source/hound/docs/hound_notes.md),
+[estado](../../../../assets-source/hound/docs/hound_status.md) e
+[informe 131](../../../../reports/hound-workspace-131/README.md).
+La segunda lámina adjunta está conservada; sus cuatro vistas individuales siguen
+pendientes de preparación/revisión. [Plan y prompt Meshy](../../../../tools/meshy/meshy_hound_plan.md)
+listos para una tarea futura: **waiting for turnaround completion; do not call MCP yet**.
+No se han cambiado v16/v17, exportaciones, rig/acción ni H01–H07; H08 sigue pendiente.
+Fuente acumulada: `art/characters/hound/v17/hound-production-v17.blend`;
+exportación: `assets/characters/hound_rig/v17/hound-rig.gltf` y `hound-rig.bin`.
+La escultura aprobada v16 continúa como maestra de escultura/bake.
+Commit local del hito 131; resolver con `rtk git log -1 --oneline --grep='^hito 131:'`.
+Sin push; 116–130 conservan su numeración en el plan C++.
 
 ## Cómo abrir una tarea nueva
 

@@ -1,0 +1,14 @@
+DRAFT FOR A FUTURE MESHY MCP TASK — NOT EXECUTED
+
+Generate a full-body 3D model of Hound, the approved male dark fantasy character from Gloom.
+Treat Hound_master.jpg as the authoritative visual canon. Maintain high fidelity to the master and to the completed, reviewed turnaround references Hound_front.png, Hound_side.png, Hound_back.png and Hound_34.png. Use hound_notes.md as the full artistic specification. If views disagree, preserve the master design and flag the discrepancy for review rather than inventing a compromise.
+
+Preserve the broad, powerful, threatening silhouette and proportions: very wide shoulders, a solid chest and torso, oversized muscular arms, strong heavy legs, and large hands and gauntlets. Keep the severe, cold masculine face recognizable, with pale ash-grey skin and bright orange eyes. Preserve the heavy dark hood and long black hair around the face and down the back.
+
+Match the large aggressive shoulder armor, projecting spikes and blades, segmented sculpted torso plates, bulky sharp gauntlets, armored thighs, knees and shins, and large heavy boots. Keep the angular shapes, layered construction and visual weight. Preserve the worn brown waist cloth and split hanging panels, including their ragged, stitched and patched character.
+
+Maintain the dark fantasy materials and palette: eroded stone, dirty muted bone or ivory, aged dark metal, worn cloth, ash-grey skin, desaturated greys and black, and muted earth brown. Orange eye glow is the primary bright accent. The character must feel cold, ancient, rough, brutal and heavy.
+
+Do not over-simplify the face, hood, hair, shoulders, spikes, gauntlets, cloth structure, legs or boots. Do not smooth away the aggressive angular armor forms. Avoid heroic elegance, clean medieval armor, polished futuristic materials, cartoon, anime, bright high fantasy, or a generic monster without Hound's identity. Maintain consistent geometry and recognizable design from front, side, back and three-quarter views.
+
+Prefer GLB or FBX output with associated textures and materials when supported. The result is a candidate for visual review and later production preparation; this prompt does not request rigging, animations, or automatic replacement of Gloom's existing Hound assets.

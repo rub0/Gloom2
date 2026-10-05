@@ -1,6 +1,22 @@
 # Traspaso de Gloom
 
-Actualizado: 5 de octubre de 2026, **hito 115 terminado**. H07 terminada en v17; H08 no iniciada.
+Actualizado: 5 de octubre de 2026, **hito 131 terminado: setup de Hound**.
+Último hito C++: 115. H07 terminada en v17; H08 no iniciada.
+
+**Nuevo workspace canónico de Hound, preparado para Meshy MCP futuro.**
+[Entrada y estructura](../assets-source/hound/README.md) ·
+[Informe 131](../reports/hound-workspace-131/README.md).
+El usuario declara canon visual aprobado el nuevo adjunto, guardado sin cambios
+en `assets-source/hound/ref/Hound_master.jpg`; segunda lámina adjunta conservada
+en `Hound_turnaround_sheet.jpg`. SHA-256 idénticos a los originales.
+`hound_notes.md` contiene íntegro el texto solicitado; estado, cuatro nombres
+individuales pendientes, trabajo/exportes y plan/prompt Meshy documentados.
+**waiting for turnaround completion; do not call MCP yet.** No generación,
+recortes ni ejecución MCP. Próximo paso: preparar/revisar las cuatro vistas
+contra el master y las notas. V16/v17, rig/acción y exportaciones conservados.
+El 131 evita ocupar los números 116–130 del plan C++, que no se han ejecutado.
+Commit local del 131; resolver con `rtk git log -1 --oneline --grep='^hito 131:'`.
+Sin push; C++ 116 y H08 continúan pendientes.
 
 **Último resultado: partículas y efectos con salida persistente.**
 [Informe 115](../reports/cpp-performance-115/README.md): ParticleSystem añade
@@ -27,7 +43,7 @@ Builds completos/formato correctos; Debug **51/54**, Release **50/54**.
 Mismos fallos heredados: tres comparadores visuales y GNS 25 solo Release.
 Storage, partículas, animación/VFX, combat, materiales, Vulkan y Hound pasan.
 
-**Siguiente: 116, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
+**Siguiente del plan C++: 116, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
 198 archivos propios/54 CTest inventariados. Diagnóstico opcional OFF, recompilado.
 Persisten headers/bloques legacy según dueños 117/119/122 y cierre transversal
 128; no afirmar cumplimiento global de C++. Jolt listeners virtuales/fastgltf
