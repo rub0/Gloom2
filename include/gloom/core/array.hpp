@@ -44,11 +44,28 @@ template <typename T> class Array {
     }
     void resize(size_t count) {
         assert(count <= capacity_);
-        for (size_t index = count; index < count_; ++index)
-            values_[index] = T{};
+        // Trivial values need no cleanup. Clearing a render list must not rewrite its entire reserve.
+        // Owners still release removed resources immediately; regrowth always resets new logical elements.
+        if constexpr (!__is_trivially_destructible(T))
+            for (size_t index = count; index < count_; ++index)
+                values_[index] = T{};
         for (size_t index = count_; index < count; ++index)
             values_[index] = T{};
         count_ = count;
+    }
+    // Sources must not overlap this allocation: reserve may invalidate them.
+    void append(Span<const T> values) {
+        assert(!values_ || reinterpret_cast<size_t>(values.data()) + values.size() * sizeof(T) <= reinterpret_cast<size_t>(values_) ||
+               reinterpret_cast<size_t>(values.data()) >= reinterpret_cast<size_t>(values_ + capacity_));
+        reserve(count_ + values.size());
+        for (const T& value : values)
+            values_[count_++] = value;
+    }
+    void push_back(const T& value) {
+        assert(!values_ || reinterpret_cast<size_t>(&value) < reinterpret_cast<size_t>(values_) ||
+               reinterpret_cast<size_t>(&value) >= reinterpret_cast<size_t>(values_ + capacity_));
+        reserve(count_ + 1);
+        values_[count_++] = value;
     }
     T& operator[](size_t index) {
         assert(index < count_);

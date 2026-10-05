@@ -70,12 +70,14 @@ set_source_files_properties(
     src/assets/animation.cpp src/gameplay/character_animation.cpp tests/skin_bounds_tests.cpp
     tests/pose_storage_tests.cpp src/core/job_system.cpp tests/job_system_tests.cpp
     src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
+    src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
     PROPERTIES COMPILE_OPTIONS
     "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
 
 if(MSVC)
     # Legacy data/future headers remain owned by 117/118; these consumers do not unwind.
     set_property(SOURCE tests/skin_bounds_tests.cpp src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
+        src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
         APPEND PROPERTY COMPILE_OPTIONS /wd4530)
 endif()
 
@@ -120,6 +122,17 @@ if(BUILD_TESTING AND WIN32)
     endif()
     add_test(NAME gloom.jobs COMMAND gloom_job_tests)
     set_tests_properties(gloom.jobs PROPERTIES TIMEOUT 15)
+    add_executable(gloom_particle_storage_tests tests/particle_storage_tests.cpp src/render/particles.cpp
+        src/gameplay/combat_effects.cpp src/render/scene.cpp src/core/allocation_profile.cpp src/core/allocation_new.cpp src/core/clock.cpp)
+    target_include_directories(gloom_particle_storage_tests PRIVATE include)
+    target_compile_features(gloom_particle_storage_tests PRIVATE cxx_std_23)
+    target_compile_definitions(gloom_particle_storage_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1 GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    target_link_libraries(gloom_particle_storage_tests PRIVATE simdjson::simdjson)
+    if(MSVC)
+        target_compile_options(gloom_particle_storage_tests PRIVATE /W4 /WX /permissive-)
+    endif()
+    add_test(NAME gloom.particle_storage COMMAND gloom_particle_storage_tests)
+    set_tests_properties(gloom.particle_storage PROPERTIES TIMEOUT 15)
 endif()
 
 if(BUILD_TESTING)

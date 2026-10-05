@@ -1,38 +1,50 @@
 # Traspaso de Gloom
 
-Actualizado: 4 de octubre de 2026, **hito 114 terminado**. H07 terminada en v17; H08 no iniciada.
+Actualizado: 5 de octubre de 2026, **hito 115 terminado**. H07 terminada en v17; H08 no iniciada.
 
-**Último resultado: trabajos nativos y capturas inline.**
-[Informe 114](../reports/cpp-performance-114/README.md): JobSystem sin STL,
-herencia/PIMPL/excepciones/RTTI; grupos estables caller-owned, FixedFunction
-void() 80/8 y cola reservada de 256 con asistencia al saturar. Arranque con
-error/rollback inmediato; cierre drena descendientes y une los hilos.
-Todos los callers adaptados, cancel/reload con contextos de vida estable.
-Los datos/futuros legacy de assets pertenecen todavía a 117/118.
+**Último resultado: partículas y efectos con salida persistente.**
+[Informe 115](../reports/cpp-performance-115/README.md): ParticleSystem añade
+directamente al Array de escena del llamador; materiales por Span por valor.
+Recetas/partículas/emisores propios, recipe resuelto una vez por emisor y dos
+estados de combate persistentes. Errores externos al cargar; precondiciones
+por assert; fuentes/prueba nativa sin STL directo, excepciones/RTTI.
+Chronología, RNG, vida/owner, saturación, métricas y materiales conservados.
+Array evita reescribir valores triviales al vaciar; recursos/regrowth verificados.
 
-Diagnóstico: jobs **3/4 → 0 new por frame Factory/Hound**, 344/416 → 0 bytes.
-Mil rondas/6.000 trabajos, grupos nuevos y reutilizados, cero asignaciones propias
-con uno y cuatro workers. No son cero heap global ni bytes vivos. Lotes normales
-mejoran mediana/p95; espera acumulada con cuatro workers aumenta, documentada.
-Sin mejora global de FPS atribuida. Serie Hound: p99 <4 ms y 345,26 MiB;
-picos >5 ms en ambas versiones (1/1.440 antes, 3/1.440 después): no recertifica H06.
-[Medidas y límites](../reports/cpp-performance-114/medidas.md).
+Diagnóstico: partículas **1 → 0 new por frame Factory/Hound**. Mil update/render
+a capacidad 2.048 y mil eventos: cero asignaciones propias, con control positivo
+de crecimiento. No son cero heap global ni bytes vivos. Estrés normal de cinco
+pasadas: mediana **48,8 → 37,2 µs**; efectos con dispersión documentada.
+Sin ganancia global de FPS atribuida. Serie integrada normal: p99 Hound <4 ms,
+0/1.440 >5 ms en ambas versiones y residencia 345,26 MiB. No elimina los picos
+históricos del 114 ni sustituye H06. [Medidas](../reports/cpp-performance-115/medidas.md).
 
-Builds completos/formato correctos; Debug **50/53**, Release **49/53**.
-Mismos fallos heredados: tres comparadores visuales, GNS 25 solo Release.
-Jobs, assets, visibilidad, Vulkan y Hound pasan. Siete vistas estáticas alineadas
-antes/después pasan; máximo por canal en 1280×720 de 1/255. Referencias y umbrales
-conservados. Renderer, contenido y política de vida GPU conservados.
+49.080 registros/583.108 valores comparados contra 114, máximo delta 4,8e-7;
+identidades/orden/métricas/eventos iguales. 1.200 capturas alineadas pasan, 41
+eventos/cero dropped; máximo por canal completo 1/255. Alineación de revisión
+como 113/114; referencias/umbrales conservados. Renderer/recursos/vida GPU intactos.
+Builds completos/formato correctos; Debug **51/54**, Release **50/54**.
+Mismos fallos heredados: tres comparadores visuales y GNS 25 solo Release.
+Storage, partículas, animación/VFX, combat, materiales, Vulkan y Hound pasan.
 
-**Siguiente: 115, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
-197 archivos propios/53 CTest inventariados. Persisten bloques legacy según
-sus dueños y cierre 128; no afirmar cumplimiento global de C++.
-Jolt listeners virtuales/fastgltf filesystem STL chocan con AGENTS: **cierre de
-117/120/128 bloqueado en esas fronteras**, pendiente de decisión expresa o
-alternativa equivalente. Se solicitó excepción mínima y no se ha autorizado.
+**Siguiente: 116, no iniciado.** [Índice 112–130](cpp/tasks/README.md).
+198 archivos propios/54 CTest inventariados. Diagnóstico opcional OFF, recompilado.
+Persisten headers/bloques legacy según dueños 117/119/122 y cierre transversal
+128; no afirmar cumplimiento global de C++. Jolt listeners virtuales/fastgltf
+filesystem STL chocan con AGENTS: **cierre de 117/120/128 bloqueado en esas
+fronteras**, pendiente de decisión expresa o alternativa equivalente.
+Se solicitó excepción mínima y no se ha autorizado.
 [Evidencia 112](../reports/cpp-performance-112/compatibilidad.md).
-112 `268db47` y 113 `8b96c71` subidos a origin/main por este encargo.
-Cierre 114 local, sin push; verificar: `rtk git log -1 --oneline --grep='^hito 114:'`.
+112 `268db47` y 113 `8b96c71` subidos a origin/main por el encargo anterior.
+114 `892463a` y cierre 115 locales, sin push; verificar:
+`rtk git log -1 --oneline --grep='^hito 115:'`.
+
+**114:** JobSystem nativo, FixedFunction inline 80/8, grupos caller-owned estables,
+cola 256 con asistencia y drain de descendientes. Jobs 3/4 → 0 new/frame,
+mil rondas/6.000 trabajos sin asignaciones propias. Datos/futuros de assets bajo
+117/118; espera con cuatro workers aumenta, documentada. Serie Hound del 114
+registró picos >5 ms antes/después; no recertifica H06.
+[Informe 114](../reports/cpp-performance-114/README.md).
 
 **113:** poses persistentes por actor; diagnóstico 210/710 → 0 new/frame en poses,
 bounds cero. Rig preparado una vez, scratch y paletas propias; CPU poses+bounds

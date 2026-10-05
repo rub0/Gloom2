@@ -932,11 +932,16 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
     gloom::gameplay::PickupPresentation pickup_presentation;
     std::vector<gloom::render::RenderInstance> previous_animated_instances;
     decltype(previous_animated_instances) current_animated_instances;
-    decltype(render_instances) complete_instances;
-    complete_instances.reserve(render_instances.size() + 512U);
+    gloom::Array<gloom::render::RenderInstance> complete_instances;
     current_animated_instances.reserve(64);
     previous_animated_instances.reserve(64);
-    gloom::render::ParticleSystem particles{gloom::render::load_particle_recipes(std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets/effects/recipes.json")};
+    gloom::Array<gloom::render::ParticleRecipe> particle_recipes;
+    if (const char* error = gloom::render::load_particle_recipes(GLOOM_SOURCE_ROOT "/assets/effects/recipes.json", particle_recipes)) {
+        fprintf(stderr, "%s\n", error);
+        return 1;
+    }
+    gloom::render::ParticleSystem particles{{particle_recipes.data(), particle_recipes.size()}};
+    complete_instances.reserve(render_instances.size() + 512U + particles.capacity());
     gloom::gameplay::CombatEffects combat_effects;
     const bool graphical_ui = vertical_slice && (!automated_graphics || performance_full);
     std::shared_ptr<gloom::gameplay::AudioPresentation> game_audio;
@@ -1956,7 +1961,8 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
 #ifdef GLOOM_ALLOCATION_PROFILE
         gloom::AllocationScope allocation_snapshots{gloom::AllocationPhase::snapshots};
 #endif
-        complete_instances = render_instances;
+        complete_instances.resize(0);
+        complete_instances.append({render_instances.data(), render_instances.size()});
         if (vertical_slice) {
             const gloom::gameplay::SliceSnapshot& state = current_slice_snapshot();
             for (std::size_t i = 0; i < state.projectile_count; ++i) {
@@ -2118,7 +2124,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 if (combatant.primary_ability_active && combatant.ability == gloom::gameplay::SliceAbility::invisibility)
                     particles.emitter(combatant.entity * 64 + 43, combatant.entity, "shadow_smoke", position);
             }
-            complete_instances.insert(complete_instances.end(), current.begin(), current.end());
+            complete_instances.append({current.data(), current.size()});
             previous_animated_instances.swap(current);
             if (original_factory) {
                 const auto& lava = gloom::gameplay::original_factory();
@@ -2148,8 +2154,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             particles.advance(std::min(elapsed, .25));
             if (effects_ticket)
                 if (const auto* scene = effects_residency->scene(*effects_ticket)) {
-                    const auto effects = particles.render(camera, scene->instances);
-                    complete_instances.insert(complete_instances.end(), effects.begin(), effects.end());
+                    particles.render(complete_instances, camera, {scene->instances.data(), scene->instances.size()});
                 }
         }
         if (vertical_slice && original_characters && visual_review && !animation_review && !ability_review) {
@@ -2274,7 +2279,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                             .color = color,
                             .particle = true,
                             .soft_distance = .15F});
-                        apply_pickup_visual(complete_instances.back(), visual);
+                        apply_pickup_visual(complete_instances[complete_instances.size() - 1], visual);
                     }
                 if (!factory_review)
                     for (std::size_t i = 0; i < state.pickup_count; ++i) {
@@ -2298,7 +2303,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
 #ifdef GLOOM_ALLOCATION_PROFILE
         allocation_snapshots.finish();
 #endif
-        const auto source_instances = std::span<const gloom::render::RenderInstance>{complete_instances};
+        const std::span<const gloom::render::RenderInstance> source_instances{complete_instances.data(), complete_instances.size()};
         const float render_aspect = drawable_size.second == 0 ? 1.0F : static_cast<float>(drawable_size.first) / static_cast<float>(drawable_size.second);
         const gloom::uint64 profile_visibility = gloom::performance_clock();
         const auto performance_visibility_started = std::chrono::steady_clock::now();

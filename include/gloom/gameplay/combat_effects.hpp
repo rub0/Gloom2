@@ -1,7 +1,6 @@
 #pragma once
 #include <gloom/gameplay/character_animation.hpp>
 #include <gloom/render/particles.hpp>
-#include <array>
 
 namespace gloom::gameplay {
 // Confirmed snapshot events only: speculative fire commands never emit an
@@ -9,20 +8,21 @@ namespace gloom::gameplay {
 class CombatEffects {
   public:
     void observe(render::ParticleSystem& particles, const CombatantView& view, const CharacterAnimationFrame& frame, const render::Transform& parent,
-        std::uint64_t tick, bool first_person);
+        uint64 tick, bool first_person);
     void reset(render::ParticleSystem& particles) noexcept;
-    [[nodiscard]] std::uint64_t events() const noexcept {
+    [[nodiscard]] uint64 events() const noexcept {
         return events_;
     }
 
   private:
     struct State {
         CombatantView view;
-        std::uint64_t tick{0};
+        uint64 tick{0};
         render::Vec3 muzzle;
         bool muzzle_valid{false}, valid{false};
     };
-    std::array<State, 2> states_;
-    std::uint64_t events_{0};
+    void burst(render::ParticleSystem& particles, uint64 owner, const char* name, render::Vec3 position, uint64 seed);
+    State states_[2]{};
+    uint64 events_{0};
 };
 } // namespace gloom::gameplay

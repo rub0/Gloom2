@@ -24,6 +24,14 @@ Scheduler y prueba propia cerrados; datos/futuros de assets siguen en 117/118.
 Las señales restantes conservan su base histórica; las líneas reflejan el workspace final.
 `tools/perf/measure_job_batches.py` es herramienta no C++ del 114.
 
+Actualización 115: **198 archivos propios, 36,720 líneas y 54 CTest**.
+La prueba autónoma particle_storage pertenece al 115, que pasa a cinco archivos.
+Partículas/efectos sin STL directo, excepciones/RTTI ni temporales de render.
+Los headers de Scene/animación y bloques mixtos conservan dueños 117/119/122.
+Array sigue bajo 112; append/push y limpieza trivial se adaptan en 115, con
+contratos de recursos/regrowth verificados. Las líneas reflejan el workspace
+final; las señales fuera del módulo conservan su base histórica.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |
@@ -60,7 +68,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
 | [apps/gloom/performance.hpp](../../../apps/gloom/performance.hpp) | 105 | Sin coincidencia lexical |
-| [include/gloom/core/array.hpp](../../../include/gloom/core/array.hpp) | 92 | Sin coincidencia lexical |
+| [include/gloom/core/array.hpp](../../../include/gloom/core/array.hpp) | 109 | Sin coincidencia lexical |
 | [include/gloom/core/clock.hpp](../../../include/gloom/core/clock.hpp) | 6 | Sin coincidencia lexical |
 | [include/gloom/core/span.hpp](../../../include/gloom/core/span.hpp) | 44 | Sin coincidencia lexical |
 | [include/gloom/core/types.hpp](../../../include/gloom/core/types.hpp) | 13 | Sin coincidencia lexical |
@@ -82,8 +90,8 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/gameplay/character_animation.hpp](../../../include/gloom/gameplay/character_animation.hpp) | 44 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
 | [src/assets/animation.cpp](../../../src/assets/animation.cpp) | 179 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
 | [src/gameplay/character_animation.cpp](../../../src/gameplay/character_animation.cpp) | 294 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
-| [tests/animation_network_tests.cpp](../../../tests/animation_network_tests.cpp) | 223 | STL, auto, exceptions, owners |
-| [tests/animation_vfx_tests.cpp](../../../tests/animation_vfx_tests.cpp) | 305 | STL, auto, exceptions |
+| [tests/animation_network_tests.cpp](../../../tests/animation_network_tests.cpp) | 226 | STL, auto, exceptions, owners |
+| [tests/animation_vfx_tests.cpp](../../../tests/animation_vfx_tests.cpp) | 302 | STL, auto, exceptions |
 | [tests/skin_bounds_tests.cpp](../../../tests/skin_bounds_tests.cpp) | 130 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
 | [include/gloom/core/matrix.hpp](../../../include/gloom/core/matrix.hpp) | 35 | Sin coincidencia lexical propia |
 | [include/gloom/gameplay/combatant_view.hpp](../../../include/gloom/gameplay/combatant_view.hpp) | 48 | Sin coincidencia lexical propia |
@@ -98,14 +106,15 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/core/job_system.cpp](../../../src/core/job_system.cpp) | 200 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
 | [tests/job_system_tests.cpp](../../../tests/job_system_tests.cpp) | 313 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
 
-### 115: [Partículas y efectos con salida persistente](115-particulas.md) — 4 archivos
+### 115: [Partículas y efectos con salida persistente](115-particulas.md) — 5 archivos
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [include/gloom/gameplay/combat_effects.hpp](../../../include/gloom/gameplay/combat_effects.hpp) | 28 | STL |
-| [include/gloom/render/particles.hpp](../../../include/gloom/render/particles.hpp) | 67 | STL |
-| [src/gameplay/combat_effects.cpp](../../../src/gameplay/combat_effects.cpp) | 93 | STL, auto |
-| [src/render/particles.cpp](../../../src/render/particles.cpp) | 263 | STL, auto, exceptions, maps |
+| [include/gloom/gameplay/combat_effects.hpp](../../../include/gloom/gameplay/combat_effects.hpp) | 28 | Sin coincidencia lexical propia; dependencias legacy según informe 115 |
+| [include/gloom/render/particles.hpp](../../../include/gloom/render/particles.hpp) | 76 | Sin coincidencia lexical propia; dependencias legacy según informe 115 |
+| [src/gameplay/combat_effects.cpp](../../../src/gameplay/combat_effects.cpp) | 90 | Sin coincidencia lexical propia; dependencias legacy según informe 115 |
+| [src/render/particles.cpp](../../../src/render/particles.cpp) | 342 | Sin coincidencia lexical propia; dependencias legacy según informe 115 |
+| [tests/particle_storage_tests.cpp](../../../tests/particle_storage_tests.cpp) | 220 | Sin coincidencia lexical propia; Win32/C, sin excepciones/RTTI |
 
 ### 116: [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) — 3 archivos
 
@@ -317,7 +326,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2700 | STL, auto, exceptions, owners |
+| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2705 | STL, auto, exceptions, owners |
 | [apps/gloom/visual_review.hpp](../../../apps/gloom/visual_review.hpp) | 61 | STL |
 | [apps/gloom_scene_viewer/main.cpp](../../../apps/gloom_scene_viewer/main.cpp) | 143 | STL, auto, exceptions |
 | [include/gloom/backends/placeholder.hpp](../../../include/gloom/backends/placeholder.hpp) | 25 | STL, virtual |

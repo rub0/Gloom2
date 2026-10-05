@@ -1,10 +1,30 @@
 # Hito 115: Partículas y efectos con salida persistente
 
-Estado: **no iniciado**. Depende de: **113 y 114**.
+Estado: **terminado**, 5 de octubre de 2026. Dependencias **113 y 114 terminadas**.
+[Informe y medidas](../../../reports/cpp-performance-115/README.md).
 Objetivo: **CPU y asignaciones**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
-4 archivos propietarios a este hito. Los cambios de firmas incluyen
+5 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
+
+## Resultado ejecutado
+
+Render añade directamente al Array persistente de main, conserva su prefijo y
+recibe materiales por Span por valor sin retenerlos ni solapar salida. Recetas,
+partículas y emisores propios; receta resuelta una vez al crear emisor. Los dos
+estados de combate ya eran persistentes: no se inventa una cola adicional.
+Se preservan RNG, vida/owner, orden cronológico, saturación y métricas. Carga
+externa devuelve error sin excepciones y deja intacta la salida previa.
+Precondiciones por assert; /GR- /EHs-c- en fuentes/prueba nativa.
+
+1.000 update/render y 1.000 eventos calentados: cero asignaciones propias, con
+control positivo de crecimiento. Juego: una asignación por frame → cero en
+partículas. Estrés 2.048: mediana 48,8 → 37,2 µs; no se atribuye mejora global
+de FPS. 49.080 registros comparados; máximo numérico 4,8e-7.
+Builds/formato correctos; Release 50/54 y Debug 51/54, mismos fallos heredados
+por causa. Detalles visuales, ruido, límites y reproducción en el informe.
+Siguiente 116 no iniciado. Commit local, sin push: resolver con
+`rtk git log -1 --oneline --grep='^hito 115:'`.
 
 ## Evidencia de partida
 
@@ -26,6 +46,7 @@ Entradas principales verificadas (no es una lista exhaustiva de callers):
 - [include/gloom/render/particles.hpp](../../../include/gloom/render/particles.hpp)
 - [src/gameplay/combat_effects.cpp](../../../src/gameplay/combat_effects.cpp)
 - [src/render/particles.cpp](../../../src/render/particles.cpp)
+- [tests/particle_storage_tests.cpp](../../../tests/particle_storage_tests.cpp)
 
 Además se adaptan todos los callers afectados por firmas/lifetime, aunque tengan otro responsable de cierre.
 

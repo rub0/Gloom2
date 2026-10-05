@@ -179,18 +179,20 @@ int main() try {
         std::cout << name << ": original clips=" << rig.animations.size() << ", deformation=" << deformation << ", grip=" << frame.left_grip.x << ','
                   << frame.left_grip.y << ',' << frame.left_grip.z << '\n';
     }
-    const auto recipes = render::load_particle_recipes(root / "effects/recipes.json");
+    Array<render::ParticleRecipe> recipes;
+    if (const char* error = render::load_particle_recipes(GLOOM_TEST_ASSETS "/effects/recipes.json", recipes))
+        throw std::runtime_error{error};
     const render::ParticleRecipe* rocket_smoke = nullptr;
     const render::ParticleRecipe* rocket_explosion = nullptr;
     for (const auto& recipe : recipes) {
-        if (recipe.name == "rocket_smoke")
+        if (strcmp(recipe.name, "rocket_smoke") == 0)
             rocket_smoke = &recipe;
-        else if (recipe.name == "explosion_review")
+        else if (strcmp(recipe.name, "explosion_review") == 0)
             rocket_explosion = &recipe;
     }
     check(rocket_smoke && rocket_smoke->rate == 55 && rocket_smoke->life == 1.1F && rocket_smoke->size_end == .62F, "Rocket smoke recipe lost");
     check(rocket_explosion && rocket_explosion->burst == 28 && rocket_explosion->size_end == 1.05F, "Rocket explosion emphasis lost");
-    render::ParticleSystem rocket_particles{recipes};
+    render::ParticleSystem rocket_particles{{recipes.data(), recipes.size()}};
     for (int i = 0; i < 60; ++i) {
         rocket_particles.emitter(9, 9, "rocket_smoke", {static_cast<float>(i) / 60, 0, 0});
         rocket_particles.advance(1.0 / 60);
@@ -200,7 +202,7 @@ int main() try {
     check(rocket_particles.metrics().spawned == 83, "Rocket explosion particle count changed");
     std::vector<render::Particle> reference;
     for (int fps : {30, 60, 144}) {
-        render::ParticleSystem p{recipes};
+        render::ParticleSystem p{{recipes.data(), recipes.size()}};
         for (int i = 0; i < fps; ++i) {
             p.emitter(1, 7, "shadow_smoke", {1, 2, 3});
             p.advance(1.0 / fps);
@@ -219,13 +221,13 @@ int main() try {
         p.cancel(7);
         check(p.particles().empty(), "Entity removal leaked particles");
     }
-    render::ParticleSystem bounded{recipes, 5};
+    render::ParticleSystem bounded{{recipes.data(), recipes.size()}, 5};
     bounded.burst(1, "impact", {}, {0, 1, 0}, 1);
     check(bounded.particles().size() == 5 && bounded.metrics().dropped == 9, "Particle saturation not bounded");
     std::vector<render::Particle> saturated_reference;
     std::uint64_t dropped_reference = 0;
     for (int fps : {30, 60, 144}) {
-        render::ParticleSystem saturated{recipes, 5};
+        render::ParticleSystem saturated{{recipes.data(), recipes.size()}, 5};
         for (int i = 0; i < fps * 3; ++i) {
             saturated.emitter(2, 8, "shadow_smoke", {1, 2, 3});
             saturated.emitter(1, 7, "archangel_energy", {});
@@ -242,20 +244,15 @@ int main() try {
                     "Saturation changed retained particles");
         }
     }
-    rejects([&] {
-        bounded.advance(std::numeric_limits<double>::quiet_NaN());
-    });
-    auto bad = recipes;
-    bad[0].life = -1;
-    rejects([&] {
-        render::ParticleSystem p{bad};
-    });
+    render::ParticleRecipe invalid = recipes[0];
+    invalid.life = -1;
+    check(!render::valid_particle_recipe(invalid), "Invalid recipe accepted");
     const auto rig = assets::import_gltf(root / "characters/original/archangel.gltf");
     assets::AnimationRig runtime;
     check(rig && assets::prepare_animation_rig(*rig, runtime), "Invalid effects animation rig");
     gameplay::CharacterAnimator animator;
     gameplay::CombatEffects events;
-    render::ParticleSystem p{recipes};
+    render::ParticleSystem p{{recipes.data(), recipes.size()}};
     gameplay::CombatantView v{.entity = 2,
         .facing_x = 0,
         .facing_z = 1,
@@ -269,10 +266,10 @@ int main() try {
     v.shot_contact = true;
     events.observe(p, v, frame, {}, 101, true);
     const auto count = p.metrics().spawned;
-    const auto muzzle_before = p.particles().front().position;
+    const auto muzzle_before = p.particles()[0].position;
     render::Transform moved{.position = {1, 2, 3}};
     events.observe(p, v, frame, moved, 101, true);
-    check(distance(p.particles().front().position, muzzle_before) > 3.7F, "Muzzle flash did not follow the weapon");
+    check(distance(p.particles()[0].position, muzzle_before) > 3.7F, "Muzzle flash did not follow the weapon");
     for (int i = 0; i < 20; ++i)
         events.observe(p, v, frame, {}, 102 + i, true);
     check(p.metrics().spawned == count && events.events() == 2, "Confirmed/replayed shot duplicated effects");

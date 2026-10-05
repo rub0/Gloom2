@@ -1,10 +1,11 @@
 # Contrato común de la migración C++
 
-Fecha: 4 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
+Fecha: 5 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
 112 terminado: [medidas/contratos](../../../reports/cpp-performance-112/README.md),
 113 terminado: [poses persistentes](../../../reports/cpp-performance-113/README.md),
 114 terminado: [trabajos nativos](../../../reports/cpp-performance-114/README.md),
-197 archivos/53 CTest; siguiente 115, no iniciado. Diagnóstico opcional OFF y bloqueos expresos
+115 terminado: [partículas persistentes](../../../reports/cpp-performance-115/README.md),
+198 archivos/54 CTest; siguiente 116, no iniciado. Diagnóstico opcional OFF y bloqueos expresos
 de fronteras fastgltf/Jolt en 117/120/128. Sin excepción autorizada.
 Leer primero el inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [índice](README.md) y solo la ficha elegida.

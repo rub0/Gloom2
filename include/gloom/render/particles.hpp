@@ -1,25 +1,23 @@
 #pragma once
 #include <gloom/render/scene.hpp>
-#include <filesystem>
-#include <string>
 
 namespace gloom::render {
 struct ParticleRecipe {
-    std::string name;
-    std::uint32_t material_slot{0}, burst{0};
+    char name[65]{};
+    uint32 material_slot{0}, burst{0};
     float rate{0}, life{1}, speed{0}, spread{0}, gravity{0};
     float size_start{.1F}, size_end{.2F}, trail_seconds{0}, distortion{0};
     Color color_start, color_end{1, 1, 1, 0};
 };
-[[nodiscard]] std::vector<ParticleRecipe> load_particle_recipes(const std::filesystem::path& path);
+// Null means success. Invalid external JSON/file data returns an error and leaves recipes unchanged.
+[[nodiscard]] const char* load_particle_recipes(const char* path, Array<ParticleRecipe>& recipes);
 [[nodiscard]] bool valid_particle_recipe(const ParticleRecipe& recipe) noexcept;
-
 struct ParticleMetrics {
-    std::uint64_t spawned{0}, expired{0}, dropped{0};
+    uint64 spawned{0}, expired{0}, dropped{0};
 };
 struct Particle {
-    std::uint64_t owner{0};
-    std::uint32_t recipe{0};
+    uint64 owner{0};
+    uint32 recipe{0};
     double birth{0};
     Vec3 position, velocity;
     float rotation{0};
@@ -27,18 +25,25 @@ struct Particle {
 };
 class ParticleSystem {
   public:
-    explicit ParticleSystem(std::vector<ParticleRecipe> recipes, std::size_t capacity = 2048);
-    // Upsert a continuous emitter. Emitter IDs are stable attachment IDs, owners
-    // are entity lifetimes. A missing refresh ends the emitter after this step.
-    void emitter(std::uint64_t id, std::uint64_t owner, std::string_view recipe, Vec3 position, Vec3 direction = {0, 1, 0});
-    void burst(std::uint64_t owner, std::string_view recipe, Vec3 position, Vec3 direction, std::uint64_t seed, bool view_model = false);
-    [[nodiscard]] bool translate(std::uint64_t owner, Vec3 offset) noexcept;
+    // Valid, unique recipes and capacity 1..16384 are programmer preconditions.
+    // Copies recipes once; no input span is retained.
+    explicit ParticleSystem(Span<const ParticleRecipe> recipes, size_t capacity = 2048);
+    // IDs are stable attachment IDs; owner identifies the whole entity lifetime, never a recycled index.
+    // Missing refresh ends an emitter after this step. Known name/rate>0, finite inputs and unchanged
+    // recipe/owner on refresh are preconditions. A recipe is resolved only when creating the emitter.
+    void emitter(uint64 id, uint64 owner, const char* recipe, Vec3 position, Vec3 direction = {0, 1, 0});
+    void burst(uint64 owner, const char* recipe, Vec3 position, Vec3 direction, uint64 seed, bool view_model = false);
+    [[nodiscard]] bool translate(uint64 owner, Vec3 offset) noexcept;
+    // Finite seconds in [0,10]. Birth ordering/expiry preserve saturation at different refresh frequencies.
     void advance(double seconds);
-    void cancel(std::uint64_t owner);
+    void cancel(uint64 owner);
     void clear() noexcept;
-    [[nodiscard]] std::vector<RenderInstance> render(const Camera& camera, std::span<const RenderInstance> materials) const;
-    [[nodiscard]] std::span<const Particle> particles() const noexcept {
-        return particles_;
+    // Appends to caller-owned scene storage, preserving its prefix. Materials must not overlap result;
+    // their span is borrowed only during this call. Reserve scene maximum + capacity() before frames.
+    // Result views expire on growth/resize/destruction; keep storage intact through visibility/end_frame.
+    void render(Array<RenderInstance>& result, const Camera& camera, Span<const RenderInstance> materials) const;
+    [[nodiscard]] Span<const Particle> particles() const noexcept {
+        return {particles_.data(), particles_.size()};
     }
     [[nodiscard]] const ParticleMetrics& metrics() const noexcept {
         return metrics_;
@@ -46,21 +51,25 @@ class ParticleSystem {
     [[nodiscard]] double time() const noexcept {
         return time_;
     }
+    [[nodiscard]] size_t capacity() const noexcept {
+        return capacity_;
+    }
 
   private:
     struct Emitter {
-        std::uint64_t id, owner, serial{0};
-        std::uint32_t recipe;
+        uint64 id{0}, owner{0}, serial{0};
+        uint32 recipe{0};
         Vec3 previous, position, direction;
         double next{0};
         bool refreshed{true};
     };
-    std::uint32_t find(std::string_view name) const;
-    void spawn(std::uint64_t owner, std::uint32_t recipe, Vec3 position, Vec3 direction, std::uint64_t seed, double birth, bool view_model);
-    std::vector<ParticleRecipe> recipes_;
-    std::vector<Particle> particles_;
-    std::vector<Emitter> emitters_;
-    std::size_t capacity_;
+    uint32 find(const char* name) const;
+    void spawn(uint64 owner, uint32 recipe, Vec3 position, Vec3 direction, uint64 seed, double birth, bool view_model);
+    void expire(double time);
+    Array<ParticleRecipe> recipes_;
+    Array<Particle> particles_;
+    Array<Emitter> emitters_;
+    size_t capacity_;
     double time_{0};
     ParticleMetrics metrics_;
 };

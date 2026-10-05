@@ -97,7 +97,10 @@ void clients(const std::string& external) {
     int resumed = 0;
     Driver driver;
     gameplay::CombatEffects effects;
-    render::ParticleSystem particles{render::load_particle_recipes(std::filesystem::path{GLOOM_TEST_ASSETS} / "effects/recipes.json")};
+    Array<render::ParticleRecipe> particle_recipes;
+    if (const char* error = render::load_particle_recipes(GLOOM_TEST_ASSETS "/effects/recipes.json", particle_recipes))
+        throw std::runtime_error{error};
+    render::ParticleSystem particles{{particle_recipes.data(), particle_recipes.size()}};
     gameplay::CharacterAnimator animator;
     const auto rig = assets::import_gltf(std::filesystem::path{GLOOM_TEST_ASSETS} / "characters/original/archangel.gltf");
     assets::AnimationRig animation_rig;
