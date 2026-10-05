@@ -6,7 +6,8 @@ Fecha: 5 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
 114 terminado: [trabajos nativos](../../../reports/cpp-performance-114/README.md),
 115 terminado: [partículas persistentes](../../../reports/cpp-performance-115/README.md),
 116 terminado: [registro estable](../../../reports/cpp-performance-116/README.md),
-198 archivos/54 CTest; siguiente 117, no iniciado; cierre bloqueado en fastgltf. Diagnóstico opcional OFF y bloqueos expresos
+117 parcial: [catálogo y bind](../../../reports/cpp-performance-117/README.md),
+198 archivos/54 CTest; continuar 117, cierre bloqueado en fastgltf. Diagnóstico opcional OFF y bloqueos expresos
 de fronteras fastgltf/Jolt en 117/120/128. Sin excepción autorizada.
 Leer primero el inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [índice](README.md) y solo la ficha elegida.

@@ -1,6 +1,6 @@
 # Traspaso de Gloom
 
-Actualizado: 5 de octubre de 2026, **hito C++ 116 terminado**.
+Actualizado: 5 de octubre de 2026, **117 iniciado parcialmente; 116 último cerrado**.
 Setup Hound 131 conservado. H07 terminada en v17; H08 no iniciada.
 
 **Nuevo workspace canónico de Hound, preparado para Meshy MCP futuro.**
@@ -14,9 +14,28 @@ individuales pendientes, trabajo/exportes y plan/prompt Meshy documentados.
 **waiting for turnaround completion; do not call MCP yet.** No generación,
 recortes ni ejecución MCP. Próximo paso: preparar/revisar las cuatro vistas
 contra el master y las notas. V16/v17, rig/acción y exportaciones conservados.
-El 131 conserva los números 116–130 para el plan C++; 116 terminado, 117–130 pendientes.
+El 131 conserva los números 116–130 para el plan C++; 116 terminado, 117 parcial, 118–130 pendientes.
 Commit local del 131; resolver con `rtk git log -1 --oneline --grep='^hito 131:'`.
-Sin push; H08 continúa pendiente. El 116 se detalla abajo.
+Sin push; H08 continúa pendiente. El avance C++ se detalla abajo.
+
+**117 iniciado, parcial; no cerrado.** [Informe y continuación](../reports/cpp-performance-117/README.md).
+AssetCatalog: Array ordenado ID/puntero, búsqueda binaria, registros estables
+al crecer/upsert y recorrido de dependencias iterativo. Matrices/cola/parents
+de bind con Array y bitset para joints, sin copiar/ordenar sus IDs.
+Cadena de 4.096 registros, move/ciclos/ausencias, asserts Debug y salida de rig
+tras error comprobados. Builds/formato pasan; siete CTest focalizados pasan
+en Release y Debug. Los resultados completos de 54 CTest siguen siendo los del 116.
+
+Con 1.024 registros: memoria propia medida -10,08 %, order 116.200 → 39.100 ns;
+find aislado 3,116 → 16,333 ns, coste registrado de búsqueda binaria en carga/recarga.
+Lifecycle dentro del ruido; serie normal Factory/Hound sin regresión integrada
+atribuible, Hound p99<4 ms, máximo<5 ms, cero >5 ms y 345,26 MiB.
+Texto/VFS, metadatos, ImportedScene, codecs/cooker/Factory y cierre de pruebas/flags
+siguen pendientes del 117. No se declara pipeline sin STL/excepciones/RTTI.
+La frontera fastgltf 0.9 sigue exigiendo filesystem/byte STL. Decisión solicitada
+al usuario; **sin autorización registrada**. No se introduce un puente ni se
+concede la excepción Jolt del 120. Continuar el mismo 117; no iniciar 118.
+Checkpoint local del avance: `rtk git log -1 --oneline --grep='^hito 117:'`; sin push.
 
 **Último resultado C++: registro de entidades nativo y estable.**
 [Informe 116](../reports/cpp-performance-116/README.md): 18 IDs explícitos,
@@ -47,7 +66,7 @@ por frame; estrés 2.048 mediana 48,8 → 37,2 µs, sin FPS global atribuido.
 1.200 capturas alineadas, identidades/eventos/métricas conservados.
 [Informe 115](../reports/cpp-performance-115/README.md).
 
-**Siguiente del plan C++: 117, no iniciado; cierre bloqueado en fastgltf.** [Índice 112–130](cpp/tasks/README.md).
+**Continuar 117, parcial; cierre bloqueado en fastgltf.** [Índice 112–130](cpp/tasks/README.md).
 198 archivos propios/54 CTest inventariados. Diagnóstico opcional OFF, recompilado.
 Persisten headers/bloques legacy según dueños 117/119/122 y cierre transversal
 128; no afirmar cumplimiento global de C++. Jolt listeners virtuales/fastgltf
@@ -56,7 +75,7 @@ fronteras**, pendiente de decisión expresa o alternativa equivalente.
 Se solicitó excepción mínima y no se ha autorizado.
 [Evidencia 112](../reports/cpp-performance-112/compatibilidad.md).
 112 `268db47` y 113 `8b96c71` subidos a origin/main por el encargo anterior.
-114 `892463a`, 115 `4cf8af8`, 131 `2b98e83` y cierre 116 locales, sin push; verificar:
+114 `892463a`, 115 `4cf8af8`, 131 `2b98e83`, cierre 116 y checkpoint 117 locales, sin push; verificar:
 `rtk git log -1 --oneline --grep='^hito 116:'`.
 
 **114:** JobSystem nativo, FixedFunction inline 80/8, grupos caller-owned estables,

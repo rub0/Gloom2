@@ -1,6 +1,8 @@
 # Hito 117: Datos de assets, VFS, importación y cooker
 
-Estado: **no iniciado**. Depende de: **113, 114 y 116**.
+Estado: **iniciado, parcial; cierre pendiente**, 5 de octubre de 2026.
+Depende de: **113, 114 y 116 terminados**.
+[Avance, medidas y pendientes](../../../reports/cpp-performance-117/README.md).
 Objetivo: **Cumplimiento C++ y coste de carga**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 19 archivos propietarios a este hito. Los cambios de firmas incluyen
@@ -8,11 +10,28 @@ todos los callers aunque su cierre final pertenezca a otro hito.
 
 ## Bloqueo concreto registrado en 112
 
-**No iniciado; cierre bloqueado** para la frontera externa, pendiente de decisión
+**Cierre bloqueado** para la frontera externa, pendiente de decisión
 expresa del usuario o alternativa equivalente demostrada. fastgltf 0.9 exige std::filesystem::path para loadGltf y variantes; leer bytes con API C no elimina ese argumento.
 [Evidencia y probe](../../../reports/cpp-performance-112/compatibilidad.md).
 No se aplica excepción por ausencia de respuesta. Conservar eventos/formatos y
 dependencias; no marcar cerrado mientras esa condición siga pendiente.
+
+## Avance comprobado
+
+AssetCatalog usa índice ordenado de ID/puntero, registros estables y recorrido
+iterativo; sin mapa de registros/visitas ni recursión. Matrices de bind, parents,
+cola y bitset de joints usan Array propio; salida vacía al fallar y reutilizable.
+Metadatos/path/dependencies y los demás modelos/formatos siguen legacy.
+Cadena de 4.096 registros, crecimiento/upsert/move, fallos de graph, cuatro
+asserts Debug, joints repetidos y salida tras error comprobados.
+Builds completos/formato pasan; siete CTest focalizados pasan en Release/Debug.
+Memoria propia con 1.024 registros -10,08 %, order 116.200 → 39.100 ns;
+find 3,116 → 16,333 ns, coste explícito de la búsqueda binaria. Lifecycle dentro
+del ruido; serie Factory/Hound sin regresión integrada atribuible.
+No se declaran nuevos formatos, flags finales ni pipeline completo sin STL.
+Continuar texto/VFS/resultados, modelos/codecs/cooker/Factory y sus consumers
+después de concretar la frontera; validación final y cook/load end-to-end pendientes.
+Checkpoint local del avance; no cierre: `rtk git log -1 --oneline --grep='^hito 117:'`.
 
 ## Evidencia de partida
 

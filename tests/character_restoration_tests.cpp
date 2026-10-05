@@ -27,14 +27,14 @@ int main() try {
         auto roundtrip = assets::decode_imported_scene(bytes);
         require(roundtrip.has_value() && assets::valid_bind_rigs(*roundtrip), "Cooked rig bind pose is invalid");
         require(roundtrip->skins[0].inverse_bind_matrices == source->skins[0].inverse_bind_matrices, "Inverse bind matrix roundtrip changed");
-        const auto transforms = assets::bind_node_transforms(*roundtrip);
-        require(transforms.has_value(), "Rig hierarchy is invalid");
+        Array<assets::RigMatrix> transforms;
+        require(assets::bind_node_transforms(*roundtrip, transforms), "Rig hierarchy is invalid");
         float head_y = -100, hand_y = -100;
         for (std::size_t i = 0; i < roundtrip->nodes.size(); ++i) {
             if (roundtrip->nodes[i].name == "Bip001 Head")
-                head_y = (*transforms)[i][13];
+                head_y = transforms[i][13];
             if (roundtrip->nodes[i].name == "Bip001 R Hand")
-                hand_y = (*transforms)[i][13];
+                hand_y = transforms[i][13];
         }
         require(head_y > hand_y && head_y > 1.3F && head_y < 1.9F && hand_y > .4F && hand_y < 1.3F, "Head/hand anchors are inverted or displaced");
         unsigned maximum = 0;
@@ -83,8 +83,14 @@ int main() try {
         bad.skins[0].inverse_bind_matrices[0][12] += 10;
         reject(bad);
         bad = *source;
-        bad.nodes[2].children.push_back(0);
+        bad.skins[0].joints[1] = bad.skins[0].joints[0];
         reject(bad);
+        bad = *source;
+        bad.nodes[2].children.push_back(0);
+        require(!assets::bind_node_transforms(bad, transforms) && transforms.size() == 0, "Invalid hierarchy left usable bind matrices");
+        reject(bad);
+        require(assets::bind_node_transforms(*roundtrip, transforms) && transforms.size() == roundtrip->nodes.size(),
+            "Bind output could not be reused after a failed hierarchy");
         bytes[8] = std::byte{3};
         require(!assets::decode_imported_scene(bytes), "Old scene version accepted");
         std::cout << name << ": " << source->skins[0].joints.size() << " bones, " << maximum << " influences, head=" << head_y << ", hand=" << hand_y << '\n';

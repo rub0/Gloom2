@@ -7,7 +7,8 @@
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
-#include <unordered_map>
+#include <stdlib.h>
+#include <string.h>
 #include <utility>
 
 namespace gloom::assets {
@@ -214,68 +215,117 @@ std::expected<void, std::string> VirtualFileSystem::write(const VirtualPath& pat
     return {};
 }
 
+namespace {
+int compare_asset_ids(const void* a, const void* b) {
+    const uint64 first = static_cast<const AssetId*>(a)->value, second = static_cast<const AssetId*>(b)->value;
+    return first < second ? -1 : first > second ? 1 : 0;
+}
+void validate_record(AssetRecord& record) {
+    assert(record.id.value && valid_type(record.type) && record.id == make_asset_id(record.source, record.type));
+#ifndef NDEBUG
+    for (AssetId dependency : record.dependencies)
+        assert(dependency != record.id);
+#endif
+    if (record.dependencies.size() > 1)
+        qsort(record.dependencies.data(), record.dependencies.size(), sizeof(AssetId), compare_asset_ids);
+    for (size_t i = 1; i < record.dependencies.size(); ++i)
+        assert(record.dependencies[i - 1] != record.dependencies[i]);
+}
+}
+
+AssetCatalog::~AssetCatalog() {
+    for (const Entry& entry : records_)
+        delete entry.record;
+}
+AssetCatalog& AssetCatalog::operator=(AssetCatalog&& other) noexcept {
+    if (this != &other) {
+        for (const Entry& entry : records_)
+            delete entry.record;
+        records_ = static_cast<Array<Entry>&&>(other.records_);
+    }
+    return *this;
+}
+size_t AssetCatalog::lower_bound(AssetId id) const noexcept {
+    size_t first = 0, last = records_.size();
+    while (first < last) {
+        const size_t middle = first + (last - first) / 2;
+        if (records_[middle].id.value < id.value)
+            first = middle + 1;
+        else
+            last = middle;
+    }
+    return first;
+}
 void AssetCatalog::add(AssetRecord record) {
-    if (record.id.value == 0 || !valid_type(record.type) || record.id != make_asset_id(record.source, record.type) ||
-        std::ranges::find(record.dependencies, record.id) != record.dependencies.end() || records_.contains(record.id)) {
-        throw std::invalid_argument{"Asset catalog record is invalid or duplicate"};
-    }
-    std::ranges::sort(record.dependencies, {}, &AssetId::value);
-    if (std::ranges::adjacent_find(record.dependencies) != record.dependencies.end()) {
-        throw std::invalid_argument{"Asset catalog dependencies contain duplicates"};
-    }
-    records_.emplace(record.id, std::move(record));
+    static_assert(__is_trivially_copyable(Entry));
+    validate_record(record);
+    const size_t position = lower_bound(record.id);
+    assert(position == records_.size() || records_[position].id != record.id);
+    records_.reserve(records_.size() + 1);
+    records_.resize(records_.size() + 1);
+    memmove(records_.data() + position + 1, records_.data() + position, (records_.size() - position - 1) * sizeof(Entry));
+    records_[position] = {.id = record.id, .record = new AssetRecord(static_cast<AssetRecord&&>(record))};
 }
-
 void AssetCatalog::upsert(AssetRecord record) {
-    if (record.id.value == 0 || !valid_type(record.type) || record.id != make_asset_id(record.source, record.type) ||
-        std::ranges::find(record.dependencies, record.id) != record.dependencies.end()) {
-        throw std::invalid_argument{"Asset catalog replacement record is invalid"};
+    const size_t position = lower_bound(record.id);
+    if (position == records_.size() || records_[position].id != record.id) {
+        add(static_cast<AssetRecord&&>(record));
+        return;
     }
-    std::ranges::sort(record.dependencies, {}, &AssetId::value);
-    if (std::ranges::adjacent_find(record.dependencies) != record.dependencies.end()) {
-        throw std::invalid_argument{"Asset catalog dependencies contain duplicates"};
-    }
-    records_.insert_or_assign(record.id, std::move(record));
+    validate_record(record);
+    *records_[position].record = static_cast<AssetRecord&&>(record);
 }
-
-const AssetRecord* AssetCatalog::find(const AssetId id) const noexcept {
-    const auto found = records_.find(id);
-    return found == records_.end() ? nullptr : &found->second;
+const AssetRecord* AssetCatalog::find(AssetId id) const noexcept {
+    const size_t position = lower_bound(id);
+    return position < records_.size() && records_[position].id == id ? records_[position].record : nullptr;
 }
-
-std::expected<std::vector<AssetId>, std::string> AssetCatalog::dependency_order() const {
-    enum class Visit : std::uint8_t { visiting, complete };
-    std::unordered_map<AssetId, Visit, AssetIdHash> visits;
-    std::vector<AssetId> order;
+bool AssetCatalog::dependency_order(Array<AssetId>& order, const char*& error) const {
+    order.resize(0);
+    error = nullptr;
     order.reserve(records_.size());
-    const auto visit = [&](const auto& self, const AssetId id) -> std::expected<void, std::string> {
-        if (const auto found = visits.find(id); found != visits.end()) {
-            return found->second == Visit::complete ? std::expected<void, std::string>{} : std::unexpected{"Asset dependency graph contains a cycle"};
-        }
-        const AssetRecord* record = find(id);
-        if (record == nullptr) {
-            return std::unexpected{"Asset dependency graph references a missing asset"};
-        }
-        visits.emplace(id, Visit::visiting);
-        for (const AssetId dependency : record->dependencies) {
-            if (auto result = self(self, dependency); !result) {
-                return result;
+    Array<uint8> visits;
+    visits.reserve(records_.size());
+    visits.resize(records_.size());
+    struct Frame {
+        size_t record{0}, dependency{0};
+    };
+    Array<Frame> stack;
+    stack.reserve(records_.size());
+    for (size_t root = 0; root < records_.size(); ++root) {
+        if (visits[root])
+            continue;
+        visits[root] = 1;
+        stack.push_back({.record = root});
+        while (stack.size()) {
+            Frame& frame = stack[stack.size() - 1];
+            const AssetRecord& record = *records_[frame.record].record;
+            if (frame.dependency == record.dependencies.size()) {
+                visits[frame.record] = 2;
+                order.push_back(record.id);
+                stack.resize(stack.size() - 1);
+                continue;
+            }
+            const AssetId dependency = record.dependencies[frame.dependency++];
+            const size_t index = lower_bound(dependency);
+            if (index == records_.size() || records_[index].id != dependency) {
+                error = "Asset dependency graph references a missing asset";
+                order.resize(0);
+                return false;
+            }
+            if (visits[index] == 1) {
+                error = "Asset dependency graph contains a cycle";
+                order.resize(0);
+                return false;
+            }
+            if (!visits[index]) {
+                visits[index] = 1;
+                stack.push_back({.record = index});
             }
         }
-        visits[id] = Visit::complete;
-        order.push_back(id);
-        return {};
-    };
-    for (const auto& [id, record] : records_) {
-        static_cast<void>(record);
-        if (auto result = visit(visit, id); !result) {
-            return std::unexpected{result.error()};
-        }
     }
-    return order;
+    return true;
 }
-
-std::size_t AssetCatalog::size() const noexcept {
+size_t AssetCatalog::size() const noexcept {
     return records_.size();
 }
 

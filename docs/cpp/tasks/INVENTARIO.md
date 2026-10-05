@@ -38,6 +38,11 @@ Composición/replicación directa adaptadas; adapters físicos reciben IDs.
 LegacyArsenal, World/Subsystem y WorldSnapshot conservan dueños 120/122/127.
 Las líneas se actualizan al workspace final; señales históricas fuera del módulo.
 
+Actualización parcial 117: **198 archivos propios, 36,960 líneas y 54 CTest**.
+Índice/recorrido de AssetCatalog y evaluación de bind con almacenamiento propio;
+metadatos, VFS y pipeline aún legacy. No hay archivos C++ ni CTest nuevos.
+El 117 permanece abierto; las señales históricas no acreditan cierre de sus 19 archivos.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |
@@ -135,23 +140,23 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
 | [apps/gloom_asset_cooker/main.cpp](../../../apps/gloom_asset_cooker/main.cpp) | 32 | STL, auto, exceptions, virtual |
-| [include/gloom/assets/asset.hpp](../../../include/gloom/assets/asset.hpp) | 96 | STL, maps |
+| [include/gloom/assets/asset.hpp](../../../include/gloom/assets/asset.hpp) | 110 | STL, maps |
 | [include/gloom/assets/asset_cooker.hpp](../../../include/gloom/assets/asset_cooker.hpp) | 19 | STL |
 | [include/gloom/assets/gltf_importer.hpp](../../../include/gloom/assets/gltf_importer.hpp) | 129 | STL |
 | [include/gloom/assets/mesh_processing.hpp](../../../include/gloom/assets/mesh_processing.hpp) | 27 | STL |
-| [include/gloom/assets/rig.hpp](../../../include/gloom/assets/rig.hpp) | 113 | STL, auto |
+| [include/gloom/assets/rig.hpp](../../../include/gloom/assets/rig.hpp) | 129 | Evaluación sin std directo; ImportedScene sigue legacy |
 | [include/gloom/assets/scene_catalog.hpp](../../../include/gloom/assets/scene_catalog.hpp) | 24 | STL |
 | [include/gloom/assets/texture_asset.hpp](../../../include/gloom/assets/texture_asset.hpp) | 26 | STL |
 | [include/gloom/gameplay/factory_scene.hpp](../../../include/gloom/gameplay/factory_scene.hpp) | 34 | STL, owners |
-| [src/assets/asset.cpp](../../../src/assets/asset.cpp) | 347 | STL, auto, exceptions, maps |
+| [src/assets/asset.cpp](../../../src/assets/asset.cpp) | 397 | STL, auto, exceptions, maps |
 | [src/assets/asset_cooker.cpp](../../../src/assets/asset_cooker.cpp) | 120 | STL, auto, maps |
 | [src/assets/gltf_importer.cpp](../../../src/assets/gltf_importer.cpp) | 1351 | STL, auto, exceptions |
 | [src/assets/mesh_processing.cpp](../../../src/assets/mesh_processing.cpp) | 214 | STL, auto |
 | [src/assets/scene_catalog.cpp](../../../src/assets/scene_catalog.cpp) | 127 | STL, auto, maps, virtual |
 | [src/assets/texture_asset.cpp](../../../src/assets/texture_asset.cpp) | 230 | STL, auto, owners |
 | [src/gameplay/factory_scene.cpp](../../../src/gameplay/factory_scene.cpp) | 250 | STL, auto, exceptions, owners |
-| [tests/asset_pipeline_tests.cpp](../../../tests/asset_pipeline_tests.cpp) | 550 | STL, auto, exceptions, maps, virtual |
-| [tests/character_restoration_tests.cpp](../../../tests/character_restoration_tests.cpp) | 114 | STL, auto, exceptions |
+| [tests/asset_pipeline_tests.cpp](../../../tests/asset_pipeline_tests.cpp) | 623 | STL, auto, exceptions, maps, virtual |
+| [tests/character_restoration_tests.cpp](../../../tests/character_restoration_tests.cpp) | 120 | STL, auto, exceptions |
 | [tests/factory_restoration_tests.cpp](../../../tests/factory_restoration_tests.cpp) | 147 | STL, auto, exceptions |
 
 ### 118: [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) — 6 archivos

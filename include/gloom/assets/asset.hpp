@@ -1,4 +1,5 @@
 #pragma once
+#include <gloom/core/array.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -29,7 +30,7 @@ class VirtualPath final {
 };
 
 struct AssetId {
-    std::uint64_t value{0};
+    uint64 value{0};
     [[nodiscard]] bool operator==(const AssetId&) const noexcept = default;
 };
 
@@ -37,7 +38,7 @@ struct AssetIdHash {
     [[nodiscard]] std::size_t operator()(AssetId id) const noexcept;
 };
 
-enum class AssetType : std::uint8_t {
+enum class AssetType : uint8 {
     binary = 1,
     scene = 2,
     mesh = 3,
@@ -70,14 +71,27 @@ struct AssetRecord {
 
 class AssetCatalog final {
   public:
+    AssetCatalog() = default;
+    ~AssetCatalog();
+    AssetCatalog(const AssetCatalog&) = delete;
+    AssetCatalog& operator=(const AssetCatalog&) = delete;
+    AssetCatalog(AssetCatalog&&) noexcept = default;
+    AssetCatalog& operator=(AssetCatalog&& other) noexcept;
+    // Transfers the owned record; find pointers survive growth and upsert.
     void add(AssetRecord record);
     void upsert(AssetRecord record);
     [[nodiscard]] const AssetRecord* find(AssetId id) const noexcept;
-    [[nodiscard]] std::expected<std::vector<AssetId>, std::string> dependency_order() const;
-    [[nodiscard]] std::size_t size() const noexcept;
+    // External graph errors return a static message and leave order empty.
+    [[nodiscard]] bool dependency_order(Array<AssetId>& order, const char*& error) const;
+    [[nodiscard]] size_t size() const noexcept;
 
   private:
-    std::unordered_map<AssetId, AssetRecord, AssetIdHash> records_;
+    struct Entry {
+        AssetId id;
+        AssetRecord* record{nullptr};
+    };
+    [[nodiscard]] size_t lower_bound(AssetId id) const noexcept;
+    Array<Entry> records_;
 };
 
 struct CookedAsset {

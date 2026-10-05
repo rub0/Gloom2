@@ -19,6 +19,12 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef _DEBUG
+#include <crtdbg.h>
+#endif
 
 namespace {
 
@@ -261,13 +267,38 @@ void test_virtual_paths_and_catalog() {
     gloom::assets::AssetCatalog catalog;
     catalog.add({.id = id_a, .type = gloom::assets::AssetType::binary, .source = source_a, .cooked = cooked_a});
     catalog.add({.id = id_b, .type = gloom::assets::AssetType::binary, .source = source_b, .cooked = cooked_b, .dependencies = {id_a}});
-    const auto order = catalog.dependency_order();
-    expect(order && order->size() == 2 && order->front() == id_a && order->back() == id_b, "Asset catalog did not produce dependency-first order");
+    gloom::Array<gloom::assets::AssetId> order;
+    const char* error = nullptr;
+    expect(catalog.dependency_order(order, error) && !error && order.size() == 2 && order[0] == id_a && order[1] == id_b,
+        "Asset catalog did not produce dependency-first order");
 
     gloom::assets::AssetCatalog cycle;
     cycle.add({.id = id_a, .type = gloom::assets::AssetType::binary, .source = source_a, .cooked = cooked_a, .dependencies = {id_b}});
     cycle.add({.id = id_b, .type = gloom::assets::AssetType::binary, .source = source_b, .cooked = cooked_b, .dependencies = {id_a}});
-    expect(!cycle.dependency_order(), "Asset dependency cycle was accepted");
+    expect(!cycle.dependency_order(order, error) && error && order.size() == 0, "Asset dependency cycle was accepted");
+
+    const gloom::assets::AssetRecord* stable = catalog.find(id_a);
+    gloom::assets::AssetId previous = id_b;
+    for (gloom::uint32 index = 0; index < 4096; ++index) {
+        char path[64];
+        snprintf(path, sizeof(path), "game:/catalog/chain-%u.bin", index);
+        const decltype(gloom::assets::VirtualPath::parse(path)) parsed = gloom::assets::VirtualPath::parse(path);
+        const gloom::assets::AssetId id = gloom::assets::make_asset_id(*parsed, gloom::assets::AssetType::binary);
+        catalog.add({.id = id, .source = *parsed, .cooked = cooked_a, .dependencies = {previous}});
+        previous = id;
+    }
+    expect(catalog.find(id_a) == stable && !catalog.find({}), "Catalog growth moved a record or accepted a missing ID");
+    expect(catalog.dependency_order(order, error) && !error && order.size() == 4098 && order[0] == id_a && order[order.size() - 1] == previous,
+        "Iterative dependency traversal lost a deep dependency chain");
+    catalog.upsert({.id = id_a, .source = source_a, .cooked = cooked_a, .source_fingerprint = 42});
+    expect(catalog.find(id_a) == stable && stable->source_fingerprint == 42, "Catalog replacement changed the record address or missed its update");
+    gloom::assets::AssetCatalog moved{static_cast<gloom::assets::AssetCatalog&&>(catalog)};
+    expect(catalog.size() == 0 && moved.find(id_a) == stable, "Catalog move did not transfer its records");
+    cycle = static_cast<gloom::assets::AssetCatalog&&>(moved);
+    expect(moved.size() == 0 && cycle.find(id_a) == stable && cycle.dependency_order(order, error), "Catalog move assignment lost ownership");
+    gloom::assets::AssetCatalog missing;
+    missing.add({.id = id_a, .source = source_a, .cooked = cooked_a, .dependencies = {id_b}});
+    expect(!missing.dependency_order(order, error) && error && order.size() == 0, "Missing dependency was accepted or left a partial output");
 }
 
 void test_offline_mesh_processing() {
@@ -363,8 +394,10 @@ void test_gltf_cooking_and_async_loading() {
     for (const auto& dependency : cooked->dependencies)
         catalog.add(dependency);
     catalog.add(cooked->scene);
-    const auto dependency_order = catalog.dependency_order();
-    expect(dependency_order && dependency_order->back() == cooked->scene.id, "Cooked scene dependency was not ordered before the scene");
+    gloom::Array<gloom::assets::AssetId> dependency_order;
+    const char* dependency_error = nullptr;
+    expect(catalog.dependency_order(dependency_order, dependency_error) && dependency_order[dependency_order.size() - 1] == cooked->scene.id,
+        "Cooked scene dependency was not ordered before the scene");
 
     const auto texture_encoded = filesystem.read(cooked->dependencies.front().cooked);
     const auto texture_asset = texture_encoded ? gloom::assets::decode_cooked_asset(*texture_encoded)
@@ -537,7 +570,47 @@ void test_gltf_cooking_and_async_loading() {
 
 } // namespace
 
-int main() try {
+int main(int argc, const char* const* argv) try {
+#ifdef _DEBUG
+    if (argc == 2) {
+        _set_error_mode(_OUT_TO_STDERR);
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+        _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+        _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+        const decltype(gloom::assets::VirtualPath::parse("game:/a")) path = gloom::assets::VirtualPath::parse("game:/a");
+        gloom::assets::AssetCatalog catalog;
+        gloom::assets::AssetRecord record{.id = gloom::assets::make_asset_id(*path, gloom::assets::AssetType::binary), .source = *path, .cooked = *path};
+        if (strcmp(argv[1], "duplicate") == 0)
+            catalog.add(record);
+        else if (strcmp(argv[1], "self") == 0)
+            record.dependencies = {record.id};
+        else if (strcmp(argv[1], "wrong-id") == 0)
+            record.id.value = 0;
+        else if (strcmp(argv[1], "duplicate-dependency") == 0)
+            record.dependencies = {{.value = 1}, {.value = 1}};
+        catalog.add(record);
+        return 0;
+    }
+    char executable[MAX_PATH];
+    expect(GetModuleFileNameA(nullptr, executable, MAX_PATH) > 0, "Locate catalog precondition fixture");
+    const char* modes[]{"duplicate", "self", "wrong-id", "duplicate-dependency"};
+    for (const char* mode : modes) {
+        char command[MAX_PATH + 64];
+        snprintf(command, sizeof(command), "\"%s\" %s", executable, mode);
+        STARTUPINFOA startup{.cb = sizeof(startup)};
+        PROCESS_INFORMATION process{};
+        expect(CreateProcessA(nullptr, command, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &startup, &process), "Start catalog fixture");
+        expect(WaitForSingleObject(process.hProcess, 5000) == WAIT_OBJECT_0, "Catalog assert hung");
+        DWORD result = 0;
+        GetExitCodeProcess(process.hProcess, &result);
+        CloseHandle(process.hThread);
+        CloseHandle(process.hProcess);
+        expect(result == 3, "Invalid catalog record did not assert");
+    }
+#else
+    static_cast<void>(argc);
+    static_cast<void>(argv);
+#endif
     test_virtual_paths_and_catalog();
     test_offline_mesh_processing();
     test_project_mesh_orientation();
