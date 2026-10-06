@@ -12,6 +12,8 @@ Rutas relativas a la raíz de Gloom:
 | Entrada | Ruta | Estado |
 | --- | --- | --- |
 | Hound_master | `assets-source/hound/ref/Hound_master.jpg` | Disponible; canon visual aprobado |
+| Hound_head_detail | `assets-source/hound/ref/Hound_head_detail.jpg` | Disponible; referencia de cabeza |
+| Hound_gauntlets_detail | `assets-source/hound/ref/Hound_gauntlets_detail.png` | Disponible; referencia de guanteletes |
 | Hound_front | `assets-source/hound/ref/Hound_front.png` | Pendiente |
 | Hound_side | `assets-source/hound/ref/Hound_side.png` | Pendiente |
 | Hound_back | `assets-source/hound/ref/Hound_back.png` | Pendiente |
@@ -21,6 +23,8 @@ Rutas relativas a la raíz de Gloom:
 Referencia adicional suministrada: `assets-source/hound/ref/Hound_turnaround_sheet.jpg`.
 Todavía no se han separado ni validado sus vistas como entradas individuales.
 El master define el diseño; el turnaround debe ser coherente con él.
+Los detalles de cabeza y guanteletes complementan estas entradas para preservar
+la identidad facial, la caída del pelo/capucha, las placas, picos y manos.
 
 ## Output esperado
 
@@ -51,7 +55,7 @@ y comparar con las fuentes v16/v17 conservadas; rig, UVs y animaciones requieren
 
 1. Preparar las cuatro referencias individuales sin cambiar el diseño; revisar su coherencia y actualizar el estado.
 2. Con un nuevo encargo de generación, comprobar las herramientas MCP disponibles y su esquema real.
-3. Confirmar en esa ejecución qué entradas y formatos admite la herramienta; no asumir que acepta cinco imágenes o un Markdown.
+3. Confirmar en esa ejecución qué entradas y formatos admite la herramienta; no asumir que acepta todo el set de imágenes o un Markdown.
 4. Usar las notas para el prompt y la revisión; enviar las imágenes por el mecanismo que admita la herramienta.
 5. Guardar resultados en una iteración nueva, revisarlos y documentar los criterios anteriores.
 

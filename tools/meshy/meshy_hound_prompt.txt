@@ -2,6 +2,7 @@ DRAFT FOR A FUTURE MESHY MCP TASK — NOT EXECUTED
 
 Generate a full-body 3D model of Hound, the approved male dark fantasy character from Gloom.
 Treat Hound_master.jpg as the authoritative visual canon. Maintain high fidelity to the master and to the completed, reviewed turnaround references Hound_front.png, Hound_side.png, Hound_back.png and Hound_34.png. Use hound_notes.md as the full artistic specification. If views disagree, preserve the master design and flag the discrepancy for review rather than inventing a compromise.
+Use Hound_head_detail.jpg as the supplied close-up reference for the face, orange eyes, hood and long black hair. Use Hound_gauntlets_detail.png as the supplied multi-angle reference for gauntlet proportions, layered plates, spikes and armored hands. These detail references complement the master; preserve their features without changing the full-body design.
 
 Preserve the broad, powerful, threatening silhouette and proportions: very wide shoulders, a solid chest and torso, oversized muscular arms, strong heavy legs, and large hands and gauntlets. Keep the severe, cold masculine face recognizable, with pale ash-grey skin and bright orange eyes. Preserve the heavy dark hood and long black hair around the face and down the back.
 

@@ -9,10 +9,20 @@ recorte, conversión ni recompresión. Es la autoridad visual para las futuras i
 Se conserva como referencia suministrada; no sustituye al master ni certifica
 por sí sola la coherencia de las cuatro vistas. Aún no hay vistas individuales.
 
+Referencias de detalle añadidas el 6 de octubre de 2026, hito 132:
+
+- [Hound_head_detail.jpg](Hound_head_detail.jpg): rostro, ojos, capucha y pelo en frente, perfil y tres cuartos.
+- [Hound_gauntlets_detail.png](Hound_gauntlets_detail.png): placas, picos, manos y volumen de guanteletes desde varios ángulos.
+
+Son copias exactas de los adjuntos `hound_head_detail.jpg` y `Hound_gauntlets_detail.png`.
+Complementan al master para modelado y revisión; el master conserva su autoridad visual.
+
 | Archivo | Resolución | Bytes | SHA-256 |
 | --- | --- | ---: | --- |
 | `Hound_master.jpg` | 1086 × 1448 | 2049478 | `C37D24A0E9551791E53FEC444E6D55FF67B4C9D4DFCA52D267F7CC0505A9854B` |
 | `Hound_turnaround_sheet.jpg` | 1448 × 1086 | 2262767 | `9EA1A43452F931E7AC23841FB0FA242056AB3D578A22D1BC3DD6BC8F59390014` |
+| `Hound_head_detail.jpg` | 1448 × 1086 | 1709873 | `512B4C03BA4317C5C28052E5B7DCBAF88B078204D5F60B17B2C4A4C1877EC6CD` |
+| `Hound_gauntlets_detail.png` | 1448 × 1086 | 2240173 | `AF9B8E8E994624F66C68CAAD7EAEB5E2BE0427274039CC18B4F2B8687C716779` |
 
 ## Archivos individuales previstos
 

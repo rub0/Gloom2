@@ -1,9 +1,11 @@
 # Hound Status
 
-Actualizado: 5 de octubre de 2026 · setup del hito 131.
+Actualizado: 6 de octubre de 2026 · setup 131; referencias de detalle añadidas en el hito 132.
 
 - Hound_master: disponible; canon aprobado en [Hound_master.jpg](../ref/Hound_master.jpg).
 - Lámina de turnaround adjunta: disponible en [Hound_turnaround_sheet.jpg](../ref/Hound_turnaround_sheet.jpg).
+- Detalle de cabeza: disponible en [Hound_head_detail.jpg](../ref/Hound_head_detail.jpg).
+- Detalle de guanteletes: disponible en [Hound_gauntlets_detail.png](../ref/Hound_gauntlets_detail.png).
 - Hound_front: pendiente como archivo individual `Hound_front.png`.
 - Hound_side: pendiente como archivo individual `Hound_side.png`.
 - Hound_back: pendiente como archivo individual `Hound_back.png`.

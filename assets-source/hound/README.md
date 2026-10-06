@@ -19,6 +19,11 @@ Contiene cuatro vistas en una lámina; las imágenes individuales con los nombre
 previstos todavía no existen. Su preparación y validación son el siguiente paso.
 No se ha recortado, generado ni reinterpretado ninguna imagen.
 
+Referencias de detalle incorporadas el 6 de octubre de 2026:
+[cabeza](ref/Hound_head_detail.jpg) y [guanteletes](ref/Hound_gauntlets_detail.png),
+copiadas intactas de los nuevos adjuntos. Complementan al master y forman parte
+del plan y prompt futuros de Meshy. [Informe 132](../../reports/hound-details-132/README.md).
+
 Este setup prepara una ruta futura con Meshy. La producción existente continúa
 en `art/characters/hound/v17/hound-production-v17.blend`, con exportación en
 `assets/characters/hound_rig/v17/hound-rig.gltf` y `hound-rig.bin`.

@@ -1,7 +1,14 @@
 # Traspaso de Gloom
 
-Actualizado: 5 de octubre de 2026, **117 iniciado parcialmente; 116 último cerrado**.
-Setup Hound 131 conservado. H07 terminada en v17; H08 no iniciada.
+Actualizado: 6 de octubre de 2026, **referencias Hound 132 terminadas**.
+C++: 117 iniciado parcialmente; 116 último cerrado. H07 terminada en v17; H08 no iniciada.
+
+**Hound 132:** añadidos `assets-source/hound/ref/Hound_head_detail.jpg` y
+`Hound_gauntlets_detail.png`, copias SHA-256 idénticas a los dos nuevos adjuntos.
+Referencias de cabeza y guanteletes registradas en README/estado y plan/prompt Meshy.
+[Informe 132](../reports/hound-details-132/README.md). Master/notas/v16/v17 conservados.
+Meshy sigue sin ejecutar; vistas individuales pendientes. Commit local del 132;
+resolver con `rtk git log -1 --oneline --grep='^hito 132:'`. Sin push.
 
 **Nuevo workspace canónico de Hound, preparado para Meshy MCP futuro.**
 [Entrada y estructura](../assets-source/hound/README.md) ·
