@@ -58,6 +58,14 @@ KTX/STBI conservan unique_ptr con deleter para recursos C opacos. Tres herramien
 Python nuevas bajo tools/perf pertenecen al 117, fuera del conteo C++.
 El parcial anterior es histórico, no describe el estado final del pipeline.
 
+Actualización 118: **199 archivos propios, 37.767 líneas y 55 CTest**.
+Prueba autónoma asset_residency nueva, propietario 118 (ahora siete archivos).
+Loader/coordinator/bridge sin STL directo/futuros/mapas/shared_ptr/auto/throw/RTTI
+propios; frontera de DTO/codec 117 y paquetes/colas 119 documentada. Array incorpora
+transferencia rvalue; purge puntual de uploads pendientes y callers adaptados no
+cierran módulos 119/127. Flags efectivos en cuatro .cpp en ambas configuraciones.
+Las líneas actuales se actualizan; señales fuera de 118 conservan su historia.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |
@@ -94,7 +102,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
 | [apps/gloom/performance.hpp](../../../apps/gloom/performance.hpp) | 105 | Sin coincidencia lexical |
-| [include/gloom/core/array.hpp](../../../include/gloom/core/array.hpp) | 109 | Sin coincidencia lexical |
+| [include/gloom/core/array.hpp](../../../include/gloom/core/array.hpp) | 115 | Sin coincidencia lexical |
 | [include/gloom/core/clock.hpp](../../../include/gloom/core/clock.hpp) | 6 | Sin coincidencia lexical |
 | [include/gloom/core/span.hpp](../../../include/gloom/core/span.hpp) | 65 | Sin coincidencia lexical |
 | [include/gloom/core/types.hpp](../../../include/gloom/core/types.hpp) | 13 | Sin coincidencia lexical |
@@ -174,16 +182,17 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [tests/character_restoration_tests.cpp](../../../tests/character_restoration_tests.cpp) | 112 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
 | [tests/factory_restoration_tests.cpp](../../../tests/factory_restoration_tests.cpp) | 167 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
 
-### 118: [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) — 6 archivos
+### 118: [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) — 7 archivos
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [include/gloom/assets/asset_loader.hpp](../../../include/gloom/assets/asset_loader.hpp) | 58 | STL, maps |
-| [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 110 | STL, maps, owners |
-| [include/gloom/assets/scene_gpu_bridge.hpp](../../../include/gloom/assets/scene_gpu_bridge.hpp) | 35 | STL |
-| [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 121 | STL, auto, exceptions, owners |
-| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 514 | STL, auto, exceptions, owners |
-| [src/assets/scene_gpu_bridge.cpp](../../../src/assets/scene_gpu_bridge.cpp) | 123 | STL, auto |
+| [include/gloom/assets/asset_loader.hpp](../../../include/gloom/assets/asset_loader.hpp) | 90 | Propiedad nativa cerrada; fronteras 117/119 enumeradas en informe |
+| [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 87 | Propiedad nativa cerrada; fronteras 117/119 enumeradas en informe |
+| [include/gloom/assets/scene_gpu_bridge.hpp](../../../include/gloom/assets/scene_gpu_bridge.hpp) | 31 | Propiedad nativa cerrada; fronteras 117/119 enumeradas en informe |
+| [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 230 | Propiedad nativa cerrada; fronteras 117/119 enumeradas en informe |
+| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 526 | Propiedad nativa cerrada; fronteras 117/119 enumeradas en informe |
+| [src/assets/scene_gpu_bridge.cpp](../../../src/assets/scene_gpu_bridge.cpp) | 119 | Propiedad nativa cerrada; fronteras 117/119 enumeradas en informe |
+| [tests/asset_residency_tests.cpp](../../../tests/asset_residency_tests.cpp) | 234 | Sin STL directo; datos de fixture 117 y callbacks 119 enumerados |
 
 ### 119: [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) — 21 archivos
 
@@ -199,14 +208,14 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/render/shadow_visibility.hpp](../../../include/gloom/render/shadow_visibility.hpp) | 23 | Sin coincidencia lexical |
 | [include/gloom/render/temporal.hpp](../../../include/gloom/render/temporal.hpp) | 87 | STL |
 | [include/gloom/render/visibility.hpp](../../../include/gloom/render/visibility.hpp) | 61 | Sin coincidencia lexical |
-| [src/backends/diligent_renderer.cpp](../../../src/backends/diligent_renderer.cpp) | 2669 | STL, auto, exceptions, maps, owners, pimpl |
+| [src/backends/diligent_renderer.cpp](../../../src/backends/diligent_renderer.cpp) | 2691 | STL, auto, exceptions, maps, owners, pimpl |
 | [src/render/lighting.cpp](../../../src/render/lighting.cpp) | 154 | Sin coincidencia lexical |
 | [src/render/scene.cpp](../../../src/render/scene.cpp) | 108 | STL, auto, exceptions |
 | [src/render/temporal.cpp](../../../src/render/temporal.cpp) | 111 | STL |
 | [src/render/visibility.cpp](../../../src/render/visibility.cpp) | 196 | Sin coincidencia lexical |
 | [tests/gpu_asset_tests.cpp](../../../tests/gpu_asset_tests.cpp) | 57 | STL, auto, exceptions |
 | [tests/lighting_tests.cpp](../../../tests/lighting_tests.cpp) | 70 | Sin coincidencia lexical |
-| [tests/material_render_tests.cpp](../../../tests/material_render_tests.cpp) | 134 | STL, auto, exceptions |
+| [tests/material_render_tests.cpp](../../../tests/material_render_tests.cpp) | 167 | STL, auto, exceptions |
 | [tests/render_scene_tests.cpp](../../../tests/render_scene_tests.cpp) | 90 | STL, auto, exceptions |
 | [tests/temporal_tests.cpp](../../../tests/temporal_tests.cpp) | 47 | Sin coincidencia lexical |
 | [tests/visibility_tests.cpp](../../../tests/visibility_tests.cpp) | 83 | Sin coincidencia lexical |

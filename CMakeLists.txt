@@ -69,9 +69,9 @@ set_source_files_properties(
     tests/dependency_contract_tests.cpp
     src/assets/animation.cpp src/gameplay/character_animation.cpp tests/skin_bounds_tests.cpp
     tests/pose_storage_tests.cpp src/core/job_system.cpp tests/job_system_tests.cpp
-    src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
+    src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp src/assets/scene_gpu_bridge.cpp
     src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
-    src/core/entity.cpp tests/entity_tests.cpp
+    src/core/entity.cpp tests/entity_tests.cpp tests/asset_residency_tests.cpp
     src/assets/asset.cpp src/assets/asset_cooker.cpp src/assets/gltf_importer.cpp src/assets/mesh_processing.cpp
     src/assets/scene_catalog.cpp src/assets/texture_asset.cpp src/gameplay/factory_scene.cpp
     apps/gloom_asset_cooker/main.cpp tests/asset_pipeline_tests.cpp tests/character_restoration_tests.cpp tests/factory_restoration_tests.cpp
@@ -80,9 +80,9 @@ set_source_files_properties(
 
 if(MSVC)
     # Legacy future/physics/render headers remain owned by 118/119/120/122; these consumers do not unwind.
-    set_property(SOURCE tests/skin_bounds_tests.cpp src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
+    set_property(SOURCE tests/skin_bounds_tests.cpp src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp src/assets/scene_gpu_bridge.cpp
         src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
-        tests/entity_tests.cpp
+        tests/entity_tests.cpp tests/asset_residency_tests.cpp
         src/assets/asset.cpp src/assets/asset_cooker.cpp src/assets/gltf_importer.cpp src/assets/mesh_processing.cpp
         src/assets/scene_catalog.cpp src/assets/texture_asset.cpp src/gameplay/factory_scene.cpp
         apps/gloom_asset_cooker/main.cpp tests/asset_pipeline_tests.cpp tests/character_restoration_tests.cpp tests/factory_restoration_tests.cpp
@@ -675,6 +675,12 @@ if(BUILD_TESTING)
     target_compile_definitions(gloom_asset_tests PRIVATE GLOOM_TEST_ASSETS="${CMAKE_CURRENT_SOURCE_DIR}/assets")
     add_test(NAME gloom.assets COMMAND gloom_asset_tests)
     set_tests_properties(gloom.assets PROPERTIES TIMEOUT 20)
+
+    add_executable(gloom_asset_residency_tests tests/asset_residency_tests.cpp src/core/allocation_profile.cpp src/core/allocation_new.cpp)
+    target_link_libraries(gloom_asset_residency_tests PRIVATE gloom_asset_pipeline)
+    target_compile_definitions(gloom_asset_residency_tests PRIVATE GLOOM_ALLOCATION_PROFILE=1)
+    add_test(NAME gloom.asset_residency COMMAND gloom_asset_residency_tests)
+    set_tests_properties(gloom.asset_residency PROPERTIES TIMEOUT 20)
 
     add_test(NAME gloom.sdl_smoke COMMAND gloom --smoke-test)
     add_executable(gloom_visual_capture_tests tests/visual_capture_tests.cpp)

@@ -156,7 +156,7 @@ int main() try {
         check(animator.update(runtime, view, 1.0 / 60).cut, "Respawn retained skin history");
         const auto uploads = assets::build_gpu_scene_uploads(rig, {123});
         check(uploads.primitives[0].arms_mesh.value != 0, "No original FPS arm geometry");
-        check(uploads.meshes.back().vertices[0].weights == rig.primitives[0].vertices[0].weights, "GPU bridge dropped bone weights");
+        check(uploads.meshes[uploads.meshes.size() - 1].vertices[0].weights == rig.primitives[0].vertices[0].weights, "GPU bridge dropped bone weights");
         std::cout << name << ": original clips=" << rig.animations.size() << ", deformation=" << deformation << ", grip=" << frame.left_grip.x << ','
                   << frame.left_grip.y << ',' << frame.left_grip.z << '\n';
     }

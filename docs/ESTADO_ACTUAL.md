@@ -1,7 +1,7 @@
 # Traspaso de Gloom
 
-Actualizado: 7 de octubre de 2026, **hito 117 terminado con STL autorizada**; referencias Hound 132 terminadas el 6 de octubre.
-C++: 117 último cerrado; 118–130 pendientes. H07 terminada en v17; H08 no iniciada.
+Actualizado: 7 de octubre de 2026, **hito 118 terminado; 117 conserva su STL autorizada**; referencias Hound 132 terminadas el 6 de octubre.
+C++: 118 último cerrado; 119–130 pendientes. H07 terminada en v17; H08 no iniciada.
 
 **Hound 132:** añadidos `assets-source/hound/ref/Hound_head_detail.jpg` y
 `Hound_gauntlets_detail.png`, copias SHA-256 idénticas a los dos nuevos adjuntos.
@@ -21,9 +21,32 @@ individuales pendientes, trabajo/exportes y plan/prompt Meshy documentados.
 **waiting for turnaround completion; do not call MCP yet.** No generación,
 recortes ni ejecución MCP. Próximo paso: preparar/revisar las cuatro vistas
 contra el master y las notas. V16/v17, rig/acción y exportaciones conservados.
-El 131 conserva los números 116–130 para el plan C++; 116/117 terminados, 118–130 pendientes.
+El 131 conserva los números 116–130 para el plan C++; 116/117/118 terminados, 119–130 pendientes.
 Commit local del 131; resolver con `rtk git log -1 --oneline --grep='^hito 131:'`.
 Sin push; H08 continúa pendiente. El avance C++ se detalla abajo.
+
+**118 terminado: carga y residencia propias.** [Informe](../reports/cpp-performance-118/README.md).
+Slots con generación/handles fijados; datos de preparación prestados, resultado
+movido y publicación sincronizada. Prioridades y referencias con tablas/scratch
+propios; decode/rig en job. ImportedScene/bind_rig redundante retirado, consumidores
+usan AnimationRig propio. Cancel purga uploads pendientes antes del retiro GPU
+existente. DTO STL del 117 y paquetes/colas legacy 119 enumerados; no cierre global.
+
+Mil updates queued: **12.000 → 0 new** dentro de capacidad, con control positivo;
+ready ya era cero. Pico propio inicial Factory/Hound **−32,47 %/−33,25 %**;
+carga inicial Hound **−7,64 %**, reload Hound **−9,98 %**; sin mejora FPS atribuida.
+Builds/formato correctos, 7/7 focalizadas Release/Debug. Suites **51/55 y 52/55**:
+mismos tres comparadores heredados y GNS 25 solo Release. 199 C++/55 CTest.
+67 capturas finales pasan; 54 UI idénticas. Control del ejecutable antiguo reproduce
+variabilidad 3D: primera serie Factory idéntica/control personajes max1/255;
+repetición final conserva comparadores, con max completo 243/254 respecto a base.
+Detalles/hashes en informe. Hound **0/1.440 >5 ms**, p99<4 ms, 345,26 MiB, missing/evictions cero.
+
+GPU compartida por ID conserva payload hasta última referencia; reemplazarlo con
+otros consumidores vivos/retirar uso enviado sigue bajo 119. Las generaciones CPU
+viejas nunca sustituyen slot/caché activa ni publican residencia. [Contratos y límites](../reports/cpp-performance-118/README.md).
+Commit local: `rtk git log -1 --oneline --grep='^hito 118:'`; sin push.
+**Siguiente 119 pendiente de encargo.** Arte/H08/Meshy y canon 131/132 conservados.
 
 **117 terminado: pipeline de assets con STL autorizada.** [Informe final](../reports/cpp-performance-117/README.md).
 VFS/Unicode y resultados de error, codecs/rig/mesh/texturas/cooker y datos Factory
@@ -43,8 +66,8 @@ Catálogo/bind del checkpoint preservados: memoria −10,08 %, order menor, **fi
 
 La excepción STL del 7 de octubre abarca el 117 y adaptaciones necesarias,
 registrada en AGENTS; fastgltf existente conservado. No autoriza STL global ni
-herencia/listeners Jolt. Async/residencia/renderer/Jolt legacy siguen bajo
-118/119/120 y cierre 128. No iniciar 118 sin encargo. Commit local verificado:
+herencia/listeners Jolt. Carga/residencia propias cerradas en 118; renderer/Jolt legacy siguen bajo
+119/120 y cierre 128. No iniciar 119 sin encargo. Commit local verificado:
 `rtk git log -1 --oneline --grep='^hito 117: optimizar'`; sin push.
 
 **116: registro de entidades nativo y estable.**
@@ -76,15 +99,15 @@ por frame; estrés 2.048 mediana 48,8 → 37,2 µs, sin FPS global atribuido.
 1.200 capturas alineadas, identidades/eventos/métricas conservados.
 [Informe 115](../reports/cpp-performance-115/README.md).
 
-**117 cerrado; siguiente 118 pendiente de encargo.** [Índice 112–130](cpp/tasks/README.md).
-198 archivos propios/54 CTest inventariados. Diagnóstico opcional OFF, recompilado.
-Persisten headers/bloques legacy según dueños 118/119/120/122 y cierre transversal
+**118 cerrado; siguiente 119 pendiente de encargo.** [Índice 112–130](cpp/tasks/README.md).
+199 archivos propios/55 CTest inventariados. Diagnóstico opcional OFF, recompilado.
+Persisten headers/bloques legacy según dueños 119/120/122 y cierre transversal
 128; no afirmar cumplimiento global de C++. **Jolt listeners virtuales siguen
 bloqueando el cierre de 120/128**, pendiente de decisión expresa o alternativa
 equivalente. La excepción STL del 117 sí está autorizada y se verificará en 128.
 [Evidencia 112](../reports/cpp-performance-112/compatibilidad.md).
 112 `268db47` y 113 `8b96c71` subidos a origin/main por el encargo anterior.
-114 `892463a`, 115 `4cf8af8`, 131 `2b98e83`, cierre 116 y cierre 117 locales, sin push; verificar:
+114 `892463a`, 115 `4cf8af8`, 131 `2b98e83`, cierre 116, cierre 117 y cierre 118 locales, sin push; verificar:
 `rtk git log -1 --oneline --grep='^hito 116:'`.
 
 **114:** JobSystem nativo, FixedFunction inline 80/8, grupos caller-owned estables,

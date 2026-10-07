@@ -67,6 +67,12 @@ template <typename T> class Array {
         reserve(count_ + 1);
         values_[count_++] = value;
     }
+    void push_back(T&& value) {
+        assert(!values_ || reinterpret_cast<size_t>(&value) < reinterpret_cast<size_t>(values_) ||
+               reinterpret_cast<size_t>(&value) >= reinterpret_cast<size_t>(values_ + capacity_));
+        reserve(count_ + 1);
+        values_[count_++] = static_cast<T&&>(value);
+    }
     T& operator[](size_t index) {
         assert(index < count_);
         return values_[index];

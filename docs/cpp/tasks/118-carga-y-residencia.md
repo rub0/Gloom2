@@ -1,9 +1,9 @@
 # Hito 118: Carga asíncrona y residencia con propiedad explícita
 
-Estado: **no iniciado**. Depende de: **114 y 117**.
+Estado: **terminado**, 7 de octubre de 2026. Depende de: **114 y 117**.
 Objetivo: **CPU, memoria y vidas útiles**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
-6 archivos propietarios a este hito. Los cambios de firmas incluyen
+7 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
 ## Evidencia de partida
@@ -28,6 +28,7 @@ Entradas principales verificadas (no es una lista exhaustiva de callers):
 - [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp)
 - [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp)
 - [src/assets/scene_gpu_bridge.cpp](../../../src/assets/scene_gpu_bridge.cpp)
+- [tests/asset_residency_tests.cpp](../../../tests/asset_residency_tests.cpp)
 
 Además se adaptan todos los callers afectados por firmas/lifetime, aunque tengan otro responsable de cierre.
 
@@ -70,6 +71,30 @@ generación antigua publica resultados.
 Entregar informe `reports/cpp-performance-118/README.md`, actualizar esta
 ficha/índice y estado; commit local `hito 118: resultado concreto`, verificado
 con hash y workspace. Si un contrato no se satisface, documentar bloqueo; no cerrar.
+
+## Resultado verificado
+
+Slots con generación/handles fijados, tablas y scratch propios; decode/rig en
+job, publicación sincronizada y salida movida. Raw ImportedScene/bind_rig retirados
+tras comprobar todos los callers; queda AnimationRig propio. Cancel purga uploads
+pendientes en el backend compartido; uso GPU enviado conserva política del 119.
+Sin STL directo propio; DTO/codec del 117 y paquetes/colas legacy 119 enumerados
+en el [informe](../../../reports/cpp-performance-118/README.md). No cumplimiento global.
+La generación loader retirada termina solo para pins antiguos; nunca sustituye
+la nueva caché. GPU por ID sigue compartida hasta última referencia; reemplazo
+de contenido compartido/versions queda en 119, sin cambio del contrato anterior.
+
+1.000 queued updates dentro de capacidad: 12.000 → 0 new; ready ya era cero.
+Pico propio inicial Factory/Hound −32,47 %/−33,25 %; tiempos y límites en
+[medidas](../../../reports/cpp-performance-118/medidas.md). Sin ganancia FPS atribuida.
+Builds/formato correctos; 7/7 focalizadas Release/Debug, suites 51/55 y 52/55,
+mismos fallos heredados. 67 capturas finales pasan y 54 UI son idénticas; control
+antiguo confirma variabilidad 3D. Identidad parcial de primera serie y diferencias
+completas de repetición final documentadas sin ocultar max243/254 frente a base. Hound GPU345,26 MiB,
+0/1.440 >5 ms en ambas series, missing/evictions/budget medido cero.
+
+Commit local: `rtk git log -1 --oneline --grep='^hito 118:'`; sin push.
+119 no iniciado. Esta ficha conserva la investigación y secuencia originales.
 
 ## Encargo para ejecutarlo aisladamente
 

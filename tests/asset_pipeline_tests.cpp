@@ -491,15 +491,15 @@ void test_gltf_cooking_and_async_loading() {
     expect(jobs.start() == nullptr, "JobSystem initialization failed");
     {
         gloom::assets::AsyncAssetLoader loader{jobs, filesystem, catalog};
-        const std::shared_future<gloom::assets::AssetLoadResult> scene_future = loader.request(cooked->scene.id);
-        const std::shared_future<gloom::assets::AssetLoadResult> cached_future = loader.request(cooked->scene.id);
-        const std::shared_future<gloom::assets::AssetLoadResult> missing_future = loader.request({.value = 999'999});
+        const gloom::assets::AssetLoadHandle scene_future = loader.request(cooked->scene.id);
+        const gloom::assets::AssetLoadHandle cached_future = loader.request(cooked->scene.id);
+        const gloom::assets::AssetLoadHandle missing_future = loader.request({.value = 999'999});
         loader.wait();
         const gloom::assets::AssetLoadResult& loaded = scene_future.get();
         const gloom::assets::AssetLoadResult& cached = cached_future.get();
         const gloom::assets::AssetLoadResult& missing = missing_future.get();
         expect(loaded.state == gloom::assets::AssetLoadState::ready && cached.state == gloom::assets::AssetLoadState::ready &&
-                   missing.state == gloom::assets::AssetLoadState::error_placeholder && !missing.error.empty() && !missing.asset.payload.empty(),
+                   missing.state == gloom::assets::AssetLoadState::error_placeholder && missing.error.size() != 0 && !missing.asset.payload.empty(),
             "Asynchronous loader did not return ready and placeholder assets "
             "correctly");
         const gloom::assets::AssetLoaderMetrics metrics = loader.metrics();
@@ -530,9 +530,8 @@ void test_gltf_cooking_and_async_loading() {
 
             wait_until(coordinator, critical, gloom::assets::SceneResidencyState::ready);
             const gloom::assets::ResidentScene* resident = coordinator.scene(critical);
-            expect(resident != nullptr && resident->generation == 1 && resident->instances.size() == 1 &&
-                       resident->instances.front().transform.position.x == 2.0F && renderer.mesh_uploads == 1 && renderer.texture_uploads == 1 &&
-                       renderer.material_uploads == 1,
+            expect(resident != nullptr && resident->generation == 1 && resident->instances.size() == 1 && resident->instances[0].transform.position.x == 2.0F &&
+                       renderer.mesh_uploads == 1 && renderer.texture_uploads == 1 && renderer.material_uploads == 1,
                 "Imported scene hierarchy or GPU dependencies were not instantiated");
 
             gloom::assets::ImportedScene changed_scene = *scene;
@@ -551,8 +550,8 @@ void test_gltf_cooking_and_async_loading() {
             coordinator.reload(critical);
             wait_until(coordinator, critical, gloom::assets::SceneResidencyState::ready);
             resident = coordinator.scene(critical);
-            expect(resident != nullptr && resident->generation == 2 && resident->instances.front().transform.position.x == 4.0F &&
-                       loader.metrics().invalidations >= 2,
+            expect(
+                resident != nullptr && resident->generation == 2 && resident->instances[0].transform.position.x == 4.0F && loader.metrics().invalidations >= 2,
                 "Hot reload did not replace the resident scene generation");
 
             const gloom::assets::SceneTicket shared = coordinator.request_scene(cooked->scene.id, gloom::assets::AssetPriority::high);
@@ -590,7 +589,8 @@ void test_gltf_cooking_and_async_loading() {
                 pause.release();
                 coordinator.update();
                 expect(coordinator.state(cancelled) == gloom::assets::SceneResidencyState::cancelled && coordinator.scene(cancelled) == nullptr &&
-                           renderer.mesh_uploads + renderer.texture_uploads + renderer.material_uploads == uploads_before,
+                           renderer.mesh_uploads + renderer.texture_uploads + renderer.material_uploads == uploads_before &&
+                           coordinator.metrics().stale_preparations >= 1,
                     "Discarded preparation published assets into a cancelled generation");
             }
             {

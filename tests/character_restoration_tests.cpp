@@ -64,7 +64,7 @@ int main() {
                     material.extra_textures[0] != assets::no_asset_index && material.emissive[0] >= 4,
             "Character metal/normal/glow material lost");
         const assets::GpuSceneUploads uploads = assets::build_gpu_scene_uploads(*roundtrip, {.value = 700});
-        require(!uploads.meshes.empty() && uploads.materials[0].metallic == 1, "Character presentation upload failed");
+        require(uploads.meshes.size() != 0 && uploads.materials[0].metallic == 1, "Character presentation upload failed");
         assets::ImportedScene bad = *source;
         bad.primitives[0].vertices[0].weights[0] = std::numeric_limits<float>::quiet_NaN();
         require(!assets::validate_imported_scene(bad), "Malformed rig accepted");

@@ -7,6 +7,7 @@
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
+#include <stdio.h>
 
 int main(int argc, char** argv) try {
     using namespace gloom;
@@ -16,6 +17,38 @@ int main(int argc, char** argv) try {
     window.start();
     backends::DiligentRenderer renderer{window, {.vertical_sync = false, .temporal = {.technique = render::TemporalTechnique::disabled}}};
     renderer.start();
+    render::MeshUpload cancelled_mesh{
+        .id = {110}, .vertices = {{.position = {0, 0, 0}}, {.position = {1, 0, 0}}, {.position = {0, 1, 0}}}, .indices = {0, 1, 2}};
+    renderer.enqueue(static_cast<render::MeshUpload&&>(cancelled_mesh));
+    render::TextureUpload cancelled_texture{.id = {111}};
+    cancelled_texture.mip_levels.resize(1);
+    cancelled_texture.mip_levels[0].width = cancelled_texture.mip_levels[0].height = 1;
+    cancelled_texture.mip_levels[0].data.resize(4);
+    renderer.enqueue(static_cast<render::TextureUpload&&>(cancelled_texture));
+    renderer.enqueue(render::MaterialUpload{.id = {112}});
+    renderer.release({110});
+    renderer.release({111});
+    renderer.release({112});
+    renderer.enqueue(render::MaterialUpload{.id = {113}});
+    renderer.release({113});
+    renderer.enqueue(render::MaterialUpload{.id = {113}});
+    renderer.begin_frame();
+    renderer.end_frame();
+    if (renderer.residency_metrics().queued_bytes != 0 || renderer.asset_state({110}) != render::GpuAssetState::missing ||
+        renderer.asset_state({111}) != render::GpuAssetState::missing || renderer.asset_state({112}) != render::GpuAssetState::missing) {
+        fputs("Cancelled queued upload became resident\n", stderr);
+        renderer.stop();
+        window.stop();
+        return 1;
+    }
+    // A fresh upload after release remains a valid new request.
+    if (renderer.asset_state({113}) != render::GpuAssetState::resident) {
+        fputs("Fresh upload was cancelled by an older release\n", stderr);
+        renderer.stop();
+        window.stop();
+        return 1;
+    }
+    renderer.release({113});
     render::MeshUpload sphere{.id = {100}};
     constexpr unsigned columns = 48, rows = 24;
     for (unsigned y = 0; y <= rows; ++y)

@@ -1,60 +1,31 @@
 #pragma once
-
 #include <gloom/assets/asset_loader.hpp>
-#include <gloom/assets/gltf_importer.hpp>
 #include <gloom/assets/animation.hpp>
-#include <gloom/core/job_system.hpp>
 #include <gloom/render/renderer.hpp>
 
-#include <cstdint>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 namespace gloom::assets {
-
 struct SceneTicket {
-    std::uint64_t value{0};
+    uint64 value{0};
     [[nodiscard]] bool operator==(const SceneTicket&) const noexcept = default;
 };
-
-enum class AssetPriority : std::uint8_t { background, normal, high, critical };
-enum class SceneResidencyState : std::uint8_t {
-    queued,
-    loading_scene,
-    loading_dependencies,
-    preparing,
-    uploading,
-    ready,
-    failed,
-    cancelled,
-};
-
+enum class AssetPriority : uint8 { background, normal, high, critical };
+enum class SceneResidencyState : uint8 { queued, loading_scene, loading_dependencies, preparing, uploading, ready, failed, cancelled };
+// Owned by a stable request. Instance/rig views expire on reload, cancel or coordinator
+// destruction; callers must retire their CPU views before those operations.
 struct ResidentScene {
     AssetId asset;
-    std::uint64_t generation{0};
-    std::vector<render::RenderInstance> instances;
-    std::shared_ptr<const ImportedScene> bind_rig;
+    uint64 generation{0};
+    Array<render::RenderInstance> instances;
     AnimationRig animation_rig;
 };
-
 struct ResidencyCoordinatorSettings {
-    std::uint32_t new_scene_requests_per_update{2};
+    uint32 new_scene_requests_per_update{2};
 };
-
 struct ResidencyCoordinatorMetrics {
-    std::uint64_t requested{0};
-    std::uint64_t dispatched{0};
-    std::uint64_t cancelled{0};
-    std::uint64_t reloaded{0};
-    std::uint64_t ready{0};
-    std::uint64_t failed{0};
-    std::uint64_t shared_resource_hits{0};
+    uint64 requested{0}, dispatched{0}, cancelled{0}, reloaded{0}, ready{0}, failed{0}, shared_resource_hits{0}, stale_preparations{0};
 };
-
-// Borrowed backend callbacks; context outlives the coordinator and its drained preparation tasks.
-// Upload callbacks take ownership; release follows the backend's existing GPU lifetime policy.
+// Context outlives coordinator and drained tasks; uploads transfer ownership.
+// release cancels queued uploads and retires executing GPU use according to the backend.
 struct AssetUploadSink {
     void* context{nullptr};
     bool (*texture_compression_bc)(const void*){nullptr};
@@ -64,7 +35,6 @@ struct AssetUploadSink {
     void (*release)(void*, render::RenderAssetId){nullptr};
     render::GpuAssetState (*state)(const void*, render::RenderAssetId){nullptr};
 };
-
 class AssetResidencyCoordinator final {
   public:
     AssetResidencyCoordinator(
@@ -72,39 +42,46 @@ class AssetResidencyCoordinator final {
     AssetResidencyCoordinator(
         core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, AssetUploadSink renderer, ResidencyCoordinatorSettings settings = {});
     ~AssetResidencyCoordinator();
-
     AssetResidencyCoordinator(const AssetResidencyCoordinator&) = delete;
     AssetResidencyCoordinator& operator=(const AssetResidencyCoordinator&) = delete;
-
     [[nodiscard]] SceneTicket request_scene(AssetId scene, AssetPriority priority = AssetPriority::normal);
     void cancel(SceneTicket ticket);
     void reload(SceneTicket ticket);
     void update();
-
-    // ticket must come from this coordinator's request_scene; unknown tickets assert.
+    // All public operations are serialized by the consumer. Jobs only publish under publication_.
+    // state requires a ticket from this coordinator; invalid tickets assert.
     [[nodiscard]] SceneResidencyState state(SceneTicket ticket) const;
     [[nodiscard]] const ResidentScene* scene(SceneTicket ticket) const noexcept;
-    [[nodiscard]] std::string_view error(SceneTicket ticket) const noexcept;
+    [[nodiscard]] const char* error(SceneTicket ticket) const noexcept;
     [[nodiscard]] ResidencyCoordinatorMetrics metrics() const noexcept;
 
   private:
     struct PreparedScene;
     struct PreparationContext;
     struct Request;
-
+    struct Reference {
+        render::RenderAssetId id;
+        uint32 count{0};
+    };
+    struct Queued {
+        uint64 ticket{0};
+        Request* request{nullptr};
+    };
+    Request* find(SceneTicket ticket) const;
+    size_t resource_position(render::RenderAssetId id) const;
     void release_resources(Request& request);
-    void fail(Request& request, std::string error);
-
+    void discard(Request& request);
+    void fail(Request& request, const char* error);
     core::JobSystem& jobs_;
     AsyncAssetLoader& loader_;
     const AssetCatalog& catalog_;
     AssetUploadSink renderer_;
     ResidencyCoordinatorSettings settings_;
     core::TaskGroup preparation_tasks_;
-    std::unordered_map<std::uint64_t, Request> requests_;
-    std::unordered_map<render::RenderAssetId, std::uint32_t, render::RenderAssetIdHash> resource_references_;
+    mutable SRWLOCK publication_{SRWLOCK_INIT};
+    Array<Request*> requests_;
+    Array<Reference> references_;
+    Array<Queued> queued_;
     ResidencyCoordinatorMetrics metrics_;
-    std::uint64_t next_ticket_{1};
 };
-
-} // namespace gloom::assets
+}

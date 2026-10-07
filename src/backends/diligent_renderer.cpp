@@ -1565,6 +1565,28 @@ void DiligentRenderer::enqueue(render::MaterialUpload upload) {
 
 void DiligentRenderer::release(const render::RenderAssetId id) {
     std::scoped_lock lock{impl_->upload_mutex};
+    // Cancelling residency also cancels deferred CPU uploads. Already submitted
+    // resources still use the existing fence retirement in process_uploads().
+    for (decltype(impl_->mesh_uploads)::iterator upload = impl_->mesh_uploads.begin(); upload != impl_->mesh_uploads.end();) {
+        if (upload->id == id) {
+            impl_->residency_metrics.queued_bytes -= upload_size(*upload);
+            upload = impl_->mesh_uploads.erase(upload);
+        } else
+            ++upload;
+    }
+    for (decltype(impl_->texture_uploads)::iterator upload = impl_->texture_uploads.begin(); upload != impl_->texture_uploads.end();) {
+        if (upload->id == id) {
+            impl_->residency_metrics.queued_bytes -= upload_size(*upload);
+            upload = impl_->texture_uploads.erase(upload);
+        } else
+            ++upload;
+    }
+    for (decltype(impl_->material_uploads)::iterator upload = impl_->material_uploads.begin(); upload != impl_->material_uploads.end();) {
+        if (upload->id == id)
+            upload = impl_->material_uploads.erase(upload);
+        else
+            ++upload;
+    }
     impl_->release_requests.push_back(id);
 }
 

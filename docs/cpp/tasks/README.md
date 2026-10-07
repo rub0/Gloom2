@@ -1,8 +1,8 @@
 # Plan de optimización y migración C++ de Gloom
 
 Formalizado en el **hito 111**, 3 de octubre de 2026. Código investigado: `5b96a91`
-(110). **13 hitos pendientes, 118–130; 112–117 terminados**, con fichas, dependencias, contratos,
-medidas y pruebas. Base 111: 188 archivos/50 CTest; actual 117 cerrado: 198 archivos/54 CTest.
+(110). **12 hitos pendientes, 119–130; 112–118 terminados**, con fichas, dependencias, contratos,
+medidas y pruebas. Base 111: 188 archivos/50 CTest; actual 118 cerrado: 199 archivos/55 CTest.
 El 128 revisa todo el código además de su prueba de captura; 129/130 son
 transversales y no tienen archivos propietarios nuevos.
 
@@ -11,8 +11,12 @@ Para empezar: leer inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 **117 terminado**, con STL autorizada en su alcance el 7 de octubre de 2026.
 [Informe 117](../../../reports/cpp-performance-117/README.md): pipeline/VFS/cooker/
 Factory revisados, formatos conservados, memoria de cook alrededor de 22 % menor,
-encode aproximadamente 34 % menor. Siguiente **118**, pendiente de encargo;
+encode aproximadamente 34 % menor. Siguiente **119**, pendiente de encargo;
 los callers adaptados no cierran automáticamente sus módulos.
+**118 terminado:** [informe](../../../reports/cpp-performance-118/README.md),
+slots/handles y residencia propios, scratch sin asignaciones y menor pico de
+carga; publicaciones viejas descartadas y cancel de upload pendiente corregido.
+DTO del 117/paquetes legacy 119 enumerados; no cierre global ni inicio de 119.
 El [116](../../../reports/cpp-performance-116/README.md) cierra el registro nativo,
 punteros estables y reutilización sin asignaciones, con medidas CPU/memoria. El [115](../../../reports/cpp-performance-115/README.md)
 cierra partículas/efectos con salida persistente, cero asignaciones por frame
@@ -31,7 +35,7 @@ Renderer y contenido conservados. Decisión externa Jolt pendiente en 120/128.
 | 115 | [Partículas y efectos con salida persistente](115-particulas.md) | 113 y 114 | Terminado | 5 |
 | 116 | [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) | 112 y 115 por secuencia | Terminado | 3 |
 | 117 | [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) | 113, 114 y 116 | Terminado; STL autorizada | 19 |
-| 118 | [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) | 114 y 117 | No iniciado | 6 |
+| 118 | [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) | 114 y 117 | Terminado | 7 |
 | 119 | [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) | 113, 117 y 118 | No iniciado | 21 |
 | 120 | [Física y consultas con eventos reutilizables](120-fisica.md) | 116 y 119; decisión de compatibilidad Jolt de 112 resuelta | No iniciado; cierre bloqueado | 6 |
 | 121 | [Audio sin propietarios compartidos ni temporales de mezcla](121-audio.md) | 114 y 117 | No iniciado | 12 |

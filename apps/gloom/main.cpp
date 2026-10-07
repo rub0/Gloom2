@@ -1114,9 +1114,9 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 factory_lift_failure_reported = true;
             }
             const auto* scene = factory_residency->scene(*factory_lift_ticket);
-            if (scene != nullptr && !scene->instances.empty() && scene->generation != factory_lift_generation && factory_lift_visual) {
+            if (scene != nullptr && scene->instances.size() != 0 && scene->generation != factory_lift_generation && factory_lift_visual) {
                 auto& visual = visual_bodies[*factory_lift_visual];
-                visual.mesh = scene->instances.front().mesh;
+                visual.mesh = scene->instances[0].mesh;
                 visual.previous.scale = {1.0F, 1.0F, 1.0F};
                 visual.current.scale = {1.0F, 1.0F, 1.0F};
                 factory_lift_generation = scene->generation;
@@ -1169,11 +1169,11 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             }
             const auto* scene = residency.scene(*character_tickets[index]);
             if (original_characters) {
-                if (scene && !scene->instances.empty() && scene->bind_rig)
+                if (scene && scene->instances.size() != 0 && scene->animation_rig.nodes.size() != 0)
                     character_generations[index] = scene->generation;
                 continue;
             }
-            if (performance_hound && index == 0 && scene && scene->bind_rig && !scene->instances.empty()) {
+            if (performance_hound && index == 0 && scene && scene->animation_rig.nodes.size() != 0 && scene->instances.size() != 0) {
                 character_generations[index] = scene->generation;
                 continue;
             }
@@ -1199,7 +1199,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             }
             const auto* scene = residency->scene(*ticket);
             if (original_characters && &meshes == &weapon_meshes) {
-                if (scene && !scene->instances.empty())
+                if (scene && scene->instances.size() != 0)
                     generation = scene->generation;
                 return;
             }
@@ -2011,7 +2011,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                 for (gloom::render::RenderInstance instance : scene.instances) {
                     instance.animation_actor = actor;
                     instance.animation_generation = generation;
-                    if (frame && scene.bind_rig) {
+                    if (frame && scene.animation_rig.nodes.size() != 0) {
                         const gloom::uint64 skin_started = performance_test ? gloom::performance_clock() : 0;
                         if (fps) {
                             if (!instance.arms_mesh.value)
@@ -2049,7 +2049,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                     current.push_back(instance);
                 }
             };
-            if (opponent_scene && opponent_scene->bind_rig) {
+            if (opponent_scene && opponent_scene->animation_rig.nodes.size() != 0) {
                 for (std::size_t i = 0; i < 9; ++i)
                     complete_instances[base + i].transform.scale = {};
                 const unsigned count = performance_eight && (!performance_hound || performance_hound_eight) ? 7U : 1U;
@@ -2101,7 +2101,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                     }
                 }
             }
-            if (local_weapon_scene && local_scene && local_scene->bind_rig) {
+            if (local_weapon_scene && local_scene && local_scene->animation_rig.nodes.size() != 0) {
                 const gloom::uint64 pose_started = performance_test ? gloom::performance_clock() : 0;
                 const gloom::gameplay::CharacterAnimationFrame& frame =
                     local_animator.update(local_scene->animation_rig, slice.player, elapsed, false, false, true);
@@ -2208,7 +2208,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
                                                                                                       : gloom::render::Color{1, .48F, .12F, 1})
                         : gloom::render::Color{};
                 append(*character_scene, parent, false, tint);
-                if (weapon_scene && slice.opponent.alive && character_scene->bind_rig) {
+                if (weapon_scene && slice.opponent.alive && character_scene->animation_rig.nodes.size() != 0) {
                     const gloom::assets::AnimationRig& rig = character_scene->animation_rig;
                     const gloom::uint32 joint = gloom::assets::animation_node(rig, "Bip001 R Hand");
                     if (joint < rig.nodes.size()) {
