@@ -1,6 +1,7 @@
 # Hito 117: avance del catálogo y evaluación de bind
 
-**Iniciado, parcial; no cerrado.** 5 de octubre de 2026. Base `f38a4a8`.
+**Iniciado, parcial; no cerrado.** Avance técnico del 5 de octubre de 2026. Base `f38a4a8`.
+Decisión STL registrada el 7 de octubre de 2026; las medidas anteriores no cambian.
 Ponytail full. Se conservan dependencias, renderer, protocolo 22, formatos y arte.
 No push ni inicio del 118. Setup Hound 131 conservado, sin llamadas Meshy.
 
@@ -57,7 +58,7 @@ No se atribuyen FPS globales ni se recertifica la partida humana de ocho.
 Los resultados de la última suite completa siguen siendo los del 116.
 198 archivos C++ propios /54 CTest; diagnóstico del runtime OFF.
 
-## Condición pendiente y continuación
+## STL autorizada y continuación pendiente
 
 La API instalada fastgltf **0.9.0**, core.hpp:891/898/905, exige
 `std::filesystem::path` en loadGltf/loadGltfJson/loadGltfBinary. FromBytes exige
@@ -65,27 +66,41 @@ La API instalada fastgltf **0.9.0**, core.hpp:891/898/905, exige
 actual usa FromPath y loadGltf en gltf_importer.cpp:239/312, sin cambios en este avance.
 [Evidencia previa](../cpp-performance-112/compatibilidad.md).
 
-AGENTS.md prohíbe headers y facilities STL propios salvo initializer_list para
-Span. Se ha pedido decidir si se permiten únicamente los tipos/operaciones que
-exige fastgltf en el adaptador. **No hay autorización registrada**; el trabajo no
-introduce un puente STL nuevo ni esconde el código en vendor. No concede la
-excepción de listeners Jolt del 120. Los campos legacy de AssetRecord, VFS,
-ImportedScene y APIs de formatos siguen pendientes; no se certifica cumplimiento
-literal del pipeline ni flags finales sin excepciones/RTTI.
+El 7 de octubre de 2026 el usuario indicó: **«vale entonces usa la stl para esta tarea»**.
+La excepción se registra en [AGENTS](../../AGENTS.md) y en la
+[ficha 117](../../docs/cpp/tasks/117-assets-y-cooker.md): permite STL en los 19
+archivos propietarios del 117 y las adaptaciones necesarias de sus callers.
+Conservar los strings/vistas, vectores/arrays, filesystem, expected y tipos
+requeridos por fastgltf que simplifican el pipeline. No escribir sustitutos
+propios de texto/resultados/archivos ni cambiar dependencias por esa prohibición.
+La frontera fastgltf queda **desbloqueada por autorización expresa**.
+
+La autorización no se extiende a otros hitos ni elimina las restantes reglas:
+Span/FixedFunction y enteros propios, sin mapas/shared ownership, sin
+excepciones/RTTI/herencia, errores externos útiles, propiedad y rendimiento.
+No concede la excepción de listeners Jolt del 120. VFS/modelos/codecs/cooker/
+Factory y sus pruebas todavía necesitan esa revisión y validación final.
+Este cambio es documental: no modifica C++, dependencias, formatos ni medidas;
+el 117 continúa parcial y no se certifican flags finales ni cumplimiento global.
 
 Continuar el mismo 117, en este orden:
 
-1. Resolver la frontera fastgltf expresamente. Mantener formatos/dependencias;
-   si se concede una excepción, enumerar sus tipos y limitarla al adaptador.
-2. Añadir texto/vista, bytes y resultados con su consumidor; migrar VFS/rutas
-   nativas preservando Unicode y bloqueo de escapes. Convertir metadatos del
-   catálogo; conservar el índice y su contrato de punteros ya comprobado.
-3. Migrar importación/rig/mesh/material/texture, codecs, cooker, Factory y sus
-   consumidores/pruebas según la ficha. Conservar BC5/BC7, fallback y recursos.
+1. Conservar fastgltf y la STL permitida; no sustituir los tipos existentes
+   solo por estilo. Enumerar los usos finales de la excepción al cerrar.
+2. Revisar VFS/rutas preservando Unicode y bloqueo de escapes; resolver sus
+   errores mediante resultados explícitos, sin throw. Conservar el índice del
+   catálogo y su contrato de punteros ya comprobado.
+3. Revisar importación/rig/mesh/material/texture, codecs, cooker, Factory y sus
+   consumidores/pruebas según la ficha; evitar copias/asignaciones innecesarias
+   y cumplir las otras reglas. Conservar BC5/BC7, fallback y recursos.
 4. Ejecutar pruebas de formatos históricos/corrupción, Unicode/traversal y
    ownership; aplicar/verificar los flags finales y medir cook/load completo.
 5. Solo entonces cerrar ficha/estado y crear el commit de hito terminado.
 
-Este commit es un **checkpoint del avance**, no el cierre del hito:
-`rtk git log -1 --oneline --grep='^hito 117:'`. Informe, ficha, índice e inventario
-actualizados. El 116 continúa siendo el último hito C++ cerrado.
+El commit `da72ffe` es un **checkpoint técnico del avance**, no el cierre del hito.
+La autorización STL se registra en un commit documental posterior:
+`rtk git log -1 --oneline --grep='^hito 117: autorizar STL'`.
+En esta revisión pasan diff --check, la comprobación de los 350 enlaces locales
+de los ocho documentos modificados y la búsqueda de bloqueos fastgltf obsoletos
+en los documentos activos. No se repiten builds/CTest porque solo cambia Markdown.
+El 116 continúa siendo el último hito C++ cerrado.

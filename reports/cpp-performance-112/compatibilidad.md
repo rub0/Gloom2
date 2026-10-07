@@ -55,6 +55,14 @@ Los filtros incorporados podrán usarse dentro del 120 aunque se autorice la fro
 
 ## fastgltf: parsing obliga a tipos STL en la frontera
 
+**Resolución posterior, 7 de octubre de 2026:** el usuario autorizó STL para
+el hito 117 («vale entonces usa la stl para esta tarea»). La excepción está
+registrada en [AGENTS](../../AGENTS.md) y en la
+[ficha 117](../../docs/cpp/tasks/117-assets-y-cooker.md); incluye fastgltf y los
+tipos estándar útiles del pipeline. El bloqueo STL de esta frontera queda resuelto
+por autorización, sin modificar dependencias. Jolt continúa pendiente. El texto
+siguiente conserva el diagnóstico y la condición que existían durante el 112.
+
 [core.hpp 0.9](https://github.com/spnda/fastgltf/blob/v0.9.0/include/fastgltf/core.hpp)
 y el instalado exigen `std::filesystem::path` como directorio en loadGltf y sus
 variantes. FromPath recibe ese path; FromBytes recibe `const std::byte*`; FromSpan

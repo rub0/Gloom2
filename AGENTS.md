@@ -19,6 +19,10 @@
 - Write simple, efficient, minimal C/C++ code.
 - Do not use C++ standard-library headers or facilities in project code, including utilities, examples, and tests.
   The sole exception is `<initializer_list>` and `std::initializer_list` for `Span` construction. C library headers (`*.h`) and functions are allowed.
+- Scoped user exception, 2026-10-07: C++ standard-library facilities are allowed for milestone 117 (assets, VFS, import, cooker, Factory data and their tests),
+  including the fastgltf adapter and necessary caller adaptations. Reuse existing strings, buffers, filesystem paths and results instead of writing replacements.
+  This does not authorize STL use in unrelated modules or later milestones. The other guidelines below still apply, including our own Span/FixedFunction,
+  integer types, no maps/shared ownership, no exceptions/RTTI and the performance review. See `docs/cpp/tasks/117-assets-y-cooker.md`.
 - Use our own `int8`, `uint8`, `int16`, `uint16`, `int32`, `uint32`, `int64`, and `uint64` types, defined with plain `typedef`s in one shared header.
   Use built-in integer types for those typedefs, and use our own `Span` and `FixedFunction` instead of their standard-library equivalents.
 - Avoid adding named variables for trivial expressions, especially when the value is used only once.

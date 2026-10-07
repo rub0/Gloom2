@@ -43,6 +43,12 @@ Actualización parcial 117: **198 archivos propios, 36,960 líneas y 54 CTest**.
 metadatos, VFS y pipeline aún legacy. No hay archivos C++ ni CTest nuevos.
 El 117 permanece abierto; las señales históricas no acreditan cierre de sus 19 archivos.
 
+Decisión del 7 de octubre de 2026: el usuario autoriza STL para el alcance del
+117 y las adaptaciones necesarias de callers, según AGENTS y su ficha. Las
+coincidencias STL de esos archivos deben revisarse con esa excepción; no cuentan
+automáticamente como infracciones. Las otras reglas y dueños siguen vigentes.
+Esta actualización documental no cambia archivos/líneas C++ ni CTest.
+
 ## Señales de búsqueda, no violaciones contabilizadas
 
 | Señal lexical | Archivos con coincidencias |

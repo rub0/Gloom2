@@ -8,9 +8,11 @@ transversales y no tienen archivos propietarios nuevos.
 
 Para empezar: leer inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [CONTEXTO](CONTEXTO.md) y **solo la ficha del hito**.
-Continuar **117**, iniciado parcialmente; su cierre mantiene el bloqueo fastgltf.
+Continuar **117**, iniciado parcialmente; STL autorizada el 7 de octubre de 2026,
+frontera fastgltf desbloqueada. La implementación/validación restante sigue pendiente.
 [Avance 117](../../../reports/cpp-performance-117/README.md): índice/recorrido de
-catálogo y evaluación de bind comprobados; texto/VFS/modelos/codecs aún pendientes.
+catálogo y evaluación de bind comprobados; VFS/modelos/codecs aún pendientes,
+conservando la STL existente donde simplifica según la excepción de AGENTS.
 El [116](../../../reports/cpp-performance-116/README.md) cierra el registro nativo,
 punteros estables y reutilización sin asignaciones, con medidas CPU/memoria. El [115](../../../reports/cpp-performance-115/README.md)
 cierra partículas/efectos con salida persistente, cero asignaciones por frame
@@ -19,7 +21,7 @@ cierra scheduler/capturas con trabajos nativos, grupos estables y cero asignacio
 por frame en esa ruta. El [113](../../../reports/cpp-performance-113/README.md)
 cierra poses persistentes con medidas y validación. El [112](../../../reports/cpp-performance-112/README.md)
 añade medición/contratos y probe de compatibilidad; no promete mejora de FPS.
-Renderer y contenido conservados. Decisión externa pendiente en 117/120/128.
+Renderer y contenido conservados. Decisión externa Jolt pendiente en 120/128.
 
 | Hito | Resultado previsto | Dependencias | Estado | Archivos propietarios |
 | --- | --- | --- | --- | ---: |
@@ -28,7 +30,7 @@ Renderer y contenido conservados. Decisión externa pendiente en 117/120/128.
 | 114 | [JobSystem y FixedFunction con grupos reutilizables](114-jobs.md) | 112 y 113, por secuencia del plan | Terminado | 4 |
 | 115 | [Partículas y efectos con salida persistente](115-particulas.md) | 113 y 114 | Terminado | 5 |
 | 116 | [EntityRegistry sin mapas ni RTTI y con direcciones seguras](116-entidades.md) | 112 y 115 por secuencia | Terminado | 3 |
-| 117 | [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) | 113, 114 y 116 | Parcial; cierre bloqueado | 19 |
+| 117 | [Datos de assets, VFS, importación y cooker](117-assets-y-cooker.md) | 113, 114 y 116 | Parcial; STL autorizada | 19 |
 | 118 | [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) | 114 y 117 | No iniciado | 6 |
 | 119 | [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) | 113, 117 y 118 | No iniciado | 21 |
 | 120 | [Física y consultas con eventos reutilizables](120-fisica.md) | 116 y 119; decisión de compatibilidad Jolt de 112 resuelta | No iniciado; cierre bloqueado | 6 |
@@ -64,9 +66,10 @@ Cada decisión se registra en el informe de su hito con medida y alternativa des
 
 El [probe 112](../../../reports/cpp-performance-112/compatibilidad.md) confirma
 filtros Jolt incorporados y polling simple, sin equivalencia completa de listeners.
-Los listeners Jolt y el filesystem de fastgltf chocan con las reglas literales:
-117/120/128 tienen cierre bloqueado hasta decisión expresa o alternativa equivalente.
-No hay excepción autorizada ni cambio de dependencia previsto.
+Los listeners Jolt siguen requiriendo decisión expresa o alternativa equivalente
+para cerrar 120/128. El usuario autorizó STL para el alcance del 117 el 7 de
+octubre de 2026: fastgltf queda desbloqueado y la validación 128 deberá comprobar
+esa excepción limitada. No hay excepción de herencia Jolt ni cambio de dependencia previsto.
 
 La migración de estilo/dependencias no se presenta como ahorro de FPS. Los hitos
 de rendimiento necesitan antes/después; si GPU domina o el ahorro queda en el ruido,

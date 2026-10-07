@@ -7,13 +7,14 @@ Fecha: 5 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
 115 terminado: [partículas persistentes](../../../reports/cpp-performance-115/README.md),
 116 terminado: [registro estable](../../../reports/cpp-performance-116/README.md),
 117 parcial: [catálogo y bind](../../../reports/cpp-performance-117/README.md),
-198 archivos/54 CTest; continuar 117, cierre bloqueado en fastgltf. Diagnóstico opcional OFF y bloqueos expresos
-de fronteras fastgltf/Jolt en 117/120/128. Sin excepción autorizada.
+198 archivos/54 CTest; continuar 117, con STL autorizada por el usuario el 7 de octubre de 2026.
+Diagnóstico opcional OFF; fastgltf desbloqueado por esa excepción. Jolt sigue pendiente en 120/128.
 Leer primero el inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [índice](README.md) y solo la ficha elegida.
 No cargar todas las fichas ni el historial. Ponytail full activo: usar lo ya
-existente y el mínimo cambio; la prohibición de STL del usuario prevalece sobre
-la preferencia de Ponytail por stdlib. No construir una biblioteca estándar completa.
+existente y el mínimo cambio; aplicar la excepción STL de AGENTS exclusivamente
+al alcance del 117. Fuera de ese alcance sigue la prohibición del usuario.
+No construir una biblioteca estándar completa.
 
 ## Alcance y decisiones firmes
 
@@ -29,15 +30,17 @@ la preferencia de Ponytail por stdlib. No construir una biblioteca estándar com
   demuestra ahorro en ejecución. Boost/EASTL no se incorporan por una supuesta
   superioridad global. SIMD, lock-free, SoA o arenas solo si un coste real lo exige.
 - Tipos propios compartidos ya existen en `core/types.hpp`; Span, Array y clock
-  del 110 se reutilizan. FixedFunction aparece con jobs en 114. Texto/resultados/
-  archivos se añaden con su primer consumidor (117), sin clonar APIs completas.
+  del 110 se reutilizan. FixedFunction aparece con jobs en 114. El 117 conserva
+  texto/resultados/archivos STL existentes por autorización expresa; no añade
+  sustitutos propios para esa tarea. Los futuros consumidores fuera de su
+  alcance se revisan según sus reglas, sin clonar APIs completas por anticipado.
 - Corregir usos prohibidos del módulo migrado y todos los callers afectados.
   Los restos heredados de otros módulos siguen registrados hasta 128: no declarar
   cumplimiento global antes ni introducir nuevas infracciones como puente.
 - Todas las fuentes C++ propias, apps, utilidades y tests están dentro del alcance.
   Bibliotecas externas conservan su código interno; ello no autoriza uso directo
-  de STL/herencia prohibidos en código Gloom. Cada conflicto debe resolverse,
-  no esconderse en vendor ni darse por exceptuado.
+  de STL/herencia prohibidos en código Gloom fuera de la excepción STL expresa
+  del 117. Cada conflicto debe resolverse, no esconderse en vendor ni darse por exceptuado.
 - Datos externos (archivo, red, HTTP, credenciales) y fallos de inicialización
   conservan resultados y errores útiles. Las precondiciones de programación
   usan asserts sin abort manual. No quitar validaciones de seguridad ni añadir
@@ -51,7 +54,7 @@ Las reglas de AGENTS se aplican en cada módulo; esta tabla asigna su cierre:
 
 | Regla/frente | Responsable y comprobación |
 | --- | --- |
-| Sin headers/facilities STL, mapas, algorithms o shared ownership propios | Hito de cada módulo; 128 revisa toda la cobertura, incluido tests/utilidades. |
+| STL según AGENTS y excepción 117; sin mapas/algorithms/shared ownership propios | Hito de cada módulo; 128 revisa toda la cobertura y el alcance de la excepción, incluido tests/utilidades. |
 | Tipos enteros propios; Span/ByteSpan/GpuRange por valor; structs grandes por referencia | Base 112, revisión de firmas en cada cambio y cierre 128. |
 | auto ordinario, variables triviales, lambdas/templates complejos y wrappers triviales | Cada módulo elimina usos afectados; 127/128 revisan residuos, también structs de un solo campo. |
 | Sin virtual/herencia/PIMPL/excepciones/RTTI | Cada dueño de módulo, conflicto Jolt en 112/120, flags efectivos de todos los targets en 128. |
@@ -89,7 +92,8 @@ de estilo: el comportamiento actual depende de esos callbacks.
 
 El probe del 112 confirma filtros incorporados y un caso simple con dos workers,
 pero no demuestra equivalencia completa de listeners. fastgltf también exige STL
-en su API de parsing. Ambos bloqueos están documentados con versión/API/prueba.
+en su API de parsing; el usuario la autorizó para el 117 el 7 de octubre de 2026.
+Ambas fronteras están documentadas con versión/API/prueba; solo Jolt sigue bloqueado.
 112 debía demostrar una alternativa sin herencia propia que conserve filtros,
 eventos entered/stayed/exited y multithreading. Si no la hay, el cierre literal
 de 120/128 requiere una decisión expresa del usuario sobre esa incompatibilidad.

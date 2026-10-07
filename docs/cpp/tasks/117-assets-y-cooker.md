@@ -1,6 +1,6 @@
 # Hito 117: Datos de assets, VFS, importación y cooker
 
-Estado: **iniciado, parcial; cierre pendiente**, 5 de octubre de 2026.
+Estado: **iniciado, parcial; STL autorizada, cierre pendiente**, 7 de octubre de 2026.
 Depende de: **113, 114 y 116 terminados**.
 [Avance, medidas y pendientes](../../../reports/cpp-performance-117/README.md).
 Objetivo: **Cumplimiento C++ y coste de carga**. Base de investigación: `5b96a91`.
@@ -8,13 +8,23 @@ Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 19 archivos propietarios a este hito. Los cambios de firmas incluyen
 todos los callers aunque su cierre final pertenezca a otro hito.
 
-## Bloqueo concreto registrado en 112
+## Decisión del usuario: STL autorizada para el 117
 
-**Cierre bloqueado** para la frontera externa, pendiente de decisión
-expresa del usuario o alternativa equivalente demostrada. fastgltf 0.9 exige std::filesystem::path para loadGltf y variantes; leer bytes con API C no elimina ese argumento.
+El 7 de octubre de 2026 el usuario indicó: **«vale entonces usa la stl para esta tarea»**.
+Se autoriza STL en el alcance del 117: sus 19 archivos propietarios y las
+adaptaciones necesarias de callers. Conservar fastgltf 0.9 y los tipos estándar
+existentes para texto/vistas, buffers, rutas y resultados; no crear sustitutos
+propios para cumplir una prohibición que aquí queda exceptuada. La autorización
+incluye el adaptador fastgltf y resuelve su bloqueo de compatibilidad:
+std::filesystem::path, std::byte y los tipos que exige su API pueden usarse.
 [Evidencia y probe](../../../reports/cpp-performance-112/compatibilidad.md).
-No se aplica excepción por ausencia de respuesta. Conservar eventos/formatos y
-dependencias; no marcar cerrado mientras esa condición siga pendiente.
+
+Esta excepción está registrada en AGENTS.md. No se extiende a otros módulos o
+hitos ni autoriza mapas, shared ownership, std::span/std::function en lugar de
+Span/FixedFunction, excepciones, RTTI o herencia. Los enteros propios, las
+precondiciones, la seguridad de datos externos y las medidas siguen exigidos.
+Los listeners Jolt del 120 continúan pendientes de decisión independiente.
+La autorización no cierra el 117: quedan implementación y validación final.
 
 ## Avance comprobado
 
@@ -29,9 +39,9 @@ Memoria propia con 1.024 registros -10,08 %, order 116.200 → 39.100 ns;
 find 3,116 → 16,333 ns, coste explícito de la búsqueda binaria. Lifecycle dentro
 del ruido; serie Factory/Hound sin regresión integrada atribuible.
 No se declaran nuevos formatos, flags finales ni pipeline completo sin STL.
-Continuar texto/VFS/resultados, modelos/codecs/cooker/Factory y sus consumers
-después de concretar la frontera; validación final y cook/load end-to-end pendientes.
-Checkpoint local del avance; no cierre: `rtk git log -1 --oneline --grep='^hito 117:'`.
+Continuar VFS, modelos/codecs/cooker/Factory y sus consumers conservando STL
+donde simplifica; validación final y cook/load end-to-end pendientes.
+Checkpoint técnico del avance: `da72ffe`; autorización STL en commit documental posterior, sin cierre.
 
 ## Evidencia de partida
 
@@ -76,18 +86,17 @@ Además se adaptan todos los callers afectados por firmas/lifetime, aunque tenga
 
 ## Trabajo concreto, en orden
 
-1. Añadir solo texto propietario/vista, bytes y resultados explícitos que requieran estos consumidores; C/native para archivos y rutas. Conservar
-   Unicode de Windows, normalización, mounts y bloqueo de escapes del VFS. Definir si cada texto es terminado en cero y cuál es su longitud/caducidad;
-   no asumir que un Span textual sirve como ruta nativa.
+1. Reutilizar string/string_view, vector de bytes, expected y filesystem existentes según la excepción del usuario; no añadir una biblioteca propia
+   de texto/resultados/archivos. Conservar Unicode de Windows, normalización, mounts y bloqueo de escapes del VFS. Documentar propiedad/caducidad;
+   emplear las sobrecargas filesystem con error_code para fallos externos, sin depender de excepciones.
 2. Migrar catálogo a arrays ordenados/índices y búsqueda explícita; preparar índice al modificar catálogo, no ordenar cada find. Conservar
    AssetId/fingerprint, dependencies y detección de ciclos. Mantener compatibilidad binaria del cooked_asset_version y de los formatos
    rig/mesh/texture.
-3. Migrar almacenamiento propio de importación/rig/mesh/material/texture/scene catalog y operaciones de cooker, sin copiar payloads grandes ni
-   construir capacidad de objetos costosos innecesariamente. Resolver el caso AssetRecord al primer consumidor; no replicar todo
-   vector/expected/filesystem.
-4. Adaptar APIs externas en una frontera pequeña. Los tipos y STL internos de una dependencia no se reescriben; el uso directo de std en código Gloom
-   sigue prohibido. Si una API exige std explícito y no hay sobrecarga equivalente, registrar el conflicto antes de cerrar, no ocultarlo detrás de una
-   typedef.
+3. Optimizar almacenamiento de importación/rig/mesh/material/texture/scene catalog y operaciones de cooker conservando contenedores estándar útiles,
+   sin copiar payloads grandes ni construir capacidad de objetos costosos innecesariamente. Reutilizar Array donde ya funciona; justificar sustituciones
+   por costes medidos y cumplir las restantes reglas de AGENTS, sin reescribir vector/expected/filesystem.
+4. Mantener las APIs externas en una frontera pequeña. Los tipos y STL internos de una dependencia no se reescriben; el uso directo de std necesario
+   en este hito está autorizado. Registrar los usos permitidos y verificar que la excepción no se extienda a otros módulos ni otras reglas.
 5. Mantener compresión BC5/BC7 y fallback existente, tangentes/UV, joints/pesos, LODs y validación del contenido corrupto antes de entrar en runtime.
    No regenerar arte ni modificar fuentes/exportaciones v16/v17.
 
@@ -114,8 +123,9 @@ por causa, no por total. No cambiar referencias o umbrales para pasar.
 Tiempo y pico de memoria de cook/load en assets pequeños y Factory/Hound; asignaciones de carga permitidas y declaradas. Objetivo runtime: no
 introducir nuevas copias o búsquedas lineales no medidas en cada frame.
 
-Código propio del pipeline, su herramienta y pruebas migrados; ABI de datos conservada, sin usos directos de STL, mapas, excepciones/RTTI o
-propietarios compartidos. Cualquier conflicto de dependencia está resuelto explícitamente.
+Código propio del pipeline, su herramienta y pruebas revisados según AGENTS y la excepción STL del 7 de octubre; ABI de datos conservada,
+sin mapas, excepciones/RTTI o propietarios compartidos. Enumerar el uso STL permitido, comprobar las demás reglas y completar las medidas/pruebas.
+Cualquier conflicto de dependencia restante está resuelto explícitamente; autorizar STL no certifica por sí solo los otros requisitos.
 
 Entregar informe `reports/cpp-performance-117/README.md`, actualizar esta
 ficha/índice y estado; commit local `hito 117: resultado concreto`, verificado
