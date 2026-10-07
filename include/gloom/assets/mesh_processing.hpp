@@ -9,10 +9,10 @@
 namespace gloom::assets {
 
 struct MeshProcessingMetrics {
-    std::size_t source_vertices{0};
-    std::size_t optimized_vertices{0};
-    std::size_t source_indices{0};
-    std::size_t lod_indices{0};
+    size_t source_vertices{0};
+    size_t optimized_vertices{0};
+    size_t source_indices{0};
+    size_t lod_indices{0};
 };
 
 struct MeshProcessingSettings {

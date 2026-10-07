@@ -2,6 +2,7 @@
 #include <gloom/assets/asset.hpp>
 #include <array>
 #include <memory>
+#include <span>
 
 namespace gloom::audio {
 struct Vec3 {

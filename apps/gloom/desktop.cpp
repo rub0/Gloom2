@@ -8,6 +8,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
+#include <iostream>
 #include <mutex>
 #include <thread>
 
@@ -97,8 +98,18 @@ struct Login {
 std::vector<std::string> menu(Session& session, const std::filesystem::path& review, unsigned width, unsigned height) {
     if (review.empty() && !session.audio) {
         assets::VirtualFileSystem fs;
-        fs.mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets");
-        fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content");
+        if (const std::expected<void, std::string> mounted = fs.mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets"); !mounted) {
+            session.notice = mounted.error();
+            session.initialization_failed = true;
+            std::cerr << session.notice << '\n';
+            return {};
+        }
+        if (const std::expected<void, std::string> mounted = fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content"); !mounted) {
+            session.notice = mounted.error();
+            session.initialization_failed = true;
+            std::cerr << session.notice << '\n';
+            return {};
+        }
         session.audio = std::make_shared<gameplay::AudioPresentation>(fs, true);
     }
     if (session.audio)

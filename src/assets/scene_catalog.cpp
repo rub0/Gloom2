@@ -2,24 +2,24 @@
 
 #include <gloom/assets/gltf_importer.hpp>
 
-#include <algorithm>
 #include <array>
 #include <charconv>
-#include <unordered_set>
 #include <vector>
 
 namespace gloom::assets {
 
-[[nodiscard]] std::expected<VirtualPath, std::string> dependency_source_path(const VirtualPath& source, std::string dependency) {
-    std::ranges::replace(dependency, '\\', '/');
-    const auto separator = source.relative().find_last_of('/');
+[[nodiscard]] std::expected<VirtualPath, std::string> dependency_source_path(const VirtualPath& source, std::string_view dependency) {
+    const size_t separator = source.relative().find_last_of('/');
     std::string combined = separator == std::string_view::npos ? std::string{} : std::string{source.relative().substr(0, separator + 1)};
     combined += dependency;
-    std::vector<std::string> parts;
-    std::size_t begin = 0;
+    for (char& character : combined)
+        if (character == '\\')
+            character = '/';
+    std::vector<std::string_view> parts;
+    size_t begin = 0;
     while (begin <= combined.size()) {
-        const auto end = combined.find('/', begin);
-        const auto part = combined.substr(begin, end - begin);
+        const size_t end = combined.find('/', begin);
+        const std::string_view part{combined.data() + begin, (end == std::string::npos ? combined.size() : end) - begin};
         if (part == "..") {
             if (parts.empty()) {
                 return std::unexpected{"Asset dependency escapes its virtual mount"};
@@ -35,7 +35,7 @@ namespace gloom::assets {
     }
     std::string result{source.mount()};
     result += ":/";
-    for (std::size_t index = 0; index < parts.size(); ++index) {
+    for (size_t index = 0; index < parts.size(); ++index) {
         if (index != 0) {
             result += '/';
         }
@@ -46,8 +46,8 @@ namespace gloom::assets {
 
 [[nodiscard]] std::expected<VirtualPath, std::string> dependency_cooked_path(const VirtualPath& scene, const AssetId id) {
     std::array<char, 16> hexadecimal{};
-    const auto conversion = std::to_chars(hexadecimal.data(), hexadecimal.data() + hexadecimal.size(), id.value, 16);
-    const auto separator = scene.relative().find_last_of('/');
+    const std::to_chars_result conversion = std::to_chars(hexadecimal.data(), hexadecimal.data() + hexadecimal.size(), id.value, 16);
+    const size_t separator = scene.relative().find_last_of('/');
     std::string result{scene.mount()};
     result += ":/";
     if (separator != std::string_view::npos) {
@@ -61,46 +61,45 @@ namespace gloom::assets {
 
 std::expected<DiscoveredSceneCatalog, std::string> discover_cooked_scene(
     const VirtualFileSystem& filesystem, const VirtualPath& source, const VirtualPath& cooked) {
-    const auto envelope = filesystem.read(cooked);
+    const std::expected<std::vector<std::byte>, std::string> envelope = filesystem.read(cooked);
     if (!envelope) {
         return std::unexpected{envelope.error()};
     }
-    const auto scene_asset = decode_cooked_asset(*envelope);
+    const std::expected<CookedAsset, std::string> scene_asset = decode_cooked_asset(*envelope);
     if (!scene_asset || scene_asset->type != AssetType::scene) {
         return std::unexpected{scene_asset ? "Cooked asset is not a scene" : scene_asset.error()};
     }
-    const auto scene = decode_imported_scene(scene_asset->payload);
+    const std::expected<ImportedScene, std::string> scene = decode_imported_scene(scene_asset->payload);
     if (!scene) {
         return std::unexpected{scene.error()};
     }
-    const auto expected_scene_id = make_asset_id(source, AssetType::scene);
+    const AssetId expected_scene_id = make_asset_id(source, AssetType::scene);
     if (scene_asset->id != expected_scene_id) {
         return std::unexpected{"Cooked scene ID does not match its source virtual path"};
     }
 
     DiscoveredSceneCatalog result{.scene = scene_asset->id};
-    std::unordered_set<AssetId, AssetIdHash> found;
-    for (const auto& image : scene->images) {
+    for (const ImportedImage& image : scene->images) {
         if (image.embedded || image.external_uri.empty()) {
             continue;
         }
-        const auto dependency_source = dependency_source_path(source, image.external_uri);
+        const std::expected<VirtualPath, std::string> dependency_source = dependency_source_path(source, image.external_uri);
         if (!dependency_source) {
             return std::unexpected{dependency_source.error()};
         }
-        const auto id = make_asset_id(*dependency_source, AssetType::texture);
-        if (!found.emplace(id).second) {
+        const AssetId id = make_asset_id(*dependency_source, AssetType::texture);
+        if (result.catalog.find(id)) {
             continue;
         }
-        const auto dependency_cooked = dependency_cooked_path(cooked, id);
+        const std::expected<VirtualPath, std::string> dependency_cooked = dependency_cooked_path(cooked, id);
         if (!dependency_cooked) {
             return std::unexpected{dependency_cooked.error()};
         }
-        const auto dependency_envelope = filesystem.read(*dependency_cooked);
+        const std::expected<std::vector<std::byte>, std::string> dependency_envelope = filesystem.read(*dependency_cooked);
         if (!dependency_envelope) {
             return std::unexpected{dependency_envelope.error()};
         }
-        const auto dependency = decode_cooked_asset(*dependency_envelope);
+        const std::expected<CookedAsset, std::string> dependency = decode_cooked_asset(*dependency_envelope);
         if (!dependency || dependency->id != id || dependency->type != AssetType::texture) {
             return std::unexpected{dependency ? "Cooked scene dependency is inconsistent" : dependency.error()};
         }
@@ -110,11 +109,12 @@ std::expected<DiscoveredSceneCatalog, std::string> discover_cooked_scene(
             .cooked = *dependency_cooked,
             .source_fingerprint = dependency->source_fingerprint});
     }
-    if (found.size() != scene_asset->dependencies.size() || !std::ranges::all_of(scene_asset->dependencies, [&](const AssetId id) {
-            return found.contains(id);
-        })) {
+    if (result.catalog.size() != scene_asset->dependencies.size()) {
         return std::unexpected{"Cooked scene dependency set does not match its imported images"};
     }
+    for (AssetId id : scene_asset->dependencies)
+        if (!result.catalog.find(id))
+            return std::unexpected{"Cooked scene dependency set does not match its imported images"};
     result.catalog.add({.id = scene_asset->id,
         .type = AssetType::scene,
         .source = source,

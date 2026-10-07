@@ -12,6 +12,7 @@ struct Session {
     std::function<std::expected<std::string, std::string>()> identity;
     std::string notice;
     bool quit{false};
+    bool initialization_failed{false};
     // Bounded acceptance driver. Empty in normal play; uses the same UI input seam.
     std::filesystem::path flow_output;
     std::string flow_name;

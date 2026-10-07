@@ -1,13 +1,13 @@
 # Contrato común de la migración C++
 
-Fecha: 5 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
+Fecha: 7 de octubre de 2026. Base investigada: `5b96a91`, hito 110.
 112 terminado: [medidas/contratos](../../../reports/cpp-performance-112/README.md),
 113 terminado: [poses persistentes](../../../reports/cpp-performance-113/README.md),
 114 terminado: [trabajos nativos](../../../reports/cpp-performance-114/README.md),
 115 terminado: [partículas persistentes](../../../reports/cpp-performance-115/README.md),
 116 terminado: [registro estable](../../../reports/cpp-performance-116/README.md),
-117 parcial: [catálogo y bind](../../../reports/cpp-performance-117/README.md),
-198 archivos/54 CTest; continuar 117, con STL autorizada por el usuario el 7 de octubre de 2026.
+117 terminado: [pipeline de assets con STL](../../../reports/cpp-performance-117/README.md),
+198 archivos/54 CTest; siguiente 118, pendiente de encargo. STL autorizada solo en el alcance del 117.
 Diagnóstico opcional OFF; fastgltf desbloqueado por esa excepción. Jolt sigue pendiente en 120/128.
 Leer primero el inicio de [ESTADO_ACTUAL](../../ESTADO_ACTUAL.md),
 [AGENTS](../../../AGENTS.md), [índice](README.md) y solo la ficha elegida.

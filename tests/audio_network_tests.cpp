@@ -38,7 +38,7 @@ int main() try {
     audio::EventCursor a, b;
     std::set<std::uint64_t> heard_a, heard_b;
     assets::VirtualFileSystem fs;
-    fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content");
+    require(fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content").has_value(), "Could not mount asset directory");
     gameplay::AudioPresentation presentation_a{fs, false}, presentation_b{fs, false};
     for (unsigned tick = 0; tick < 150; ++tick) {
         for (const auto& message : first.create_input({.aim_z = 1, .jump = tick == 20, .fire_primary = tick > 5 && tick % 31 == 0}))

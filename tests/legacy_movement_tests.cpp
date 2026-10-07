@@ -8,6 +8,19 @@
 #include <limits>
 
 using namespace gloom;
+gameplay::SliceCharacter shadow_character(void*, network::NetworkEntityId) {
+    return gameplay::SliceCharacter::shadow;
+}
+struct CountDodges {
+    network::ReplicationSettings::SceneMovement motion;
+    unsigned* count;
+};
+network::MovementState count_dodges(void* context, network::MovementState state, const network::MovementInput& input, double delta) {
+    CountDodges& counter = *static_cast<CountDodges*>(context);
+    if (input.dodge)
+        ++*counter.count;
+    return counter.motion(state, input, delta);
+}
 void require(bool value, const char* why) {
     if (!value)
         throw std::runtime_error{why};
@@ -83,9 +96,8 @@ int main() try {
     invalid.payload.back() = std::byte{4};
     require(!network::decode_movement_input(invalid), "Reserved movement flag accepted");
     const auto& factory = gameplay::original_factory();
-    auto settings = gameplay::factory_movement_settings([](auto) {
-        return gameplay::SliceCharacter::shadow;
-    });
+    gameplay::FactoryCharacterResolver character{.function = shadow_character};
+    auto settings = gameplay::factory_movement_settings(&character);
     network::MovementState state{
         .entity = 1, .position_x = factory.spawns[0].position.x, .position_y = factory.spawns[0].position.y, .position_z = factory.spawns[0].position.z};
     for (unsigned tick = 1; tick <= 30; ++tick)
@@ -148,11 +160,8 @@ int main() try {
     settings.snapshot_rate = 60;
     auto authority_settings = settings;
     unsigned dodge_commands = 0;
-    authority_settings.scene_movement = [motion = settings.scene_movement, &dodge_commands](auto s, const auto& command, double dt) {
-        if (command.dodge)
-            ++dodge_commands;
-        return motion(s, command, dt);
-    };
+    CountDodges counter{.motion = settings.scene_movement, .count = &dodge_commands};
+    authority_settings.scene_movement = {.function = count_dodges, .context = &counter};
     network::AuthoritativeMovementServer server{authority_settings, 1};
     server.add_entity(start);
     network::PredictedMovementClient client{settings, 1, start};

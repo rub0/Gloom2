@@ -53,10 +53,24 @@ struct ResidencyCoordinatorMetrics {
     std::uint64_t shared_resource_hits{0};
 };
 
+// Borrowed backend callbacks; context outlives the coordinator and its drained preparation tasks.
+// Upload callbacks take ownership; release follows the backend's existing GPU lifetime policy.
+struct AssetUploadSink {
+    void* context{nullptr};
+    bool (*texture_compression_bc)(const void*){nullptr};
+    void (*mesh)(void*, render::MeshUpload){nullptr};
+    void (*texture)(void*, render::TextureUpload){nullptr};
+    void (*material)(void*, render::MaterialUpload){nullptr};
+    void (*release)(void*, render::RenderAssetId){nullptr};
+    render::GpuAssetState (*state)(const void*, render::RenderAssetId){nullptr};
+};
+
 class AssetResidencyCoordinator final {
   public:
     AssetResidencyCoordinator(
         core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, render::Renderer& renderer, ResidencyCoordinatorSettings settings = {});
+    AssetResidencyCoordinator(
+        core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, AssetUploadSink renderer, ResidencyCoordinatorSettings settings = {});
     ~AssetResidencyCoordinator();
 
     AssetResidencyCoordinator(const AssetResidencyCoordinator&) = delete;
@@ -84,7 +98,7 @@ class AssetResidencyCoordinator final {
     core::JobSystem& jobs_;
     AsyncAssetLoader& loader_;
     const AssetCatalog& catalog_;
-    render::Renderer& renderer_;
+    AssetUploadSink renderer_;
     ResidencyCoordinatorSettings settings_;
     core::TaskGroup preparation_tasks_;
     std::unordered_map<std::uint64_t, Request> requests_;

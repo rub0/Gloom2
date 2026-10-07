@@ -22,8 +22,8 @@ bool has(const audio::EventJournal& j, audio::Cue cue) {
 }
 int main() try {
     assets::VirtualFileSystem fs;
-    fs.mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets");
-    fs.mount("cache", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets/audio/cooked");
+    require(fs.mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets").has_value(), "Could not mount asset directory");
+    require(fs.mount("cache", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets/audio/cooked").has_value(), "Could not mount asset directory");
     for (const auto path : audio::cue_paths) {
         auto loaded = audio::load_clip(fs, "cache:/" + std::string{path} + ".gau");
         require(loaded.has_value(), "Cooked original audio failed load");
@@ -208,7 +208,7 @@ int main() try {
         "Shadow ability audio missing");
     // Presentation tests use the same cache layout as the packaged application.
     assets::VirtualFileSystem presentation_fs;
-    presentation_fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content");
+    require(presentation_fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content").has_value(), "Could not mount asset directory");
     gameplay::AudioPresentation presentation{presentation_fs, false};
     gameplay::VerticalSliceSimulation factory{{.opponent_ai_enabled = false, .original_factory = true}};
     {

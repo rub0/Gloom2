@@ -14,10 +14,10 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <stdexcept>
+
 #include <string>
 #include <thread>
-#include <unordered_map>
+
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,11 +30,13 @@ namespace {
 
 void expect(const bool condition, const char* message) {
     if (!condition) {
-        throw std::runtime_error{message};
+        fputs(message, stderr);
+        fputc('\n', stderr);
+        exit(1);
     }
 }
 
-// Native RAII gate: test failures must release the worker before owner destructors drain.
+// Native gate releases the worker before scoped owners drain; failed checks terminate the test process.
 struct PausedWorker {
     gloom::core::JobSystem& jobs;
     gloom::core::TaskGroup group;
@@ -67,10 +69,14 @@ struct PausedWorker {
 class TemporaryDirectory final {
   public:
     TemporaryDirectory() {
-        const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
-        path_ = std::filesystem::temp_directory_path() / ("gloom-assets-" + std::to_string(nonce));
-        std::filesystem::create_directories(path_ / "source/models");
-        std::filesystem::create_directories(path_ / "cache");
+        const std::chrono::steady_clock::rep nonce = std::chrono::steady_clock::now().time_since_epoch().count();
+        std::error_code error;
+        path_ = std::filesystem::temp_directory_path(error) / ("gloom-assets-" + std::to_string(nonce));
+        expect(!error, "Locate temporary asset directory");
+        std::filesystem::create_directories(path_ / "source/models", error);
+        expect(!error, "Create asset source directory");
+        std::filesystem::create_directories(path_ / "cache", error);
+        expect(!error, "Create asset cache directory");
     }
 
     ~TemporaryDirectory() {
@@ -86,81 +92,69 @@ class TemporaryDirectory final {
     std::filesystem::path path_;
 };
 
-class ImmediateRenderer final : public gloom::render::Renderer {
-  public:
-    [[nodiscard]] std::string_view name() const noexcept override {
-        return "Immediate test renderer";
+struct ImmediateRenderer {
+    gloom::Array<gloom::render::RenderAssetId> states;
+    gloom::uint32 mesh_uploads{0}, texture_uploads{0}, material_uploads{0}, releases{0};
+    bool check_alias{false};
+    static bool compression_bc(const void*) {
+        return false;
     }
-    [[nodiscard]] gloom::core::SubsystemState state() const noexcept override {
-        return state_;
+    static void mesh(void* context, gloom::render::MeshUpload upload) {
+        ImmediateRenderer& self = *static_cast<ImmediateRenderer*>(context);
+        self.states.push_back(upload.id);
+        ++self.mesh_uploads;
     }
-    void start() override {
-        state_ = gloom::core::SubsystemState::running;
-    }
-    void tick(double) override {}
-    void stop() noexcept override {
-        state_ = gloom::core::SubsystemState::stopped;
-    }
-    [[nodiscard]] gloom::render::RenderCapabilities capabilities() const noexcept override {
-        return {};
-    }
-    void resize(std::uint32_t, std::uint32_t) override {}
-    void enqueue(gloom::render::MeshUpload upload) override {
-        states_[upload.id] = gloom::render::GpuAssetState::resident;
-        ++mesh_uploads;
-    }
-    void enqueue(gloom::render::TextureUpload upload) override {
+    static void texture(void* context, gloom::render::TextureUpload upload) {
         expect(upload.mip_levels.size() == 2, "Coordinator discarded the cooked texture mip chain");
-        states_[upload.id] = gloom::render::GpuAssetState::resident;
-        ++texture_uploads;
+        ImmediateRenderer& self = *static_cast<ImmediateRenderer*>(context);
+        self.states.push_back(upload.id);
+        ++self.texture_uploads;
     }
-    void enqueue(gloom::render::MaterialUpload upload) override {
-        expect(upload.base_color_texture.value != gloom::render::builtin_white_texture.value, "Coordinator did not bind the scene texture to its material");
-        states_[upload.id] = gloom::render::GpuAssetState::resident;
-        ++material_uploads;
+    static void material(void* context, gloom::render::MaterialUpload upload) {
+        expect(upload.base_color_texture.value != gloom::render::builtin_white_texture.value, "Coordinator did not bind the scene texture");
+        ImmediateRenderer& self = *static_cast<ImmediateRenderer*>(context);
+        if (self.check_alias)
+            expect(upload.extra_textures[0] == upload.base_color_texture, "URI alias did not bind the same GPU texture");
+        self.states.push_back(upload.id);
+        ++self.material_uploads;
     }
-    void release(const gloom::render::RenderAssetId id) override {
-        states_.erase(id);
-        ++releases;
+    static void release(void* context, gloom::render::RenderAssetId id) {
+        ImmediateRenderer& self = *static_cast<ImmediateRenderer*>(context);
+        for (size_t i = 0; i < self.states.size(); ++i) {
+            if (self.states[i] == id) {
+                self.states[i] = self.states[self.states.size() - 1];
+                self.states.resize(self.states.size() - 1);
+                break;
+            }
+        }
+        ++self.releases;
     }
-    [[nodiscard]] gloom::render::GpuAssetState asset_state(const gloom::render::RenderAssetId id) const noexcept override {
-        const auto found = states_.find(id);
-        return found == states_.end() ? gloom::render::GpuAssetState::missing : found->second;
+    static gloom::render::GpuAssetState state(const void* context, gloom::render::RenderAssetId id) {
+        const ImmediateRenderer& self = *static_cast<const ImmediateRenderer*>(context);
+        for (gloom::render::RenderAssetId resident : self.states)
+            if (resident == id)
+                return gloom::render::GpuAssetState::resident;
+        return gloom::render::GpuAssetState::missing;
     }
-    [[nodiscard]] gloom::render::GpuResidencyMetrics residency_metrics() const noexcept override {
-        return {};
-    }
-    void begin_frame() override {}
-    void draw(const gloom::render::RenderSnapshot&) override {}
-    void end_frame() override {}
-
-    std::uint32_t mesh_uploads{0};
-    std::uint32_t texture_uploads{0};
-    std::uint32_t material_uploads{0};
-    std::uint32_t releases{0};
-
-  private:
-    gloom::core::SubsystemState state_{gloom::core::SubsystemState::stopped};
-    std::unordered_map<gloom::render::RenderAssetId, gloom::render::GpuAssetState, gloom::render::RenderAssetIdHash> states_;
 };
 
 void wait_until(
     gloom::assets::AssetResidencyCoordinator& coordinator, const gloom::assets::SceneTicket ticket, const gloom::assets::SceneResidencyState expected) {
-    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds{5};
+    const std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::now() + std::chrono::seconds{5};
     while (std::chrono::steady_clock::now() < deadline) {
         coordinator.update();
-        const auto state = coordinator.state(ticket);
+        const gloom::assets::SceneResidencyState state = coordinator.state(ticket);
         if (state == expected)
             return;
         if (state == gloom::assets::SceneResidencyState::failed)
-            throw std::runtime_error{"Scene residency failed: " + std::string{coordinator.error(ticket)}};
+            expect(false, "Scene residency failed");
         std::this_thread::yield();
     }
-    throw std::runtime_error{"Timed out waiting for scene residency"};
+    expect(false, "Timed out waiting for scene residency");
 }
 
 template <typename Value> void append(std::vector<std::byte>& bytes, const Value& value) {
-    const auto* begin = reinterpret_cast<const std::byte*>(&value);
+    const std::byte* begin = reinterpret_cast<const std::byte*>(&value);
     bytes.insert(bytes.end(), begin, begin + sizeof(Value));
 }
 
@@ -170,7 +164,7 @@ void write_fixture(const std::filesystem::path& root) {
         for (const float value : position)
             append(buffer, value);
     }
-    for (std::size_t vertex = 0; vertex < 3; ++vertex) {
+    for (size_t vertex = 0; vertex < 3; ++vertex) {
         for (const float value : {0.0F, 0.0F, 1.0F})
             append(buffer, value);
     }
@@ -178,7 +172,7 @@ void write_fixture(const std::filesystem::path& root) {
         for (const float value : uv)
             append(buffer, value);
     }
-    for (const std::uint16_t index : {std::uint16_t{0}, std::uint16_t{1}, std::uint16_t{2}}) {
+    for (const gloom::uint16 index : {gloom::uint16{0}, gloom::uint16{1}, gloom::uint16{2}}) {
         append(buffer, index);
     }
     std::ofstream binary{root / "source/models/triangle.bin", std::ios::binary};
@@ -187,21 +181,21 @@ void write_fixture(const std::filesystem::path& root) {
     std::vector<std::byte> bitmap;
     bitmap.push_back(std::byte{'B'});
     bitmap.push_back(std::byte{'M'});
-    append(bitmap, std::uint32_t{70});
-    append(bitmap, std::uint32_t{0});
-    append(bitmap, std::uint32_t{54});
-    append(bitmap, std::uint32_t{40});
-    append(bitmap, std::int32_t{2});
-    append(bitmap, std::int32_t{2});
-    append(bitmap, std::uint16_t{1});
-    append(bitmap, std::uint16_t{32});
-    append(bitmap, std::uint32_t{0});
-    append(bitmap, std::uint32_t{16});
-    append(bitmap, std::int32_t{0});
-    append(bitmap, std::int32_t{0});
-    append(bitmap, std::uint32_t{0});
-    append(bitmap, std::uint32_t{0});
-    const std::array<std::uint8_t, 16> pixels{0, 0, 255, 255, 0, 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 255};
+    append(bitmap, gloom::uint32{70});
+    append(bitmap, gloom::uint32{0});
+    append(bitmap, gloom::uint32{54});
+    append(bitmap, gloom::uint32{40});
+    append(bitmap, gloom::int32{2});
+    append(bitmap, gloom::int32{2});
+    append(bitmap, gloom::uint16{1});
+    append(bitmap, gloom::uint16{32});
+    append(bitmap, gloom::uint32{0});
+    append(bitmap, gloom::uint32{16});
+    append(bitmap, gloom::int32{0});
+    append(bitmap, gloom::int32{0});
+    append(bitmap, gloom::uint32{0});
+    append(bitmap, gloom::uint32{0});
+    const std::array<gloom::uint8, 16> pixels{0, 0, 255, 255, 0, 255, 0, 255, 255, 255, 0, 255, 255, 255, 255, 255};
     bitmap.insert(bitmap.end(), reinterpret_cast<const std::byte*>(pixels.data()), reinterpret_cast<const std::byte*>(pixels.data() + pixels.size()));
     std::ofstream image{root / "source/models/albedo.bmp", std::ios::binary};
     image.write(reinterpret_cast<const char*>(bitmap.data()), static_cast<std::streamsize>(bitmap.size()));
@@ -246,24 +240,49 @@ void write_fixture(const std::filesystem::path& root) {
 }
 
 void test_virtual_paths_and_catalog() {
-    const auto normalized = gloom::assets::VirtualPath::parse("Game:\\models//./ship.gltf");
+    const std::expected<gloom::assets::VirtualPath, std::string> normalized = gloom::assets::VirtualPath::parse("Game:\\models//./ship.gltf");
     expect(normalized && normalized->string() == "game:/models/ship.gltf" && normalized->mount() == "game" && normalized->relative() == "models/ship.gltf",
         "Virtual path normalization is incorrect");
-    expect(gloom::assets::dependency_source_path(*normalized, "..\\textures/./diffuse.png").value().string() == "game:/textures/diffuse.png",
-        "Shared dependency resolver changed parent/separator normalization");
+    const std::expected<gloom::assets::VirtualPath, std::string> dependency = gloom::assets::dependency_source_path(*normalized, "..\\textures/./diffuse.png");
+    expect(dependency && dependency->string() == "game:/textures/diffuse.png", "Shared dependency resolver changed parent/separator normalization");
     expect(!gloom::assets::dependency_source_path(*normalized, "../../secret.png"), "Shared dependency resolver escaped its mount");
-    expect(gloom::assets::dependency_cooked_path(*gloom::assets::VirtualPath::parse("cache:/models/ship.gasset"), {.value = 0x1234}).value().string() ==
-               "cache:/models/dependencies/1234.gasset",
-        "Shared cooked dependency layout changed");
+    const std::expected<gloom::assets::VirtualPath, std::string> cooked_dependency =
+        gloom::assets::dependency_cooked_path(*gloom::assets::VirtualPath::parse("cache:/models/ship.gasset"), {.value = 0x1234});
+    expect(cooked_dependency && cooked_dependency->string() == "cache:/models/dependencies/1234.gasset", "Shared cooked dependency layout changed");
     expect(!gloom::assets::VirtualPath::parse("game:/../secret.txt"), "Virtual path traversal was accepted");
+#ifdef _WIN32
+    expect(!gloom::assets::VirtualPath::parse("game:/.. /secret.txt") && !gloom::assets::VirtualPath::parse("game:/folder./secret.txt"),
+        "Win32 path normalization bypassed traversal policy");
+#endif
     expect(!gloom::assets::VirtualPath::parse("C:\\absolute.txt"), "Native absolute path was accepted as a virtual path");
+    expect(!gloom::assets::VirtualPath::parse("game:/\xC0\xAF") && !gloom::assets::VirtualPath::parse("game:/\xED\xA0\x80") &&
+               !gloom::assets::VirtualPath::parse("game:/\xF4\x90\x80\x80"),
+        "Malformed UTF-8 path was accepted");
+    TemporaryDirectory directory;
+    gloom::assets::VirtualFileSystem filesystem;
+    expect(filesystem.mount("game", directory.path() / "source").has_value(), "Mount Unicode fixture");
+    expect(!filesystem.mount("GAME", directory.path() / "source") && !filesystem.mount("missing", directory.path() / "absent"), "Invalid mount accepted");
+    std::expected<gloom::assets::VirtualPath, std::string> unicode = gloom::assets::VirtualPath::parse("game:/\xC3\xA1rbol/\xE7\x8C\xAB-\xF0\x9F\x90\xBA.bin");
+    expect(unicode.has_value(), "Parse Unicode filename");
+    gloom::assets::VirtualPath moved_path = std::move(*unicode);
+    const std::array<std::byte, 3> bytes{std::byte{0}, std::byte{42}, std::byte{255}};
+    expect(filesystem.write(moved_path, bytes).has_value(), "Write Unicode filename");
+    const std::expected<std::vector<std::byte>, std::string> read = filesystem.read(moved_path);
+    expect(read && read->size() == bytes.size() && memcmp(read->data(), bytes.data(), bytes.size()) == 0, "Moved path or Unicode bytes lost ownership");
+    const std::expected<std::filesystem::path, std::string> resolved = filesystem.resolve(moved_path);
+    expect(resolved && resolved->filename() == std::filesystem::path{L"\u732B-\U0001F43A.bin"}, "Unicode path was converted through ANSI");
+    expect(filesystem.write(moved_path, {}).has_value() && filesystem.read(moved_path)->empty(), "Empty owned buffer could not roundtrip");
+    std::error_code link_error;
+    std::filesystem::create_directory_symlink(directory.path() / "cache", directory.path() / "source/escape", link_error);
+    if (!link_error)
+        expect(!filesystem.resolve(*gloom::assets::VirtualPath::parse("game:/escape/outside.bin")), "Symlink escaped the mount");
 
-    const auto source_a = *gloom::assets::VirtualPath::parse("game:/a.bin");
-    const auto source_b = *gloom::assets::VirtualPath::parse("game:/b.bin");
-    const auto cooked_a = *gloom::assets::VirtualPath::parse("cache:/a.gasset");
-    const auto cooked_b = *gloom::assets::VirtualPath::parse("cache:/b.gasset");
-    const auto id_a = gloom::assets::make_asset_id(source_a, gloom::assets::AssetType::binary);
-    const auto id_b = gloom::assets::make_asset_id(source_b, gloom::assets::AssetType::binary);
+    const gloom::assets::VirtualPath source_a = *gloom::assets::VirtualPath::parse("game:/a.bin");
+    const gloom::assets::VirtualPath source_b = *gloom::assets::VirtualPath::parse("game:/b.bin");
+    const gloom::assets::VirtualPath cooked_a = *gloom::assets::VirtualPath::parse("cache:/a.gasset");
+    const gloom::assets::VirtualPath cooked_b = *gloom::assets::VirtualPath::parse("cache:/b.gasset");
+    const gloom::assets::AssetId id_a = gloom::assets::make_asset_id(source_a, gloom::assets::AssetType::binary);
+    const gloom::assets::AssetId id_b = gloom::assets::make_asset_id(source_b, gloom::assets::AssetType::binary);
     gloom::assets::AssetCatalog catalog;
     catalog.add({.id = id_a, .type = gloom::assets::AssetType::binary, .source = source_a, .cooked = cooked_a});
     catalog.add({.id = id_b, .type = gloom::assets::AssetType::binary, .source = source_b, .cooked = cooked_b, .dependencies = {id_a}});
@@ -303,10 +322,10 @@ void test_virtual_paths_and_catalog() {
 
 void test_offline_mesh_processing() {
     gloom::assets::ImportedPrimitive primitive;
-    constexpr std::uint32_t side = 12;
+    constexpr gloom::uint32 side = 12;
     primitive.vertices.reserve(side * side);
-    for (std::uint32_t y = 0; y < side; ++y) {
-        for (std::uint32_t x = 0; x < side; ++x) {
+    for (gloom::uint32 y = 0; y < side; ++y) {
+        for (gloom::uint32 x = 0; x < side; ++x) {
             primitive.vertices.push_back({
                 .position = {static_cast<float>(x), 0.0F, static_cast<float>(y)},
                 .normal = {0.0F, 1.0F, 0.0F},
@@ -314,21 +333,22 @@ void test_offline_mesh_processing() {
             });
         }
     }
-    for (std::uint32_t y = 0; y + 1U < side; ++y) {
-        for (std::uint32_t x = 0; x + 1U < side; ++x) {
-            const auto first = y * side + x;
-            const auto second = first + side;
+    for (gloom::uint32 y = 0; y + 1U < side; ++y) {
+        for (gloom::uint32 x = 0; x + 1U < side; ++x) {
+            const gloom::uint32 first = y * side + x;
+            const gloom::uint32 second = first + side;
             primitive.indices.insert(primitive.indices.end(), {first, second, first + 1U, first + 1U, second, second + 1U});
         }
     }
-    const auto processed = gloom::assets::process_imported_primitive(primitive);
+    const std::expected<gloom::assets::MeshProcessingMetrics, std::string> processed = gloom::assets::process_imported_primitive(primitive);
     expect(processed && primitive.bounds_radius > 7.0F && !primitive.lod_indices.empty() && primitive.lod_indices.front().size() < primitive.indices.size() &&
                primitive.vertices.front().tangent[3] != 0.0F && processed->lod_indices >= primitive.lod_indices.front().size(),
         "Offline tangent, bounds, optimization or LOD generation failed");
 
     gloom::assets::ImportedPrimitive attribute_less{
         .vertices = {{.position = {0.0F, 0.0F, 0.0F}}, {.position = {0.0F, 1.0F, 0.0F}}, {.position = {0.0F, 0.0F, 1.0F}}}, .indices = {0, 1, 2}};
-    const auto generated = gloom::assets::process_imported_primitive(attribute_less, {.source_normals = false, .source_texture_coordinates = false});
+    const std::expected<gloom::assets::MeshProcessingMetrics, std::string> generated =
+        gloom::assets::process_imported_primitive(attribute_less, {.source_normals = false, .source_texture_coordinates = false});
     expect(generated && std::abs(attribute_less.vertices.front().normal[0]) > 0.9F && std::isfinite(attribute_less.vertices.front().tangent[0]),
         "Missing glTF normals or UVs did not receive safe offline fallbacks");
     gloom::assets::ImportedPrimitive corner{
@@ -336,8 +356,8 @@ void test_offline_mesh_processing() {
     expect(gloom::assets::process_imported_primitive(corner, {.source_normals = false, .source_texture_coordinates = false}).has_value(),
         "Hard-edge normal generation failed");
     expect(corner.vertices.size() == 6, "Missing normals incorrectly smoothed a shared hard edge");
-    for (std::size_t i = 0; i < corner.indices.size(); i += 3) {
-        const auto& a = corner.vertices[corner.indices[i]].normal;
+    for (size_t i = 0; i < corner.indices.size(); i += 3) {
+        const std::array<float, 3>& a = corner.vertices[corner.indices[i]].normal;
         expect(a == corner.vertices[corner.indices[i + 1]].normal && a == corner.vertices[corner.indices[i + 2]].normal,
             "Flat triangle has interpolated corner normals");
     }
@@ -346,12 +366,12 @@ void test_offline_mesh_processing() {
 void test_project_mesh_orientation() {
     for (const char* name : {"factory/cargo_lift.gltf", "factory/surface_modules.gltf", "characters/hound.gltf", "characters/berserker.gltf",
              "weapons/soul_reaper.gltf", "abilities/hound_abilities.gltf"}) {
-        const auto scene = gloom::assets::import_gltf(std::filesystem::path{GLOOM_TEST_ASSETS} / name);
+        const std::expected<gloom::assets::ImportedScene, std::string> scene = gloom::assets::import_gltf(std::filesystem::path{GLOOM_TEST_ASSETS} / name);
         expect(scene.has_value(), "Project glTF did not import");
-        for (const auto& primitive : scene->primitives) {
-            for (const auto& v : primitive.vertices) {
+        for (const gloom::assets::ImportedPrimitive& primitive : scene->primitives) {
+            for (const gloom::assets::ImportedVertex& v : primitive.vertices) {
                 float outward = 0;
-                for (std::size_t axis = 0; axis < 3; ++axis)
+                for (size_t axis = 0; axis < 3; ++axis)
                     outward += v.normal[axis] * (v.position[axis] - primitive.bounds_center[axis]);
                 // Factory lava is an open plane with an explicit upward normal.
                 const bool plane = primitive.vertices.size() == 4;
@@ -365,33 +385,50 @@ void test_gltf_cooking_and_async_loading() {
     TemporaryDirectory temporary;
     write_fixture(temporary.path());
     gloom::assets::VirtualFileSystem filesystem;
-    filesystem.mount("game", temporary.path() / "source");
-    filesystem.mount("cache", temporary.path() / "cache");
-    const auto source = *gloom::assets::VirtualPath::parse("game:/models/triangle.gltf");
-    const auto output = *gloom::assets::VirtualPath::parse("cache:/models/triangle.gasset");
-    const auto cooked = gloom::assets::cook_gltf(filesystem, source, output);
+    expect(filesystem.mount("game", temporary.path() / "source").has_value(), "Could not mount asset directory");
+    expect(filesystem.mount("cache", temporary.path() / "cache").has_value(), "Could not mount asset directory");
+    const gloom::assets::VirtualPath source = *gloom::assets::VirtualPath::parse("game:/models/triangle.gltf");
+    const gloom::assets::VirtualPath output = *gloom::assets::VirtualPath::parse("cache:/models/triangle.gasset");
+    const std::expected<gloom::assets::GltfCookResult, std::string> cooked = gloom::assets::cook_gltf(filesystem, source, output);
     expect(cooked && cooked->dependencies.size() == 1 && cooked->scene.dependencies.size() == 1, "glTF cooker did not discover and cook its image dependency");
-    const auto discovered = gloom::assets::discover_cooked_scene(filesystem, source, output);
+    const std::expected<gloom::assets::DiscoveredSceneCatalog, std::string> discovered = gloom::assets::discover_cooked_scene(filesystem, source, output);
     expect(discovered && discovered->scene == cooked->scene.id && discovered->catalog.size() == 2, "Runtime could not reconstruct the cooked scene catalog");
 
-    const auto encoded = filesystem.read(output);
-    const auto scene_asset = encoded ? gloom::assets::decode_cooked_asset(*encoded)
-                                     : std::expected<gloom::assets::CookedAsset, std::string>{std::unexpected{"Missing cooked scene"}};
+    const std::expected<std::vector<std::byte>, std::string> encoded = filesystem.read(output);
+    const std::expected<gloom::assets::CookedAsset, std::string> scene_asset =
+        encoded ? gloom::assets::decode_cooked_asset(*encoded)
+                : std::expected<gloom::assets::CookedAsset, std::string>{std::unexpected{"Missing cooked scene"}};
     expect(scene_asset && scene_asset->type == gloom::assets::AssetType::scene && scene_asset->dependencies == cooked->scene.dependencies,
         "Cooked scene envelope is invalid");
-    const auto scene = gloom::assets::decode_imported_scene(scene_asset->payload);
+    const std::expected<gloom::assets::ImportedScene, std::string> scene = gloom::assets::decode_imported_scene(scene_asset->payload);
     expect(scene && scene->primitives.size() == 1 && scene->meshes.size() == 1 && scene->materials.size() == 1 && scene->nodes.size() == 1 &&
-               scene->primitives.front().vertices.size() == 3 && scene->primitives.front().indices == std::vector<std::uint32_t>({0, 1, 2}) &&
+               scene->primitives.front().vertices.size() == 3 && scene->primitives.front().indices == std::vector<gloom::uint32>({0, 1, 2}) &&
                scene->primitives.front().bounds_radius > 1.0F && std::abs(scene->primitives.front().vertices.front().tangent[0]) > 0.9F &&
                scene->materials.front().base_color_texture == 0 && scene->nodes.front().local_transform[12] == 2.0F,
         "Cooked glTF scene lost geometry, material or hierarchy data");
 
-    auto corrupted = *encoded;
+    std::vector<std::byte> corrupted = *encoded;
     corrupted.back() ^= std::byte{1};
     expect(!gloom::assets::decode_cooked_asset(corrupted), "Cooked asset payload corruption was not detected");
+    for (size_t size = 0; size < encoded->size(); ++size)
+        expect(!gloom::assets::decode_cooked_asset(gloom::Span<const std::byte>{*encoded}.first(size)), "Truncated asset envelope accepted");
+    for (size_t size = 0; size < scene_asset->payload.size(); ++size)
+        expect(!gloom::assets::decode_imported_scene(gloom::Span<const std::byte>{scene_asset->payload}.first(size)), "Truncated scene accepted");
+    gloom::assets::ImportedScene unskinned_cycle = *scene;
+    unskinned_cycle.nodes[0].children.push_back(0);
+    expect(!gloom::assets::validate_imported_scene(unskinned_cycle), "Unskinned cycle accepted");
+    const std::vector<std::byte> empty_scene = gloom::assets::encode_imported_scene({});
+    expect(gloom::assets::decode_imported_scene(empty_scene).has_value(), "Empty owned scene changed format");
+    const gloom::assets::ImportedNode default_node;
+    expect(default_node.local_transform[0] == 1 && default_node.local_transform[5] == 1 && default_node.local_transform[10] == 1 &&
+               default_node.local_transform[15] == 1 && default_node.local_transform[12] == 0,
+        "Default node transform is not identity");
+    std::vector<std::byte> invalid_counts = empty_scene;
+    invalid_counts[16] = std::byte{1};
+    expect(!gloom::assets::decode_imported_scene(invalid_counts), "Scene reserved elements absent from its payload");
 
     gloom::assets::AssetCatalog catalog;
-    for (const auto& dependency : cooked->dependencies)
+    for (const gloom::assets::AssetRecord& dependency : cooked->dependencies)
         catalog.add(dependency);
     catalog.add(cooked->scene);
     gloom::Array<gloom::assets::AssetId> dependency_order;
@@ -399,24 +436,30 @@ void test_gltf_cooking_and_async_loading() {
     expect(catalog.dependency_order(dependency_order, dependency_error) && dependency_order[dependency_order.size() - 1] == cooked->scene.id,
         "Cooked scene dependency was not ordered before the scene");
 
-    const auto texture_encoded = filesystem.read(cooked->dependencies.front().cooked);
-    const auto texture_asset = texture_encoded ? gloom::assets::decode_cooked_asset(*texture_encoded)
-                                               : std::expected<gloom::assets::CookedAsset, std::string>{std::unexpected{"Missing cooked texture"}};
+    const std::expected<std::vector<std::byte>, std::string> texture_encoded = filesystem.read(cooked->dependencies.front().cooked);
+    const std::expected<gloom::assets::CookedAsset, std::string> texture_asset =
+        texture_encoded ? gloom::assets::decode_cooked_asset(*texture_encoded)
+                        : std::expected<gloom::assets::CookedAsset, std::string>{std::unexpected{"Missing cooked texture"}};
     expect(texture_asset && texture_asset->type == gloom::assets::AssetType::texture, "Cooked texture envelope is invalid");
-    const auto texture_upload = texture_asset ? gloom::assets::decode_texture_ktx2({.value = texture_asset->id.value}, texture_asset->payload)
-                                              : std::expected<gloom::render::TextureUpload, std::string>{std::unexpected{"Missing texture payload"}};
+    const std::expected<gloom::render::TextureUpload, std::string> texture_upload =
+        texture_asset ? gloom::assets::decode_texture_ktx2({.value = texture_asset->id.value}, texture_asset->payload)
+                      : std::expected<gloom::render::TextureUpload, std::string>{std::unexpected{"Missing texture payload"}};
     expect(texture_upload && texture_upload->srgb && texture_upload->mip_levels.size() == 2 && texture_upload->mip_levels[0].width == 2 &&
                texture_upload->mip_levels[1].width == 1,
         "KTX2 texture did not preserve dimensions, color space and mip chain");
-    const auto source_texture = filesystem.read(*gloom::assets::VirtualPath::parse("game:/models/albedo.bmp"));
-    const auto normal_payload = source_texture ? gloom::assets::cook_texture_ktx2(*source_texture, gloom::assets::TextureSemantic::normal)
-                                               : std::expected<std::vector<std::byte>, std::string>{std::unexpected{"Missing normal-map fixture"}};
-    const auto normal_upload = normal_payload ? gloom::assets::decode_texture_ktx2({.value = 0x44}, *normal_payload)
-                                              : std::expected<gloom::render::TextureUpload, std::string>{std::unexpected{"Missing normal-map payload"}};
+    const std::expected<std::vector<std::byte>, std::string> source_texture = filesystem.read(*gloom::assets::VirtualPath::parse("game:/models/albedo.bmp"));
+    const std::expected<std::vector<std::byte>, std::string> normal_payload =
+        source_texture ? gloom::assets::cook_texture_ktx2(*source_texture, gloom::assets::TextureSemantic::normal)
+                       : std::expected<std::vector<std::byte>, std::string>{std::unexpected{"Missing normal-map fixture"}};
+    const std::expected<gloom::render::TextureUpload, std::string> normal_upload =
+        normal_payload ? gloom::assets::decode_texture_ktx2({.value = 0x44}, *normal_payload)
+                       : std::expected<gloom::render::TextureUpload, std::string>{std::unexpected{"Missing normal-map payload"}};
     expect(normal_upload && !normal_upload->srgb && normal_upload->mip_levels.size() == 2, "Normal-map KTX2 did not use linear UASTC data with mipmaps");
-    const auto bc7_upload = gloom::assets::decode_texture_ktx2({.value = 0x46}, texture_asset->payload, gloom::assets::TextureTranscodeTarget::bc7);
-    const auto bc5_upload = normal_payload ? gloom::assets::decode_texture_ktx2({.value = 0x47}, *normal_payload, gloom::assets::TextureTranscodeTarget::bc5)
-                                           : std::expected<gloom::render::TextureUpload, std::string>{std::unexpected{"Missing normal-map payload"}};
+    const std::expected<gloom::render::TextureUpload, std::string> bc7_upload =
+        gloom::assets::decode_texture_ktx2({.value = 0x46}, texture_asset->payload, gloom::assets::TextureTranscodeTarget::bc7);
+    const std::expected<gloom::render::TextureUpload, std::string> bc5_upload =
+        normal_payload ? gloom::assets::decode_texture_ktx2({.value = 0x47}, *normal_payload, gloom::assets::TextureTranscodeTarget::bc5)
+                       : std::expected<gloom::render::TextureUpload, std::string>{std::unexpected{"Missing normal-map payload"}};
     expect(bc7_upload && bc7_upload->format == gloom::render::TextureFormat::bc7 && bc7_upload->mip_levels.front().data.size() == 16 && bc5_upload &&
                bc5_upload->format == gloom::render::TextureFormat::bc5 && !bc5_upload->srgb && bc5_upload->mip_levels.front().data.size() == 16,
         "KTX2 did not transcode directly to native BC7/BC5 GPU blocks");
@@ -448,28 +491,36 @@ void test_gltf_cooking_and_async_loading() {
     expect(jobs.start() == nullptr, "JobSystem initialization failed");
     {
         gloom::assets::AsyncAssetLoader loader{jobs, filesystem, catalog};
-        const auto scene_future = loader.request(cooked->scene.id);
-        const auto cached_future = loader.request(cooked->scene.id);
-        const auto missing_future = loader.request({999'999});
+        const std::shared_future<gloom::assets::AssetLoadResult> scene_future = loader.request(cooked->scene.id);
+        const std::shared_future<gloom::assets::AssetLoadResult> cached_future = loader.request(cooked->scene.id);
+        const std::shared_future<gloom::assets::AssetLoadResult> missing_future = loader.request({.value = 999'999});
         loader.wait();
-        const auto loaded = scene_future.get();
-        const auto cached = cached_future.get();
-        const auto missing = missing_future.get();
+        const gloom::assets::AssetLoadResult& loaded = scene_future.get();
+        const gloom::assets::AssetLoadResult& cached = cached_future.get();
+        const gloom::assets::AssetLoadResult& missing = missing_future.get();
         expect(loaded.state == gloom::assets::AssetLoadState::ready && cached.state == gloom::assets::AssetLoadState::ready &&
                    missing.state == gloom::assets::AssetLoadState::error_placeholder && !missing.error.empty() && !missing.asset.payload.empty(),
             "Asynchronous loader did not return ready and placeholder assets "
             "correctly");
-        const auto metrics = loader.metrics();
+        const gloom::assets::AssetLoaderMetrics metrics = loader.metrics();
         expect(metrics.requests == 3 && metrics.cache_hits == 1 && metrics.loaded == 1 && metrics.failed == 1 &&
                    metrics.bytes_loaded == scene_asset->payload.size(),
             "Asynchronous asset loader metrics are incorrect");
 
         ImmediateRenderer renderer;
-        renderer.start();
+
         {
-            gloom::assets::AssetResidencyCoordinator coordinator{jobs, loader, catalog, renderer, {.new_scene_requests_per_update = 1}};
-            const auto background = coordinator.request_scene({.value = 999'998}, gloom::assets::AssetPriority::background);
-            const auto critical = coordinator.request_scene(cooked->scene.id, gloom::assets::AssetPriority::critical);
+            gloom::assets::AssetResidencyCoordinator coordinator{jobs, loader, catalog,
+                {.context = &renderer,
+                    .texture_compression_bc = ImmediateRenderer::compression_bc,
+                    .mesh = ImmediateRenderer::mesh,
+                    .texture = ImmediateRenderer::texture,
+                    .material = ImmediateRenderer::material,
+                    .release = ImmediateRenderer::release,
+                    .state = ImmediateRenderer::state},
+                {.new_scene_requests_per_update = 1}};
+            const gloom::assets::SceneTicket background = coordinator.request_scene({.value = 999'998}, gloom::assets::AssetPriority::background);
+            const gloom::assets::SceneTicket critical = coordinator.request_scene(cooked->scene.id, gloom::assets::AssetPriority::critical);
             coordinator.update();
             expect(coordinator.state(background) == gloom::assets::SceneResidencyState::queued &&
                        coordinator.state(critical) != gloom::assets::SceneResidencyState::queued,
@@ -478,23 +529,23 @@ void test_gltf_cooking_and_async_loading() {
             expect(coordinator.state(background) == gloom::assets::SceneResidencyState::cancelled, "Queued scene cancellation failed");
 
             wait_until(coordinator, critical, gloom::assets::SceneResidencyState::ready);
-            const auto* resident = coordinator.scene(critical);
+            const gloom::assets::ResidentScene* resident = coordinator.scene(critical);
             expect(resident != nullptr && resident->generation == 1 && resident->instances.size() == 1 &&
                        resident->instances.front().transform.position.x == 2.0F && renderer.mesh_uploads == 1 && renderer.texture_uploads == 1 &&
                        renderer.material_uploads == 1,
                 "Imported scene hierarchy or GPU dependencies were not instantiated");
 
-            auto changed_scene = *scene;
+            gloom::assets::ImportedScene changed_scene = *scene;
             changed_scene.nodes.front().local_transform[12] = 4.0F;
-            auto changed_payload = gloom::assets::encode_imported_scene(changed_scene);
-            auto changed_asset = *scene_asset;
+            std::vector<std::byte> changed_payload = gloom::assets::encode_imported_scene(changed_scene);
+            gloom::assets::CookedAsset changed_asset = *scene_asset;
             changed_asset.payload = std::move(changed_payload);
             changed_asset.source_fingerprint = gloom::assets::fingerprint(changed_asset.payload);
-            auto changed_record = cooked->scene;
+            gloom::assets::AssetRecord changed_record = cooked->scene;
             changed_record.source_fingerprint = changed_asset.source_fingerprint;
             catalog.upsert(changed_record);
-            const auto changed_envelope = gloom::assets::encode_cooked_asset(changed_asset);
-            const auto write_result = filesystem.write(output, changed_envelope);
+            const std::vector<std::byte> changed_envelope = gloom::assets::encode_cooked_asset(changed_asset);
+            const std::expected<void, std::string> write_result = filesystem.write(output, changed_envelope);
             expect(write_result.has_value(), "Could not replace the cooked scene fixture");
 
             coordinator.reload(critical);
@@ -504,18 +555,18 @@ void test_gltf_cooking_and_async_loading() {
                        loader.metrics().invalidations >= 2,
                 "Hot reload did not replace the resident scene generation");
 
-            const auto shared = coordinator.request_scene(cooked->scene.id, gloom::assets::AssetPriority::high);
+            const gloom::assets::SceneTicket shared = coordinator.request_scene(cooked->scene.id, gloom::assets::AssetPriority::high);
             wait_until(coordinator, shared, gloom::assets::SceneResidencyState::ready);
             expect(coordinator.metrics().shared_resource_hits >= 3 && renderer.mesh_uploads == 2 && renderer.texture_uploads == 2 &&
                        renderer.material_uploads == 2,
                 "Resident GPU resources were uploaded again instead of shared");
-            const auto releases_before_cancel = renderer.releases;
+            const gloom::uint32 releases_before_cancel = renderer.releases;
             coordinator.cancel(critical);
             expect(renderer.releases == releases_before_cancel, "Cancelling one scene released resources still used by another");
             coordinator.cancel(shared);
             expect(renderer.releases == releases_before_cancel + 3, "Last scene reference did not release its GPU resources");
 
-            const auto coordinator_metrics = coordinator.metrics();
+            const gloom::assets::ResidencyCoordinatorMetrics coordinator_metrics = coordinator.metrics();
             expect(
                 coordinator_metrics.requested == 3 && coordinator_metrics.cancelled == 3 && coordinator_metrics.reloaded == 1 && coordinator_metrics.ready == 3,
                 "Residency coordinator metrics are incorrect");
@@ -563,14 +614,56 @@ void test_gltf_cooking_and_async_loading() {
                     "Invalid external asset lost its explicit result during saturation");
             }
         }
-        renderer.stop();
     }
     jobs.stop();
+
+    std::string aliases;
+    {
+        const std::expected<std::vector<std::byte>, std::string> document = filesystem.read(source);
+        expect(document.has_value(), "Read alias fixture");
+        aliases.assign(reinterpret_cast<const char*>(document->data()), document->size());
+    }
+    const std::string_view image = "{\"uri\": \"albedo.bmp\", \"name\": \"Albedo\"}";
+    aliases.replace(aliases.find(image), image.size(), "{\"uri\": \"albedo.bmp\", \"name\": \"Albedo\"}, {\"uri\": \"./albedo.bmp\"}");
+    expect(filesystem.write(source, {reinterpret_cast<const std::byte*>(aliases.data()), aliases.size()}).has_value(), "Write alias fixture");
+    const std::expected<gloom::assets::GltfCookResult, std::string> alias_cook = gloom::assets::cook_gltf(filesystem, source, output);
+    expect(alias_cook && alias_cook->dependencies.size() == 1 && gloom::assets::discover_cooked_scene(filesystem, source, output).has_value(),
+        "Canonical image aliases created duplicate dependencies");
+    const std::string_view texture = "\"textures\": [{\"source\": 0}]";
+    aliases.replace(aliases.find(texture), texture.size(), "\"textures\": [{\"source\": 0}, {\"source\": 1}]");
+    const std::string_view material = "\"name\": \"Copper\",";
+    std::string used_aliases = aliases;
+    used_aliases.replace(used_aliases.find(material), material.size(), "\"name\": \"Copper\", \"emissiveTexture\": {\"index\": 1},");
+    expect(filesystem.write(source, {reinterpret_cast<const std::byte*>(used_aliases.data()), used_aliases.size()}).has_value(), "Write used alias fixture");
+    expect(gloom::assets::cook_gltf(filesystem, source, output).has_value(), "Cook color aliases");
+    std::expected<gloom::assets::DiscoveredSceneCatalog, std::string> used_catalog = gloom::assets::discover_cooked_scene(filesystem, source, output);
+    expect(used_catalog.has_value(), "Discover color aliases");
+    expect(jobs.start() == nullptr, "Restart asset workers");
+    {
+        gloom::assets::AsyncAssetLoader loader{jobs, filesystem, used_catalog->catalog};
+        ImmediateRenderer renderer;
+        renderer.check_alias = true;
+        gloom::assets::AssetResidencyCoordinator coordinator{jobs, loader, used_catalog->catalog,
+            {.context = &renderer,
+                .texture_compression_bc = ImmediateRenderer::compression_bc,
+                .mesh = ImmediateRenderer::mesh,
+                .texture = ImmediateRenderer::texture,
+                .material = ImmediateRenderer::material,
+                .release = ImmediateRenderer::release,
+                .state = ImmediateRenderer::state}};
+        const gloom::assets::SceneTicket ticket = coordinator.request_scene(used_catalog->scene);
+        wait_until(coordinator, ticket, gloom::assets::SceneResidencyState::ready);
+        expect(renderer.texture_uploads == 1, "Color alias uploaded the texture twice");
+    }
+    jobs.stop();
+    aliases.replace(aliases.find(material), material.size(), "\"name\": \"Copper\", \"normalTexture\": {\"index\": 1},");
+    expect(filesystem.write(source, {reinterpret_cast<const std::byte*>(aliases.data()), aliases.size()}).has_value(), "Write conflicting alias fixture");
+    expect(!gloom::assets::cook_gltf(filesystem, source, output), "Incompatible alias semantics silently replaced a cooked texture");
 }
 
 } // namespace
 
-int main(int argc, const char* const* argv) try {
+int main(int argc, const char* const* argv) {
 #ifdef _DEBUG
     if (argc == 2) {
         _set_error_mode(_OUT_TO_STDERR);
@@ -580,6 +673,12 @@ int main(int argc, const char* const* argv) try {
         const decltype(gloom::assets::VirtualPath::parse("game:/a")) path = gloom::assets::VirtualPath::parse("game:/a");
         gloom::assets::AssetCatalog catalog;
         gloom::assets::AssetRecord record{.id = gloom::assets::make_asset_id(*path, gloom::assets::AssetType::binary), .source = *path, .cooked = *path};
+        if (strcmp(argv[1], "invalid-scene") == 0) {
+            gloom::assets::ImportedScene invalid;
+            invalid.default_scene = 1;
+            static_cast<void>(gloom::assets::encode_imported_scene(invalid));
+            return 0;
+        }
         if (strcmp(argv[1], "duplicate") == 0)
             catalog.add(record);
         else if (strcmp(argv[1], "self") == 0)
@@ -593,7 +692,7 @@ int main(int argc, const char* const* argv) try {
     }
     char executable[MAX_PATH];
     expect(GetModuleFileNameA(nullptr, executable, MAX_PATH) > 0, "Locate catalog precondition fixture");
-    const char* modes[]{"duplicate", "self", "wrong-id", "duplicate-dependency"};
+    const char* modes[]{"duplicate", "self", "wrong-id", "duplicate-dependency", "invalid-scene"};
     for (const char* mode : modes) {
         char command[MAX_PATH + 64];
         snprintf(command, sizeof(command), "\"%s\" %s", executable, mode);
@@ -617,7 +716,4 @@ int main(int argc, const char* const* argv) try {
     test_gltf_cooking_and_async_loading();
     std::cout << "Gloom asset pipeline tests completed successfully.\n";
     return 0;
-} catch (const std::exception& error) {
-    std::cerr << "Asset pipeline test failure: " << error.what() << '\n';
-    return 1;
 }

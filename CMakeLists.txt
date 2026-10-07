@@ -72,16 +72,24 @@ set_source_files_properties(
     src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
     src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
     src/core/entity.cpp tests/entity_tests.cpp
+    src/assets/asset.cpp src/assets/asset_cooker.cpp src/assets/gltf_importer.cpp src/assets/mesh_processing.cpp
+    src/assets/scene_catalog.cpp src/assets/texture_asset.cpp src/gameplay/factory_scene.cpp
+    apps/gloom_asset_cooker/main.cpp tests/asset_pipeline_tests.cpp tests/character_restoration_tests.cpp tests/factory_restoration_tests.cpp
     PROPERTIES COMPILE_OPTIONS
     "$<$<CXX_COMPILER_ID:MSVC>:/GR->;$<$<CXX_COMPILER_ID:MSVC>:/EHs-c->;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-rtti>;$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fno-exceptions>")
 
 if(MSVC)
-    # Legacy data/future headers remain owned by 117/118; these consumers do not unwind.
+    # Legacy future/physics/render headers remain owned by 118/119/120/122; these consumers do not unwind.
     set_property(SOURCE tests/skin_bounds_tests.cpp src/assets/asset_loader.cpp src/assets/residency_coordinator.cpp
         src/render/particles.cpp src/gameplay/combat_effects.cpp tests/particle_storage_tests.cpp
         tests/entity_tests.cpp
+        src/assets/asset.cpp src/assets/asset_cooker.cpp src/assets/gltf_importer.cpp src/assets/mesh_processing.cpp
+        src/assets/scene_catalog.cpp src/assets/texture_asset.cpp src/gameplay/factory_scene.cpp
+        apps/gloom_asset_cooker/main.cpp tests/asset_pipeline_tests.cpp tests/character_restoration_tests.cpp tests/factory_restoration_tests.cpp
         APPEND PROPERTY COMPILE_OPTIONS /wd4530)
 endif()
+
+set_property(SOURCE src/assets/gltf_importer.cpp src/gameplay/factory_scene.cpp APPEND PROPERTY COMPILE_DEFINITIONS SIMDJSON_EXCEPTIONS=0)
 
 find_program(GLOOM_CLANG_FORMAT NAMES clang-format
     HINTS "${CMAKE_GENERATOR_INSTANCE}/VC/Tools/Llvm/bin")

@@ -15,15 +15,6 @@ void check(bool v, const char* text) {
     if (!v)
         throw std::runtime_error{text};
 }
-template <class F> void rejects(F f) {
-    bool rejected = false;
-    try {
-        f();
-    } catch (const std::exception&) {
-        rejected = true;
-    }
-    check(rejected, "Malformed data accepted");
-}
 gloom::Array<gloom::assets::RigMatrix> evaluated_worlds(const gloom::assets::AnimationRig& rig, const char* name, double time) {
     gloom::assets::LocalPose local;
     local.reserve(rig.nodes.size());
@@ -84,29 +75,19 @@ int main() try {
         if (!rig.animations.empty()) {
             auto bad = rig;
             bad.animations[0].channels[0].times[1] = bad.animations[0].channels[0].times[0];
-            rejects([&] {
-                static_cast<void>(assets::encode_imported_scene(bad));
-            });
+            check(!assets::validate_imported_scene(bad), "Invalid animation accepted");
             bad = rig;
             bad.animations[0].channels[0].node = 9999;
-            rejects([&] {
-                static_cast<void>(assets::encode_imported_scene(bad));
-            });
+            check(!assets::validate_imported_scene(bad), "Invalid animation accepted");
             bad = rig;
             bad.animations[0].channels[1].values[0] = {0, 0, 0, 0};
-            rejects([&] {
-                static_cast<void>(assets::encode_imported_scene(bad));
-            });
+            check(!assets::validate_imported_scene(bad), "Invalid animation accepted");
             bad = rig;
             bad.animations[0].channels[0].interpolation = static_cast<assets::AnimationInterpolation>(7);
-            rejects([&] {
-                static_cast<void>(assets::encode_imported_scene(bad));
-            });
+            check(!assets::validate_imported_scene(bad), "Invalid animation accepted");
             bad = rig;
             bad.animations[0].channels.push_back(bad.animations[0].channels[0]);
-            rejects([&] {
-                static_cast<void>(assets::encode_imported_scene(bad));
-            });
+            check(!assets::validate_imported_scene(bad), "Invalid animation accepted");
             auto short_bytes = encoded;
             short_bytes.resize(short_bytes.size() - 7);
             check(!assets::decode_imported_scene(short_bytes), "Truncated clip accepted");

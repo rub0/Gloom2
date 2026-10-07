@@ -1,3 +1,4 @@
+#include <gloom/gameplay/factory_scene.hpp>
 #include <gloom/backends/gns_transport.hpp>
 #include <gloom/backends/game_ticket.hpp>
 #include <gloom/backends/jolt_world.hpp>
@@ -75,6 +76,10 @@ void print_lobby(const gloom::gameplay::SliceLobbyState& lobby) {
 } // namespace
 
 int main(const int argument_count, const char* const* arguments) try {
+    if (const char* error = gloom::gameplay::original_factory_error()) {
+        std::cerr << error << '\n';
+        return 1;
+    }
     if (argument_count < 2) {
         throw std::invalid_argument{"Usage: gloom_slice_server IP:port [--ticks count]"};
     }

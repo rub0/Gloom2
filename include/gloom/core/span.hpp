@@ -18,6 +18,19 @@ template <typename T> struct Span {
     }
     template <size_t N> constexpr Span(T (&data)[N]) : values{data}, count{N} {}
     template <typename U> constexpr Span(Span<U> data) : values{data.values}, count{data.count} {}
+    // Container storage remains caller-owned, including temporaries through their enclosing call.
+    template <typename Buffer>
+        requires requires(Buffer& data) {
+            data.data();
+            data.size();
+        }
+    constexpr Span(Buffer& data) : values{data.data()}, count{data.size()} {}
+    template <typename Buffer>
+        requires requires(const Buffer& data) {
+            data.data();
+            data.size();
+        }
+    constexpr Span(const Buffer& data) : values{data.data()}, count{data.size()} {}
     constexpr Span(std::initializer_list<T> data) : values{data.begin()}, count{data.size()} {}
 
     constexpr T& operator[](size_t index) const {
@@ -38,6 +51,14 @@ template <typename T> struct Span {
     }
     constexpr bool empty() const {
         return count == 0;
+    }
+    constexpr Span first(size_t length) const {
+        assert(length <= count);
+        return {values, length};
+    }
+    constexpr Span subspan(size_t offset) const {
+        assert(offset <= count);
+        return {offset ? values + offset : values, count - offset};
     }
 };
 

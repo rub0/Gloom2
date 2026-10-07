@@ -148,6 +148,11 @@ constexpr network::ConnectionId opponent_connection = 102;
 } // namespace
 
 struct VerticalSliceSimulation::Impl {
+    static SliceCharacter resolve_factory_character(void* context, network::NetworkEntityId entity) {
+        const Impl& state = *static_cast<const Impl*>(context);
+        return entity == state.player.entity() ? state.player.loadout->selection.character : state.opponent.loadout->selection.character;
+    }
+    FactoryCharacterResolver factory_character{.function = resolve_factory_character, .context = this};
     struct Projectile {
         std::uint32_t id{};
         network::NetworkEntityId owner{};
@@ -219,7 +224,7 @@ struct VerticalSliceSimulation::Impl {
               .hit_half_height = 0.45F,
               .maximum_range = maximum_weapon_range,
               .static_obstacles = movement_settings.static_obstacles,
-              .static_mesh = settings.original_factory ? original_factory().collision : nullptr}),
+              .static_mesh = settings.original_factory ? &original_factory().collision : nullptr}),
           opponent_ai_enabled{settings.opponent_ai_enabled}, authoritative_physics{settings.authoritative_physics},
           use_original_factory{settings.original_factory} {
         if (authoritative_physics == nullptr) {
@@ -234,9 +239,7 @@ struct VerticalSliceSimulation::Impl {
 
         if (use_original_factory) {
             pickups.reset(original_factory().pickups);
-            movement_settings = factory_movement_settings([this](network::NetworkEntityId entity) {
-                return entity == player.entity() ? player.loadout->selection.character : opponent.loadout->selection.character;
-            });
+            movement_settings = factory_movement_settings(&factory_character);
             const auto set_spawn = [](Combatant& character, const FactorySpawn& spawn) {
                 character.movement->spawn_x = spawn.position.x;
                 character.movement->spawn_y = spawn.position.y;
@@ -286,7 +289,7 @@ struct VerticalSliceSimulation::Impl {
         if (use_original_factory) {
             const auto entity = logical_entities.create();
             logical_entities.emplace<physics::StaticBodyComponent>(entity, *authoritative_physics, entity,
-                physics::BodyDesc{.shape = {.type = physics::ShapeType::triangle_mesh, .triangle_mesh = original_factory().collision}, .friction = 0.6F});
+                physics::BodyDesc{.shape = {.type = physics::ShapeType::triangle_mesh, .triangle_mesh = &original_factory().collision}, .friction = 0.6F});
         }
         lava_entity = logical_entities.create();
         logical_entities.emplace<DamageVolumeComponent>(lava_entity, DamageVolumeComponent{.damage_per_second = 90.0F});

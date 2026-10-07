@@ -41,13 +41,22 @@ Las líneas se actualizan al workspace final; señales históricas fuera del mó
 Actualización parcial 117: **198 archivos propios, 36,960 líneas y 54 CTest**.
 Índice/recorrido de AssetCatalog y evaluación de bind con almacenamiento propio;
 metadatos, VFS y pipeline aún legacy. No hay archivos C++ ni CTest nuevos.
-El 117 permanece abierto; las señales históricas no acreditan cierre de sus 19 archivos.
+En aquel checkpoint el 117 permanecía abierto; esas señales no acreditaban cierre de sus 19 archivos.
 
 Decisión del 7 de octubre de 2026: el usuario autoriza STL para el alcance del
 117 y las adaptaciones necesarias de callers, según AGENTS y su ficha. Las
 coincidencias STL de esos archivos deben revisarse con esa excepción; no cuentan
 automáticamente como infracciones. Las otras reglas y dueños siguen vigentes.
 Esta actualización documental no cambia archivos/líneas C++ ni CTest.
+
+Actualización final 117: **198 archivos propios, 37,350 líneas y 54 CTest**.
+Sus 19 propietarios cerrados bajo la excepción STL: enteros/Span propios, sin
+mapas/shared_ptr/local auto ordinario/throw/catch/RTTI/herencia/PIMPL propios.
+11 .cpp con flags efectivos; callers adaptados siguen bajo sus respectivos dueños.
+Texto/buffers/filesystem/resultados STL autorizados y enumerados en el informe;
+KTX/STBI conservan unique_ptr con deleter para recursos C opacos. Tres herramientas
+Python nuevas bajo tools/perf pertenecen al 117, fuera del conteo C++.
+El parcial anterior es histórico, no describe el estado final del pipeline.
 
 ## Señales de búsqueda, no violaciones contabilizadas
 
@@ -87,7 +96,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [apps/gloom/performance.hpp](../../../apps/gloom/performance.hpp) | 105 | Sin coincidencia lexical |
 | [include/gloom/core/array.hpp](../../../include/gloom/core/array.hpp) | 109 | Sin coincidencia lexical |
 | [include/gloom/core/clock.hpp](../../../include/gloom/core/clock.hpp) | 6 | Sin coincidencia lexical |
-| [include/gloom/core/span.hpp](../../../include/gloom/core/span.hpp) | 44 | Sin coincidencia lexical |
+| [include/gloom/core/span.hpp](../../../include/gloom/core/span.hpp) | 65 | Sin coincidencia lexical |
 | [include/gloom/core/types.hpp](../../../include/gloom/core/types.hpp) | 13 | Sin coincidencia lexical |
 | [src/core/clock.cpp](../../../src/core/clock.cpp) | 29 | Sin coincidencia lexical |
 | [tests/storage_tests.cpp](../../../tests/storage_tests.cpp) | 113 | Sin coincidencia lexical |
@@ -108,7 +117,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/assets/animation.cpp](../../../src/assets/animation.cpp) | 179 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
 | [src/gameplay/character_animation.cpp](../../../src/gameplay/character_animation.cpp) | 294 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
 | [tests/animation_network_tests.cpp](../../../tests/animation_network_tests.cpp) | 226 | STL, auto, exceptions, owners |
-| [tests/animation_vfx_tests.cpp](../../../tests/animation_vfx_tests.cpp) | 302 | STL, auto, exceptions |
+| [tests/animation_vfx_tests.cpp](../../../tests/animation_vfx_tests.cpp) | 283 | STL, auto, exceptions |
 | [tests/skin_bounds_tests.cpp](../../../tests/skin_bounds_tests.cpp) | 130 | Sin coincidencia lexical propia; dependencias legacy según informe 113 |
 | [include/gloom/core/matrix.hpp](../../../include/gloom/core/matrix.hpp) | 35 | Sin coincidencia lexical propia |
 | [include/gloom/gameplay/combatant_view.hpp](../../../include/gloom/gameplay/combatant_view.hpp) | 48 | Sin coincidencia lexical propia |
@@ -145,35 +154,35 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom_asset_cooker/main.cpp](../../../apps/gloom_asset_cooker/main.cpp) | 32 | STL, auto, exceptions, virtual |
-| [include/gloom/assets/asset.hpp](../../../include/gloom/assets/asset.hpp) | 110 | STL, maps |
-| [include/gloom/assets/asset_cooker.hpp](../../../include/gloom/assets/asset_cooker.hpp) | 19 | STL |
-| [include/gloom/assets/gltf_importer.hpp](../../../include/gloom/assets/gltf_importer.hpp) | 129 | STL |
-| [include/gloom/assets/mesh_processing.hpp](../../../include/gloom/assets/mesh_processing.hpp) | 27 | STL |
-| [include/gloom/assets/rig.hpp](../../../include/gloom/assets/rig.hpp) | 129 | Evaluación sin std directo; ImportedScene sigue legacy |
-| [include/gloom/assets/scene_catalog.hpp](../../../include/gloom/assets/scene_catalog.hpp) | 24 | STL |
-| [include/gloom/assets/texture_asset.hpp](../../../include/gloom/assets/texture_asset.hpp) | 26 | STL |
-| [include/gloom/gameplay/factory_scene.hpp](../../../include/gloom/gameplay/factory_scene.hpp) | 34 | STL, owners |
-| [src/assets/asset.cpp](../../../src/assets/asset.cpp) | 397 | STL, auto, exceptions, maps |
-| [src/assets/asset_cooker.cpp](../../../src/assets/asset_cooker.cpp) | 120 | STL, auto, maps |
-| [src/assets/gltf_importer.cpp](../../../src/assets/gltf_importer.cpp) | 1351 | STL, auto, exceptions |
-| [src/assets/mesh_processing.cpp](../../../src/assets/mesh_processing.cpp) | 214 | STL, auto |
-| [src/assets/scene_catalog.cpp](../../../src/assets/scene_catalog.cpp) | 127 | STL, auto, maps, virtual |
-| [src/assets/texture_asset.cpp](../../../src/assets/texture_asset.cpp) | 230 | STL, auto, owners |
-| [src/gameplay/factory_scene.cpp](../../../src/gameplay/factory_scene.cpp) | 250 | STL, auto, exceptions, owners |
-| [tests/asset_pipeline_tests.cpp](../../../tests/asset_pipeline_tests.cpp) | 623 | STL, auto, exceptions, maps, virtual |
-| [tests/character_restoration_tests.cpp](../../../tests/character_restoration_tests.cpp) | 120 | STL, auto, exceptions |
-| [tests/factory_restoration_tests.cpp](../../../tests/factory_restoration_tests.cpp) | 147 | STL, auto, exceptions |
+| [apps/gloom_asset_cooker/main.cpp](../../../apps/gloom_asset_cooker/main.cpp) | 55 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/asset.hpp](../../../include/gloom/assets/asset.hpp) | 114 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/asset_cooker.hpp](../../../include/gloom/assets/asset_cooker.hpp) | 19 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/gltf_importer.hpp](../../../include/gloom/assets/gltf_importer.hpp) | 133 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/mesh_processing.hpp](../../../include/gloom/assets/mesh_processing.hpp) | 27 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/rig.hpp](../../../include/gloom/assets/rig.hpp) | 129 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/scene_catalog.hpp](../../../include/gloom/assets/scene_catalog.hpp) | 24 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/assets/texture_asset.hpp](../../../include/gloom/assets/texture_asset.hpp) | 26 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [include/gloom/gameplay/factory_scene.hpp](../../../include/gloom/gameplay/factory_scene.hpp) | 44 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/assets/asset.cpp](../../../src/assets/asset.cpp) | 452 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/assets/asset_cooker.cpp](../../../src/assets/asset_cooker.cpp) | 107 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/assets/gltf_importer.cpp](../../../src/assets/gltf_importer.cpp) | 1365 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/assets/mesh_processing.cpp](../../../src/assets/mesh_processing.cpp) | 219 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/assets/scene_catalog.cpp](../../../src/assets/scene_catalog.cpp) | 127 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/assets/texture_asset.cpp](../../../src/assets/texture_asset.cpp) | 236 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [src/gameplay/factory_scene.cpp](../../../src/gameplay/factory_scene.cpp) | 311 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [tests/asset_pipeline_tests.cpp](../../../tests/asset_pipeline_tests.cpp) | 719 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [tests/character_restoration_tests.cpp](../../../tests/character_restoration_tests.cpp) | 112 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
+| [tests/factory_restoration_tests.cpp](../../../tests/factory_restoration_tests.cpp) | 167 | STL autorizada 117; restantes reglas revisadas, sin infracciones propias; fronteras legacy según informe |
 
 ### 118: [Carga asíncrona y residencia con propiedad explícita](118-carga-y-residencia.md) — 6 archivos
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
 | [include/gloom/assets/asset_loader.hpp](../../../include/gloom/assets/asset_loader.hpp) | 58 | STL, maps |
-| [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 96 | STL, maps, owners |
+| [include/gloom/assets/residency_coordinator.hpp](../../../include/gloom/assets/residency_coordinator.hpp) | 110 | STL, maps, owners |
 | [include/gloom/assets/scene_gpu_bridge.hpp](../../../include/gloom/assets/scene_gpu_bridge.hpp) | 35 | STL |
 | [src/assets/asset_loader.cpp](../../../src/assets/asset_loader.cpp) | 121 | STL, auto, exceptions, owners |
-| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 475 | STL, auto, exceptions, owners |
+| [src/assets/residency_coordinator.cpp](../../../src/assets/residency_coordinator.cpp) | 514 | STL, auto, exceptions, owners |
 | [src/assets/scene_gpu_bridge.cpp](../../../src/assets/scene_gpu_bridge.cpp) | 123 | STL, auto |
 
 ### 119: [Datos CPU del renderer y retiro seguro de recursos GPU](119-renderer-y-lifetime.md) — 21 archivos
@@ -183,7 +192,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/backends/diligent_renderer.hpp](../../../include/gloom/backends/diligent_renderer.hpp) | 57 | STL, owners, virtual, pimpl |
 | [include/gloom/backends/vulkan_present.hpp](../../../include/gloom/backends/vulkan_present.hpp) | 42 | Sin coincidencia lexical |
 | [include/gloom/render/gpu_assets.hpp](../../../include/gloom/render/gpu_assets.hpp) | 86 | STL |
-| [include/gloom/render/lighting.hpp](../../../include/gloom/render/lighting.hpp) | 112 | STL, owners |
+| [include/gloom/render/lighting.hpp](../../../include/gloom/render/lighting.hpp) | 113 | STL, owners |
 | [include/gloom/render/material_surface.hpp](../../../include/gloom/render/material_surface.hpp) | 55 | STL, auto |
 | [include/gloom/render/renderer.hpp](../../../include/gloom/render/renderer.hpp) | 87 | STL, virtual |
 | [include/gloom/render/scene.hpp](../../../include/gloom/render/scene.hpp) | 119 | STL, owners |
@@ -217,9 +226,9 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom/audio_review.hpp](../../../apps/gloom/audio_review.hpp) | 82 | STL, auto, exceptions |
+| [apps/gloom/audio_review.hpp](../../../apps/gloom/audio_review.hpp) | 85 | STL, auto, exceptions |
 | [include/gloom/audio/events.hpp](../../../include/gloom/audio/events.hpp) | 112 | STL, auto |
-| [include/gloom/audio/mixer.hpp](../../../include/gloom/audio/mixer.hpp) | 76 | STL, owners, virtual |
+| [include/gloom/audio/mixer.hpp](../../../include/gloom/audio/mixer.hpp) | 77 | STL, owners, virtual |
 | [include/gloom/gameplay/audio_events.hpp](../../../include/gloom/gameplay/audio_events.hpp) | 13 | STL |
 | [include/gloom/gameplay/audio_presentation.hpp](../../../include/gloom/gameplay/audio_presentation.hpp) | 41 | STL, owners |
 | [src/audio/mixer.cpp](../../../src/audio/mixer.cpp) | 197 | STL, auto, exceptions, owners, virtual |
@@ -234,7 +243,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom_slice_server/main.cpp](../../../apps/gloom_slice_server/main.cpp) | 180 | STL, auto, exceptions, owners |
+| [apps/gloom_slice_server/main.cpp](../../../apps/gloom_slice_server/main.cpp) | 185 | STL, auto, exceptions, owners |
 | [include/gloom/backends/gns_transport.hpp](../../../include/gloom/backends/gns_transport.hpp) | 43 | STL, owners, virtual, pimpl |
 | [include/gloom/gameplay/character_presentation.hpp](../../../include/gloom/gameplay/character_presentation.hpp) | 79 | STL |
 | [include/gloom/gameplay/component_replication.hpp](../../../include/gloom/gameplay/component_replication.hpp) | 85 | STL, auto, exceptions |
@@ -252,7 +261,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [include/gloom/gameplay/vertical_slice_network.hpp](../../../include/gloom/gameplay/vertical_slice_network.hpp) | 105 | STL, owners, pimpl |
 | [include/gloom/network/clock_sync.hpp](../../../include/gloom/network/clock_sync.hpp) | 35 | STL |
 | [include/gloom/network/combat.hpp](../../../include/gloom/network/combat.hpp) | 88 | STL, maps, owners |
-| [include/gloom/network/movement_replication.hpp](../../../include/gloom/network/movement_replication.hpp) | 206 | STL, maps |
+| [include/gloom/network/movement_replication.hpp](../../../include/gloom/network/movement_replication.hpp) | 214 | STL, maps |
 | [include/gloom/network/network_simulator.hpp](../../../include/gloom/network/network_simulator.hpp) | 73 | STL, owners, pimpl |
 | [include/gloom/network/prediction_history.hpp](../../../include/gloom/network/prediction_history.hpp) | 70 | STL, auto, exceptions |
 | [include/gloom/network/presentation_smoother.hpp](../../../include/gloom/network/presentation_smoother.hpp) | 82 | STL, exceptions |
@@ -267,7 +276,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/gameplay/legacy_pickups.cpp](../../../src/gameplay/legacy_pickups.cpp) | 117 | STL, auto, exceptions |
 | [src/gameplay/match_lobby.cpp](../../../src/gameplay/match_lobby.cpp) | 361 | STL, auto, exceptions, owners, virtual |
 | [src/gameplay/pickup_presentation.cpp](../../../src/gameplay/pickup_presentation.cpp) | 52 | Sin coincidencia lexical |
-| [src/gameplay/vertical_slice.cpp](../../../src/gameplay/vertical_slice.cpp) | 1344 | STL, auto, exceptions, owners, pimpl |
+| [src/gameplay/vertical_slice.cpp](../../../src/gameplay/vertical_slice.cpp) | 1347 | STL, auto, exceptions, owners, pimpl |
 | [src/gameplay/vertical_slice_network.cpp](../../../src/gameplay/vertical_slice_network.cpp) | 1209 | STL, auto, exceptions, maps, owners, pimpl |
 | [src/network/clock_sync.cpp](../../../src/network/clock_sync.cpp) | 49 | STL, exceptions |
 | [src/network/combat.cpp](../../../src/network/combat.cpp) | 381 | STL, auto, exceptions |
@@ -277,7 +286,7 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 | [src/network/session.cpp](../../../src/network/session.cpp) | 573 | STL, auto, exceptions |
 | [tests/combat_tests.cpp](../../../tests/combat_tests.cpp) | 196 | STL, auto, exceptions |
 | [tests/legacy_arsenal_tests.cpp](../../../tests/legacy_arsenal_tests.cpp) | 94 | STL, auto, exceptions |
-| [tests/legacy_movement_tests.cpp](../../../tests/legacy_movement_tests.cpp) | 189 | STL, auto, exceptions |
+| [tests/legacy_movement_tests.cpp](../../../tests/legacy_movement_tests.cpp) | 198 | STL, auto, exceptions |
 | [tests/legacy_pickups_tests.cpp](../../../tests/legacy_pickups_tests.cpp) | 135 | STL, auto, exceptions, maps |
 | [tests/match_lobby_tests.cpp](../../../tests/match_lobby_tests.cpp) | 115 | STL, auto, exceptions |
 | [tests/network_protocol_tests.cpp](../../../tests/network_protocol_tests.cpp) | 205 | STL, auto, exceptions |
@@ -332,8 +341,8 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom/desktop.cpp](../../../apps/gloom/desktop.cpp) | 457 | STL, auto, exceptions, owners |
-| [apps/gloom/desktop.hpp](../../../apps/gloom/desktop.hpp) | 21 | STL, owners |
+| [apps/gloom/desktop.cpp](../../../apps/gloom/desktop.cpp) | 468 | STL, auto, exceptions, owners |
+| [apps/gloom/desktop.hpp](../../../apps/gloom/desktop.hpp) | 22 | STL, owners |
 | [apps/gloom/game_ui.hpp](../../../apps/gloom/game_ui.hpp) | 267 | STL, auto |
 | [include/gloom/render/ui.hpp](../../../include/gloom/render/ui.hpp) | 72 | STL, maps |
 | [src/render/ui.cpp](../../../src/render/ui.cpp) | 250 | STL, auto, exceptions |
@@ -343,9 +352,9 @@ archivos; cero archivos nuevos sin responsable al cerrar 128.
 
 | Archivo | Líneas | Señales |
 | --- | ---: | --- |
-| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2705 | STL, auto, exceptions, owners |
+| [apps/gloom/main.cpp](../../../apps/gloom/main.cpp) | 2715 | STL, auto, exceptions, owners |
 | [apps/gloom/visual_review.hpp](../../../apps/gloom/visual_review.hpp) | 61 | STL |
-| [apps/gloom_scene_viewer/main.cpp](../../../apps/gloom_scene_viewer/main.cpp) | 143 | STL, auto, exceptions |
+| [apps/gloom_scene_viewer/main.cpp](../../../apps/gloom_scene_viewer/main.cpp) | 149 | STL, auto, exceptions |
 | [include/gloom/backends/placeholder.hpp](../../../include/gloom/backends/placeholder.hpp) | 25 | STL, virtual |
 | [include/gloom/backends/sdl_window.hpp](../../../include/gloom/backends/sdl_window.hpp) | 42 | STL, owners, virtual, pimpl |
 | [include/gloom/core/engine.hpp](../../../include/gloom/core/engine.hpp) | 24 | STL, owners |

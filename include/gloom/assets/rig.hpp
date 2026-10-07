@@ -50,6 +50,9 @@ inline bool valid_bind_rigs(const ImportedScene& scene) {
             for (float w : vertex.weights)
                 if (!isfinite(w) || w < 0 || w > 1)
                     return false;
+    Array<RigMatrix> world;
+    if (!bind_node_transforms(scene, world))
+        return false;
     if (scene.skins.empty()) {
         for (const ImportedNode& node : scene.nodes)
             if (node.skin != no_asset_index)
@@ -61,9 +64,6 @@ inline bool valid_bind_rigs(const ImportedScene& scene) {
                         return false;
         return true;
     }
-    Array<RigMatrix> world;
-    if (!bind_node_transforms(scene, world))
-        return false;
     Array<uint32> seen_joints;
     seen_joints.reserve((scene.nodes.size() + 31) / 32);
     seen_joints.resize((scene.nodes.size() + 31) / 32);

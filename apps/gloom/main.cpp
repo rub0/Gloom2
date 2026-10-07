@@ -949,8 +949,14 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
         game_audio = desktop_session ? desktop_session->audio : nullptr;
         if (!game_audio) {
             gloom::assets::VirtualFileSystem fs;
-            fs.mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets");
-            fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content");
+            if (const std::expected<void, std::string> mounted = fs.mount("game", std::filesystem::path{GLOOM_SOURCE_ROOT} / "assets"); !mounted) {
+                std::cerr << mounted.error() << '\n';
+                return 1;
+            }
+            if (const std::expected<void, std::string> mounted = fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content"); !mounted) {
+                std::cerr << mounted.error() << '\n';
+                return 1;
+            }
             game_audio = std::make_shared<gloom::gameplay::AudioPresentation>(fs, !performance_full || performance_audio_device);
             if (desktop_session)
                 desktop_session->audio = game_audio;
@@ -2331,7 +2337,7 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
             vertical_slice ? gloom::render::EnvironmentLighting{.sky_radiance = {0.20F, 0.24F, 0.30F},
                                  .ground_radiance = {0.08F, 0.075F, 0.07F},
                                  .intensity = original_factory ? 0.35F : 1.0F,
-                                 .probe = original_factory ? gloom::gameplay::original_factory().environment_probe : nullptr,
+                                 .probe = original_factory ? &gloom::gameplay::original_factory().environment_probe : nullptr,
                                  .ambient_fill = original_factory ? 0.65F : 0.0F}
                            : gloom::render::EnvironmentLighting{});
         performance_lighting_nanoseconds += static_cast<std::uint64_t>(
@@ -2644,6 +2650,10 @@ int run_game(const int argument_count, const char* const* arguments, gloom::desk
 }
 
 int main(int argc, const char* const* argv) try {
+    if (const char* error = gloom::gameplay::original_factory_error()) {
+        std::cerr << "Gloom: " << error << '\n';
+        return 1;
+    }
     if (argc > 1 && std::string_view{argv[1]} == "--audio-review") {
         if (argc < 3 || argc > 4)
             throw std::invalid_argument{"Usage: gloom --audio-review DIR [--device]"};
@@ -2698,7 +2708,7 @@ int main(int argc, const char* const* argv) try {
             session.notice = e.what();
         }
     }
-    return 0;
+    return session.initialization_failed ? 1 : 0;
 } catch (const std::exception& e) {
     std::cerr << "Gloom: " << e.what() << '\n';
     return 1;

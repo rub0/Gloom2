@@ -8,7 +8,10 @@ namespace gloom::review {
 inline int audio_review(const std::filesystem::path& directory, bool device) {
     std::filesystem::create_directories(directory);
     assets::VirtualFileSystem fs;
-    fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content");
+    if (const std::expected<void, std::string> mounted = fs.mount("cache", std::filesystem::path{GLOOM_BINARY_ROOT} / "content"); !mounted) {
+        std::cerr << mounted.error() << '\n';
+        return 1;
+    }
     gameplay::AudioPresentation presentation{fs, device};
     std::ofstream log{directory / "sequence.txt"};
     log << presentation.diagnostic() << '\n';

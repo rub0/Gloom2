@@ -103,7 +103,7 @@ struct ShapeDesc {
     ShapeType type{ShapeType::box};
     Vec3 half_extent{0.5F, 0.5F, 0.5F};
     float radius{0.5F};
-    std::shared_ptr<const TriangleMesh> triangle_mesh;
+    const TriangleMesh* triangle_mesh{nullptr}; // Borrowed through create_body; Jolt builds its own shape data.
 };
 
 struct BodyDesc {

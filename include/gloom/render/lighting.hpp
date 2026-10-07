@@ -32,7 +32,8 @@ struct EnvironmentLighting {
     Vec3 ground_radiance{0.025F, 0.02F, 0.018F};
     float intensity{1.0F};
     float exposure{1.0F};
-    std::shared_ptr<const EnvironmentProbe> probe;
+    // Borrowed: owner outlives all prepared views and renderer uses; reset to null before destroying it.
+    const EnvironmentProbe* probe{nullptr};
     float ambient_fill{0.0F};
 };
 

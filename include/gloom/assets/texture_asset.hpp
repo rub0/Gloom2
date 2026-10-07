@@ -5,22 +5,22 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
-#include <span>
+#include <gloom/core/span.hpp>
 #include <string>
 #include <vector>
 
 namespace gloom::assets {
 
-enum class TextureSemantic : std::uint8_t { color, normal, data };
-enum class TextureTranscodeTarget : std::uint8_t { rgba8, bc5, bc7 };
+enum class TextureSemantic : uint8 { color, normal, data };
+enum class TextureTranscodeTarget : uint8 { rgba8, bc5, bc7 };
 
 // Offline-only authoring conversion. The returned bytes are a complete KTX2
 // Basis Universal texture including all mip levels.
-[[nodiscard]] std::expected<std::vector<std::byte>, std::string> cook_texture_ktx2(std::span<const std::byte> encoded_image, TextureSemantic semantic);
+[[nodiscard]] std::expected<std::vector<std::byte>, std::string> cook_texture_ktx2(Span<const std::byte> encoded_image, TextureSemantic semantic);
 
 // Runtime conversion selects a native GPU payload supported by the active
 // device. RGBA8 remains the universal fallback.
 [[nodiscard]] std::expected<render::TextureUpload, std::string> decode_texture_ktx2(
-    render::RenderAssetId id, std::span<const std::byte> ktx2_payload, TextureTranscodeTarget target = TextureTranscodeTarget::rgba8);
+    render::RenderAssetId id, Span<const std::byte> ktx2_payload, TextureTranscodeTarget target = TextureTranscodeTarget::rgba8);
 
 } // namespace gloom::assets

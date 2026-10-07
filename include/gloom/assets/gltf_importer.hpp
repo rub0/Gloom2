@@ -2,6 +2,7 @@
 
 #include <gloom/render/material_surface.hpp>
 #include <gloom/core/matrix.hpp>
+#include <gloom/core/span.hpp>
 
 #include <array>
 #include <cstddef>
@@ -9,13 +10,13 @@
 #include <expected>
 #include <filesystem>
 #include <limits>
-#include <span>
+
 #include <string>
 #include <vector>
 
 namespace gloom::assets {
 
-inline constexpr std::uint32_t no_asset_index = std::numeric_limits<std::uint32_t>::max();
+inline constexpr uint32 no_asset_index = std::numeric_limits<uint32>::max();
 
 struct ImportedVertex {
     std::array<float, 3> position{};
@@ -23,23 +24,23 @@ struct ImportedVertex {
     std::array<float, 2> texture_coordinate{};
     std::array<float, 4> tangent{1.0F, 0.0F, 0.0F, 1.0F};
     std::array<float, 2> texture_coordinate_1{};
-    std::array<std::uint16_t, 8> joints{};
+    std::array<uint16, 8> joints{};
     std::array<float, 8> weights{};
 };
 
 struct ImportedPrimitive {
     std::vector<ImportedVertex> vertices;
-    std::vector<std::uint32_t> indices;
-    std::vector<std::vector<std::uint32_t>> lod_indices;
+    std::vector<uint32> indices;
+    std::vector<std::vector<uint32>> lod_indices;
     std::array<float, 3> bounds_center{};
     float bounds_radius{0.0F};
-    std::uint32_t material{no_asset_index};
+    uint32 material{no_asset_index};
 };
 
 struct ImportedMesh {
     std::string name;
-    std::uint32_t first_primitive{0};
-    std::uint32_t primitive_count{0};
+    uint32 first_primitive{0};
+    uint32 primitive_count{0};
 };
 
 struct ImportedMaterial {
@@ -49,22 +50,22 @@ struct ImportedMaterial {
     float metallic{1.0F};
     float roughness{1.0F};
     float alpha_cutoff{0.5F};
-    std::uint8_t alpha_mode{0};
+    uint8 alpha_mode{0};
     bool double_sided{false};
-    std::uint32_t base_color_texture{no_asset_index};
-    std::uint32_t metallic_roughness_texture{no_asset_index};
-    std::uint32_t normal_texture{no_asset_index};
+    uint32 base_color_texture{no_asset_index};
+    uint32 metallic_roughness_texture{no_asset_index};
+    uint32 normal_texture{no_asset_index};
     render::MaterialSurface surface;
-    std::array<std::uint32_t, 7> extra_textures{no_asset_index, no_asset_index, no_asset_index, no_asset_index, no_asset_index, no_asset_index, no_asset_index};
+    std::array<uint32, 7> extra_textures{no_asset_index, no_asset_index, no_asset_index, no_asset_index, no_asset_index, no_asset_index, no_asset_index};
 };
 
-[[nodiscard]] inline std::array<std::uint32_t, render::material_texture_count> material_textures(const ImportedMaterial& material) {
+[[nodiscard]] inline std::array<uint32, render::material_texture_count> material_textures(const ImportedMaterial& material) {
     return {material.base_color_texture, material.metallic_roughness_texture, material.normal_texture, material.extra_textures[0], material.extra_textures[1],
         material.extra_textures[2], material.extra_textures[3], material.extra_textures[4], material.extra_textures[5], material.extra_textures[6]};
 }
 
 struct ImportedTexture {
-    std::uint32_t image{no_asset_index};
+    uint32 image{no_asset_index};
 };
 
 struct ImportedImage {
@@ -75,23 +76,23 @@ struct ImportedImage {
 
 struct ImportedNode {
     std::string name;
-    Matrix4 local_transform{};
-    std::uint32_t mesh{no_asset_index};
-    std::vector<std::uint32_t> children;
-    std::uint32_t skin{no_asset_index};
+    Matrix4 local_transform{.values = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+    uint32 mesh{no_asset_index};
+    std::vector<uint32> children;
+    uint32 skin{no_asset_index};
 };
 
 struct ImportedSkin {
     std::string name;
-    std::vector<std::uint32_t> joints;
+    std::vector<uint32> joints;
     std::vector<Matrix4> inverse_bind_matrices;
 };
 
-enum class AnimationPath : std::uint8_t { translation, rotation, scale };
-enum class AnimationInterpolation : std::uint8_t { linear, step };
+enum class AnimationPath : uint8 { translation, rotation, scale };
+enum class AnimationInterpolation : uint8 { linear, step };
 
 struct AnimationChannel {
-    std::uint32_t node{no_asset_index};
+    uint32 node{no_asset_index};
     AnimationPath path{AnimationPath::translation};
     AnimationInterpolation interpolation{AnimationInterpolation::linear};
     std::vector<float> times;
@@ -106,11 +107,11 @@ struct AnimationClip {
 
 struct ImportedSceneDefinition {
     std::string name;
-    std::vector<std::uint32_t> roots;
+    std::vector<uint32> roots;
 };
 
 struct ImportedScene {
-    std::uint32_t default_scene{no_asset_index};
+    uint32 default_scene{no_asset_index};
     std::vector<ImportedPrimitive> primitives;
     std::vector<ImportedMesh> meshes;
     std::vector<ImportedMaterial> materials;
@@ -123,7 +124,10 @@ struct ImportedScene {
 };
 
 [[nodiscard]] std::expected<ImportedScene, std::string> import_gltf(const std::filesystem::path& source);
+// Strings and containers own their data; parser views never escape import_gltf.
+// validate_imported_scene checks external/edited scenes before encoding. Encoder requires a valid scene.
+[[nodiscard]] bool validate_imported_scene(const ImportedScene& scene);
 [[nodiscard]] std::vector<std::byte> encode_imported_scene(const ImportedScene& scene);
-[[nodiscard]] std::expected<ImportedScene, std::string> decode_imported_scene(std::span<const std::byte> encoded);
+[[nodiscard]] std::expected<ImportedScene, std::string> decode_imported_scene(Span<const std::byte> encoded);
 
 } // namespace gloom::assets

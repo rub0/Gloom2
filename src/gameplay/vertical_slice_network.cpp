@@ -836,6 +836,11 @@ const SliceLobbyState& VerticalSliceRemoteHost::lobby() const noexcept {
 }
 
 struct VerticalSliceRemoteClient::Impl {
+    static SliceCharacter resolve_factory_character(void* context, network::NetworkEntityId) {
+        const Impl& state = *static_cast<const Impl*>(context);
+        return state.received_snapshot ? state.snapshot.player.character : state.desired_selection.character;
+    }
+    FactoryCharacterResolver factory_character{.function = resolve_factory_character, .context = this};
     std::uint64_t audio_epoch{};
     explicit Impl(SlicePlayerIdentity configured_identity, const SlicePlayerSelection configured_selection, const bool automatic_selection)
         : identity{std::move(configured_identity)}, desired_selection{configured_selection}, selection_confirmed{automatic_selection} {
@@ -936,11 +941,8 @@ std::optional<SliceWireMessage> VerticalSliceRemoteClient::receive(const network
             impl_->session.controlled_entity() != VerticalSliceSimulation::opponent_entity) {
             throw std::runtime_error{"Remote slice client received the wrong entity"};
         }
-        const auto settings = impl_->received_snapshot && impl_->snapshot.scene_id != 0
-                                  ? factory_movement_settings([state = impl_.get()](network::NetworkEntityId) {
-                                        return state->received_snapshot ? state->snapshot.player.character : state->desired_selection.character;
-                                    })
-                                  : VerticalSliceSimulation::default_movement_settings();
+        const auto settings = impl_->received_snapshot && impl_->snapshot.scene_id != 0 ? factory_movement_settings(&impl_->factory_character)
+                                                                                        : VerticalSliceSimulation::default_movement_settings();
         const auto entity = impl_->session.controlled_entity();
         impl_->compose_replication_entities(entity);
         const bool resumes_known_state = impl_->received_snapshot && impl_->snapshot.player.entity == entity;
@@ -1029,10 +1031,8 @@ std::optional<SliceWireMessage> VerticalSliceRemoteClient::receive(const network
     if (impl_->received_snapshot && decoded->scene_id != impl_->snapshot.scene_id)
         return std::nullopt;
     if (!impl_->received_snapshot && decoded->scene_id != 0) {
-        impl_->prediction = std::make_unique<network::PredictedMovementClient>(factory_movement_settings([state = impl_.get()](network::NetworkEntityId) {
-            return state->received_snapshot ? state->snapshot.player.character : state->desired_selection.character;
-        }),
-            decoded->player.entity, movement.entities.front());
+        impl_->prediction = std::make_unique<network::PredictedMovementClient>(
+            factory_movement_settings(&impl_->factory_character), decoded->player.entity, movement.entities.front());
     }
     const std::array component_entities{impl_->local_logical, impl_->remote_logical};
     static_cast<void>(apply_component_snapshot(impl_->logical_entities, {component_entities.data(), component_entities.size()}, movement, true));

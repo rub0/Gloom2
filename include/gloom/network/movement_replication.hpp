@@ -6,7 +6,6 @@
 
 #include <cstdint>
 #include <expected>
-#include <functional>
 #include <optional>
 #include <span>
 #include <string>
@@ -85,7 +84,16 @@ struct ReplicationSettings {
     std::size_t input_redundancy{4};
     float relevance_radius{0.0F};
     std::size_t maximum_snapshot_entities{1024};
-    std::function<MovementState(MovementState, const MovementInput&, double)> scene_movement;
+    struct SceneMovement {
+        MovementState (*function)(void*, MovementState, const MovementInput&, double){nullptr};
+        void* context{nullptr}; // Borrowed; remains alive through all simulations using copied settings.
+        explicit operator bool() const noexcept {
+            return function != nullptr;
+        }
+        MovementState operator()(MovementState state, const MovementInput& input, double delta) const {
+            return function(context, state, input, delta);
+        }
+    } scene_movement;
 };
 
 struct InputBatchMetrics {

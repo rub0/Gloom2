@@ -785,7 +785,7 @@ struct DiligentRenderer::Impl {
     Diligent::RefCntAutoPtr<Diligent::IBuffer> cluster_buffer;
     Diligent::RefCntAutoPtr<Diligent::IBuffer> light_index_buffer;
     Diligent::RefCntAutoPtr<Diligent::ITexture> environment_texture, probe_texture;
-    std::shared_ptr<const render::EnvironmentProbe> active_probe;
+    const render::EnvironmentProbe* active_probe{nullptr};
     Diligent::RefCntAutoPtr<Diligent::ITextureView> environment_shader_resource;
     Diligent::RefCntAutoPtr<Diligent::ITexture> shadow_texture;
     Diligent::RefCntAutoPtr<Diligent::ITextureView> shadow_shader_resource;
@@ -1858,7 +1858,7 @@ void DiligentRenderer::stop() noexcept {
     impl_->cluster_buffer.Release();
     impl_->light_index_buffer.Release();
     impl_->environment_shader_resource.Release();
-    impl_->active_probe.reset();
+    impl_->active_probe = nullptr;
     impl_->probe_texture.Release();
     impl_->environment_texture.Release();
     impl_->double_sided_shadow_pipeline.Release();

@@ -40,8 +40,14 @@ int main(const int argument_count, const char* const* arguments) try {
         throw std::runtime_error{"Viewer paths must use game:/ and cache:/ mounts"};
     }
     gloom::assets::VirtualFileSystem filesystem;
-    filesystem.mount("game", std::filesystem::path{arguments[1]});
-    filesystem.mount("cache", std::filesystem::path{arguments[2]});
+    if (const std::expected<void, std::string> mounted = filesystem.mount("game", std::filesystem::path{arguments[1]}); !mounted) {
+        std::cerr << mounted.error() << '\n';
+        return 1;
+    }
+    if (const std::expected<void, std::string> mounted = filesystem.mount("cache", std::filesystem::path{arguments[2]}); !mounted) {
+        std::cerr << mounted.error() << '\n';
+        return 1;
+    }
     auto discovered = gloom::assets::discover_cooked_scene(filesystem, *source, *cooked);
     if (!discovered) {
         throw std::runtime_error{discovered.error()};

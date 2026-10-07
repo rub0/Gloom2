@@ -4,6 +4,7 @@
 #include <gloom/assets/gltf_importer.hpp>
 #include <gloom/assets/scene_gpu_bridge.hpp>
 #include <gloom/assets/texture_asset.hpp>
+#include <gloom/assets/scene_catalog.hpp>
 
 #include <algorithm>
 #include <array>
@@ -80,14 +81,6 @@ using Matrix = Matrix4;
     };
 }
 
-[[nodiscard]] bool path_ends_with(std::string_view path, const std::string& uri) {
-    if (path.size() < uri.size())
-        return false;
-    for (size_t index = 0; index < uri.size(); ++index)
-        if (path[path.size() - uri.size() + index] != (uri[index] == '\\' ? '/' : uri[index]))
-            return false;
-    return true;
-}
 int compare_resource(const void* left, const void* right) {
     const uint64 a = static_cast<const render::RenderAssetId*>(left)->value;
     const uint64 b = static_cast<const render::RenderAssetId*>(right)->value;
@@ -123,7 +116,7 @@ struct AssetResidencyCoordinator::Request {
 struct AssetResidencyCoordinator::PreparationContext {
     ImportedScene scene;
     std::vector<CookedAsset> dependencies;
-    std::vector<AssetRecord> dependency_records;
+    VirtualPath source;
     AssetId scene_id;
     bool use_bc{false};
     std::promise<std::expected<PreparedScene, std::string>> promise;
@@ -171,10 +164,23 @@ struct AssetResidencyCoordinator::PreparationContext {
         image_assets.resize(scene.images.size());
         matched.reserve(scene.images.size());
         matched.resize(scene.images.size());
+        Array<AssetId> image_ids;
+        image_ids.reserve(scene.images.size());
+        image_ids.resize(scene.images.size());
+        for (size_t image = 0; image < scene.images.size(); ++image) {
+            if (scene.images[image].external_uri.empty())
+                continue;
+            const std::expected<VirtualPath, std::string> path = dependency_source_path(source, scene.images[image].external_uri);
+            if (!path) {
+                promise.set_value(std::unexpected{path.error()});
+                return;
+            }
+            image_ids[image] = make_asset_id(*path, AssetType::texture);
+        }
         for (size_t dependency = 0; dependency < dependencies.size(); ++dependency) {
             const render::RenderAssetId gpu_id{dependencies[dependency].id.value};
             for (size_t image = 0; image < scene.images.size(); ++image) {
-                matched[image] = path_ends_with(dependency_records[dependency].source.relative(), scene.images[image].external_uri);
+                matched[image] = image_ids[image] == dependencies[dependency].id;
                 if (matched[image])
                     image_assets[image] = gpu_id;
             }
@@ -228,9 +234,42 @@ struct AssetResidencyCoordinator::PreparationContext {
     }
 };
 
+namespace {
+bool renderer_compression(const void* context) {
+    return static_cast<const render::Renderer*>(context)->capabilities().texture_compression_bc;
+}
+void renderer_mesh(void* context, render::MeshUpload upload) {
+    static_cast<render::Renderer*>(context)->enqueue(static_cast<render::MeshUpload&&>(upload));
+}
+void renderer_texture(void* context, render::TextureUpload upload) {
+    static_cast<render::Renderer*>(context)->enqueue(static_cast<render::TextureUpload&&>(upload));
+}
+void renderer_material(void* context, render::MaterialUpload upload) {
+    static_cast<render::Renderer*>(context)->enqueue(static_cast<render::MaterialUpload&&>(upload));
+}
+void renderer_release(void* context, render::RenderAssetId id) {
+    static_cast<render::Renderer*>(context)->release(id);
+}
+render::GpuAssetState renderer_state(const void* context, render::RenderAssetId id) {
+    return static_cast<const render::Renderer*>(context)->asset_state(id);
+}
+}
 AssetResidencyCoordinator::AssetResidencyCoordinator(
     core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, render::Renderer& renderer, const ResidencyCoordinatorSettings settings)
-    : jobs_{jobs}, loader_{loader}, catalog_{catalog}, renderer_{renderer}, settings_{settings}, preparation_tasks_{jobs.create_group()} {}
+    : AssetResidencyCoordinator(jobs, loader, catalog,
+          {.context = &renderer,
+              .texture_compression_bc = renderer_compression,
+              .mesh = renderer_mesh,
+              .texture = renderer_texture,
+              .material = renderer_material,
+              .release = renderer_release,
+              .state = renderer_state},
+          settings) {}
+AssetResidencyCoordinator::AssetResidencyCoordinator(
+    core::JobSystem& jobs, AsyncAssetLoader& loader, const AssetCatalog& catalog, AssetUploadSink renderer, const ResidencyCoordinatorSettings settings)
+    : jobs_{jobs}, loader_{loader}, catalog_{catalog}, renderer_{renderer}, settings_{settings}, preparation_tasks_{jobs.create_group()} {
+    assert(renderer.texture_compression_bc && renderer.mesh && renderer.texture && renderer.material && renderer.release && renderer.state);
+}
 
 AssetResidencyCoordinator::~AssetResidencyCoordinator() {
     if (preparation_tasks_.valid()) {
@@ -291,7 +330,7 @@ void AssetResidencyCoordinator::release_resources(Request& request) {
             continue;
         }
         if (--found->second == 0) {
-            renderer_.release(resource);
+            renderer_.release(renderer_.context, resource);
             resource_references_.erase(found);
         }
     }
@@ -330,7 +369,7 @@ void AssetResidencyCoordinator::update() {
     for (auto& [ticket, request] : requests_) {
         static_cast<void>(ticket);
         if (request.state == SceneResidencyState::loading_scene && request.scene_future.wait_for(std::chrono::seconds{0}) == std::future_status::ready) {
-            const auto result = request.scene_future.get();
+            const AssetLoadResult& result = request.scene_future.get();
             if (result.state != AssetLoadState::ready || result.asset.type != AssetType::scene) {
                 fail(request, result.error.empty() ? "Scene asset failed to load" : result.error);
                 continue;
@@ -350,17 +389,16 @@ void AssetResidencyCoordinator::update() {
             if (!ready) {
                 continue;
             }
-            const auto scene_result = request.scene_future.get();
+            const AssetLoadResult& scene_result = request.scene_future.get();
             auto decoded_scene = decode_imported_scene(scene_result.asset.payload);
             if (!decoded_scene) {
                 fail(request, decoded_scene.error());
                 continue;
             }
             std::vector<CookedAsset> dependencies;
-            std::vector<AssetRecord> dependency_records;
             bool dependency_error = false;
             for (std::size_t index = 0; index < request.dependency_futures.size(); ++index) {
-                const auto result = request.dependency_futures[index].get();
+                const AssetLoadResult& result = request.dependency_futures[index].get();
                 if (result.state != AssetLoadState::ready || result.asset.type != AssetType::texture) {
                     fail(request, result.error.empty() ? "Scene texture dependency failed" : result.error);
                     dependency_error = true;
@@ -373,16 +411,17 @@ void AssetResidencyCoordinator::update() {
                     break;
                 }
                 dependencies.push_back(result.asset);
-                dependency_records.push_back(*record);
             }
             if (dependency_error) {
                 continue;
             }
+            const AssetRecord* scene_record = catalog_.find(request.asset);
+            assert(scene_record);
             PreparationContext* context = new PreparationContext{.scene = static_cast<ImportedScene&&>(*decoded_scene),
                 .dependencies = static_cast<decltype(dependencies)&&>(dependencies),
-                .dependency_records = static_cast<decltype(dependency_records)&&>(dependency_records),
+                .source = scene_record->source,
                 .scene_id = request.asset,
-                .use_bc = renderer_.capabilities().texture_compression_bc};
+                .use_bc = renderer_.texture_compression_bc(renderer_.context)};
             request.preparation_future = context->promise.get_future().share();
             jobs_.schedule(preparation_tasks_, core::JobSystem::Job{context});
             request.state = SceneResidencyState::preparing;
@@ -417,17 +456,17 @@ void AssetResidencyCoordinator::update() {
             };
             for (auto& texture : prepared->textures) {
                 if (is_first_reference(texture.id)) {
-                    renderer_.enqueue(std::move(texture));
+                    renderer_.texture(renderer_.context, std::move(texture));
                 }
             }
             for (auto& mesh : prepared->gpu.meshes) {
                 if (is_first_reference(mesh.id)) {
-                    renderer_.enqueue(std::move(mesh));
+                    renderer_.mesh(renderer_.context, std::move(mesh));
                 }
             }
             for (auto& material : prepared->gpu.materials) {
                 if (is_first_reference(material.id)) {
-                    renderer_.enqueue(std::move(material));
+                    renderer_.material(renderer_.context, std::move(material));
                 }
             }
             request.state = SceneResidencyState::uploading;
@@ -436,7 +475,7 @@ void AssetResidencyCoordinator::update() {
         if (request.state == SceneResidencyState::uploading) {
             bool all_resident = true;
             for (const auto resource : request.resources) {
-                const auto state = renderer_.asset_state(resource);
+                const auto state = renderer_.state(renderer_.context, resource);
                 if (state == render::GpuAssetState::failed) {
                     fail(request, "Renderer rejected a scene GPU resource");
                     all_resident = false;

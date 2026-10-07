@@ -8,7 +8,7 @@
 namespace gloom::assets {
 
 // Resolve image references inside the source mount and match the cooker's output layout.
-[[nodiscard]] std::expected<VirtualPath, std::string> dependency_source_path(const VirtualPath& source, std::string dependency);
+[[nodiscard]] std::expected<VirtualPath, std::string> dependency_source_path(const VirtualPath& source, std::string_view dependency);
 [[nodiscard]] std::expected<VirtualPath, std::string> dependency_cooked_path(const VirtualPath& scene, AssetId id);
 
 struct DiscoveredSceneCatalog {

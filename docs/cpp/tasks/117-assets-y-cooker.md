@@ -1,8 +1,8 @@
 # Hito 117: Datos de assets, VFS, importación y cooker
 
-Estado: **iniciado, parcial; STL autorizada, cierre pendiente**, 7 de octubre de 2026.
+Estado: **terminado; STL autorizada en su alcance**, 7 de octubre de 2026.
 Depende de: **113, 114 y 116 terminados**.
-[Avance, medidas y pendientes](../../../reports/cpp-performance-117/README.md).
+[Informe final, medidas y límites](../../../reports/cpp-performance-117/README.md).
 Objetivo: **Cumplimiento C++ y coste de carga**. Base de investigación: `5b96a91`.
 Leer [CONTEXTO](CONTEXTO.md) y esta ficha; [INVENTARIO](INVENTARIO.md) asigna
 19 archivos propietarios a este hito. Los cambios de firmas incluyen
@@ -24,24 +24,22 @@ hitos ni autoriza mapas, shared ownership, std::span/std::function en lugar de
 Span/FixedFunction, excepciones, RTTI o herencia. Los enteros propios, las
 precondiciones, la seguridad de datos externos y las medidas siguen exigidos.
 Los listeners Jolt del 120 continúan pendientes de decisión independiente.
-La autorización no cierra el 117: quedan implementación y validación final.
+La implementación y validación de este alcance están terminadas; no certifican otros módulos.
 
-## Avance comprobado
+## Cierre comprobado
 
-AssetCatalog usa índice ordenado de ID/puntero, registros estables y recorrido
-iterativo; sin mapa de registros/visitas ni recursión. Matrices de bind, parents,
-cola y bitset de joints usan Array propio; salida vacía al fallar y reutilizable.
-Metadatos/path/dependencies y los demás modelos/formatos siguen legacy.
-Cadena de 4.096 registros, crecimiento/upsert/move, fallos de graph, cuatro
-asserts Debug, joints repetidos y salida tras error comprobados.
-Builds completos/formato pasan; siete CTest focalizados pasan en Release/Debug.
-Memoria propia con 1.024 registros -10,08 %, order 116.200 → 39.100 ns;
-find 3,116 → 16,333 ns, coste explícito de la búsqueda binaria. Lifecycle dentro
-del ruido; serie Factory/Hound sin regresión integrada atribuible.
-No se declaran nuevos formatos, flags finales ni pipeline completo sin STL.
-Continuar VFS, modelos/codecs/cooker/Factory y sus consumers conservando STL
-donde simplifica; validación final y cook/load end-to-end pendientes.
-Checkpoint técnico del avance: `da72ffe`; autorización STL en commit documental posterior, sin cierre.
+VFS/Unicode/errores explícitos, modelos/codecs, cooker, Factory y callers adaptados;
+STL existente conservada según autorización, Span/enteros propios y flags finales.
+Los 104 blobs cocinados son byte-idénticos. Pico WS Factory/Hound alrededor de
+22 % menor; encode aproximadamente 34 % menor y una asignación. Carga/cook wall
+sin ganancia concluyente. Catálogo/bind del checkpoint conservados, incluido
+el coste de find más lento documentado; no se vuelve a atribuir su mejora.
+Builds/formato correctos, 7/7 focalizados en ambos; Release 50/54 y Debug 51/54,
+fallos heredados por las mismas causas. Hound 0/1.440 >5 ms, 345,26 MiB GPU;
+Factory pico aislado de 7,870 ms, no repetido en control. Fuentes/referencias intactas.
+[Contratos, STL enumerada, flags, checks y reproducción](../../../reports/cpp-performance-117/README.md).
+Commit local de cierre: `rtk git log -1 --oneline --grep='^hito 117: optimizar'`.
+118 no iniciado; Jolt/otros propietarios pendientes de sus respectivos hitos.
 
 ## Evidencia de partida
 
@@ -84,7 +82,7 @@ Entradas principales verificadas (no es una lista exhaustiva de callers):
 
 Además se adaptan todos los callers afectados por firmas/lifetime, aunque tengan otro responsable de cierre.
 
-## Trabajo concreto, en orden
+## Trabajo ejecutado, en orden
 
 1. Reutilizar string/string_view, vector de bytes, expected y filesystem existentes según la excepción del usuario; no añadir una biblioteca propia
    de texto/resultados/archivos. Conservar Unicode de Windows, normalización, mounts y bloqueo de escapes del VFS. Documentar propiedad/caducidad;

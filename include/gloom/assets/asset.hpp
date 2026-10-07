@@ -5,10 +5,8 @@
 #include <cstdint>
 #include <expected>
 #include <filesystem>
-#include <span>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 namespace gloom::assets {
@@ -23,10 +21,10 @@ class VirtualPath final {
     [[nodiscard]] bool operator==(const VirtualPath&) const noexcept = default;
 
   private:
-    VirtualPath(std::string normalized, std::size_t mount_length);
+    VirtualPath(std::string normalized, size_t mount_length);
 
     std::string normalized_;
-    std::size_t mount_length_{0};
+    size_t mount_length_{0};
 };
 
 struct AssetId {
@@ -35,7 +33,7 @@ struct AssetId {
 };
 
 struct AssetIdHash {
-    [[nodiscard]] std::size_t operator()(AssetId id) const noexcept;
+    [[nodiscard]] size_t operator()(AssetId id) const noexcept;
 };
 
 enum class AssetType : uint8 {
@@ -47,17 +45,22 @@ enum class AssetType : uint8 {
 };
 
 [[nodiscard]] AssetId make_asset_id(const VirtualPath& path, AssetType type) noexcept;
-[[nodiscard]] std::uint64_t fingerprint(std::span<const std::byte> bytes) noexcept;
+[[nodiscard]] uint64 fingerprint(Span<const std::byte> bytes) noexcept;
 
 class VirtualFileSystem final {
   public:
-    void mount(std::string_view name, const std::filesystem::path& root);
+    [[nodiscard]] std::expected<void, std::string> mount(std::string_view name, const std::filesystem::path& root);
     [[nodiscard]] std::expected<std::filesystem::path, std::string> resolve(const VirtualPath& path) const;
     [[nodiscard]] std::expected<std::vector<std::byte>, std::string> read(const VirtualPath& path) const;
-    [[nodiscard]] std::expected<void, std::string> write(const VirtualPath& path, std::span<const std::byte> bytes) const;
+    [[nodiscard]] std::expected<void, std::string> write(const VirtualPath& path, Span<const std::byte> bytes) const;
 
   private:
-    std::unordered_map<std::string, std::filesystem::path> mounts_;
+    struct Mount {
+        std::string name;
+        std::filesystem::path root;
+    };
+    // A few mounts, initialized once. Comparing views avoids a temporary string per resolve.
+    std::vector<Mount> mounts_;
 };
 
 struct AssetRecord {
@@ -65,7 +68,7 @@ struct AssetRecord {
     AssetType type{AssetType::binary};
     VirtualPath source;
     VirtualPath cooked;
-    std::uint64_t source_fingerprint{0};
+    uint64 source_fingerprint{0};
     std::vector<AssetId> dependencies;
 };
 
@@ -97,14 +100,15 @@ class AssetCatalog final {
 struct CookedAsset {
     AssetId id;
     AssetType type{AssetType::binary};
-    std::uint64_t source_fingerprint{0};
+    uint64 source_fingerprint{0};
     std::vector<AssetId> dependencies;
     std::vector<std::byte> payload;
 };
 
-inline constexpr std::uint32_t cooked_asset_version = 1;
+inline constexpr uint32 cooked_asset_version = 1;
 
 [[nodiscard]] std::vector<std::byte> encode_cooked_asset(const CookedAsset& asset);
-[[nodiscard]] std::expected<CookedAsset, std::string> decode_cooked_asset(std::span<const std::byte> encoded);
+// Encoder requires a valid owned asset; malformed external bytes are checked by the decoder.
+[[nodiscard]] std::expected<CookedAsset, std::string> decode_cooked_asset(Span<const std::byte> encoded);
 
 } // namespace gloom::assets

@@ -55,7 +55,7 @@ struct CombatSettings {
     float hit_half_height{0.0F};
     float maximum_range{100.0F};
     std::vector<StaticMovementObstacle> static_obstacles;
-    std::shared_ptr<const physics::TriangleMesh> static_mesh;
+    const physics::TriangleMesh* static_mesh{nullptr}; // Borrowed for the server's lifetime.
 };
 
 struct CombatMetrics {
